@@ -1126,8 +1126,10 @@
         </nav>
     </header>
 
+    <main id="main-content">
+
     <!-- HERO -->
-    <section class="hero">
+    <section class="hero" data-section-id="wc-hero" data-section-type="hero">
         <div class="hero-badge">✦ WORKSHOP C &nbsp;·&nbsp; 視覺升級</div>
         <h1 class="hero-title">下一級<br><span class="accent">視覺</span></h1>
         <p class="hero-subtitle-en">NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY</p>
@@ -1143,7 +1145,7 @@
     </section>
 
     <!-- VIDEO SECTION -->
-    <section class="video-section reveal">
+    <section class="video-section reveal" data-section-id="wc-video" data-section-type="video">
         <div class="section-label" style="text-align:center;margin-bottom:16px;">— 預覽 —</div>
         <div class="video-wrap" id="video-container">
             <video src="/workshop-c-assets/ai-video.mp4" autoplay muted loop playsinline></video>
@@ -1152,7 +1154,7 @@
     </section>
 
     <!-- IMAGE CHAIN SECTION -->
-    <section class="chain-section">
+    <section class="chain-section" data-section-id="wc-image-chain" data-section-type="image-chain">
         <div class="container">
             <div class="chain-intro reveal">
                 <div class="section-label">— 你能做到的 —</div>
@@ -1219,7 +1221,7 @@
     </section>
 
     <!-- PROBLEM SECTION -->
-    <section id="problem">
+    <section id="problem" data-section-id="wc-problem" data-section-type="pain-points">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 問題在哪 —</div>
@@ -1255,7 +1257,7 @@
     </section>
 
     <!-- SHIFT SECTION -->
-    <section class="shift-section">
+    <section class="shift-section" data-section-id="wc-mindset" data-section-type="mindset-shift">
         <div class="container">
             <div class="reveal">
                 <p class="section-label" style="text-align:center;">— 思維轉換 —</p>
@@ -1273,7 +1275,7 @@
     </section>
 
     <!-- WHAT YOU LEARN -->
-    <section id="what-you-learn">
+    <section id="what-you-learn" data-section-id="wc-learning" data-section-type="learning-outcomes">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 你將掌握 —</div>
@@ -1321,7 +1323,7 @@
     </section>
 
     <!-- FOR / NOT FOR -->
-    <section>
+    <section data-section-id="wc-audience" data-section-type="audience-fit">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 適合對象 —</div>
@@ -1352,7 +1354,7 @@
     </section>
 
     <!-- LOGISTICS -->
-    <section id="register">
+    <section id="register" data-section-id="wc-logistics" data-section-type="logistics-card">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 工作坊詳情 —</div>
@@ -1405,7 +1407,7 @@
     </section>
 
     <!-- INSTRUCTOR -->
-    <section id="about-instructor">
+    <section id="about-instructor" data-section-id="wc-instructor" data-section-type="about">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 關於講師 —</div>
@@ -1441,7 +1443,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq-section">
+    <section id="faq-section" data-section-id="wc-faq" data-section-type="faq">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 常見問題 —</div>
@@ -1488,7 +1490,7 @@
     </section>
 
     <!-- FINAL CTA -->
-    <section class="final-cta">
+    <section class="final-cta" data-section-id="wc-final-cta" data-section-type="final-cta">
         <div class="final-cta-bg"></div>
         <div class="container" style="position:relative;">
             <div class="reveal">
@@ -1504,6 +1506,8 @@
             </div>
         </div>
     </section>
+
+    </main><!-- end #main-content -->
 
     <!-- FOOTER -->
     <footer>
@@ -1614,6 +1618,158 @@ function toggleFaq(el) {
     document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
     if (!isOpen) item.classList.add('open');
 }
+
+// =============================================
+// LAYOUT ENGINE (for Layout Editor integration)
+// =============================================
+var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
+
+function applyLayoutConfig() {
+    if (_isPreviewMode) {
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
+                applySections(e.data.sections);
+            }
+        });
+        return;
+    }
+    initFirebase(function() {
+        var db = firebase.firestore();
+        db.collection('pageLayouts').doc('workshop-c').get().then(function(doc) {
+            if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+            applySections(doc.data().sections);
+        }).catch(function(err) {
+            console.log('[Layout] No layout config found for workshop-c.', err);
+        });
+    });
+}
+
+function applySections(rawSections) {
+    var sections = rawSections.slice().sort(function(a, b) {
+        return (a.order || 0) - (b.order || 0);
+    });
+    var main = document.getElementById('main-content');
+    if (!main) return;
+
+    var existingEls = {};
+    main.querySelectorAll('[data-section-id]').forEach(function(el) {
+        existingEls[el.getAttribute('data-section-id')] = el;
+    });
+
+    var allIds = sections.map(function(s) { return s.id; });
+    Object.keys(existingEls).forEach(function(id) {
+        if (allIds.indexOf(id) === -1) {
+            existingEls[id].style.display = 'none';
+        }
+    });
+
+    sections.forEach(function(sec) {
+        var el = existingEls[sec.id];
+
+        if (!el && sec.visible !== false) {
+            var template = main.querySelector('[data-section-type="' + sec.type + '"]');
+            if (template) {
+                el = template.cloneNode(true);
+                el.setAttribute('data-section-id', sec.id);
+                main.appendChild(el);
+            }
+        }
+
+        if (!el) return;
+
+        if (sec.visible === false) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = '';
+        main.appendChild(el);
+
+        if (sec.content) applyContentToSection(el, sec.type, sec.content);
+    });
+
+    initScrollReveal('.reveal', { threshold: 0.12 });
+}
+
+function applyContentToSection(el, type, c) {
+    switch (type) {
+        case 'hero':
+            var h1 = el.querySelector('.hero-title');
+            if (h1 && c.title) h1.innerHTML = c.title;
+            var sub = el.querySelector('.hero-tagline');
+            if (sub && c.subtitle) sub.innerHTML = c.subtitle;
+            var badge = el.querySelector('.hero-badge');
+            if (badge && c.badge) badge.textContent = c.badge;
+            var cta = el.querySelector('.btn-primary');
+            if (cta && c.ctaText) cta.textContent = c.ctaText;
+            if (cta && c.ctaLink) cta.href = c.ctaLink;
+            break;
+
+        case 'pain-points':
+            var h2 = el.querySelector('.section-title');
+            if (h2 && c.sectionTitle) h2.innerHTML = c.sectionTitle;
+            if (c.items) {
+                var items = el.querySelectorAll('.problem-item p');
+                c.items.forEach(function(item, i) {
+                    if (items[i]) items[i].textContent = item;
+                });
+            }
+            break;
+
+        case 'mindset-shift':
+            var large = el.querySelector('.shift-large');
+            if (large && c.title) large.innerHTML = c.title;
+            var body = el.querySelector('.shift-body');
+            if (body && c.body) body.innerHTML = c.body;
+            break;
+
+        case 'learning-outcomes':
+            var h2lo = el.querySelector('.section-title');
+            if (h2lo && c.sectionTitle) h2lo.innerHTML = c.sectionTitle;
+            if (c.items) {
+                var masterItems = el.querySelectorAll('.master-item');
+                c.items.forEach(function(item, i) {
+                    if (masterItems[i]) {
+                        var txt = masterItems[i].querySelector('.master-text');
+                        if (txt && item.text) txt.textContent = item.text;
+                        var sub = masterItems[i].querySelector('.master-sub');
+                        if (sub && item.sub) sub.textContent = item.sub;
+                    }
+                });
+            }
+            break;
+
+        case 'audience-fit':
+            var h2af = el.querySelector('.section-title');
+            if (h2af && c.sectionTitle) h2af.innerHTML = c.sectionTitle;
+            break;
+
+        case 'about':
+            var name = el.querySelector('.instructor-name');
+            if (name && c.name) name.textContent = c.name;
+            var role = el.querySelector('.instructor-role');
+            if (role && c.role) role.textContent = c.role;
+            var bio = el.querySelector('.instructor-bio');
+            if (bio && c.bio) bio.innerHTML = c.bio;
+            break;
+
+        case 'faq':
+            var h2faq = el.querySelector('.section-title');
+            if (h2faq && c.sectionTitle) h2faq.textContent = c.sectionTitle;
+            break;
+
+        case 'final-cta':
+            var title = el.querySelector('.final-cta-title');
+            if (title && c.title) title.innerHTML = c.title;
+            var subFc = el.querySelector('.final-cta-sub');
+            if (subFc && c.subtitle) subFc.textContent = c.subtitle;
+            var ctaFc = el.querySelector('.btn-primary');
+            if (ctaFc && c.ctaText) ctaFc.textContent = c.ctaText;
+            if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
+            break;
+    }
+}
+
+applyLayoutConfig();
 
 // =============================================
 // FIREBASE — Load Workshop C data (real-time)

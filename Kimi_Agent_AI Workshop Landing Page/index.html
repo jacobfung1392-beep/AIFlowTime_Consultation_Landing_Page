@@ -568,8 +568,10 @@
             </nav>
         </header>
 
+        <main id="main-content">
+
         <!-- HERO -->
-        <section class="hero" id="hero">
+        <section class="hero" id="hero" data-section-id="w0-hero" data-section-type="hero">
             <div class="hero-badge">WORKSHOP 0 — CHANGE YOUR MIND</div>
             <h1 class="hero-title">
                 定義問題的深度，<br>決定了 AI 解決問題的<span class="accent">高度</span>。
@@ -589,7 +591,7 @@
         </section>
 
         <!-- TRANSFORMATION -->
-        <section id="transformation">
+        <section id="transformation" data-section-id="w0-transformation" data-section-type="transformation">
             <div class="container">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
                     <p class="section-label">TRANSFORMATION</p>
@@ -647,7 +649,7 @@
         </section>
 
         <!-- AUDIENCE -->
-        <section id="audience">
+        <section id="audience" data-section-id="w0-audience" data-section-type="audience-fit">
             <div class="container" style="max-width:720px;">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
                     <p class="section-label">WHO IS THIS FOR</p>
@@ -696,7 +698,7 @@
         </section>
 
         <!-- EXPERIENCE / BENEFITS -->
-        <section id="experience">
+        <section id="experience" data-section-id="w0-experience" data-section-type="learning-outcomes">
             <div class="container">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
                     <p class="section-label">WHAT YOU'LL EXPERIENCE</p>
@@ -753,7 +755,7 @@
         </section>
 
         <!-- LOGISTICS -->
-        <section id="logistics">
+        <section id="logistics" data-section-id="w0-logistics" data-section-type="logistics-card">
             <div class="container" style="max-width:640px;">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
                     <p class="section-label">WORKSHOP INFO</p>
@@ -797,7 +799,7 @@
         </section>
 
         <!-- CTA -->
-        <section id="register" style="padding-bottom:120px;">
+        <section id="register" style="padding-bottom:120px;" data-section-id="w0-cta" data-section-type="final-cta">
             <div class="container" style="max-width:640px; text-align:center;">
                 <div class="reveal">
                     <p class="section-label">READY?</p>
@@ -817,6 +819,8 @@
                 </div>
             </div>
         </section>
+
+        </main><!-- end #main-content -->
 
         <!-- FOOTER -->
         <footer>
@@ -855,6 +859,149 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
     <script src="/js/shared-utils.js"></script>
+
+    <script>
+    // =============================================
+    // LAYOUT ENGINE (for Layout Editor integration)
+    // =============================================
+    var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
+
+    function applyLayoutConfig() {
+        if (_isPreviewMode) {
+            window.addEventListener('message', function(e) {
+                if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
+                    applySections(e.data.sections);
+                }
+            });
+            return;
+        }
+        initFirebase(function() {
+            var db = firebase.firestore();
+            db.collection('pageLayouts').doc('workshop-0').get().then(function(doc) {
+                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                applySections(doc.data().sections);
+            }).catch(function(err) {
+                console.log('[Layout] No layout config found for workshop-0.', err);
+            });
+        });
+    }
+
+    function applySections(rawSections) {
+        var sections = rawSections.slice().sort(function(a, b) {
+            return (a.order || 0) - (b.order || 0);
+        });
+        var main = document.getElementById('main-content');
+        if (!main) return;
+
+        var existingEls = {};
+        main.querySelectorAll('[data-section-id]').forEach(function(el) {
+            existingEls[el.getAttribute('data-section-id')] = el;
+        });
+
+        var allIds = sections.map(function(s) { return s.id; });
+        Object.keys(existingEls).forEach(function(id) {
+            if (allIds.indexOf(id) === -1) {
+                existingEls[id].style.display = 'none';
+            }
+        });
+
+        sections.forEach(function(sec) {
+            var el = existingEls[sec.id];
+
+            if (!el && sec.visible !== false) {
+                var template = main.querySelector('[data-section-type="' + sec.type + '"]');
+                if (template) {
+                    el = template.cloneNode(true);
+                    el.setAttribute('data-section-id', sec.id);
+                    main.appendChild(el);
+                }
+            }
+
+            if (!el) return;
+
+            if (sec.visible === false) {
+                el.style.display = 'none';
+                return;
+            }
+            el.style.display = '';
+            main.appendChild(el);
+
+            if (sec.content) applyContentToSection(el, sec.type, sec.content);
+        });
+
+        initScrollReveal('.reveal', { threshold: 0.12 });
+    }
+
+    function applyContentToSection(el, type, c) {
+        switch (type) {
+            case 'hero':
+                var h1 = el.querySelector('.hero-title');
+                if (h1 && c.title) h1.innerHTML = c.title;
+                var tagline = el.querySelector('.hero-tagline');
+                if (tagline && c.subtitle) tagline.innerHTML = c.subtitle;
+                var badge = el.querySelector('.hero-badge');
+                if (badge && c.badge) badge.textContent = c.badge;
+                var cta = el.querySelector('.btn-primary');
+                if (cta && c.ctaText) cta.textContent = c.ctaText;
+                if (cta && c.ctaLink) cta.href = c.ctaLink;
+                break;
+
+            case 'transformation':
+                var h2t = el.querySelector('.section-title');
+                if (h2t && c.sectionTitle) h2t.innerHTML = c.sectionTitle;
+                var desc = el.querySelector('.section-desc');
+                if (desc && c.description) desc.textContent = c.description;
+                if (c.cards) {
+                    var tfCards = el.querySelectorAll('.tf-card');
+                    c.cards.forEach(function(card, i) {
+                        if (tfCards[i]) {
+                            var title = tfCards[i].querySelector('.tf-card-title');
+                            if (title && card.title) title.textContent = card.title;
+                            var before = tfCards[i].querySelector('.tf-before p:last-child');
+                            if (before && card.before) before.textContent = card.before;
+                            var after = tfCards[i].querySelector('.tf-after p:last-child');
+                            if (after && card.after) after.textContent = card.after;
+                        }
+                    });
+                }
+                break;
+
+            case 'audience-fit':
+                var h2a = el.querySelector('.section-title');
+                if (h2a && c.sectionTitle) h2a.innerHTML = c.sectionTitle;
+                break;
+
+            case 'learning-outcomes':
+                var h2l = el.querySelector('.section-title');
+                if (h2l && c.sectionTitle) h2l.innerHTML = c.sectionTitle;
+                if (c.items) {
+                    var cards = el.querySelectorAll('.card');
+                    c.items.forEach(function(item, i) {
+                        if (cards[i]) {
+                            var h3 = cards[i].querySelector('h3');
+                            if (h3 && item.title) h3.textContent = item.title;
+                            var p = cards[i].querySelector('p:last-child');
+                            if (p && item.description) p.textContent = item.description;
+                        }
+                    });
+                }
+                break;
+
+            case 'final-cta':
+                var h2fc = el.querySelector('.section-title');
+                if (h2fc && c.title) h2fc.innerHTML = c.title;
+                var descFc = el.querySelector('.section-desc');
+                if (descFc && c.subtitle) descFc.textContent = c.subtitle;
+                var ctaFc = el.querySelector('.btn-primary');
+                if (ctaFc && c.ctaText) ctaFc.textContent = c.ctaText;
+                if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
+                break;
+        }
+    }
+
+    applyLayoutConfig();
+    </script>
+
     <script>
     initFirebase(function() {
         var db = firebase.firestore();
@@ -871,16 +1018,10 @@
             var enrolled = d.enrolled || 0;
             var container = document.getElementById('logisticsCapacity');
             if (cap > 0) {
-                var totalRects = cap <= 10 ? cap : 10;
-                var seatsPerRect = cap <= 10 ? 1 : cap / 10;
-                var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
-                var html = '<div class="ws0-cap-bar">';
-                for (var i = 0; i < totalRects; i++) {
-                    html += '<div class="ws0-cap-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
-                }
-                html += '</div>';
-                html += '<div class="ws0-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
-                container.innerHTML = html;
+                container.innerHTML = buildCapacityBar(cap, enrolled, {
+                    barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect',
+                    textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true
+                });
                 container.style.display = '';
             } else {
                 container.style.display = 'none';

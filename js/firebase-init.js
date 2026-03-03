@@ -27,13 +27,22 @@ function initFirebase(callback, opts) {
     opts = opts || {};
     var appName = opts.appName || undefined;
 
+    function _getConfig() {
+        if (firebase.apps.length) {
+            var defaultApp = firebase.apps[0];
+            return defaultApp.options || AIFLOW_FIREBASE_CONFIG;
+        }
+        return AIFLOW_FIREBASE_CONFIG;
+    }
+
     function _ensureApp() {
+        var config = _getConfig();
         if (appName) {
             try { return firebase.app(appName); }
-            catch (e) { return firebase.initializeApp(AIFLOW_FIREBASE_CONFIG, appName); }
+            catch (e) { return firebase.initializeApp(config, appName); }
         }
         if (firebase.apps.length) return firebase.apps[0];
-        return firebase.initializeApp(AIFLOW_FIREBASE_CONFIG);
+        return firebase.initializeApp(config);
     }
 
     function _ready() {

@@ -1050,15 +1050,34 @@ var PAGE_REGISTRY = {
         label: 'Workshop 0 落地頁',
         previewUrl: '/workshop-0',
         firestoreDoc: 'workshop-0',
-        sectionTypes: ['hero', 'video', 'image-chain', 'mindset-shift', 'learning-outcomes', 'audience-fit', 'logistics-card', 'transformation', 'cta', 'section-divider', 'countdown', 'final-cta'],
-        defaultSections: []
+        sectionTypes: ['hero', 'transformation', 'audience-fit', 'learning-outcomes', 'logistics-card', 'final-cta'],
+        defaultSections: [
+            { id: 'w0-hero', type: 'hero', visible: true },
+            { id: 'w0-transformation', type: 'transformation', visible: true },
+            { id: 'w0-audience', type: 'audience-fit', visible: true },
+            { id: 'w0-experience', type: 'learning-outcomes', visible: true },
+            { id: 'w0-logistics', type: 'logistics-card', visible: true },
+            { id: 'w0-cta', type: 'final-cta', visible: true }
+        ]
     },
     'workshop-c': {
         label: 'Workshop C 落地頁',
         previewUrl: '/workshop-c',
         firestoreDoc: 'workshop-c',
-        sectionTypes: ['hero', 'video', 'image-chain', 'mindset-shift', 'learning-outcomes', 'audience-fit', 'logistics-card', 'transformation', 'cta', 'section-divider', 'countdown', 'final-cta'],
-        defaultSections: []
+        sectionTypes: ['hero', 'video', 'image-chain', 'pain-points', 'mindset-shift', 'learning-outcomes', 'audience-fit', 'logistics-card', 'about', 'faq', 'final-cta'],
+        defaultSections: [
+            { id: 'wc-hero', type: 'hero', visible: true },
+            { id: 'wc-video', type: 'video', visible: true },
+            { id: 'wc-image-chain', type: 'image-chain', visible: true },
+            { id: 'wc-problem', type: 'pain-points', visible: true },
+            { id: 'wc-mindset', type: 'mindset-shift', visible: true },
+            { id: 'wc-learning', type: 'learning-outcomes', visible: true },
+            { id: 'wc-audience', type: 'audience-fit', visible: true },
+            { id: 'wc-logistics', type: 'logistics-card', visible: true },
+            { id: 'wc-instructor', type: 'about', visible: true },
+            { id: 'wc-faq', type: 'faq', visible: true },
+            { id: 'wc-final-cta', type: 'final-cta', visible: true }
+        ]
     },
     'consultation': {
         label: '諮詢頁 Consultation',

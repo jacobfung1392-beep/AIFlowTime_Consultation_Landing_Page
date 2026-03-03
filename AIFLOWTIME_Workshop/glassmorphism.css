@@ -1,0 +1,594 @@
+/**
+ * ============================================================================
+ * iOS 26 Liquid Glass / Glassmorphism CSS
+ * ============================================================================
+ * A production-ready CSS implementation of Apple's iOS 26 Liquid Glass design
+ * for the AIFLOWTIME website workshop cards.
+ * 
+ * Features:
+ * - backdrop-filter blur(16-24px) with saturate(180%)
+ * - Semi-transparent rgba backgrounds
+ * - Subtle white borders for glass edge definition
+ * - Soft shadows for depth
+ * - Border radius 16-20px
+ * - Graceful degradation for unsupported browsers
+ * - Accessibility support (prefers-reduced-transparency)
+ * 
+ * @version 1.0.0
+ * @author AIFLOWTIME Design Team
+ * ============================================================================
+ */
+
+/* ==========================================================================
+   CSS Custom Properties (Variables)
+   ========================================================================== */
+:root {
+  /* Core Glass Properties - iOS 26 Liquid Glass Specs */
+  --glass-blur: 20px;
+  --glass-saturate: 180%;
+  --glass-bg-opacity: 0.15;
+  --glass-bg-dark-opacity: 0.25;
+  --glass-border-opacity: 0.3;
+  --glass-border-width: 1px;
+  --glass-radius: 20px;
+  --glass-radius-sm: 16px;
+  --glass-shadow-color: rgba(0, 0, 0, 0.1);
+  --glass-shadow-spread: 30px;
+  --glass-shadow-blur: 8px;
+  
+  /* Color Variants */
+  --glass-bg-light: rgba(255, 255, 255, var(--glass-bg-opacity));
+  --glass-bg-dark: rgba(17, 24, 39, var(--glass-bg-dark-opacity));
+  --glass-border-light: rgba(255, 255, 255, var(--glass-border-opacity));
+  --glass-border-dark: rgba(255, 255, 255, 0.1);
+  
+  /* Interactive States */
+  --glass-hover-bg-opacity: 0.25;
+  --glass-active-bg-opacity: 0.35;
+  
+  /* Fallback for unsupported browsers */
+  --glass-fallback-bg: rgba(255, 255, 255, 0.95);
+  --glass-fallback-bg-dark: rgba(30, 41, 59, 0.95);
+}
+
+/* ==========================================================================
+   Base Glass Card Class
+   ========================================================================== */
+
+/**
+ * .glass-card
+ * The primary glassmorphism card component
+ * Use for workshop cards, modals, navigation panels, etc.
+ */
+.glass-card {
+  /* Fallback styles for browsers without backdrop-filter support */
+  background: var(--glass-fallback-bg);
+  border-radius: var(--glass-radius);
+  border: var(--glass-border-width) solid rgba(209, 213, 219, 0.5);
+  
+  /* Layout */
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  
+  /* Smooth transitions */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/**
+ * Glass effect - applied only when backdrop-filter is supported
+ * Using @supports for feature detection
+ */
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-card {
+    /* Semi-transparent background */
+    background: var(--glass-bg-light);
+    
+    /* The magic: backdrop-filter for frosted glass effect */
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    
+    /* Subtle glass edge */
+    border: var(--glass-border-width) solid var(--glass-border-light);
+    
+    /* Soft shadow for depth */
+    box-shadow: 
+      0 var(--glass-shadow-blur) var(--glass-shadow-spread) var(--glass-shadow-color),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* ==========================================================================
+   Glass Card Variants
+   ========================================================================== */
+
+/**
+ * .glass-card--dark
+ * Dark variant for light backgrounds or dark mode
+ */
+.glass-card--dark {
+  background: var(--glass-fallback-bg-dark);
+  border-color: rgba(75, 85, 99, 0.5);
+  color: #ffffff;
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-card--dark {
+    background: var(--glass-bg-dark);
+    border: var(--glass-border-width) solid var(--glass-border-dark);
+    box-shadow: 
+      0 var(--glass-shadow-blur) var(--glass-shadow-spread) rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+}
+
+/**
+ * .glass-card--clear
+ * High transparency variant (like iOS 26 .clear)
+ * Best over media-rich backgrounds with bold foreground content
+ */
+.glass-card--clear {
+  --glass-bg-opacity: 0.08;
+  --glass-border-opacity: 0.2;
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-card--clear {
+    background: rgba(255, 255, 255, var(--glass-bg-opacity));
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+  }
+  
+  .glass-card--clear.glass-card--dark {
+    background: rgba(17, 24, 39, 0.15);
+  }
+}
+
+/**
+ * .glass-card--strong
+ * Less transparent, more opaque variant for better readability
+ */
+.glass-card--strong {
+  --glass-bg-opacity: 0.35;
+  --glass-border-opacity: 0.4;
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-card--strong {
+    background: rgba(255, 255, 255, var(--glass-bg-opacity));
+  }
+  
+  .glass-card--strong.glass-card--dark {
+    background: rgba(17, 24, 39, 0.5);
+  }
+}
+
+/**
+ * .glass-card--sm
+ * Small radius variant
+ */
+.glass-card--sm {
+  border-radius: var(--glass-radius-sm);
+}
+
+/**
+ * .glass-card--lg
+ * Large radius variant
+ */
+.glass-card--lg {
+  border-radius: 24px;
+}
+
+/**
+ * .glass-card--pill
+ * Pill/capsule shape
+ */
+.glass-card--pill {
+  border-radius: 9999px;
+}
+
+/* ==========================================================================
+   Interactive States (Hover, Active, Focus)
+   ========================================================================== */
+
+/**
+ * Interactive glass cards - iOS 26 style touch response
+ */
+.glass-card--interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+.glass-card--interactive:hover {
+  transform: translateY(-2px);
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-card--interactive:hover {
+    background: rgba(255, 255, 255, var(--glass-hover-bg-opacity));
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+  
+  .glass-card--interactive.glass-card--dark:hover {
+    background: rgba(17, 24, 39, 0.4);
+  }
+}
+
+.glass-card--interactive:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-card--interactive:active {
+    background: rgba(255, 255, 255, var(--glass-active-bg-opacity));
+  }
+}
+
+/* Focus styles for accessibility */
+.glass-card--interactive:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Liquid Glass Enhancement (Pseudo-element Shine)
+   ========================================================================== */
+
+/**
+ * .glass-card--liquid
+ * Adds the signature iOS 26 "liquid" specular highlight effect
+ */
+.glass-card--liquid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-card--liquid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Ensure content appears above pseudo-elements */
+.glass-card--liquid > * {
+  position: relative;
+  z-index: 3;
+}
+
+/* ==========================================================================
+   Background Treatments for Glass Visibility
+   ========================================================================== */
+
+/**
+ * .glass-bg
+ * Recommended background for glass cards
+ * Use soft gradients or abstract shapes behind glass panels
+ */
+.glass-bg {
+  /* Soft gradient background that makes glass visible */
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 25%,
+    #f093fb 50%,
+    #f5576c 75%,
+    #4facfe 100%
+  );
+  background-size: 400% 400%;
+  animation: glassGradient 15s ease infinite;
+  min-height: 100vh;
+  position: relative;
+}
+
+@keyframes glassGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/**
+ * .glass-bg--subtle
+ * More subtle background option
+ */
+.glass-bg--subtle {
+  background: linear-gradient(
+    135deg,
+    #e0c3fc 0%,
+    #8ec5fc 50%,
+    #c2e9fb 100%
+  );
+  background-size: 200% 200%;
+  animation: glassGradient 10s ease infinite;
+}
+
+/**
+ * .glass-bg--dark
+ * Dark background option
+ */
+.glass-bg--dark {
+  background: linear-gradient(
+    135deg,
+    #1a1a2e 0%,
+    #16213e 25%,
+    #0f3460 50%,
+    #533483 75%,
+    #1a1a2e 100%
+  );
+  background-size: 400% 400%;
+  animation: glassGradient 20s ease infinite;
+}
+
+/**
+ * .glass-bg--aurora
+ * Aurora-style animated background
+ */
+.glass-bg--aurora {
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.2) 0%, transparent 60%),
+    linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+  background-size: 200% 200%;
+  animation: auroraMove 20s ease-in-out infinite;
+}
+
+@keyframes auroraMove {
+  0%, 100% { background-position: 0% 0%, 100% 100%, 50% 50%, 0% 0%; }
+  25% { background-position: 100% 0%, 0% 100%, 50% 50%, 0% 0%; }
+  50% { background-position: 100% 100%, 0% 0%, 50% 50%, 0% 0%; }
+  75% { background-position: 0% 100%, 100% 0%, 50% 50%, 0% 0%; }
+}
+
+/**
+ * .glass-bg--mesh
+ * Mesh gradient background using CSS
+ */
+.glass-bg--mesh {
+  background: 
+    radial-gradient(at 40% 20%, hsla(28, 100%, 74%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(340, 100%, 76%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, hsla(266, 100%, 68%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(22, 100%, 77%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, hsla(242, 100%, 70%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, hsla(343, 100%, 76%, 0.5) 0px, transparent 50%);
+  background-color: #0f172a;
+}
+
+/* ==========================================================================
+   Accessibility: Reduced Motion & Transparency
+   ========================================================================== */
+
+/**
+ * Respect user's motion preferences
+ */
+@media (prefers-reduced-motion: reduce) {
+  .glass-bg,
+  .glass-bg--subtle,
+  .glass-bg--dark,
+  .glass-bg--aurora {
+    animation: none;
+    background-size: 100% 100%;
+  }
+  
+  .glass-card,
+  .glass-card--interactive {
+    transition: none;
+  }
+  
+  .glass-card--interactive:hover,
+  .glass-card--interactive:active {
+    transform: none;
+  }
+}
+
+/**
+ * Respect user's transparency preferences
+ * Increases opacity for better readability
+ */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .glass-card--dark {
+    background: rgba(30, 41, 59, 0.95);
+    color: #ffffff;
+  }
+  
+  .glass-card--liquid::before,
+  .glass-card--liquid::after {
+    display: none;
+  }
+}
+
+/**
+ * High contrast mode support
+ */
+@media (prefers-contrast: high) {
+  .glass-card {
+    background: #ffffff;
+    border: 2px solid #000000;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  
+  .glass-card--dark {
+    background: #000000;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+  }
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-fallback-bg: rgba(30, 41, 59, 0.95);
+  }
+  
+  /* Auto-switch glass cards in dark mode (optional) */
+  .glass-card--auto-dark {
+    background: var(--glass-fallback-bg-dark);
+    color: #ffffff;
+  }
+  
+  @supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+    .glass-card--auto-dark {
+      background: var(--glass-bg-dark);
+      border: var(--glass-border-width) solid var(--glass-border-dark);
+    }
+  }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/**
+ * Text shadow for better readability on glass
+ */
+.glass-text-shadow {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.glass-text-shadow--strong {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/**
+ * Content wrapper for consistent padding inside glass cards
+ */
+.glass-content {
+  padding: 1.5rem;
+}
+
+.glass-content--sm {
+  padding: 1rem;
+}
+
+.glass-content--lg {
+  padding: 2rem;
+}
+
+/**
+ * Glass divider/separator
+ */
+.glass-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  margin: 1rem 0;
+}
+
+.glass-card--dark .glass-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+/* ==========================================================================
+   Performance Optimizations
+   ========================================================================== */
+
+/**
+ * Use will-change sparingly for animated glass elements
+ */
+.glass-card--animated {
+  will-change: transform, box-shadow;
+}
+
+/**
+ * GPU acceleration for smoother animations
+ */
+.glass-card--gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ==========================================================================
+   Browser-Specific Fixes
+   ========================================================================== */
+
+/**
+ * Firefox specific adjustments
+ */
+@-moz-document url-prefix() {
+  /* Firefox may need slightly different opacity values */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .glass-card--dark {
+    background: rgba(17, 24, 39, 0.35);
+  }
+}
+
+/**
+ * Safari specific adjustments
+ */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific tweaks */
+  .glass-card {
+    -webkit-transform: translateZ(0);
+  }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+  .glass-card,
+  .glass-card--dark,
+  .glass-card--clear,
+  .glass-card--strong {
+    background: #ffffff !important;
+    border: 1px solid #000000 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+  }
+  
+  .glass-bg,
+  .glass-bg--subtle,
+  .glass-bg--dark,
+  .glass-bg--aurora,
+  .glass-bg--mesh {
+    background: #ffffff !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>More about Jacob - AIFlowTime</title>
+    <meta name="description" content="認識 AIFlowTime 創辦人 Jacob。把 AI 從工具變成系統，幫香港斜槓族與小生意經營者建立可持續的工作節奏。">
+    <meta property="og:title" content="More about Jacob - AIFlowTime">
+    <meta property="og:description" content="認識 AIFlowTime 創辦人 Jacob。把 AI 從工具變成系統，幫香港斜槓族與小生意經營者建立可持續的工作節奏。">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7;
+            --bg-off: #E8E4DF;
+            --bg-pampas: #F4F3EE;
+            --accent: #D97757;
+            --accent-text: #C45A3A;
+            --accent-dark: #C56A4B;
+            --text: #3B3B3B;
+            --text-light: #7A7A7A;
+            --white: #FFFFFF;
+            --green: #2E7D32;
+            --green-bg: rgba(46,125,50,0.08);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; overflow-x:hidden; }
+        body {
+            font-family:'Noto Sans TC', sans-serif;
+            background:var(--bg-cream);
+            color:var(--text);
+            line-height:1.7;
+            font-size:16px;
+            overflow-x:hidden;
+            font-weight:400;
+        }
+
+        /* Scroll animation */
+        .fade-in { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity:1; transform:translateY(0); }
+
+        /* Nav */
+        .aj-nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(250,249,247,0.92); backdrop-filter:blur(12px); border-bottom:1px solid rgba(0,0,0,0.06); transition:all 0.3s; }
+        .aj-nav-inner { max-width:900px; margin:0 auto; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+        .aj-nav-brand { font-size:20px; font-weight:700; color:var(--text); text-decoration:none; }
+        .aj-nav-links { display:flex; gap:24px; align-items:center; }
+        .aj-nav-links a { font-size:14px; font-weight:600; color:var(--text-light); text-decoration:none; transition:color 0.2s; }
+        .aj-nav-links a:hover { color:var(--accent); }
+        .aj-nav-links a.active { color:var(--accent); }
+        @media(max-width:600px) { .aj-nav-links { gap:14px; } .aj-nav-links a { font-size:13px; } }
+
+        /* Container */
+        .aj-container { max-width:760px; margin:0 auto; padding:0 24px; }
+
+        /* Hero */
+        .aj-hero { padding:120px 0 60px; text-align:center; }
+        .aj-hero-photo { width:200px; height:200px; border-radius:24px; object-fit:cover; border:2.5px solid var(--accent); margin-bottom:20px; box-shadow:0 8px 32px rgba(217,119,87,0.15); }
+        .aj-hero h1 { font-size:clamp(28px,5vw,40px); font-weight:700; margin-bottom:8px; }
+        .aj-hero .aj-subtitle { font-size:18px; color:var(--accent); font-weight:600; margin-bottom:16px; }
+        .aj-hero .aj-intro { font-size:17px; color:var(--text-light); line-height:1.8; max-width:580px; margin:0 auto 24px; }
+        .aj-tags { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-bottom:28px; }
+        .aj-tag { padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600; background:rgba(217,119,87,0.1); color:var(--accent); }
+        .aj-cta-row { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
+        .aj-btn { display:inline-flex; align-items:center; gap:6px; padding:12px 28px; border-radius:12px; font-size:15px; font-weight:700; text-decoration:none; transition:all 0.2s; cursor:pointer; border:none; }
+        .aj-btn-primary { background:var(--accent); color:var(--white); box-shadow:0 2px 10px rgba(217,119,87,0.25); }
+        .aj-btn-primary:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(217,119,87,0.35); }
+        .aj-btn-outline { background:transparent; color:var(--accent); border:2px solid var(--accent); }
+        .aj-btn-outline:hover { background:rgba(217,119,87,0.06); transform:translateY(-2px); }
+
+        /* Section */
+        .aj-section { padding:48px 0; }
+        .aj-section-label { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:8px; }
+        .aj-section h2 { font-size:clamp(24px,4vw,32px); font-weight:700; margin-bottom:16px; }
+        .aj-section p.lead { font-size:17px; color:var(--text-light); line-height:1.8; margin-bottom:20px; }
+
+        /* Quote */
+        .aj-quote { border-left:4px solid var(--accent); padding:16px 20px; background:var(--bg-pampas); border-radius:0 12px 12px 0; margin:20px 0; font-size:17px; font-style:italic; color:var(--text-light); line-height:1.8; }
+
+        /* Cards */
+        .aj-card { background:var(--white); border-radius:16px; padding:24px; border:1.5px solid var(--bg-off); transition:all 0.2s; }
+        .aj-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.06); transform:translateY(-2px); }
+        .aj-card h3 { font-size:18px; font-weight:700; margin-bottom:6px; }
+        .aj-card p { font-size:15px; color:var(--text-light); line-height:1.7; }
+
+        /* Grid */
+        .aj-grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+
+        /* Timeline */
+        .aj-timeline { position:relative; padding-left:28px; }
+        .aj-timeline::before { content:''; position:absolute; left:8px; top:8px; bottom:8px; width:2px; background:rgba(217,119,87,0.2); border-radius:2px; }
+        .aj-timeline-item { position:relative; margin-bottom:24px; }
+        .aj-timeline-item::before { content:''; position:absolute; left:-22px; top:8px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:2px solid var(--bg-cream); }
+        .aj-timeline-item h3 { font-size:16px; font-weight:700; color:var(--accent); margin-bottom:4px; }
+        .aj-timeline-item p { font-size:15px; color:var(--text-light); }
+        .aj-timeline-item .aj-note { font-size:12px; color:var(--text-light); opacity:0.7; margin-top:2px; }
+
+        /* Steps */
+        .aj-step { display:flex; gap:16px; margin-bottom:20px; align-items:flex-start; }
+        .aj-step-num { flex-shrink:0; width:36px; height:36px; border-radius:50%; background:var(--accent); color:var(--white); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; }
+        .aj-step h3 { font-size:16px; font-weight:700; margin-bottom:2px; }
+        .aj-step p { font-size:15px; color:var(--text-light); }
+
+        /* Tools */
+        .aj-tools-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+        .aj-callout { padding:20px; border-radius:14px; background:var(--bg-pampas); border:1.5px solid rgba(217,119,87,0.15); margin-top:20px; }
+        .aj-callout h3 { font-size:16px; font-weight:700; margin-bottom:8px; }
+        .aj-callout p { font-size:15px; color:var(--text-light); line-height:1.7; }
+
+        /* Photo Gallery */
+        .aj-gallery { position:relative; max-width:500px; margin:32px auto; }
+        .aj-gallery-container { position:relative; height:260px; display:flex; align-items:center; justify-content:center; overflow:visible; }
+        .aj-gallery-wrapper { position:relative; width:200px; height:200px; margin:0 auto; }
+        .aj-gallery-photo { position:absolute; left:50%; top:50%; width:200px; height:200px; transform:translate(-50%,-50%); opacity:0; cursor:grab; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); touch-action:none; }
+        .aj-gallery-photo.active { opacity:1; transform:translate(calc(-50% + var(--x,0px)),calc(-50% + var(--y,0px))) rotate(var(--rotate,0deg)); transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease; }
+        .aj-gallery-photo:hover { transform:translate(calc(-50% + var(--x,0px)),calc(-50% + var(--y,0px))) rotate(calc(var(--rotate,0deg) + 2deg)) scale(1.08); z-index:99 !important; }
+        .aj-gallery-photo img { width:100%; height:100%; object-fit:cover; border-radius:18px; box-shadow:0 4px 12px rgba(0,0,0,0.1); pointer-events:none; user-select:none; -webkit-user-select:none; }
+        .aj-gallery-label { text-align:center; margin-top:8px; }
+        .aj-gallery-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 20px; border-radius:20px; background:var(--bg-pampas); border:1.5px solid var(--bg-off); font-size:13px; font-weight:600; color:var(--text-light); cursor:pointer; transition:all 0.2s; }
+        .aj-gallery-btn:hover { border-color:var(--accent); color:var(--accent); }
+        @media(max-width:600px) {
+            .aj-gallery-wrapper { width:160px; height:160px; }
+            .aj-gallery-photo { width:160px; height:160px; }
+            .aj-gallery-container { height:220px; }
+        }
+
+        /* FAQ */
+        .aj-faq { border-bottom:1px solid var(--bg-off); padding:18px 0; }
+        .aj-faq-q { display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-size:16px; font-weight:600; }
+        .aj-faq-icon { transition:transform 0.3s; font-size:18px; color:var(--text-light); }
+        .aj-faq.open .aj-faq-icon { transform:rotate(180deg); }
+        .aj-faq-a { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+        .aj-faq.open .aj-faq-a { max-height:400px; }
+        .aj-faq-a p { padding-top:12px; font-size:15px; color:var(--text-light); line-height:1.7; }
+
+        /* CTA Banner */
+        .aj-cta-banner { background:linear-gradient(135deg, var(--accent), var(--accent-dark)); border-radius:20px; padding:40px 32px; text-align:center; color:var(--white); margin:32px 0; }
+        .aj-cta-banner h2 { font-size:clamp(22px,4vw,28px); font-weight:700; margin-bottom:12px; }
+        .aj-cta-banner p { font-size:16px; opacity:0.92; margin-bottom:24px; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.7; }
+        .aj-cta-banner .aj-btn-outline { border-color:rgba(255,255,255,0.5); color:var(--white); }
+        .aj-cta-banner .aj-btn-outline:hover { background:rgba(255,255,255,0.12); }
+        .aj-cta-banner .aj-btn-white { background:var(--white); color:var(--accent); }
+        .aj-cta-banner .aj-btn-white:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.15); }
+
+        /* Footer */
+        .aj-footer { background:var(--text); color:rgba(255,255,255,0.7); padding:48px 0 32px; margin-top:48px; }
+        .aj-footer-inner { max-width:760px; margin:0 auto; padding:0 24px; display:flex; flex-wrap:wrap; gap:40px; justify-content:space-between; }
+        .aj-footer-brand { font-size:20px; font-weight:700; color:var(--white); margin-bottom:8px; }
+        .aj-footer p { font-size:13px; line-height:1.6; }
+        .aj-footer a { color:rgba(255,255,255,0.7); text-decoration:none; transition:color 0.2s; font-size:14px; }
+        .aj-footer a:hover { color:var(--white); }
+        .aj-footer-links { display:flex; flex-direction:column; gap:6px; }
+        .aj-footer-copy { text-align:center; font-size:12px; color:rgba(255,255,255,0.4); margin-top:32px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08); }
+
+        /* Divider */
+        .aj-divider { width:60px; height:3px; border-radius:3px; background:var(--accent); margin:0 auto 32px; opacity:0.4; }
+
+        /* Origin story */
+        .aj-origin-intro { font-size:clamp(18px,3.5vw,22px); line-height:1.7; text-align:center; max-width:600px; margin:0 auto 36px; }
+        .aj-origin-intro .aj-dim { color:var(--text-light); }
+        .aj-origin-intro .aj-highlight { color:var(--accent); font-weight:700; }
+        .aj-origin-cards { display:flex; flex-direction:column; gap:0; position:relative; padding-left:28px; }
+        .aj-origin-cards::before { content:''; position:absolute; left:8px; top:12px; bottom:12px; width:2px; background:linear-gradient(to bottom, var(--accent), rgba(217,119,87,0.15)); border-radius:2px; }
+        .aj-origin-card { position:relative; padding:20px 24px; background:var(--white); border-radius:14px; border:1.5px solid var(--bg-off); margin-bottom:16px; transition:all 0.2s; }
+        .aj-origin-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.05); transform:translateY(-1px); }
+        .aj-origin-card::before { content:''; position:absolute; left:-22px; top:24px; width:12px; height:12px; border-radius:50%; background:var(--accent); border:2.5px solid var(--bg-cream); }
+        .aj-origin-card .aj-origin-num { display:inline-block; font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+        .aj-origin-card h3 { font-size:17px; font-weight:700; margin-bottom:6px; line-height:1.5; }
+        .aj-origin-card p { font-size:15px; color:var(--text-light); line-height:1.7; }
+
+        /* Second photo */
+        .aj-photo-wide { width:100%; max-width:480px; border-radius:18px; margin:24px auto; display:block; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+    <nav class="aj-nav">
+        <div class="aj-nav-inner">
+            <a href="/linktree" class="aj-nav-brand">AIFlowTime</a>
+            <div class="aj-nav-links">
+                <a href="/ai-beginner-workshop">工作坊</a>
+                <a href="/consultation">諮詢</a>
+                <a href="/about-jacob" class="active">About Jacob</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="aj-hero fade-in" data-section-id="aj-hero" data-section-type="hero">
+        <div class="aj-container">
+            <img src="About_Jacob.jpg" alt="Jacob" class="aj-hero-photo">
+            <h1>Jacob</h1>
+            <p class="aj-subtitle">AIFlowTime 創辦人</p>
+            <p class="aj-intro">
+                我做的事很單純：把 AI 從「工具」變成「會自己跑的系統」，幫香港的斜槓族與小生意經營者省回時間，建立可持續的工作節奏。
+            </p>
+            <div class="aj-tags">
+                <span class="aj-tag">AI 工作流</span>
+                <span class="aj-tag">省時系統</span>
+                <span class="aj-tag">自動化思維</span>
+                <span class="aj-tag">副業可執行路線</span>
+            </div>
+            <div class="aj-cta-row">
+                <a href="/ai-beginner-workshop" class="aj-btn aj-btn-primary">瀏覽工作坊</a>
+                <a href="/consultation" class="aj-btn aj-btn-outline">預約諮詢</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Origin Story -->
+    <section class="aj-section fade-in" data-section-id="aj-origin" data-section-type="origin-story">
+        <div class="aj-container">
+            <p class="aj-origin-intro">
+                <span class="aj-dim">我曾經是一個攝影師——</span><br>
+                <span class="aj-dim">沒有流量、沒有關注，也沒有人在意我的服務。</span><br>
+                <span class="aj-highlight">然後，我做了三件事。</span>
+            </p>
+
+            <div class="aj-origin-cards">
+                <div class="aj-origin-card fade-in">
+                    <span class="aj-origin-num">第一步</span>
+                    <h3>學會與 AI 對話，重新打磨商業定位</h3>
+                    <p>透過 AI 重新梳理我的服務價值、受眾痛點與表達方式，讓原本無人問津的業務開始被看見、被理解、被需要。</p>
+                </div>
+                <div class="aj-origin-card fade-in">
+                    <span class="aj-origin-num">第二步</span>
+                    <h3>用 AI 建立以前想都不敢想的網站與系統</h3>
+                    <p>沒有技術背景，卻靠著正確的 AI 工具與工作流，從零搭建出品牌網站、自動化報名流程、CMS 管理後台——這些過去只有開發者才做得到的事。</p>
+                </div>
+                <div class="aj-origin-card fade-in">
+                    <span class="aj-origin-num">第三步</span>
+                    <h3>把學到的一切，分享到 Instagram</h3>
+                    <p>開始用 Reels 記錄我的 AI 實戰經驗與工作流設計，不到兩個月，從零累積超過 20,000 追蹤——證明了真正有價值的內容，自然會被看見。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why AIFlowTime -->
+    <section class="aj-section fade-in" data-section-id="aj-why" data-section-type="cta">
+        <div class="aj-container">
+            <span class="aj-section-label">觀點</span>
+            <h2>為何 AIFlowTime</h2>
+            <p class="lead">
+                我不相信「學晒所有 AI 工具」會帶來改變。我相信真正有效的，是三件事：<strong>整理 → 模板化 → 自動化</strong>。工具會變，方法會留。
+            </p>
+            <div class="aj-quote">
+                不必更努力，只需更精準的系統。被省下的時間，才是真正可投資的資產。
+            </div>
+
+            <div class="aj-quote" style="margin-top:24px; font-style:normal; font-weight:600; color:var(--text); font-size:18px;">
+                我不追求一次性的成果，我設計讓成果持續發生的系統。
+            </div>
+
+            <p class="lead" style="margin-top:20px;">
+                在 AI 時代，工具本身不是優勢，思維方式才是。學會使用 AI 並不難，真正的挑戰在於：如何將 AI 融入你的工作與生活，構建一套自動運轉的機制——讓系統替你持續產出結果，而不依賴每天的狀態與意志力。
+            </p>
+
+            <p class="lead">
+                我深信：<strong>成功不是靠硬撐出來的，而是靠設計出來的。</strong>一套好的系統，能帶任何人走得更遠。
+            </p>
+        </div>
+    </section>
+
+    <!-- Second Photo -->
+    <section class="aj-section fade-in" data-section-id="aj-photo" data-section-type="photo-block" style="padding-top:0;">
+        <div class="aj-container" style="text-align:center;">
+            <img src="Jacob_not_ugly.jpg" alt="Jacob" class="aj-photo-wide">
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="aj-section fade-in" data-section-id="aj-timeline" data-section-type="origin-story">
+        <div class="aj-container">
+            <h2>Timeline</h2>
+            <div style="height:16px;"></div>
+
+            <!-- Photo Gallery -->
+            <div class="aj-gallery">
+                <div class="aj-gallery-container">
+                    <div class="aj-gallery-wrapper">
+                        <div class="aj-gallery-photo" data-order="0" style="--x:-140px;--y:12px;z-index:50;">
+                            <img src="My2025/89C2A262-E577-443A-95E0-1B3A3BB3B5DC.JPG" alt="Photo 1" draggable="false">
+                        </div>
+                        <div class="aj-gallery-photo" data-order="1" style="--x:-70px;--y:28px;z-index:40;">
+                            <img src="My2025/CNY_2025014.JPG" alt="Photo 2" draggable="false">
+                        </div>
+                        <div class="aj-gallery-photo" data-order="2" style="--x:0px;--y:6px;z-index:30;">
+                            <img src="My2025/IMG_7914.JPG" alt="Photo 3" draggable="false">
+                        </div>
+                        <div class="aj-gallery-photo" data-order="3" style="--x:70px;--y:18px;z-index:20;">
+                            <img src="My2025/Piu Shot for Jacob-095.jpg" alt="Photo 4" draggable="false">
+                        </div>
+                        <div class="aj-gallery-photo" data-order="4" style="--x:140px;--y:38px;z-index:10;">
+                            <img src="My2025/Shanghai_2025-312.jpg" alt="Photo 5" draggable="false">
+                        </div>
+                    </div>
+                </div>
+                <div class="aj-gallery-label">
+                    <button class="aj-gallery-btn" id="shuffleBtn">我的 2025 ↻</button>
+                </div>
+            </div>
+
+            <div class="aj-timeline">
+                <div class="aj-timeline-item fade-in">
+                    <h3>2025 秋</h3>
+                    <p>開始在 Instagram 以 Reels 分享 AI 工具與工作流實測</p>
+                </div>
+                <div class="aj-timeline-item fade-in">
+                    <h3>兩個月內</h3>
+                    <p>品牌累積 20,000 追蹤</p>
+                    <p class="aj-note">數據以帳號後台為準</p>
+                </div>
+                <div class="aj-timeline-item fade-in">
+                    <h3>現在</h3>
+                    <p>把內容沉澱成諮詢、工作坊、會員與模板資源</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who I Serve -->
+    <section class="aj-section fade-in" data-section-id="aj-who" data-section-type="cta">
+        <div class="aj-container">
+            <h2>我服務的對象</h2>
+            <div style="height:8px;"></div>
+            <div class="aj-grid-3">
+                <div class="aj-card fade-in">
+                    <h3>斜槓族／自由工作者</h3>
+                    <p>案多、訊息多、交付壓力大——需要穩定交付嘅工作流</p>
+                </div>
+                <div class="aj-card fade-in">
+                    <h3>小生意經營者／上班族副業</h3>
+                    <p>資源少、時間少——用流程換產能，唔靠硬撐</p>
+                </div>
+                <div class="aj-card fade-in">
+                    <h3>AI 新手</h3>
+                    <p>想開始用 AI 但唔知從何入手——需要清晰嘅學習路線同實用指引</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How I Work -->
+    <section class="aj-section fade-in" data-section-id="aj-how" data-section-type="cta">
+        <div class="aj-container">
+            <h2>我的工作方式</h2>
+            <div style="height:8px;"></div>
+            <div class="aj-step fade-in">
+                <div class="aj-step-num">1</div>
+                <div><h3>Problem Spotting</h3><p>找出時間黑洞與目標</p></div>
+            </div>
+            <div class="aj-step fade-in">
+                <div class="aj-step-num">2</div>
+                <div><h3>Pain Point Mapping</h3><p>拆成 1–3 個可處理流程</p></div>
+            </div>
+            <div class="aj-step fade-in">
+                <div class="aj-step-num">3</div>
+                <div><h3>Workflow Blueprint</h3><p>提供可落地的工作流設計建議</p></div>
+            </div>
+            <div class="aj-step fade-in">
+                <div class="aj-step-num">4</div>
+                <div><h3>Make It Stick</h3><p>模板／清單化，確保你用得返落去</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools -->
+    <section class="aj-section fade-in" data-section-id="aj-tools" data-section-type="tools-tags">
+        <div class="aj-container">
+            <h2>我常用的工具</h2>
+            <p class="lead">我唔追工具榜單；只用可以長期放入流程的工具。你會見到的不是「最新功能」，而是「可以複製的做法」。</p>
+            <div class="aj-tools-wrap">
+                <span class="aj-tag">Notion</span>
+                <span class="aj-tag">ChatGPT</span>
+                <span class="aj-tag">Google Calendar</span>
+                <span class="aj-tag">Xmind</span>
+                <span class="aj-tag">Perplexity</span>
+                <span class="aj-tag">NotebookLM</span>
+                <span class="aj-tag">CapCut</span>
+            </div>
+            <div class="aj-callout">
+                <h3>Jacob is still learning~</h3>
+                <p>自動化係 AIFlowTime 下一個重點章節。n8n／Zapier 我仍在累積實戰里程碑：每完成一個可重用的流程，就會整理成清單、模板與示範案例，公開分享進度與結論。等到整套方法成熟、可大量複製，我會以工作坊形式（線上＋線下）正式教授，讓更多人把 AI 從「想像」變成「會自己跑」的系統。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personal Note -->
+    <section class="aj-section fade-in" data-section-id="aj-note" data-section-type="cta">
+        <div class="aj-container">
+            <div class="aj-quote">
+                我一直都需要一個清晰的系統去保持節奏——否則事情會越做越散。AIFlowTime 某程度上亦係把我自己試過有效的方法，變成可以交付給別人的流程。
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="aj-section fade-in" data-section-id="aj-cta" data-section-type="cta">
+        <div class="aj-container">
+            <div class="aj-cta-banner">
+                <h2>由邊度開始？</h2>
+                <p>如果你唔肯定由邊開始，建議先做「2 分鐘省時診斷」：它會幫你判斷自己卡喺 Skill／Workflow／意願邊一段，並生成一條兩週可落地路線。</p>
+                <div class="aj-cta-row">
+                    <a href="/" class="aj-btn aj-btn-outline">做 2 分鐘省時診斷</a>
+                    <a href="/consultation" class="aj-btn aj-btn-white">預約 HK$1,500／90分鐘諮詢</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="aj-section fade-in" data-section-id="aj-faq" data-section-type="faq">
+        <div class="aj-container">
+            <h2>常見問題</h2>
+            <div style="height:8px;"></div>
+            <div class="aj-faq" onclick="this.classList.toggle('open')">
+                <div class="aj-faq-q"><span>我完全新手得唔得？</span><span class="aj-faq-icon">▾</span></div>
+                <div class="aj-faq-a"><p>得。我哋唔係教工具操作，而係幫你設計流程。你只需要知道自己想解決咩問題、有幾多時間，其他我會帶你行。</p></div>
+            </div>
+            <div class="aj-faq" onclick="this.classList.toggle('open')">
+                <div class="aj-faq-q"><span>需要識 coding 嗎？</span><span class="aj-faq-icon">▾</span></div>
+                <div class="aj-faq-a"><p>唔需要。我用嘅工具大部分都係 no-code 或者低門檻工具（Notion、ChatGPT、Google Calendar 等）。重點係流程設計，唔係技術操作。</p></div>
+            </div>
+            <div class="aj-faq" onclick="this.classList.toggle('open')">
+                <div class="aj-faq-q"><span>90 分鐘諮詢會做啲咩？</span><span class="aj-faq-icon">▾</span></div>
+                <div class="aj-faq-a"><p>前 30 分鐘：問題定位（時間黑洞／目標／優先序）<br>中 40 分鐘：工作流設計建議（可落地步驟）+ 即場示範與提示詞調整<br>後 20 分鐘：整理成流程清單 + 提供可即用 prompts／模板（電子版）</p></div>
+            </div>
+            <div class="aj-faq" onclick="this.classList.toggle('open')">
+                <div class="aj-faq-q"><span>我適合工作坊定諮詢？</span><span class="aj-faq-icon">▾</span></div>
+                <div class="aj-faq-a"><p>如果你想快速釐清方向、建立第一條工作流，適合諮詢。如果你想同其他人一齊學、氣氛輕鬆啲，適合工作坊。唔肯定可以先做「2 分鐘省時診斷」。</p></div>
+            </div>
+            <div class="aj-faq" onclick="this.classList.toggle('open')">
+                <div class="aj-faq-q"><span>會唔會推銷好多工具？</span><span class="aj-faq-icon">▾</span></div>
+                <div class="aj-faq-a"><p>唔會。我只會推薦你真正需要、可以長期用落去嘅工具。大部分時候，你已經有嘅工具已經夠用，只係需要重新整理同串連。</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="aj-footer">
+        <div class="aj-footer-inner">
+            <div>
+                <div class="aj-footer-brand">AIFlowTime</div>
+                <p>用 AI 換時間｜建立會自己跑的工作系統</p>
+                <p style="margin-top:8px;">© 2026 AIFlowTime. All rights reserved.</p>
+            </div>
+            <div>
+                <p style="font-weight:600;color:var(--white);margin-bottom:8px;">快速連結</p>
+                <div class="aj-footer-links">
+                    <a href="/">首頁</a>
+                    <a href="/ai-beginner-workshop">工作坊</a>
+                    <a href="/consultation">諮詢服務</a>
+                    <a href="/about-jacob">About Jacob</a>
+                </div>
+            </div>
+            <div>
+                <p style="font-weight:600;color:var(--white);margin-bottom:8px;">聯絡</p>
+                <div class="aj-footer-links">
+                    <a href="https://wa.me/85262880186" target="_blank">WhatsApp 查詢</a>
+                    <a href="https://instagram.com/aiflowtime" target="_blank">Instagram @aiflowtime</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    // Scroll animations
+    (function() {
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting && !entry.target.classList.contains('visible')) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.fade-in').forEach(function(el, i) {
+            el.style.transitionDelay = (i * 60) + 'ms';
+            observer.observe(el);
+        });
+    })();
+
+    // Photo gallery
+    (function() {
+        var photos = document.querySelectorAll('.aj-gallery-photo');
+        if (!photos.length) return;
+        photos.forEach(function(p, i) {
+            var dir = i < 2 ? -1 : 1;
+            p.style.setProperty('--rotate', (Math.random() * 3 + 1) * dir + 'deg');
+        });
+        setTimeout(function() {
+            photos.forEach(function(p, i) {
+                setTimeout(function() { p.classList.add('active'); }, i * 120);
+            });
+        }, 600);
+
+        // Drag
+        photos.forEach(function(photo) {
+            var dragging = false, sx, sy;
+            photo.addEventListener('mousedown', function(e) { dragging = true; sx = e.clientX; sy = e.clientY; photo.style.cursor = 'grabbing'; });
+            document.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                var dx = e.clientX - sx, dy = e.clientY - sy;
+                photo.style.transform = 'translate(calc(-50% + var(--x,0px) + ' + dx + 'px), calc(-50% + var(--y,0px) + ' + dy + 'px)) rotate(var(--rotate,0deg)) scale(1.08)';
+                photo.style.zIndex = '999';
+            });
+            document.addEventListener('mouseup', function() { if (dragging) { dragging = false; photo.style.cursor = 'grab'; setTimeout(function() { photo.style.transform = ''; photo.style.zIndex = ''; }, 80); } });
+            photo.addEventListener('touchstart', function(e) { dragging = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+            document.addEventListener('touchmove', function(e) {
+                if (!dragging) return; e.preventDefault();
+                var t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+                photo.style.transform = 'translate(calc(-50% + var(--x,0px) + ' + dx + 'px), calc(-50% + var(--y,0px) + ' + dy + 'px)) rotate(var(--rotate,0deg)) scale(1.08)';
+                photo.style.zIndex = '999';
+            }, { passive: false });
+            document.addEventListener('touchend', function() { if (dragging) { dragging = false; setTimeout(function() { photo.style.transform = ''; photo.style.zIndex = ''; }, 80); } });
+        });
+
+        // Shuffle
+        var positions = [{x:-140,y:12},{x:-70,y:28},{x:0,y:6},{x:70,y:18},{x:140,y:38}];
+        document.getElementById('shuffleBtn').addEventListener('click', function() {
+            var shuffled = positions.slice().sort(function() { return Math.random() - 0.5; });
+            photos.forEach(function(p, i) {
+                p.style.setProperty('--x', shuffled[i].x + 'px');
+                p.style.setProperty('--y', shuffled[i].y + 'px');
+                p.style.setProperty('--rotate', ((Math.random() - 0.5) * 6) + 'deg');
+            });
+        });
+    })();
+    </script>
+
+    <!-- Firebase SDK for layout loading -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- Layout Engine (Preview + Public) -->
+    <script>
+    (function() {
+        var _isPreview = new URLSearchParams(window.location.search).has('preview');
+
+        function applySections(sections) {
+            var allSecs = document.querySelectorAll('[data-section-id]');
+            allSecs.forEach(function(el) { el.style.display = 'none'; el.style.order = ''; });
+
+            if (!sections || !sections.length) return;
+
+            var order = 0;
+            sections.forEach(function(sec) {
+                if (!sec.visible) return;
+                var el = document.querySelector('[data-section-id="' + sec.id + '"]');
+                if (!el) { console.warn('[Layout] No element for section:', sec.type, sec.id); return; }
+                el.style.display = '';
+                el.style.order = order++;
+                applyContent(el, sec);
+            });
+        }
+
+        function _escHtml(s) {
+            var d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
+        function applyContent(el, sec) {
+            var c = sec.content || {};
+            var type = sec.type;
+
+            switch (type) {
+                case 'origin-story':
+                    var cards = el.querySelectorAll('.aj-origin-card');
+                    if (c.steps && cards.length === 0) {
+                        var timeline = el.querySelector('.aj-timeline');
+                        if (timeline && c.steps) {
+                            timeline.innerHTML = '';
+                            c.steps.forEach(function(step) {
+                                var item = document.createElement('div');
+                                item.className = 'aj-timeline-item fade-in';
+                                item.innerHTML = '<h3>' + _escHtml(step.title) + '</h3><p>' + _escHtml(step.description) + '</p>';
+                                timeline.appendChild(item);
+                            });
+                        }
+                    }
+                    if (c.steps && cards.length > 0) {
+                        var container = cards[0].parentNode;
+                        container.innerHTML = '';
+                        c.steps.forEach(function(step, i) {
+                            var card = document.createElement('div');
+                            card.className = 'aj-origin-card fade-in';
+                            card.innerHTML = '<span class="aj-origin-num">第' + (i + 1 === 1 ? '一' : i + 1 === 2 ? '二' : '三') + '步</span>' +
+                                '<h3>' + _escHtml(step.title) + '</h3><p>' + _escHtml(step.description) + '</p>';
+                            container.appendChild(card);
+                        });
+                    }
+                    break;
+
+                case 'tools-tags':
+                    var toolsWrap = el.querySelector('.aj-tools-wrap');
+                    if (toolsWrap && c.tags) {
+                        toolsWrap.innerHTML = '';
+                        c.tags.forEach(function(tag) {
+                            var span = document.createElement('span');
+                            span.className = 'aj-tag';
+                            span.textContent = tag.name || '';
+                            toolsWrap.appendChild(span);
+                        });
+                    }
+                    var callout = el.querySelector('.aj-callout');
+                    if (callout && c.calloutText) {
+                        callout.innerHTML = '<h3>' + _escHtml(c.calloutText.split('~')[0] + '~') + '</h3><p>' + _escHtml(c.calloutText.split('~').slice(1).join('~').trim()) + '</p>';
+                    }
+                    break;
+
+                case 'photo-block':
+                    var img = el.querySelector('.aj-photo-wide');
+                    if (img && c.imageUrl) img.src = c.imageUrl;
+                    if (img && c.alt) img.alt = c.alt;
+                    break;
+            }
+        }
+
+        if (_isPreview) {
+            window.addEventListener('message', function(e) {
+                if (!e.data || e.data.type !== 'layoutPreview') return;
+                applySections(e.data.sections);
+            });
+        } else {
+            try { firebase.app(); } catch(e) {
+                firebase.initializeApp({
+                    projectId: 'aiflowtime-hk',
+                    apiKey: 'AIzaSyDummy',
+                    authDomain: 'aiflowtime-hk.firebaseapp.com'
+                });
+            }
+            var db = firebase.firestore();
+            db.collection('pageLayouts').doc('about-jacob').get().then(function(doc) {
+                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                console.log('[Layout] Loaded about-jacob layout from Firestore');
+                applySections(doc.data().sections);
+            }).catch(function(err) {
+                console.log('[Layout] No layout config found for about-jacob.', err);
+            });
+        }
+    })();
+    </script>
+</body>
+</html>

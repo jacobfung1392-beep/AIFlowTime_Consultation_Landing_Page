@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop C — 下一級視覺 | AIFLOWTIME</title>
+    <meta name="description" content="用 AI 打造商業級圖像。Midjourney + FloraFauna + Higgsfield，3小時學會品牌視覺語言。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #111118;
+            --bg-card-hover: #161622;
+            --border: rgba(255,255,255,0.07);
+            --border-glow: rgba(217,119,87,0.35);
+            --accent: #D97757;
+            --accent-dim: rgba(217,119,87,0.15);
+            --accent-glow: rgba(217,119,87,0.4);
+            --text: #f0ede8;
+            --text-dim: rgba(240,237,232,0.55);
+            --text-muted: rgba(240,237,232,0.3);
+            --white: #ffffff;
+            --radius: 16px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        /* =============================================
+           FIXED NOISE BACKGROUND
+        ============================================= */
+        #noise-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: var(--bg);
+        }
+
+        #noise-bg .radial-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle 700px at 50% 0px, rgba(217,119,87,0.18), transparent 70%);
+        }
+
+        #noise-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            image-rendering: pixelated;
+        }
+
+        /* All content above the noise layer */
+        .page-content { position: relative; z-index: 1; }
+
+        /* =============================================
+           HEADER / NAV
+        ============================================= */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 72rem;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .logo {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+        .logo:hover { color: var(--accent); }
+        .logo span { color: var(--accent); }
+
+        .nav-desktop { display: none; }
+
+        .nav-desktop a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .nav-desktop a:hover { color: var(--accent); }
+
+        .nav-desktop .nav-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 42px;
+            padding: 0 22px;
+            margin-left: 32px;
+            background: var(--accent);
+            color: #fff !important;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .nav-desktop .nav-cta-btn:hover { opacity: 0.85; }
+
+        .nav-mobile { display: flex; align-items: center; }
+
+        .hamburger {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .hamburger:hover { background: var(--accent-dim); }
+
+        .hamburger .bar {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--text);
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .hamburger.active .bar:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.active .bar:nth-child(2) { opacity: 0; }
+        .hamburger.active .bar:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0; right: 0;
+            background: rgba(10,10,15,0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 24px;
+            transform: translateY(-100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            padding: 16px 0;
+            font-size: 18px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            min-height: 44px;
+        }
+        .mobile-menu a:last-child { border-bottom: none; }
+        .mobile-menu a:hover { color: var(--accent); }
+
+        .mobile-menu .mob-cta {
+            margin-top: 16px;
+            width: 100%;
+            justify-content: center;
+            background: var(--accent);
+            color: #fff !important;
+            border-radius: 10px;
+            font-weight: 700;
+            padding: 14px 0;
+            border-bottom: none;
+        }
+
+        @media (min-width: 769px) {
+            .nav-desktop { display: flex; align-items: center; }
+            .nav-mobile { display: none; }
+        }
+
+        /* =============================================
+           HERO
+        ============================================= */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-glow);
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-size: 12px;
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.12em;
+            padding: 6px 16px;
+            border-radius: 100px;
+            margin-bottom: 32px;
+        }
+
+        .hero-title {
+            font-size: clamp(52px, 10vw, 108px);
+            font-weight: 700;
+            line-height: 1.0;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .hero-title .accent { color: var(--accent); }
+
+        .hero-subtitle-en {
+            font-family: 'Courier Prime', monospace;
+            font-size: clamp(14px, 2vw, 18px);
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+        }
+
+        .hero-tagline {
+            font-size: clamp(16px, 2.5vw, 22px);
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 48px;
+            font-weight: 300;
+        }
+
+        .hero-tagline strong { color: var(--text); font-weight: 500; }
+
+        .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--accent-glow); }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .scroll-arrow {
+            width: 1px;
+            height: 32px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            animation: scrollPulse 2s infinite;
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+            50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        /* =============================================
+           SECTION LAYOUT
+        ============================================= */
+        section { padding: 100px 24px; }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: 'Courier Prime', monospace;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(28px, 5vw, 52px);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 24px;
+        }
+
+        /* =============================================
+           VIDEO SECTION (9:16)
+        ============================================= */
+        .video-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 24px;
+        }
+
+        .video-wrap {
+            position: relative;
+            width: min(340px, 85vw);
+            aspect-ratio: 9 / 16;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 0 60px rgba(217,119,87,0.15), 0 24px 80px rgba(0,0,0,0.6);
+        }
+
+        .video-wrap video, .video-wrap .video-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .video-placeholder {
+            background: linear-gradient(160deg, #1a1a2e 0%, #0f0f1a 50%, #1a0f00 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .video-placeholder-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-placeholder p {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        .video-caption {
+            margin-top: 24px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 14px;
+            max-width: 300px;
+        }
+
+        /* =============================================
+           FLOATING IMAGE CHAIN (FloraFauna style)
+        ============================================= */
+        .chain-section {
+            padding: 80px 0;
+            overflow: visible;
+        }
+
+        .chain-section .container { overflow: visible; }
+
+        .chain-intro {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 0 24px;
+        }
+
+        /* Vertical chain layout */
+        .chain-vertical {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 24px 40px;
+            gap: 0;
+        }
+
+        .chain-row {
+            display: flex;
+        }
+
+        .chain-row.left  { justify-content: flex-start; padding-left: 40px; }
+        .chain-row.right { justify-content: flex-end;   padding-right: 40px; }
+
+        .chain-card {
+            position: relative;
+            width: clamp(200px, 42vw, 280px);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 12px 40px rgba(0,0,0,0.55),
+                0 0 0 1px rgba(255,255,255,0.04),
+                0 24px 60px rgba(0,0,0,0.4);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            background: var(--bg-card);
+            cursor: pointer;
+        }
+
+        .chain-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow:
+                0 24px 60px rgba(217,119,87,0.25),
+                0 0 0 1px var(--border-glow),
+                0 40px 80px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        .chain-card img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            display: block;
+        }
+
+        .chain-card-label {
+            padding: 10px 14px;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.06em;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Vertical SVG curve connector */
+        .chain-v-connector {
+            position: relative;
+            height: 80px;
+            pointer-events: none;
+        }
+
+        .chain-v-connector svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* =============================================
+           PROBLEM SECTION
+        ============================================= */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .problem-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 20px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: border-color 0.3s;
+        }
+
+        .problem-item:hover { border-color: rgba(217,119,87,0.3); }
+
+        .problem-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+            margin-top: 7px;
+        }
+
+        .problem-item p {
+            font-size: 15px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        /* =============================================
+           SHIFT SECTION
+        ============================================= */
+        .shift-section {
+            text-align: center;
+            padding: 80px 24px;
+        }
+
+        .shift-large {
+            font-size: clamp(32px, 6vw, 72px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 32px;
+        }
+
+        .shift-large .strike {
+            position: relative;
+            color: var(--text-muted);
+        }
+
+        .shift-large .strike::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            top: 50%;
+            height: 2px;
+            background: var(--accent);
+            transform: rotate(-2deg);
+        }
+
+        .shift-body {
+            max-width: 560px;
+            margin: 0 auto;
+            font-size: 17px;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        /* =============================================
+           WHAT YOU MASTER
+        ============================================= */
+        .master-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 48px;
+        }
+
+        .master-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            transition: padding-left 0.3s;
+            cursor: default;
+        }
+
+        .master-item:hover { padding-left: 8px; }
+
+        .master-num {
+            font-family: 'Courier Prime', monospace;
+            font-size: 13px;
+            color: var(--accent);
+            width: 32px;
+            flex-shrink: 0;
+        }
+
+        .master-text {
+            font-size: clamp(20px, 3.5vw, 32px);
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .master-sub {
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--text-muted);
+            font-family: 'Courier Prime', monospace;
+            text-align: right;
+            flex-shrink: 0;
+            max-width: 200px;
+        }
+
+        /* =============================================
+           TOOLS SECTION
+        ============================================= */
+        .tools-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .tool-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .tool-chip:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 16px var(--accent-dim);
+        }
+
+        .tool-chip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* =============================================
+           DEMO PROMISE
+        ============================================= */
+        .demo-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            padding: 48px;
+            text-align: center;
+            margin-top: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--accent), transparent);
+        }
+
+        .demo-big {
+            font-size: clamp(22px, 4vw, 42px);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 16px;
+        }
+
+        .demo-sub {
+            color: var(--text-dim);
+            font-size: 16px;
+        }
+
+        /* =============================================
+           FOR / NOT FOR
+        ============================================= */
+        .for-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .for-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .for-card.for-yes { border-color: rgba(34,197,94,0.25); }
+        .for-card.for-no { border-color: rgba(239,68,68,0.2); }
+
+        .for-card-label {
+            font-family: 'Courier Prime', monospace;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            margin-bottom: 20px;
+        }
+
+        .for-yes .for-card-label { color: #4ade80; }
+        .for-no .for-card-label { color: #f87171; }
+
+        .for-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+
+        .for-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 15px;
+            color: var(--text-dim);
+        }
+
+        .for-list li::before { content: '→'; color: var(--text-muted); flex-shrink: 0; }
+        .for-yes .for-list li::before { color: #4ade80; }
+        .for-no .for-list li::before { color: #f87171; content: '✕'; }
+
+        /* =============================================
+           LOGISTICS — row-based card
+        ============================================= */
+        .wsc-logistics-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 48px;
+        }
+        .wsc-logistics-rows { display: flex; flex-direction: column; }
+        .wsc-logistics-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+        .wsc-logistics-row:last-child { border-bottom: none; }
+        .wsc-logistics-icon {
+            flex-shrink: 0;
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .wsc-logistics-label {
+            flex-shrink: 0;
+            width: 60px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .wsc-logistics-val {
+            flex: 1;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            text-align: right;
+            line-height: 1.5;
+        }
+        .wsc-logistics-val .session-line {
+            display: block;
+            font-size: 0.95rem;
+        }
+        .wsc-logistics-val .session-label {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+        .wsc-logistics-capacity {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+        }
+        .wsc-cap-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+        .wsc-cap-rect {
+            flex: 1; height: 10px; border-radius: 5px;
+            background: rgba(255,255,255,0.08);
+            transition: background 0.3s;
+        }
+        .wsc-cap-rect.filled {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+        .wsc-cap-text {
+            text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-dim);
+        }
+        .wsc-cap-text span { color: var(--accent); font-weight: 700; }
+        .wsc-logistics-cta {
+            display: flex; justify-content: center; padding: 20px 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media (max-width: 480px) {
+            .wsc-logistics-row { padding: 16px 20px; gap: 12px; }
+            .wsc-logistics-label { width: 50px; font-size: 0.82rem; }
+            .wsc-logistics-val { font-size: 1rem; }
+            .wsc-logistics-capacity { padding: 16px 20px; }
+        }
+
+        /* =============================================
+           INSTRUCTOR
+        ============================================= */
+        .instructor-card {
+            display: flex;
+            gap: 48px;
+            align-items: flex-start;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            margin-top: 48px;
+        }
+
+        .instructor-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 2px solid var(--border-glow);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            overflow: hidden;
+        }
+
+        .instructor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .instructor-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .instructor-role {
+            font-family: 'Courier Prime', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        .instructor-bio {
+            font-size: 15px;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        .instructor-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .instructor-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-num {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* =============================================
+           FLOATING SCROLL ELEMENTS
+        ============================================= */
+        .float-el {
+            position: fixed;
+            pointer-events: none;
+            z-index: 2;
+            will-change: transform;
+        }
+
+        .float-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 1px solid rgba(217,119,87,0.2);
+        }
+
+        .float-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(217,119,87,0.4);
+        }
+
+        .float-square {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(217,119,87,0.15);
+            border-radius: 6px;
+        }
+
+        /* =============================================
+           FINAL CTA
+        ============================================= */
+        .final-cta {
+            text-align: center;
+            padding: 120px 24px;
+            position: relative;
+        }
+
+        .final-cta-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(217,119,87,0.12), transparent);
+            pointer-events: none;
+        }
+
+        .final-cta-title {
+            font-size: clamp(32px, 6vw, 72px);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+
+        .final-cta-sub {
+            font-size: 18px;
+            color: var(--text-dim);
+            margin-bottom: 48px;
+        }
+
+        /* =============================================
+           FAQ
+        ============================================= */
+        .faq-list { margin-top: 48px; display: flex; flex-direction: column; gap: 2px; }
+
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .faq-q {
+            padding: 20px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            color: var(--text);
+            user-select: none;
+        }
+
+        .faq-q:hover { color: var(--accent); }
+
+        .faq-arrow {
+            color: var(--text-muted);
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .faq-item.open .faq-arrow { transform: rotate(45deg); color: var(--accent); }
+
+        .faq-a {
+            padding: 0 24px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, padding 0.35s ease;
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        .faq-item.open .faq-a {
+            max-height: 300px;
+            padding: 0 24px 20px;
+        }
+
+        /* =============================================
+           FOOTER
+        ============================================= */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        footer a { color: var(--accent); text-decoration: none; }
+
+        /* =============================================
+           SCROLL ANIMATIONS
+        ============================================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+
+        /* =============================================
+           RESPONSIVE
+        ============================================= */
+        @media (max-width: 768px) {
+            .problem-grid { grid-template-columns: 1fr; }
+            .for-grid { grid-template-columns: 1fr; }
+            .instructor-card { flex-direction: column; gap: 24px; padding: 28px; }
+            .master-sub { display: none; }
+            .chain-row.left  { padding-left: 16px; }
+            .chain-row.right { padding-right: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .demo-box { padding: 28px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- =============================================
+     FIXED NOISE BACKGROUND
+============================================= -->
+<div id="noise-bg">
+    <div class="radial-glow"></div>
+    <canvas id="noise-canvas"></canvas>
+</div>
+
+<!-- =============================================
+     FLOATING SCROLL ELEMENTS
+============================================= -->
+<div class="float-el float-ring" id="f1" style="top:25vh;left:4vw;"></div>
+<div class="float-el float-square" id="f2" style="top:55vh;right:5vw;"></div>
+<div class="float-el float-dot" id="f3" style="top:70vh;left:8vw;"></div>
+<div class="float-el float-ring" id="f4" style="top:30vh;right:3vw;width:48px;height:48px;"></div>
+<div class="float-el float-dot" id="f5" style="top:80vh;right:10vw;"></div>
+
+<!-- =============================================
+     MAIN PAGE CONTENT
+============================================= -->
+<div class="page-content">
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-inner">
+            <a href="/ai-beginner-workshop" class="logo">AI<span>FLOW</span>TIME</a>
+
+            <nav class="nav-desktop">
+                <a href="#what-you-learn">內容</a>
+                <a href="#about-instructor">講師</a>
+                <a href="#faq-section">常見問題</a>
+                <a href="/ai-beginner-workshop">所有工作坊</a>
+                <a href="/workshop-payment?id=workshop-c" class="nav-cta-btn">立即報名</a>
+            </nav>
+
+            <div class="nav-mobile">
+                <button class="hamburger" aria-label="開啟選單" aria-expanded="false" onclick="toggleMobileMenu()">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="mobile-menu" id="mobileMenu" aria-hidden="true">
+            <a href="#what-you-learn" onclick="closeMobileMenu()">內容</a>
+            <a href="#about-instructor" onclick="closeMobileMenu()">講師</a>
+            <a href="#faq-section" onclick="closeMobileMenu()">常見問題</a>
+            <a href="/ai-beginner-workshop" onclick="closeMobileMenu()">所有工作坊</a>
+            <a href="/workshop-payment?id=workshop-c" class="mob-cta" onclick="closeMobileMenu()">立即報名</a>
+        </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">✦ WORKSHOP C &nbsp;·&nbsp; 視覺升級</div>
+        <h1 class="hero-title">下一級<br><span class="accent">視覺</span></h1>
+        <p class="hero-subtitle-en">NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY</p>
+        <p class="hero-tagline">你不是不會設計。<br><strong>你只是還沒學會用 AI 做決定。</strong></p>
+        <div class="cta-group">
+            <a href="/workshop-payment?id=workshop-c" class="btn-primary">立即預留席位 →</a>
+            <a href="#what-you-learn" class="btn-outline">了解內容</a>
+        </div>
+        <div class="scroll-hint">
+            <span>SCROLL</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- VIDEO SECTION -->
+    <section class="video-section reveal">
+        <div class="section-label" style="text-align:center;margin-bottom:16px;">— 預覽 —</div>
+        <div class="video-wrap" id="video-container">
+            <video src="/workshop-c-assets/ai-video.mp4" autoplay muted loop playsinline></video>
+        </div>
+        <p class="video-caption">工作坊現場示範 — 從構思到成品，一次睇晒</p>
+    </section>
+
+    <!-- IMAGE CHAIN SECTION -->
+    <section class="chain-section">
+        <div class="container">
+            <div class="chain-intro reveal">
+                <div class="section-label">— 你能做到的 —</div>
+                <h2 class="section-title">從生成圖片<br>到<span style="color:var(--accent)">設計視覺</span></h2>
+                <p style="color:var(--text-dim);font-size:16px;max-width:480px;margin:0 auto;">每一張圖都是你品牌的一部分。這是你離開工作坊後的輸出能力。</p>
+            </div>
+        </div>
+
+        <div class="chain-vertical reveal">
+
+            <!-- Card 1 — left -->
+            <div class="chain-row left">
+                <div class="chain-card">
+                    <img src="/workshop-c-assets/Untitled_Ethereal_Butterfly_2026-02-22_17-56.png"
+                         alt="Ethereal Butterfly — AI商業圖像示例"
+                         loading="lazy">
+                    <div class="chain-card-label">品牌視覺 · Midjourney</div>
+                </div>
+            </div>
+
+            <!-- Curve: left card bottom → right card top -->
+            <div class="chain-v-connector">
+                <svg viewBox="0 0 700 80" preserveAspectRatio="none">
+                    <path d="M 180 0 C 180 40, 520 40, 520 80"
+                          stroke="rgba(217,119,87,0.45)" stroke-width="1.5"
+                          fill="none" stroke-dasharray="5 5"/>
+                    <circle cx="180" cy="0"  r="3" fill="rgba(217,119,87,0.6)"/>
+                    <circle cx="520" cy="80" r="3" fill="rgba(217,119,87,0.6)"/>
+                </svg>
+            </div>
+
+            <!-- Card 2 — right -->
+            <div class="chain-row right">
+                <div class="chain-card">
+                    <img src="/workshop-c-assets/Untitled_Floating_Hourglass_2026-02-22_17-56.jpg"
+                         alt="Floating Hourglass — AI商業圖像示例"
+                         loading="lazy">
+                    <div class="chain-card-label">概念視覺 · FloraFauna</div>
+                </div>
+            </div>
+
+            <!-- Curve: right card bottom → left card top -->
+            <div class="chain-v-connector">
+                <svg viewBox="0 0 700 80" preserveAspectRatio="none">
+                    <path d="M 520 0 C 520 40, 180 40, 180 80"
+                          stroke="rgba(217,119,87,0.45)" stroke-width="1.5"
+                          fill="none" stroke-dasharray="5 5"/>
+                    <circle cx="520" cy="0"  r="3" fill="rgba(217,119,87,0.6)"/>
+                    <circle cx="180" cy="80" r="3" fill="rgba(217,119,87,0.6)"/>
+                </svg>
+            </div>
+
+            <!-- Card 3 — left -->
+            <div class="chain-row left">
+                <div class="chain-card">
+                    <img src="/workshop-c-assets/Untitled_Surreal_Chess_Game_2026-02-22_17-56.png"
+                         alt="Surreal Chess — AI商業圖像示例"
+                         loading="lazy">
+                    <div class="chain-card-label">商業素材 · Higgsfield</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PROBLEM SECTION -->
+    <section id="problem">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label">— 問題在哪 —</div>
+                <h2 class="section-title">為什麼你的 AI 圖片<br>總是「差一點」？</h2>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-item reveal reveal-delay-1">
+                    <div class="problem-dot"></div>
+                    <p>風格不統一，每次出圖都像不同人做的</p>
+                </div>
+                <div class="problem-item reveal reveal-delay-2">
+                    <div class="problem-dot"></div>
+                    <p>顏色飄移，跟品牌毫無關係</p>
+                </div>
+                <div class="problem-item reveal reveal-delay-1">
+                    <div class="problem-dot"></div>
+                    <p>一眼就看出是 AI 生成，客戶不買單</p>
+                </div>
+                <div class="problem-item reveal reveal-delay-2">
+                    <div class="problem-dot"></div>
+                    <p>改稿改到懷疑人生，輸出效率極低</p>
+                </div>
+                <div class="problem-item reveal reveal-delay-1">
+                    <div class="problem-dot"></div>
+                    <p>不知道哪個工具適合哪個用途</p>
+                </div>
+                <div class="problem-item reveal reveal-delay-2">
+                    <div class="problem-dot"></div>
+                    <p>有想法但出不到那個感覺</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHIFT SECTION -->
+    <section class="shift-section">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label" style="text-align:center;">— 思維轉換 —</p>
+                <div class="shift-large">
+                    問題不是工具。<br>
+                    是<span class="accent"> 視覺決策能力</span>。
+                </div>
+                <p class="shift-body">
+                    這堂課不教你亂試 prompt。<br>
+                    而是教你如何<strong>定義風格、控制輸出、建立品牌視覺語言</strong>。<br><br>
+                    你生成的每一張圖，都應該是一個決定——不是一個賭注。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHAT YOU LEARN -->
+    <section id="what-you-learn">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label">— 你將掌握 —</div>
+                <h2 class="section-title">離開時，<br>你的輸出不一樣了。</h2>
+            </div>
+            <div class="master-list">
+                <div class="master-item reveal">
+                    <span class="master-num">01</span>
+                    <span class="master-text">控制風格參數，建立視覺一致性</span>
+                    <span class="master-sub">Midjourney Stylization</span>
+                </div>
+                <div class="master-item reveal reveal-delay-1">
+                    <span class="master-num">02</span>
+                    <span class="master-text">定義品牌視覺調性與色彩語言</span>
+                    <span class="master-sub">Brand Visual Language</span>
+                </div>
+                <div class="master-item reveal reveal-delay-2">
+                    <span class="master-num">03</span>
+                    <span class="master-text">用 FloraFauna 快速迭代商業素材</span>
+                    <span class="master-sub">Workflow Automation</span>
+                </div>
+                <div class="master-item reveal reveal-delay-1">
+                    <span class="master-num">04</span>
+                    <span class="master-text">用 Higgsfield 生成品牌短影片</span>
+                    <span class="master-sub">AI Video Generation</span>
+                </div>
+                <div class="master-item reveal reveal-delay-2">
+                    <span class="master-num">05</span>
+                    <span class="master-text">一小時從構想到成品，整套流程</span>
+                    <span class="master-sub">End-to-End Production</span>
+                </div>
+            </div>
+
+            <div class="tools-row reveal" style="margin-top:48px;">
+                <div class="tool-chip"><div class="tool-chip-dot"></div> Midjourney</div>
+                <div class="tool-chip"><div class="tool-chip-dot"></div> FloraFauna</div>
+                <div class="tool-chip"><div class="tool-chip-dot"></div> Higgsfield</div>
+            </div>
+
+            <div class="demo-box reveal" style="margin-top:48px;">
+                <div class="demo-big">帶著你的品牌進來。<br><span style="color:var(--accent)">帶走 3 件即用素材。</span></div>
+                <p class="demo-sub">現場完成 1 個品牌視覺專案示範。這不是理論課。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOR / NOT FOR -->
+    <section>
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label">— 適合對象 —</div>
+                <h2 class="section-title">這堂課適合你嗎？</h2>
+            </div>
+            <div class="for-grid">
+                <div class="for-card for-yes reveal reveal-delay-1">
+                    <div class="for-card-label">✓ &nbsp;FOR YOU IF</div>
+                    <ul class="for-list">
+                        <li>你在經營社群或品牌</li>
+                        <li>你的內容需要視覺一致性</li>
+                        <li>你是創業者或自由工作者</li>
+                        <li>你有想法但不懂如何落地</li>
+                        <li>你每次出圖都不夠滿意</li>
+                    </ul>
+                </div>
+                <div class="for-card for-no reveal reveal-delay-2">
+                    <div class="for-card-label">✕ &nbsp;NOT FOR YOU IF</div>
+                    <ul class="for-list">
+                        <li>你只是想玩玩看 AI</li>
+                        <li>你想要一鍵模板解決一切</li>
+                        <li>你不打算實際應用於品牌</li>
+                        <li>你覺得設計不重要</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOGISTICS -->
+    <section id="register">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label">— 工作坊詳情 —</div>
+                <h2 class="section-title">準備好了嗎？</h2>
+            </div>
+            <div class="wsc-logistics-card reveal">
+                <div class="wsc-logistics-rows" id="wscLogisticsRows">
+                    <div class="wsc-logistics-row">
+                        <div class="wsc-logistics-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="wsc-logistics-label">課時</div>
+                        <div class="wsc-logistics-val" id="wscDuration">載入中...</div>
+                    </div>
+                    <div class="wsc-logistics-row">
+                        <div class="wsc-logistics-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </div>
+                        <div class="wsc-logistics-label">日期</div>
+                        <div class="wsc-logistics-val" id="wscDate">待定</div>
+                    </div>
+                    <div class="wsc-logistics-row">
+                        <div class="wsc-logistics-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="wsc-logistics-label">時間</div>
+                        <div class="wsc-logistics-val" id="wscTime">待定</div>
+                    </div>
+                    <div class="wsc-logistics-row">
+                        <div class="wsc-logistics-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="wsc-logistics-label">費用</div>
+                        <div class="wsc-logistics-val" id="wscPrice">待定</div>
+                    </div>
+                    <div class="wsc-logistics-row">
+                        <div class="wsc-logistics-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <div class="wsc-logistics-label">地點</div>
+                        <div class="wsc-logistics-val" id="wscMode">待定</div>
+                    </div>
+                </div>
+                <div class="wsc-logistics-capacity" id="wscCapacity" style="display:none;"></div>
+                <div class="wsc-logistics-cta">
+                    <a href="/workshop-payment?id=workshop-c" id="ws-cta-link" class="btn-primary" style="width:100%;justify-content:center;">立即報名 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INSTRUCTOR -->
+    <section id="about-instructor">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label">— 關於講師 —</div>
+            </div>
+            <div class="instructor-card reveal">
+                <div class="instructor-avatar">
+                    <img src="/LOGO_transparent_background.png" alt="Jacob" onerror="this.parentElement.textContent='J'">
+                </div>
+                <div>
+                    <div class="instructor-name">Jacob</div>
+                    <div class="instructor-role">AIFLOWTIME 創辦人 · 香港 AI 創作者</div>
+                    <p class="instructor-bio">
+                        Jacob 每日用 AI 創作內容、做圖、拍片，並將整套流程應用於實際商業項目。
+                        他不教課本知識——他教的是他自己每天在用、驗證過的方法。
+                    </p>
+                    <div class="instructor-stats">
+                        <div class="instructor-stat">
+                            <span class="stat-num">34,000+</span>
+                            <span class="stat-label">追蹤者</span>
+                        </div>
+                        <div class="instructor-stat">
+                            <span class="stat-num">Midjourney</span>
+                            <span class="stat-label">品牌合作</span>
+                        </div>
+                        <div class="instructor-stat">
+                            <span class="stat-num">Higgsfield</span>
+                            <span class="stat-label">品牌合作</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq-section">
+        <div class="container">
+            <div class="reveal">
+                <div class="section-label">— 常見問題 —</div>
+                <h2 class="section-title">你可能想問</h2>
+            </div>
+            <div class="faq-list reveal">
+                <div class="faq-item">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        需要有設計背景嗎？
+                        <span class="faq-arrow">+</span>
+                    </div>
+                    <div class="faq-a">完全不需要。這堂課教的是視覺判斷力，不是技術操作。你只需要知道自己的品牌是什麼感覺就夠了。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        我沒有用過 Midjourney，可以嗎？
+                        <span class="faq-arrow">+</span>
+                    </div>
+                    <div class="faq-a">可以。工作坊包含工具入門，你不需要任何先備知識。有 AI 圖像生成基礎的學員可以更快進入進階部分。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        工作坊是實體還是線上？
+                        <span class="faq-arrow">+</span>
+                    </div>
+                    <div class="faq-a">提供實體及線上兩種模式。實體於太子區舉行，確切場地報名後通知。線上學員可全程參與並獲得錄影。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        可以退款嗎？
+                        <span class="faq-arrow">+</span>
+                    </div>
+                    <div class="faq-a">報名後不設退款。建議先參加免費 AI 認知工作坊，了解教學風格後再報名付費課程。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        完成後有支援嗎？
+                        <span class="faq-arrow">+</span>
+                    </div>
+                    <div class="faq-a">會。完成工作坊後可加入學員專屬社群，持續獲得更新、資源及 Jacob 本人的回應。</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="final-cta">
+        <div class="final-cta-bg"></div>
+        <div class="container" style="position:relative;">
+            <div class="reveal">
+                <p class="section-label" style="text-align:center;">— 最後 —</p>
+                <h2 class="final-cta-title">
+                    不要再生成「像 AI 的圖片」。<br>
+                    <span style="color:var(--accent)">生成屬於你的視覺系統。</span>
+                </h2>
+                <p class="final-cta-sub">名額有限。你的品牌值得更好的視覺。</p>
+                <div class="cta-group">
+                    <a href="/workshop-payment?id=workshop-c" id="final-cta-link" class="btn-primary" style="font-size:17px;padding:16px 40px;">立即預留席位 →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>
+            <a href="/ai-beginner-workshop">← 所有工作坊</a> &nbsp;·&nbsp;
+            <a href="https://wa.me/85262880186" target="_blank">WhatsApp 查詢</a> &nbsp;·&nbsp;
+            © 2026 AIFLOWTIME
+        </p>
+    </footer>
+
+</div><!-- end .page-content -->
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+// =============================================
+// NOISE CANVAS (converted from React component)
+// =============================================
+(function() {
+    var canvas = document.getElementById('noise-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    var frame = 0;
+    var animId;
+    var REFRESH = 2;
+    var ALPHA = 18;
+    var SIZE = 1024;
+
+    function resize() {
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+    }
+
+    function drawGrain() {
+        var img = ctx.createImageData(SIZE, SIZE);
+        var d = img.data;
+        for (var i = 0; i < d.length; i += 4) {
+            var v = Math.random() * 255;
+            d[i] = v; d[i+1] = v; d[i+2] = v; d[i+3] = ALPHA;
+        }
+        ctx.putImageData(img, 0, 0);
+    }
+
+    function loop() {
+        if (frame % REFRESH === 0) drawGrain();
+        frame++;
+        animId = requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    loop();
+})();
+
+// =============================================
+// FLOATING SCROLL ELEMENTS
+// =============================================
+(function() {
+    var floaters = [
+        { el: document.getElementById('f1'), speedY: -0.08, speedR: 0.03 },
+        { el: document.getElementById('f2'), speedY: 0.06,  speedR: -0.04 },
+        { el: document.getElementById('f3'), speedY: -0.12, speedR: 0.05 },
+        { el: document.getElementById('f4'), speedY: 0.10,  speedR: 0.06 },
+        { el: document.getElementById('f5'), speedY: -0.07, speedR: -0.03 }
+    ];
+
+    var lastScroll = 0;
+    var rotations = [0, 0, 0, 0, 0];
+
+    window.addEventListener('scroll', function() {
+        var scrollY = window.scrollY;
+        var delta = scrollY - lastScroll;
+        lastScroll = scrollY;
+
+        floaters.forEach(function(f, i) {
+            if (!f.el) return;
+            rotations[i] += delta * f.speedR;
+            var translateY = scrollY * f.speedY;
+            f.el.style.transform = 'translateY(' + translateY + 'px) rotate(' + rotations[i] + 'deg)';
+        });
+    }, { passive: true });
+})();
+
+// =============================================
+// SCROLL REVEAL
+// =============================================
+(function() {
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                observer.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(function(el) {
+        observer.observe(el);
+    });
+})();
+
+// =============================================
+// FAQ TOGGLE
+// =============================================
+// =============================================
+// MOBILE MENU
+// =============================================
+function toggleMobileMenu() {
+    var btn = document.querySelector('.hamburger');
+    var menu = document.getElementById('mobileMenu');
+    var isOpen = menu.classList.contains('active');
+    btn.classList.toggle('active');
+    menu.classList.toggle('active');
+    btn.setAttribute('aria-expanded', !isOpen);
+    menu.setAttribute('aria-hidden', isOpen);
+}
+
+function closeMobileMenu() {
+    var btn = document.querySelector('.hamburger');
+    var menu = document.getElementById('mobileMenu');
+    btn.classList.remove('active');
+    menu.classList.remove('active');
+    btn.setAttribute('aria-expanded', 'false');
+    menu.setAttribute('aria-hidden', 'true');
+}
+
+// =============================================
+// FAQ TOGGLE
+// =============================================
+function toggleFaq(el) {
+    var item = el.closest('.faq-item');
+    var isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(function(i) { i.classList.remove('open'); });
+    if (!isOpen) item.classList.add('open');
+}
+
+// =============================================
+// FIREBASE — Load Workshop C data (real-time)
+// =============================================
+(function() {
+    try {
+        var app = firebase.apps.length
+            ? firebase.apps[0]
+            : firebase.initializeApp({
+                apiKey: "AIzaSyD_Z4HCZF1HBv3eqBdJbm_Cl-aZH7vmn4A",
+                authDomain: "aiflowtime-hk.firebaseapp.com",
+                projectId: "aiflowtime-hk"
+            });
+
+        var db = firebase.firestore(app);
+
+        db.collection('workshops').doc('workshop-c').onSnapshot(function(snap) {
+            if (!snap.exists) return;
+            var d = snap.data();
+
+            // Duration
+            document.getElementById('wscDuration').textContent = d.duration || '待定';
+
+            // Multi-session date/time
+            var dateEl = document.getElementById('wscDate');
+            var timeEl = document.getElementById('wscTime');
+
+            if (d.courseType === 'continuous' && d.rounds && d.rounds.length) {
+                var dateHtml = '', timeHtml = '';
+                var cSortedRounds = d.rounds.slice().sort(function(a, b) {
+                    var aDates = (a.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
+                    var bDates = (b.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
+                    var aMin = aDates[0] || '', bMin = bDates[0] || '';
+                    return aMin > bMin ? -1 : aMin < bMin ? 1 : 0;
+                });
+                cSortedRounds.forEach(function(round) {
+                    dateHtml += '<span class="session-line" style="font-weight:700;opacity:.7;font-size:13px;">' + (round.label || '') + '</span>';
+                    timeHtml += '<span class="session-line">&nbsp;</span>';
+                    (round.sessions || []).filter(function(s) { return s.visible !== false; }).forEach(function(s) {
+                        var lbl = s.label ? '<span class="session-label">' + s.label + '</span> ' : '';
+                        dateHtml += '<span class="session-line">' + lbl + (s.date || '待定') + '</span>';
+                        timeHtml += '<span class="session-line">' + lbl + (s.time || '待定') + '</span>';
+                    });
+                });
+                dateEl.innerHTML = dateHtml;
+                timeEl.innerHTML = timeHtml;
+            } else if (d.sessions && d.sessions.length) {
+                var sorted = d.sessions.filter(function(s) { return s.visible !== false; }).slice().sort(function(a, b) {
+                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    if (da !== db2) return da > db2 ? -1 : 1;
+                    var ta = (a.time || '').replace(/[^0-9:]/g, '');
+                    var tb = (b.time || '').replace(/[^0-9:]/g, '');
+                    return ta > tb ? -1 : ta < tb ? 1 : 0;
+                });
+                var dateHtml = '', timeHtml = '';
+                for (var i = 0; i < sorted.length; i++) {
+                    var s = sorted[i];
+                    var lbl = s.label ? '<span class="session-label">' + s.label + '</span> ' : '';
+                    dateHtml += '<span class="session-line">' + lbl + (s.date || '待定') + '</span>';
+                    timeHtml += '<span class="session-line">' + lbl + (s.time || '待定') + '</span>';
+                }
+                dateEl.innerHTML = dateHtml;
+                timeEl.innerHTML = timeHtml;
+            } else {
+                dateEl.textContent = d.date || '即將公佈';
+                timeEl.textContent = d.time || '待定';
+            }
+
+            // Price
+            var priceEl = document.getElementById('wscPrice');
+            if (d.price) priceEl.textContent = d.price;
+            else if (d.priceHkd) priceEl.textContent = 'HKD ' + d.priceHkd;
+            else priceEl.textContent = '待定';
+
+            // Mode / Location
+            var modeEl = document.getElementById('wscMode');
+            var modeLabel = '';
+            if (d.mode === 'online') modeLabel = '💻 線上';
+            else if (d.mode === 'both') modeLabel = '🏢 實體 + 💻 線上';
+            else modeLabel = '🏢 實體';
+            if (d.location && d.mode !== 'online') modeLabel += '　' + d.location;
+            modeEl.textContent = modeLabel;
+
+            // Capacity bar
+            var cap = d.capacity || 0;
+            var enrolled = d.enrolled || 0;
+            var capContainer = document.getElementById('wscCapacity');
+            if (cap > 0) {
+                var totalRects = cap <= 10 ? cap : 10;
+                var seatsPerRect = cap <= 10 ? 1 : cap / 10;
+                var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
+                var html = '<div class="wsc-cap-bar">';
+                for (var j = 0; j < totalRects; j++) {
+                    html += '<div class="wsc-cap-rect' + (j < filledRects ? ' filled' : '') + '"></div>';
+                }
+                html += '</div>';
+                html += '<div class="wsc-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
+                capContainer.innerHTML = html;
+                capContainer.style.display = '';
+            } else {
+                capContainer.style.display = 'none';
+            }
+
+            // CTA links
+            var rawCta = (d.ctaLink || '').trim();
+            var isSelf = !rawCta || rawCta === '#' || rawCta === '#waitlist'
+                || rawCta === '/workshop-c'
+                || rawCta.indexOf('workshop-c.html') !== -1
+                || rawCta.indexOf('aiflowtime-hk.web.app/workshop-c') !== -1;
+            var ctaLink = isSelf ? '/workshop-payment?id=workshop-c' : rawCta;
+            document.getElementById('ws-cta-link').href = ctaLink;
+            document.getElementById('final-cta-link').href = ctaLink;
+
+        }, function(err) {
+            console.warn('Workshop C snapshot error:', err);
+        });
+
+    } catch(e) {
+        console.error('Firebase init error:', e);
+    }
+})();
+</script>
+
+</body>
+</html>

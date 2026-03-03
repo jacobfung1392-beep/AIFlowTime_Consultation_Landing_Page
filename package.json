@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "firebase-tools": "^15.8.0"
+  },
+  "devDependencies": {
+    "firebase-admin": "^13.7.0",
+    "gifsicle": "^7.0.1"
+  }
+}

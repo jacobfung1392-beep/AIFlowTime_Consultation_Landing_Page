@@ -1,0 +1,17 @@
+{
+  "name": "AIFlowTime",
+  "short_name": "AIFlowTime",
+  "description": "AIFlowTime 的所有連結",
+  "start_url": "/linktree.html",
+  "display": "standalone",
+  "background_color": "#020111",
+  "theme_color": "#020111",
+  "icons": [
+    {
+      "src": "/Landing-page-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

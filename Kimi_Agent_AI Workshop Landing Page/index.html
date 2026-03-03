@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Workshop 0 — Change Your Mind | AIFLOWTIME</title>
+    <meta name="description" content="2.5小時AI體驗工作坊，零基礎也能學會。學會問對問題，讓AI幫你做對事。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #111118;
+            --bg-card-hover: #161622;
+            --border: rgba(255,255,255,0.07);
+            --border-glow: rgba(217,119,87,0.35);
+            --accent: #D97757;
+            --accent-dim: rgba(217,119,87,0.15);
+            --accent-glow: rgba(217,119,87,0.4);
+            --text: #f0ede8;
+            --text-dim: rgba(240,237,232,0.55);
+            --text-muted: rgba(240,237,232,0.3);
+            --white: #ffffff;
+            --radius: 16px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        /* =============================================
+           BACKGROUND "0" ANIMATION CANVAS
+        ============================================= */
+        #bg-zero-wrap {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+        }
+        #bg-zero-canvas {
+            display: block;
+            width: 100%; height: 100%;
+            opacity: 0.3;
+        }
+
+        .page-content { position: relative; z-index: 1; }
+
+        /* =============================================
+           HEADER / NAV
+        ============================================= */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 72rem;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .logo {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+        .logo:hover { color: var(--accent); }
+        .logo span { color: var(--accent); }
+
+        .nav-desktop { display: none; }
+        .nav-desktop a {
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .nav-desktop a:hover { color: var(--accent); }
+
+        .nav-desktop .nav-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 42px;
+            padding: 0 22px;
+            margin-left: 32px;
+            background: var(--accent);
+            color: #fff !important;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .nav-desktop .nav-cta-btn:hover { opacity: 0.85; }
+
+        .nav-mobile { display: flex; align-items: center; }
+
+        .hamburger {
+            width: 44px; height: 44px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 6px;
+            background: none; border: none; cursor: pointer;
+            padding: 10px; border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .hamburger:hover { background: var(--accent-dim); }
+        .hamburger .bar {
+            display: block; width: 24px; height: 2px;
+            background: var(--text); transition: all 0.3s ease; border-radius: 2px;
+        }
+        .hamburger.active .bar:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.active .bar:nth-child(2) { opacity: 0; }
+        .hamburger.active .bar:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+        .mobile-menu {
+            position: absolute;
+            top: 100%; left: 0; right: 0;
+            background: rgba(10,10,15,0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 24px;
+            transform: translateY(-100%);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+        .mobile-menu.active { transform: translateY(0); opacity: 1; visibility: visible; }
+        .mobile-menu a {
+            display: flex; align-items: center;
+            color: var(--text); text-decoration: none;
+            padding: 16px 0; font-size: 18px; font-weight: 700;
+            border-bottom: 1px solid var(--border); min-height: 44px;
+        }
+        .mobile-menu a:last-child { border-bottom: none; }
+        .mobile-menu a:hover { color: var(--accent); }
+        .mobile-menu .mob-cta {
+            margin-top: 16px; width: 100%; justify-content: center;
+            background: var(--accent); color: #fff !important;
+            border-radius: 10px; font-weight: 700; padding: 14px 0; border-bottom: none;
+        }
+
+        @media (min-width: 769px) {
+            .nav-desktop { display: flex; align-items: center; }
+            .nav-mobile { display: none; }
+        }
+
+        /* =============================================
+           GENERAL
+        ============================================= */
+        section { padding: 100px 24px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .section-label {
+            font-family: 'Courier Prime', monospace;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .section-desc {
+            font-size: 17px;
+            color: var(--text-dim);
+            max-width: 600px;
+            font-weight: 300;
+        }
+
+        /* =============================================
+           BUTTONS
+        ============================================= */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--accent-glow); }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* =============================================
+           SCROLL REVEAL
+        ============================================= */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+        .reveal-delay-5 { transition-delay: 0.5s; }
+
+        @media (max-width: 768px), (pointer: coarse) {
+            .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+        }
+
+        /* =============================================
+           HERO
+        ============================================= */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-glow);
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-size: 12px;
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.12em;
+            padding: 6px 16px;
+            border-radius: 100px;
+            margin-bottom: 32px;
+        }
+
+        .hero-title {
+            font-size: clamp(36px, 7vw, 72px);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+        .hero-title .accent { color: var(--accent); }
+
+        .hero-subtitle-en {
+            font-family: 'Courier Prime', monospace;
+            font-size: clamp(13px, 1.8vw, 16px);
+            color: var(--text-dim);
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+        }
+
+        .hero-tagline {
+            font-size: clamp(16px, 2.5vw, 22px);
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 48px;
+            font-weight: 300;
+        }
+        .hero-tagline strong { color: var(--text); font-weight: 500; }
+
+        .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+        }
+        .scroll-hint-pill {
+            width: 24px; height: 40px;
+            border: 2px solid var(--text-muted);
+            border-radius: 12px;
+            display: flex; justify-content: center; padding-top: 8px;
+        }
+        .scroll-hint-dot {
+            width: 4px; height: 8px;
+            background: var(--accent);
+            border-radius: 2px;
+            animation: scrollBounce 1.5s ease-in-out infinite;
+        }
+        @keyframes scrollBounce { 0%, 100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(10px); opacity: 0.3; } }
+        .scroll-hint span { font-size: 12px; font-family: 'Courier Prime', monospace; letter-spacing: 0.1em; }
+
+        /* =============================================
+           CARDS
+        ============================================= */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .card:hover { border-color: var(--border-glow); transform: translateY(-4px); }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+        .card-number {
+            font-family: 'Courier Prime', monospace;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .card-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: var(--accent-dim);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .card p { color: var(--text-dim); font-size: 15px; line-height: 1.6; }
+
+        /* =============================================
+           TRANSFORMATION CARDS
+        ============================================= */
+        .tf-card { padding: 0; overflow: hidden; }
+        .tf-card-title {
+            text-align: center;
+            padding: 20px 24px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .tf-card-body { padding: 20px 28px 28px; }
+        .tf-before, .tf-after { padding: 12px 0; }
+        .tf-label {
+            font-family: 'Courier Prime', monospace;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .tf-before .tf-label { color: var(--text-muted); }
+        .tf-after .tf-label { color: var(--accent); }
+        .tf-divider { height: 1px; background: var(--border-glow); margin: 4px 0; }
+        .tf-before p, .tf-after p { font-size: 16px; line-height: 1.7; }
+
+        /* =============================================
+           AUDIENCE
+        ============================================= */
+        .audience-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+        .audience-item.yes { background: var(--bg-card); border: 1px solid var(--border-glow); }
+        .audience-item.no { background: rgba(255,255,255,0.02); border: 1px solid var(--border); }
+        .audience-icon { flex-shrink: 0; margin-top: 2px; }
+        .audience-item.yes .audience-icon { color: var(--accent); }
+        .audience-item.no .audience-icon { color: var(--text-muted); }
+        .audience-item p { font-size: 16px; }
+        .audience-item.no p { color: var(--text-dim); }
+
+        .audience-divider {
+            margin: 40px 0;
+            border: none;
+            border-top: 1px solid var(--border);
+        }
+
+        .audience-sub-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* =============================================
+           LOGISTICS
+        ============================================= */
+        .logistics-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .logistics-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logistics-row:last-child { border-bottom: none; }
+        .logistics-icon {
+            flex-shrink: 0;
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .logistics-label {
+            flex-shrink: 0;
+            width: 60px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.05em;
+        }
+        .logistics-value {
+            flex: 1;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: right;
+        }
+        .logistics-capacity {
+            padding: 20px 28px;
+            border-top: 1px solid var(--border);
+        }
+        .ws0-cap-bar { display: flex; gap: 6px; margin-bottom: 10px; }
+        .ws0-cap-rect {
+            flex: 1; height: 10px; border-radius: 5px;
+            background: rgba(255,255,255,0.08); transition: background 0.3s;
+        }
+        .ws0-cap-rect.filled { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+        .ws0-cap-text { text-align: center; font-size: 14px; font-weight: 600; color: var(--text-dim); }
+        .ws0-cap-text span { color: var(--accent); font-weight: 700; }
+
+        @media (max-width: 480px) {
+            .logistics-row { padding: 16px 20px; gap: 12px; }
+            .logistics-label { width: 50px; font-size: 12px; }
+            .logistics-value { font-size: 15px; }
+            .logistics-capacity { padding: 16px 20px; }
+        }
+
+        /* =============================================
+           FOOTER
+        ============================================= */
+        footer {
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        footer p { font-size: 13px; color: var(--text-muted); font-family: 'Courier Prime', monospace; }
+
+        /* =============================================
+           REDUCED MOTION
+        ============================================= */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .reveal { opacity: 1; transform: none; }
+        }
+
+        /* =============================================
+           MOBILE: sticky nav, no backdrop-filter
+        ============================================= */
+        @media (max-width: 768px), (pointer: coarse) {
+            header {
+                position: -webkit-sticky !important;
+                position: sticky !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: var(--bg) !important;
+            }
+            .hero { padding-top: 80px; min-height: calc(100vh - 60px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background "0" animation -->
+    <div id="bg-zero-wrap"><canvas id="bg-zero-canvas"></canvas></div>
+
+    <div class="page-content">
+        <!-- HEADER -->
+        <header>
+            <div class="header-inner">
+                <a href="/linktree" class="logo">AI<span>FLOW</span>TIME</a>
+                <nav class="nav-desktop">
+                    <a href="#transformation">轉變</a>
+                    <a href="#experience">內容</a>
+                    <a href="#logistics">資訊</a>
+                    <a href="/ai-beginner-workshop">所有工作坊</a>
+                    <a href="/workshop-payment?id=workshop-0" class="nav-cta-btn">立即報名</a>
+                </nav>
+                <div class="nav-mobile">
+                    <button class="hamburger" aria-label="開啟選單" onclick="this.classList.toggle('active');document.getElementById('mobileMenu').classList.toggle('active');">
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </button>
+                </div>
+            </div>
+            <nav class="mobile-menu" id="mobileMenu">
+                <a href="#transformation" onclick="closeMobileMenu()">轉變</a>
+                <a href="#experience" onclick="closeMobileMenu()">內容</a>
+                <a href="#logistics" onclick="closeMobileMenu()">資訊</a>
+                <a href="/ai-beginner-workshop" onclick="closeMobileMenu()">所有工作坊</a>
+                <a href="/workshop-payment?id=workshop-0" class="mob-cta">立即報名 →</a>
+            </nav>
+        </header>
+
+        <!-- HERO -->
+        <section class="hero" id="hero">
+            <div class="hero-badge">WORKSHOP 0 — CHANGE YOUR MIND</div>
+            <h1 class="hero-title">
+                定義問題的深度，<br>決定了 AI 解決問題的<span class="accent">高度</span>。
+            </h1>
+            <p class="hero-subtitle-en">2.5-HOUR AI EXPERIENCE WORKSHOP</p>
+            <p class="hero-tagline">
+                <strong>零基礎</strong> 也能學會 · 即場見效 · 帶走可用的方法
+            </p>
+            <div class="cta-group">
+                <a href="/workshop-payment?id=workshop-0" class="btn-primary">我要報名 →</a>
+                <a href="#experience" class="btn-outline">了解更多</a>
+            </div>
+            <div class="scroll-hint">
+                <div class="scroll-hint-pill"><div class="scroll-hint-dot"></div></div>
+                <span>SCROLL</span>
+            </div>
+        </section>
+
+        <!-- TRANSFORMATION -->
+        <section id="transformation">
+            <div class="container">
+                <div class="reveal" style="text-align:center; margin-bottom:48px;">
+                    <p class="section-label">TRANSFORMATION</p>
+                    <h2 class="section-title"><span style="color:var(--accent);">2.5 小時</span>，重新理解 AI 能為你做什麼</h2>
+                    <p class="section-desc" style="margin:12px auto 0;">看看這堂課如何改變你與 AI 的互動方式</p>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card tf-card reveal reveal-delay-1">
+                        <p class="tf-card-title">精準表達</p>
+                        <div class="tf-card-body">
+                            <div class="tf-before">
+                                <p class="tf-label">BEFORE</p>
+                                <p>AI 好像什麼都會，但每次用起來都離自己的需求很遠</p>
+                            </div>
+                            <div class="tf-divider"></div>
+                            <div class="tf-after">
+                                <p class="tf-label">AFTER</p>
+                                <p>你學會了用清晰的指令讓 AI 準確理解你要什麼，不再只是碰運氣</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card tf-card reveal reveal-delay-2">
+                        <p class="tf-card-title">先問 AI</p>
+                        <div class="tf-card-body">
+                            <div class="tf-before">
+                                <p class="tf-label">BEFORE</p>
+                                <p>遇到問題還是習慣自己硬做，覺得 AI 不穩定、不可靠</p>
+                            </div>
+                            <div class="tf-divider"></div>
+                            <div class="tf-after">
+                                <p class="tf-label">AFTER</p>
+                                <p>下次遇到複雜任務，你會自然地想到：「我可以先問 AI」</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card tf-card reveal reveal-delay-3">
+                        <p class="tf-card-title">核心邏輯</p>
+                        <div class="tf-card-body">
+                            <div class="tf-before">
+                                <p class="tf-label">BEFORE</p>
+                                <p>AI 工具多到眼花撩亂，不知道該學哪一個</p>
+                            </div>
+                            <div class="tf-divider"></div>
+                            <div class="tf-after">
+                                <p class="tf-label">AFTER</p>
+                                <p>你理解了跟 AI 溝通的核心邏輯——不管工具怎麼換，這套方法都適用</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUDIENCE -->
+        <section id="audience">
+            <div class="container" style="max-width:720px;">
+                <div class="reveal" style="text-align:center; margin-bottom:48px;">
+                    <p class="section-label">WHO IS THIS FOR</p>
+                    <h2 class="section-title">這堂課適合誰？</h2>
+                </div>
+
+                <div class="reveal reveal-delay-1">
+                    <div class="audience-item yes">
+                        <div class="audience-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <p>從未用過 AI，想試但不知從何開始</p>
+                    </div>
+                    <div class="audience-item yes">
+                        <div class="audience-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <p>用過一兩次，覺得 AI 回答很普通</p>
+                    </div>
+                    <div class="audience-item yes">
+                        <div class="audience-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <p>想知道為什麼別人用 AI 這麼厲害，自己卻做不到</p>
+                    </div>
+                </div>
+
+                <hr class="audience-divider">
+
+                <div class="reveal reveal-delay-2">
+                    <p class="audience-sub-title">這堂課不適合誰？</p>
+                    <div class="audience-item no">
+                        <div class="audience-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </div>
+                        <p>已經每天用 ChatGPT 工作的人（<span style="color:var(--text-muted);">進階工作坊更適合你</span>）</p>
+                    </div>
+                    <div class="audience-item no">
+                        <div class="audience-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </div>
+                        <p>想學寫程式或開發 AI 產品的人</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXPERIENCE / BENEFITS -->
+        <section id="experience">
+            <div class="container">
+                <div class="reveal" style="text-align:center; margin-bottom:48px;">
+                    <p class="section-label">WHAT YOU'LL EXPERIENCE</p>
+                    <h2 class="section-title">在這 2.5 小時，你會經歷什麼？</h2>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card reveal reveal-delay-1">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+                        </div>
+                        <p class="card-number">01</p>
+                        <h3>AI 是一面鏡子</h3>
+                        <p>你會明白為什麼同一個 AI，有人用得好、有人用得差</p>
+                    </div>
+
+                    <div class="card reveal reveal-delay-2">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </div>
+                        <p class="card-number">02</p>
+                        <h3>即場寫問句挑戰</h3>
+                        <p>開場寫一個，學完再寫一個，自己比較分別</p>
+                    </div>
+
+                    <div class="card reveal reveal-delay-3">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                        </div>
+                        <p class="card-number">03</p>
+                        <h3>拆解真實高手的問句</h3>
+                        <p>用真實案例學會結構，不靠死記硬背</p>
+                    </div>
+
+                    <div class="card reveal reveal-delay-4">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        </div>
+                        <p class="card-number">04</p>
+                        <h3>3 個讓 AI 即刻變聰明的技巧</h3>
+                        <p>簡單、實用、課後馬上能用</p>
+                    </div>
+
+                    <div class="card reveal reveal-delay-5">
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <p class="card-number">05</p>
+                        <h3>帶走問句速查表</h3>
+                        <p>一頁紙，課後隨時翻閱</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOGISTICS -->
+        <section id="logistics">
+            <div class="container" style="max-width:640px;">
+                <div class="reveal" style="text-align:center; margin-bottom:48px;">
+                    <p class="section-label">WORKSHOP INFO</p>
+                    <h2 class="section-title">工作坊資訊</h2>
+                </div>
+
+                <div class="logistics-card reveal reveal-delay-1" id="logisticsCard">
+                    <div id="logisticsRows">
+                        <div class="logistics-row">
+                            <div class="logistics-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="logistics-label">課時</div>
+                            <div class="logistics-value" id="lDuration">載入中...</div>
+                        </div>
+                        <div class="logistics-row">
+                            <div class="logistics-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </div>
+                            <div class="logistics-label">日期</div>
+                            <div class="logistics-value" id="lDate">待定</div>
+                        </div>
+                        <div class="logistics-row">
+                            <div class="logistics-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div class="logistics-label">時間</div>
+                            <div class="logistics-value" id="lTime">待定</div>
+                        </div>
+                        <div class="logistics-row">
+                            <div class="logistics-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                            <div class="logistics-label">費用</div>
+                            <div class="logistics-value" id="lPrice">待定</div>
+                        </div>
+                    </div>
+                    <div class="logistics-capacity" id="logisticsCapacity"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section id="register" style="padding-bottom:120px;">
+            <div class="container" style="max-width:640px; text-align:center;">
+                <div class="reveal">
+                    <p class="section-label">READY?</p>
+                    <h2 class="section-title">準備好讓 AI 幫你工作了嗎？</h2>
+                    <p class="section-desc" style="margin:0 auto 40px;">2.5 小時，改變你對 AI 的看法</p>
+                    <a href="/workshop-payment?id=workshop-0" class="btn-primary" style="font-size:17px; padding:16px 40px;">我要報名 →</a>
+                    <div style="display:flex; gap:24px; justify-content:center; flex-wrap:wrap; margin-top:32px;">
+                        <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span style="font-size:14px;">零基礎也能學會</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            <span style="font-size:14px;">小班教學，確保學懂</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <p>&copy; 2026 AIFLOWTIME. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- =============================================
+         SCRIPTS
+    ============================================= -->
+    <script>
+    function closeMobileMenu() {
+        document.querySelector('.hamburger').classList.remove('active');
+        document.getElementById('mobileMenu').classList.remove('active');
+    }
+
+    // Scroll reveal
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                observer.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+            var t = document.querySelector(this.getAttribute('href'));
+            if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+    });
+    </script>
+
+    <!-- Firebase SDK (compat) for real-time workshop data -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+    (function() {
+        var script = document.createElement('script');
+        script.src = '/__/firebase/init.js';
+        script.onload = function() { loadWorkshop0Data(); };
+        script.onerror = function() {
+            if (!firebase.apps.length) {
+                firebase.initializeApp({ projectId: 'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com' });
+            }
+            loadWorkshop0Data();
+        };
+        document.head.appendChild(script);
+
+        function loadWorkshop0Data() {
+            var db = firebase.firestore();
+            db.collection('workshops').doc('workshop-0').onSnapshot(function(doc) {
+                if (!doc.exists) return;
+                var d = doc.data();
+
+                document.getElementById('lDuration').textContent = d.duration || '待定';
+                document.getElementById('lDate').textContent = d.date || '待定';
+                document.getElementById('lTime').textContent = d.time || '待定';
+                document.getElementById('lPrice').textContent = d.price || '待定';
+
+                var cap = d.capacity || 0;
+                var enrolled = d.enrolled || 0;
+                var container = document.getElementById('logisticsCapacity');
+                if (cap > 0) {
+                    var totalRects = cap <= 10 ? cap : 10;
+                    var seatsPerRect = cap <= 10 ? 1 : cap / 10;
+                    var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
+                    var html = '<div class="ws0-cap-bar">';
+                    for (var i = 0; i < totalRects; i++) {
+                        html += '<div class="ws0-cap-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
+                    }
+                    html += '</div>';
+                    html += '<div class="ws0-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
+                    container.innerHTML = html;
+                    container.style.display = '';
+                } else {
+                    container.style.display = 'none';
+                }
+            }, function(err) {
+                console.warn('Workshop 0 snapshot error:', err);
+            });
+        }
+    })();
+    </script>
+
+    <!-- Background "0" Glassmorphism Animation -->
+    <script>
+    (function() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const CONFIG = {
+            tileSize: 12,
+            gap: 2,
+            layerDepth: 20,
+            charScale: 0.8,
+            colors: {
+                front: { r: 224, g: 122, b: 95 },
+                back:  { r: 120, g: 120, b: 130 }
+            },
+            animation: {
+                jitterRange: 1.5,
+                jitterSpeed: 0.002,
+                pulseSpeed: 0.003
+            },
+            rotation: { x: -35, y: 23, z: 0 },
+            models: ['0']
+        };
+
+        const canvas = document.getElementById('bg-zero-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        let tiles = [];
+        let time = 0;
+
+        class Tile {
+            constructor(localX, localY, z, cx, cy, w, h, isBackLayer) {
+                this.localX = localX;
+                this.localY = localY;
+                this.originZ = z;
+                this.cx = cx;
+                this.cy = cy;
+                this.w = w;
+                this.h = h;
+                this.isBackLayer = isBackLayer;
+                this.baseAlpha = 0.15 + Math.random() * 0.35;
+                this.pulseOffset = Math.random() * Math.PI * 2;
+                this.jitterPhaseX = Math.random() * Math.PI * 2;
+                this.jitterPhaseY = Math.random() * Math.PI * 2;
+                this.screenX = 0;
+                this.screenY = 0;
+                this.depth = 0;
+                this.currentAlpha = 1;
+            }
+
+            update(timestamp) {
+                const jx = Math.sin(time * CONFIG.animation.jitterSpeed + this.jitterPhaseX) * CONFIG.animation.jitterRange;
+                const jy = Math.cos(time * CONFIG.animation.jitterSpeed + this.jitterPhaseY) * CONFIG.animation.jitterRange;
+                let x = this.localX + jx;
+                let y = this.localY + jy;
+                let z = this.originZ;
+                const radX = CONFIG.rotation.x * (Math.PI / 180);
+                const radY = CONFIG.rotation.y * (Math.PI / 180);
+                const radZ = CONFIG.rotation.z * (Math.PI / 180);
+                let y1 = y * Math.cos(radX) - z * Math.sin(radX);
+                let z1 = y * Math.sin(radX) + z * Math.cos(radX);
+                let x2 = x * Math.cos(radY) + z1 * Math.sin(radY);
+                let z2 = -x * Math.sin(radY) + z1 * Math.cos(radY);
+                let x3 = x2 * Math.cos(radZ) - y1 * Math.sin(radZ);
+                let y3 = x2 * Math.sin(radZ) + y1 * Math.cos(radZ);
+                this.screenX = x3 + this.cx;
+                this.screenY = y3 + this.cy;
+                this.depth = z2;
+                const pulse = Math.sin(time * CONFIG.animation.pulseSpeed + this.pulseOffset);
+                this.currentAlpha = Math.max(0, Math.min(1, this.baseAlpha + (pulse * 0.1)));
+            }
+
+            draw(ctx) {
+                const c = this.isBackLayer ? CONFIG.colors.back : CONFIG.colors.front;
+                let alpha = this.currentAlpha;
+                if (this.isBackLayer) alpha *= 0.6;
+                ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
+                ctx.beginPath();
+                ctx.rect(this.screenX, this.screenY, this.w, this.h);
+                ctx.fill();
+                const borderAlpha = this.isBackLayer ? 0.1 : 0.3;
+                ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${borderAlpha})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        function generateScene() {
+            tiles = [];
+            const dpr = window.devicePixelRatio || 1;
+            const screenW = canvas.width / dpr;
+            const screenH = canvas.height / dpr;
+            const isDesktop = screenW >= 768;
+            const charBaseW = isDesktop ? 600 : Math.min(screenW * 0.85, 420);
+            const charBaseH = isDesktop ? 900 : Math.min(screenH * 0.65, 630);
+            const cx = screenW / 2;
+            const cy = screenH / 2;
+            createTilesForCharacter('0', cx, cy, charBaseW, charBaseH);
+        }
+
+        function createTilesForCharacter(char, cx, cy, w, h) {
+            const buffer = document.createElement('canvas');
+            buffer.width = w;
+            buffer.height = h;
+            const bctx = buffer.getContext('2d');
+            bctx.fillStyle = '#000';
+            bctx.font = `900 ${h * 0.8}px Arial, Helvetica, sans-serif`;
+            bctx.textAlign = 'center';
+            bctx.textBaseline = 'middle';
+            bctx.fillText(char, w / 2, h / 2);
+            const idata = bctx.getImageData(0, 0, w, h);
+            const data = idata.data;
+            const step = CONFIG.tileSize;
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
+                    const index = (y * w + x) * 4 + 3;
+                    if (data[index] > 50) {
+                        const localX = x - w / 2;
+                        const localY = y - h / 2;
+                        const tileW = CONFIG.tileSize - CONFIG.gap;
+                        const tileH = CONFIG.tileSize - CONFIG.gap;
+                        const jX = (Math.random() - 0.5) * 4;
+                        const jY = (Math.random() - 0.5) * 4;
+                        tiles.push(new Tile(localX + jX, localY + jY, CONFIG.layerDepth / 2, cx, cy, tileW, tileH, false));
+                        tiles.push(new Tile(localX + jX, localY + jY, -CONFIG.layerDepth / 2, cx, cy, tileW, tileH, true));
+                    }
+                }
+            }
+        }
+
+        var lastInitWidth = 0;
+
+        function init(force) {
+            const wrap = document.getElementById('bg-zero-wrap');
+            const screenW = wrap ? wrap.clientWidth : window.innerWidth;
+            const screenH = wrap ? wrap.clientHeight : window.innerHeight;
+            if (!force && Math.abs(screenW - lastInitWidth) < 5) return;
+            lastInitWidth = screenW;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = screenW * dpr;
+            canvas.height = screenH * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            generateScene();
+        }
+
+        function loop(timestamp) {
+            time = timestamp;
+            const dpr = window.devicePixelRatio || 1;
+            const screenW = canvas.width / dpr;
+            const screenH = canvas.height / dpr;
+            ctx.clearRect(0, 0, screenW + 1, screenH + 1);
+            tiles.forEach(tile => tile.update(timestamp));
+            tiles.sort((a, b) => a.depth - b.depth);
+            tiles.forEach(tile => tile.draw(ctx));
+            requestAnimationFrame(loop);
+        }
+
+        init(true);
+        requestAnimationFrame(loop);
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => init(false), 250);
+        });
+    })();
+
+    // Lock pinch/double-tap zoom on mobile browsers
+    (function lockPageZoom() {
+        var lastTouchEnd = 0;
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+        document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+        document.addEventListener('gestureend', function(e) { e.preventDefault(); }, { passive: false });
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches && e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+        document.addEventListener('touchend', function(e) {
+            var now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年底實測：真正提升效率的5個AI核心工具與工作流 | AIFlowTime</title>
+    <meta name="description" content="深度分析2025年最實用的AI工具與工作流程，包括Perplexity、ChatGPT、Notion AI、Gemini和NotebookLM。">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@700&family=Antic&display=swap" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    
+    <style>
+        :root {
+            --brand-blue: #2563EB;
+            --brand-orange: #D97706;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-light: #F8F9FA;
+            --border-light: #E5E7EB;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.7;
+            background: transparent;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+            transition: background-color 0.7s ease, color 0.7s ease;
+        }
+        
+        body.dark-mode {
+            background: #1D1F2C;
+            color: #ffffff;
+        }
+        
+        /* Warm background layer */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #FEFBF8;
+            z-index: -2;
+            pointer-events: none;
+            transition: background-color 0.7s ease;
+        }
+        
+        body.dark-mode::before {
+            background: #1D1F2C;
+        }
+        
+        .font-heading {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        
+        /* Infinite Grid Background */
+        .infinite-grid-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(229, 231, 235, 0.8) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(229, 231, 235, 0.8) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: scrollGrid 20s linear infinite;
+        }
+        
+        body.dark-mode .grid-pattern {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+        
+        @keyframes scrollGrid {
+            0% {
+                transform: translate(0, 0);
+            }
+            100% {
+                transform: translate(-50px, -50px);
+            }
+        }
+        
+        /* Day/Night Sky Backgrounds */
+        .sky-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            transition: opacity 0.7s ease;
+        }
+        
+        .day-sky {
+            background: linear-gradient(180deg, 
+                #1e3a8a 0%,
+                #3b82f6 25%,
+                #60a5fa 50%,
+                #93c5fd 75%,
+                #dbeafe 100%);
+            opacity: 0;
+        }
+        
+        body:not(.dark-mode) .day-sky {
+            opacity: 0.3;
+        }
+        
+        .night-sky {
+            background: linear-gradient(180deg,
+                #0f172a 0%,
+                #1e293b 50%,
+                #334155 100%);
+            opacity: 0;
+        }
+        
+        body.dark-mode .night-sky {
+            opacity: 1;
+        }
+        
+        /* Navigation */
+        nav {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-bottom-color: rgba(229, 231, 235, 0.8) !important;
+        }
+        
+        body.dark-mode nav {
+            background: rgba(29, 31, 44, 0.9) !important;
+            border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        body.dark-mode nav.scrolled {
+            background: rgba(29, 31, 44, 0.95) !important;
+        }
+        
+        /* Navigation Brand Logo - White in Dark Mode */
+        body.dark-mode #navBrand {
+            color: #ffffff !important;
+        }
+        
+        /* Theme Toggle Styles */
+        .sky-toggle-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-switch {
+            --toggle-size: 10px;
+            --container-width: 5.625em;
+            --container-height: 2.5em;
+            --container-radius: 6.25em;
+            --circle-container-diameter: 3.375em;
+            --sun-moon-diameter: 2.125em;
+            --sun-bg: radial-gradient(circle, #FDB813 0%, #FDB813 50%, transparent 50%);
+            --moon-bg: radial-gradient(circle, #FCFCFC 0%, #FCFCFC 50%, transparent 50%);
+            --spot-color: #959DB1;
+            --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+            --stars-color: #fff;
+            --clouds-color: #FCFCFC;
+            --back-clouds-color: #D3D3D3;
+            --transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+            --circle-transition: 0.3s cubic-bezier(0, -0.02, 0.35, 1.17);
+        }
+        
+        .theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-size: var(--toggle-size);
+        }
+        
+        .theme-switch__container {
+            width: var(--container-width);
+            height: var(--container-height);
+            background-color: var(--container-light-bg);
+            border-radius: var(--container-radius);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .theme-switch__circle-container {
+            width: var(--circle-container-diameter);
+            height: var(--circle-container-diameter);
+            background-color: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            left: var(--circle-container-offset);
+            top: var(--circle-container-offset);
+            border-radius: 50%;
+            box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+            display: flex;
+            transition: var(--circle-transition);
+            pointer-events: none;
+        }
+        
+        .theme-switch__sun-moon-container {
+            pointer-events: auto;
+            position: relative;
+            z-index: 2;
+            width: var(--sun-moon-diameter);
+            height: var(--sun-moon-diameter);
+            margin: auto;
+            border-radius: 50%;
+            background: var(--sun-bg);
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+            filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .theme-switch__moon {
+            transform: translateX(100%);
+            width: 100%;
+            height: 100%;
+            background: var(--moon-bg);
+            border-radius: 50%;
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .theme-switch__spot {
+            position: absolute;
+            top: 0.75em;
+            left: 0.312em;
+            width: 0.75em;
+            height: 0.75em;
+            border-radius: 50%;
+            background: var(--spot-color);
+            box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+        }
+        
+        .theme-switch__spot:nth-of-type(2) {
+            width: 0.375em;
+            height: 0.375em;
+            top: 0.937em;
+            left: 1.375em;
+        }
+        
+        .theme-switch__spot:nth-last-of-type(3) {
+            width: 0.25em;
+            height: 0.25em;
+            top: 0.312em;
+            left: 0.812em;
+        }
+        
+        .theme-switch__clouds {
+            width: 1.25em;
+            height: 1.25em;
+            background: var(--clouds-color);
+            border-radius: 50%;
+            position: absolute;
+            bottom: -0.625em;
+            left: 0.312em;
+            box-shadow: 0.937em 0.312em var(--back-clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0em var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+            transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+            transform: translateX(-0.062em);
+        }
+        
+        .theme-switch__stars-container {
+            position: absolute;
+            color: var(--stars-color);
+            top: -100%;
+            left: 0.312em;
+            width: 2.75em;
+            height: auto;
+            transition: var(--transition);
+        }
+        
+        /* Checkbox */
+        .theme-switch__checkbox {
+            display: none;
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container {
+            background-color: var(--container-night-bg);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+            transform: translateX(calc(var(--container-width) - var(--circle-container-diameter) - var(--circle-container-offset) * 2));
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+            transform: translateX(calc(var(--container-width) - var(--circle-container-diameter) - var(--circle-container-offset) * 2)) scale(1.1);
+        }
+        
+        .theme-switch__circle-container:hover {
+            transform: scale(1.1);
+        }
+        
+        .theme-switch__container:active .theme-switch__circle-container {
+            transform: scale(0.96);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:active {
+            transform: translateX(calc(var(--container-width) - var(--circle-container-diameter) - var(--circle-container-offset) * 2)) scale(0.96);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__sun-moon-container {
+            background: var(--moon-bg);
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
+            transform: translateX(0);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
+            bottom: -4.062em;
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Mobile Toggle */
+        @media (max-width: 768px) {
+            .sky-toggle-mobile {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 50;
+            }
+        }
+        
+        /* TOC Block Styles */
+        .toc-block {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0 3rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        body.dark-mode .toc-block {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toc-block h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .toc-block h3 {
+            color: #ffffff;
+        }
+        
+        .toc-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .toc-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            background: rgba(217, 119, 6, 0.05);
+        }
+        
+        .toc-link:hover {
+            background-color: rgba(217, 119, 6, 0.1);
+            color: var(--brand-orange);
+            transform: translateX(4px);
+        }
+        
+        body.dark-mode .toc-link {
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        body.dark-mode .toc-link:hover {
+            color: var(--brand-orange);
+            background: rgba(217, 119, 6, 0.15);
+        }
+        
+        /* Tool Logo Styles */
+        .tool-logo {
+            max-width: 120px;
+            max-height: 60px;
+            object-fit: contain;
+        }
+        
+        .tool-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Old TOC Menu Styles - Removed */
+        .toc-menu-button-old {
+            position: fixed;
+            top: 5.5rem;
+            left: 1.5rem;
+            z-index: 40;
+            background: var(--brand-orange);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .toc-menu-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .toc-drawer {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            z-index: 50;
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease;
+        }
+        
+        body.dark-mode .toc-drawer {
+            background: #1e293b;
+        }
+        
+        .toc-drawer.open {
+            left: 0;
+        }
+        
+        .toc-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 45;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .toc-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .toc-link {
+            display: block;
+            padding: 0.5rem 0 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-left: 2px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        
+        .toc-link:hover,
+        .toc-link.active {
+            border-left-color: var(--brand-orange);
+            background-color: rgba(217, 119, 6, 0.05);
+            color: var(--brand-orange);
+        }
+        
+        body.dark-mode .toc-link {
+            color: #94a3b8;
+        }
+        
+        body.dark-mode .toc-link:hover,
+        body.dark-mode .toc-link.active {
+            color: var(--brand-orange);
+        }
+        
+        /* Content Styles */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 4rem;
+        }
+        
+        @media (min-width: 768px) {
+            .content-wrapper {
+                padding: 8rem 2rem 4rem;
+            }
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            padding: 4rem 0;
+            margin-bottom: 4rem;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .hero-title {
+            color: #ffffff;
+        }
+        
+        @media (min-width: 768px) {
+            .hero-title {
+                font-size: 3.5rem;
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        body.dark-mode .hero-subtitle {
+            color: #94a3b8;
+        }
+        
+        /* Section Styles */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .section-title {
+            color: #ffffff;
+        }
+        
+        @media (min-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--border-light) 50%, transparent 100%);
+            margin: 4rem 0;
+        }
+        
+        body.dark-mode .section-divider {
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        }
+        
+        /* Tool Card Styles */
+        .tool-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .tool-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tool-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--brand-orange);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        
+        body.dark-mode .highlight-box {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
+        }
+        
+        /* Citation Badge */
+        .citation {
+            display: inline-block;
+            background: var(--brand-orange);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            text-decoration: none;
+            margin: 0 0.2rem;
+            transition: all 0.2s ease;
+        }
+        
+        .citation:hover {
+            background: #92400E;
+            transform: translateY(-1px);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.dark-mode .stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Fade in animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Text colors for dark mode */
+        body.dark-mode p,
+        body.dark-mode li,
+        body.dark-mode .text-slate-600,
+        body.dark-mode .text-slate-700,
+        body.dark-mode .text-slate-800 {
+            color: #cbd5e1 !important;
+        }
+        
+        body.dark-mode h3,
+        body.dark-mode h4,
+        body.dark-mode h5 {
+            color: #f1f5f9 !important;
+        }
+        
+        body.dark-mode .text-blue-600,
+        body.dark-mode .text-green-600,
+        body.dark-mode .text-purple-600,
+        body.dark-mode .text-orange-600 {
+            color: var(--brand-orange) !important;
+        }
+        
+        /* High Contrast Text for Light Colored Boxes */
+        .light-box-text {
+            color: #1F2937 !important;
+        }
+        
+        .light-box-text h4,
+        .light-box-text h5,
+        .light-box-text p,
+        .light-box-text span,
+        .light-box-text strong {
+            color: #1F2937 !important;
+        }
+        
+        .light-box-text-small {
+            color: #374151 !important;
+        }
+        
+        body.dark-mode .light-box-text,
+        body.dark-mode .light-box-text h4,
+        body.dark-mode .light-box-text h5,
+        body.dark-mode .light-box-text p,
+        body.dark-mode .light-box-text span,
+        body.dark-mode .light-box-text strong {
+            color: #1F2937 !important;
+        }
+        
+        body.dark-mode .light-box-text-small {
+            color: #374151 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Infinite Grid Background -->
+    <div class="infinite-grid-container">
+        <div class="grid-pattern"></div>
+    </div>
+    
+    <!-- Sky Backgrounds -->
+    <div class="sky-background day-sky"></div>
+    <div class="sky-background night-sky"></div>
+    
+    <!-- Navigation -->
+    <nav id="mainNav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(229, 231, 235, 0.5);">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="index.html" id="navBrand" class="font-heading font-bold text-2xl text-gray-900 transition-colors duration-300">
+                    AIFlowTime
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-600 hover:text-orange-600 transition-colors nav-link">首頁</a>
+                    <a href="index.html#about" class="text-gray-600 hover:text-orange-600 transition-colors nav-link">關於我們</a>
+                    <a href="index.html#services" class="text-gray-600 hover:text-orange-600 transition-colors nav-link">服務</a>
+                    <a href="consultation.html" class="text-gray-600 hover:text-orange-600 transition-colors nav-link">諮詢</a>
+                    
+                    <!-- Sky Toggle -->
+                    <div class="sky-toggle-wrapper">
+                        <label class="theme-switch">
+                            <input type="checkbox" class="theme-switch__checkbox" id="themeToggle">
+                            <div class="theme-switch__container">
+                                <div class="theme-switch__clouds"></div>
+                                <div class="theme-switch__stars-container">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545Z" fill="currentColor"></path>
+                                    </svg>
+                                </div>
+                                <div class="theme-switch__circle-container">
+                                    <div class="theme-switch__sun-moon-container">
+                                        <div class="theme-switch__moon">
+                                            <div class="theme-switch__spot"></div>
+                                            <div class="theme-switch__spot"></div>
+                                            <div class="theme-switch__spot"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile Theme Toggle -->
+    <div class="sky-toggle-mobile md:hidden">
+        <label class="theme-switch">
+            <input type="checkbox" class="theme-switch__checkbox" id="themeToggleMobile">
+            <div class="theme-switch__container">
+                <div class="theme-switch__clouds"></div>
+                <div class="theme-switch__stars-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <div class="theme-switch__circle-container">
+                    <div class="theme-switch__sun-moon-container">
+                        <div class="theme-switch__moon">
+                            <div class="theme-switch__spot"></div>
+                            <div class="theme-switch__spot"></div>
+                            <div class="theme-switch__spot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </label>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <!-- Hero Section -->
+        <section class="hero-section fade-in-up" id="executive-summary">
+            <h1 class="hero-title">
+                <span style="color: var(--brand-orange);">2025年底實測：</span><br>
+                真正提升效率的5個AI核心工具與工作流
+            </h1>
+            <p class="hero-subtitle">
+                深度分析最實用的AI工具組合，幫助你建立高效工作系統
+            </p>
+            
+            <!-- Table of Contents -->
+            <div class="toc-block fade-in-up">
+                <h3 class="font-heading">目錄</h3>
+                <div class="toc-links">
+                    <a href="#executive-summary" class="toc-link">執行摘要</a>
+                    <a href="#introduction" class="toc-link">1. 總論：從工具迷思到系統思維</a>
+                    <a href="#information-tools" class="toc-link">2. 資訊獲取與處理工具</a>
+                    <a href="#content-creation" class="toc-link">3. 內容創作與知識管理</a>
+                    <a href="#case-study" class="toc-link">4. 實戰案例：GatherGrid</a>
+                    <a href="#workflow-integration" class="toc-link">5. 整合應用：核心工作流</a>
+                    <a href="#conclusion" class="toc-link">6. 結論與展望</a>
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <h2 class="text-2xl font-semibold mb-4" style="color: var(--brand-orange);">執行摘要</h2>
+                <p class="text-lg leading-relaxed mb-4">
+                    2025年的AI工具已從單一功能進化為專業化生態系統。<strong>真正的競爭力來自系統性整合</strong>，而非追逐最新工具。
+                </p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 class="font-semibold mb-2" style="color: var(--brand-orange);">核心發現</h3>
+                        <p class="text-sm">AI工作流的價值遠超單一工具，能將效率提升300%以上</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 class="font-semibold mb-2" style="color: var(--brand-orange);">目標讀者</h3>
+                        <p class="text-sm">AI新手、香港斜槓族、自由工作者及小型創業者</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Introduction Section -->
+        <section id="introduction" class="fade-in-up">
+            <h2 class="section-title">1. 總論：從工具迷思到系統思維</h2>
+            
+            <h3 class="text-2xl font-semibold mb-4">2025年的AI生態：工具碎片化與專業化</h3>
+            <p class="text-lg leading-relaxed mb-6">
+                進入2025年，人工智能領域的發展呈現出兩個顯著趨勢：工具的極度豐富與能力的高度專業化。市場上充斥著數以百計的AI應用，從文本生成、圖像創作到程式編寫，幾乎涵蓋了所有數位工作場景<a href="https://index.zshipu.com/ai002/post/20251025/%E4%BB%80%E4%B9%88%E6%98%AFPerplexity-AI2025%E5%B9%B4AI%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" class="citation" target="_blank">[1]</a>。
+            </p>
+            
+            <div class="highlight-box">
+                <h4 class="font-semibold mb-3">核心觀點：AI工作流的價值遠超單一工具</h4>
+                <p class="mb-0">真正的競爭力不再來自於對某一個工具的精通，而是來自於構建一套高效、流暢的「AI工作流」。單一工具如同一個孤立的齒輪，無法驅動複雜的專案前進；而一個設計良好的工作流，則能將多個工具的優勢串聯起來，形成一個完整的生產系統。</p>
+            </div>
+        </section>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Information Tools Section -->
+        <section id="information-tools" class="fade-in-up">
+            <h2 class="section-title">2. 工具深度分析：資訊獲取與處理</h2>
+            
+            <!-- Perplexity + Comet -->
+            <div class="tool-card">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="flex-shrink-0">
+                        <div class="tool-icon" style="background: #dbeafe; color: #2563eb;">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-semibold mb-2">
+                            Perplexity + Comet：資訊型AI的極致體驗
+                        </h3>
+                        <div class="tool-logo-container">
+                            <img src="https://www.perplexity.ai/static/favicon-32x32.png" alt="Perplexity AI" class="tool-logo" onerror="this.style.display='none'">
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="font-semibold mb-3">超越搜尋引擎的「答案引擎」</h4>
+                                <p class="mb-4">
+                                    Perplexity AI已牢固確立了其作為「答案引擎」的獨特定位<a href="https://llmrefs.com/blog/perplexity-vs-google" class="citation" target="_blank">[7]</a>。其核心價值在於直接為用戶問題提供經過整合、總結並附有明確來源引用的答案，而不是像Google那樣返回連結列表。
+                                </p>
+                                
+                                <div class="light-box-text" style="background: #f1f5f9; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
+                                    <h5 class="font-medium mb-2">核心數據</h5>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• 月活躍用戶超過1500萬</li>
+                                        <li>• 月查詢量達7.8億次</li>
+                                        <li>• 深度研究模式支持多輪對話</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold mb-3">Comet插件的革命性功能</h4>
+                                <p class="mb-4">
+                                    Comet瀏覽器插件將Perplexity的能力無縫集成到日常網頁瀏覽中<a href="https://mdnice.com/writing/97dea96b37424eca9890f0ec0baa3dd7" class="citation" target="_blank">[10]</a>。用戶可以通過快捷鍵喚起AI助手，對當前頁面進行即時分析和操作。
+                                </p>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                        <span class="text-sm">跨源綜合分析與框架構建</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                        <span class="text-sm">80頁報告的即時分析</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                        <span class="text-sm">多標籤頁對比分析</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grok vs ChatGPT -->
+            <div class="mt-12">
+                <h3 class="text-2xl font-semibold mb-2">Grok × ChatGPT：對話式AI的雙生策略</h3>
+                <div class="tool-logo-container mb-6">
+                    <img src="https://x.com/i/web/static/media/grok-logo.8c0b8c8c.svg" alt="Grok" class="tool-logo" onerror="this.style.display='none'">
+                    <img src="https://chatgpt.com/favicon.ico" alt="ChatGPT" class="tool-logo" onerror="this.style.display='none'">
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="tool-card">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="tool-icon" style="background: #fed7aa; color: #ea580c;">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">Grok：創意與即時性</h4>
+                                <p class="text-sm">具備「個性」與「即時性」的創意夥伴</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <p>由xAI開發，對話風格「叛逆」、「機智」，與X平台深度整合<a href="https://www.fahimai.com/zh/grok" class="citation" target="_blank">[16]</a>，實時訪問社交媒體動態。</p>
+                            <div class="light-box-text" style="background: #fed7aa; border-radius: 0.5rem; padding: 0.75rem;">
+                                <strong style="color: #7c2d12;">最適合：</strong><span style="color: #1F2937;">即時資訊追蹤、社交內容創作、腦力激盪</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-card">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="tool-icon" style="background: #dbeafe; color: #2563eb;">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold">ChatGPT：穩定與結構</h4>
+                                <p class="text-sm">追求「穩定」與「結構」的專業助手</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm">
+                            <p>成熟穩定的生態系統，卓越的結構化能力，強大的API整合<a href="http://www.nstipsp.com/page155.html?article_id=5275" class="citation" target="_blank">[19]</a>，在企業級應用中佔據主導地位。</p>
+                            <div class="light-box-text" style="background: #dbeafe; border-radius: 0.5rem; padding: 0.75rem;">
+                                <strong style="color: #1e3a8a;">最適合：</strong><span style="color: #1F2937;">專業寫作、報告生成、程式開發、數據分析</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Content Creation Section -->
+        <section id="content-creation" class="fade-in-up">
+            <h2 class="section-title">3. 工具深度分析：內容創作與知識管理</h2>
+            
+            <!-- Notion AI -->
+            <div class="tool-card mb-12">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="flex-shrink-0">
+                        <div class="tool-icon" style="background: #f3f4f6; color: #4b5563;">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-semibold mb-2">
+                            Notion AI：從寫作助手到內容結構引擎
+                        </h3>
+                        <div class="tool-logo-container mb-4">
+                            <img src="https://www.notion.so/images/logo-ios.png" alt="Notion AI" class="tool-logo" onerror="this.style.display='none'">
+                        </div>
+                        
+                        <p class="mb-4">
+                            Notion AI已從輔助寫作功能，脫胎換骨為深度整合於工作流程的「內容結構引擎」<a href="https://hub.baai.ac.cn/view/49080" class="citation" target="_blank">[308]</a>。其殺手鐧在於能將生成的內容無縫嵌入到Notion的資料庫結構中。
+                        </p>
+                        
+                        <div class="light-box-text" style="background: #f8fafc; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
+                            <h4 class="font-medium mb-2">自動化工作流程</h4>
+                            <p class="text-sm">
+                                自動將會議記錄轉化為具體待辦事項，連結到專案資料庫，自動指派負責人和截止日期<a href="https://sinai-hk.com/trend/notion-ai-3-0-agents-guide-features-pricing-comparison/" class="citation" target="_blank">[293]</a>。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gemini + NotebookLM -->
+            <div class="tool-card">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="flex-shrink-0">
+                        <div class="tool-icon" style="background: #f3e8ff; color: #9333ea;">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-semibold mb-2">
+                            Gemini + NotebookLM：個人知識整合系統的崛起
+                        </h3>
+                        <div class="tool-logo-container mb-4">
+                            <img src="https://www.gstatic.com/lamda/images/favicon_v1_150160cddff7d294dea0.png" alt="Gemini" class="tool-logo" onerror="this.style.display='none'">
+                            <img src="https://notebooklm.google.com/favicon.ico" alt="NotebookLM" class="tool-logo" onerror="this.style.display='none'">
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-6">
+                            <div>
+                                <h4 class="font-semibold mb-3">Gemini的Code能力突破</h4>
+                                <div class="space-y-4">
+                                    <div class="light-box-text" style="background: #dcfce7; border-radius: 0.5rem; padding: 1rem;">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-medium" style="color: #1F2937;">SWE-bench Verified</span>
+                                            <span class="text-lg font-bold" style="color: #15803d;">76.2%</span>
+                                        </div>
+                                        <p class="text-xs light-box-text-small">Gemini 3超越OpenAI o3-mini和DeepSeek R1<a href="https://ecas.cas.cn/xxkw/kbcd/201115_147319/ml/xxhjsyjcss/202504/t20250417_5064530.html" class="citation" target="_blank">[368]</a></p>
+                                    </div>
+                                    
+                                    <div class="light-box-text" style="background: #dbeafe; border-radius: 0.5rem; padding: 1rem;">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <span class="text-sm font-medium" style="color: #1F2937;">生成速度</span>
+                                            <span class="text-lg font-bold" style="color: #1e40af;">148 tokens/s</span>
+                                        </div>
+                                        <p class="text-xs light-box-text-small">比GPT-5快45%<a href="https://juejin.cn/post/7564716611933831187" class="citation" target="_blank">[373]</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold mb-3">NotebookLM的視覺化產出</h4>
+                                <p class="mb-4">
+                                    2025年11月引入「視覺化產出」能力，新增「簡報」與「資訊圖表」生成功能<a href="https://vocus.cc/article/6927f5b7fd8978000152b267" class="citation" target="_blank">[376]</a>，將簡報製作時間從數小時壓縮至10-40分鐘。
+                                </p>
+                                
+                                <div class="light-box-text" style="background: #f3e8ff; border-radius: 0.5rem; padding: 1rem;">
+                                    <h5 class="font-medium mb-2">隱私保護保障</h5>
+                                    <p class="text-sm">
+                                        用戶上傳的文件、查詢內容和AI響應都不會被用於訓練新AI模型<a href="https://notebooklm-ai.com/" class="citation" target="_blank">[353]</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Case Study Section -->
+        <section id="case-study" class="fade-in-up">
+            <h2 class="section-title">4. 實戰案例：從代碼到產品的完整流程</h2>
+            
+            <div class="tool-card">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="flex-shrink-0">
+                        <div class="tool-icon" style="background: #d1fae5; color: #059669;">
+                            <i class="fas fa-code"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-semibold mb-2">
+                            Gemini × Cursor AI → GatherGrid 實例解析
+                        </h3>
+                        <div class="tool-logo-container mb-4">
+                            <img src="https://www.gstatic.com/lamda/images/favicon_v1_150160cddff7d294dea0.png" alt="Gemini" class="tool-logo" onerror="this.style.display='none'">
+                            <img src="https://cursor.sh/favicon.ico" alt="Cursor AI" class="tool-logo" onerror="this.style.display='none'">
+                        </div>
+                        
+                        <div class="light-box-text" style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-bottom: 1.5rem; border-radius: 0 0.5rem 0.5rem 0;">
+                            <h4 class="font-semibold mb-2">案例背景：從「AI生成Code」到「可用產品」的鴻溝</h4>
+                            <p>
+                                從AI生成的程式碼到真正可用、穩定的產品之間存在巨大鴻溝，包括可讀性、可維護性、錯誤處理、性能優化等挑戰。
+                            </p>
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <h4 class="font-semibold mb-4">Cursor AI的關鍵角色</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-start gap-3">
+                                        <i class="fas fa-brain mt-1" style="color: #2563eb;"></i>
+                                        <div>
+                                            <h5 class="font-medium">自動理解代碼庫</h5>
+                                            <p class="text-sm">準確定位相關程式碼區塊，提供精準修改建議</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <i class="fas fa-bug mt-1" style="color: #ef4444;"></i>
+                                        <div>
+                                            <h5 class="font-medium">主動發現錯誤</h5>
+                                            <p class="text-sm">識別邏輯錯誤、安全漏洞和性能瓶頸</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <i class="fas fa-vial mt-1" style="color: #10b981;"></i>
+                                        <div>
+                                            <h5 class="font-medium">協助全面測試</h5>
+                                            <p class="text-sm">自動生成單元測試，確保產品穩定性</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-semibold mb-4">GatherGrid核心功能</h4>
+                                <div class="space-y-3">
+                                    <div class="light-box-text" style="background: #dbeafe; border-radius: 0.5rem; padding: 0.75rem;">
+                                        <h5 class="font-medium mb-1">約時間</h5>
+                                        <p class="text-sm">時間投票工具，網格視圖拖拽選擇</p>
+                                    </div>
+                                    <div class="light-box-text" style="background: #d1fae5; border-radius: 0.5rem; padding: 0.75rem;">
+                                        <h5 class="font-medium mb-1">行程規劃</h5>
+                                        <p class="text-sm">可視化時間軸，自動抓取景點圖片</p>
+                                    </div>
+                                    <div class="light-box-text" style="background: #f3e8ff; border-radius: 0.5rem; padding: 0.75rem;">
+                                        <h5 class="font-medium mb-1">旅費結算</h5>
+                                        <p class="text-sm">智能分攤算法，自動計算結算報告</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="light-box-text" style="background: #d1fae5; border: 1px solid #10b981; border-radius: 0.75rem; padding: 1.5rem;">
+                            <h4 class="font-semibold mb-3">
+                                <i class="fas fa-lightbulb mr-2" style="color: #15803d;"></i>核心啟示：證明「流程」的價值
+                            </h4>
+                            <p class="mb-0">
+                                這個案例不是要證明GatherGrid產品本身的創新，而是要展示從AI生成到產品落地的標準化工作流。AI時代的開發競爭力，不在於單一工具的強大，而在於設計和執行高效「流程」的能力。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Workflow Integration Section -->
+        <section id="workflow-integration" class="fade-in-up">
+            <h2 class="section-title">5. 整合應用：兩大核心AI工作流</h2>
+            
+            <div class="space-y-12">
+                <!-- Workflow 1 -->
+                <div class="tool-card">
+                    <div class="flex flex-col md:flex-row items-start gap-6">
+                        <div class="flex-shrink-0">
+                            <div class="tool-icon" style="background: #dbeafe; color: #2563eb;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-semibold mb-6">
+                                工作流一：核心研究與內容產出
+                            </h3>
+                            
+                            <p class="mb-8">
+                                專為需要進行深度研究並產出高質量報告、文章或簡報的用戶設計，整合了Perplexity、Notion AI和NotebookLM的優勢。
+                            </p>
+                            
+                            <div class="space-y-6">
+                                <div class="flex gap-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-sm font-semibold text-white rounded-full" style="background: #2563eb;">1</div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">使用Perplexity進行深度主題研究</h4>
+                                        <p class="text-sm">提出具體、複雜的問題，獲得結構化摘要和明確來源引用<a href="https://www.getguru.com/zh/reference/what-is-perplexity-ai-and-how-to-use-it" class="citation" target="_blank">[4]</a></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-sm font-semibold text-white rounded-full" style="background: #10b981;">2</div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">將研究資料儲存至Notion知識庫</h4>
+                                        <p class="text-sm">系統性保存有價值資訊，建立可持續累積的個人知識資產</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-sm font-semibold text-white rounded-full" style="background: #9333ea;">3</div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">使用Notion AI整理資料與頁面佈局</h4>
+                                        <p class="text-sm">自動生成報告大綱，優化視覺呈現，創建對比表格和流程圖</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-4">
+                                    <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-sm font-semibold text-white rounded-full" style="background: #f59e0b;">4</div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">使用NotebookLM生成報告與簡報</h4>
+                                        <p class="text-sm">基於Notion頁面生成PowerPoint簡報大綱，確保內容一致性</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Workflow 2 -->
+                <div class="tool-card">
+                    <div class="flex flex-col md:flex-row items-start gap-6">
+                        <div class="flex-shrink-0">
+                            <div class="tool-icon" style="background: #fce7f3; color: #ec4899;">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-semibold mb-6">
+                                工作流二：日常資訊蒐集與社群內容創作
+                            </h3>
+                            
+                            <p class="mb-8">
+                                專為需要持續產出社群內容的用戶設計，透過自動化工具實現「一鍵式」內容生產。
+                            </p>
+                            
+                            <div class="grid md:grid-cols-3 gap-6">
+                                <div class="light-box-text" style="background: #f8fafc; border-radius: 0.5rem; padding: 1.5rem;">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <i class="fas fa-rss" style="color: #1e40af;"></i>
+                                        <h4 class="font-semibold">自動爬取新聞</h4>
+                                    </div>
+                                    <p class="text-sm">使用Perplexity或Grok設定每日任務，自動爬取最新產業新聞和趨勢</p>
+                                </div>
+                                
+                                <div class="light-box-text" style="background: #f8fafc; border-radius: 0.5rem; padding: 1.5rem;">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <i class="fas fa-database" style="color: #15803d;"></i>
+                                        <h4 class="font-semibold">自動化資料儲存</h4>
+                                    </div>
+                                    <p class="text-sm">使用Zapier或n8n將爬取資料自動儲存至Notion資料庫，自動打標籤</p>
+                                </div>
+                                
+                                <div class="light-box-text" style="background: #f8fafc; border-radius: 0.5rem; padding: 1.5rem;">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <i class="fas fa-video" style="color: #7c3aed;"></i>
+                                        <h4 class="font-semibold">自動生成腳本</h4>
+                                    </div>
+                                    <p class="text-sm">自動觸發ChatGPT生成Instagram Reels腳本，包含畫面描述和互動問題</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="section-divider"></div>
+        
+        <!-- Conclusion Section -->
+        <section id="conclusion" class="fade-in-up">
+            <h2 class="section-title">6. 結論：2026年的AI競爭力在於系統化思維</h2>
+            
+            <div class="space-y-8 mb-12">
+                <div class="tool-card">
+                    <h3 class="text-2xl font-semibold mb-4" style="color: var(--brand-orange);">核心洞察：單一工具的時代已經過去</h3>
+                    <p class="text-lg leading-relaxed mb-4">
+                        回顧2025年的AI工具版圖，我們可以清晰看到：<strong>單一工具的「一招鮮」時代已經徹底終結</strong>。真正的核心洞察在於，AI的價值不再體現在其本身的功能，而體現在它如何被整合進一個更宏大的工作流程中。
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="tool-card text-center">
+                        <h4 class="font-semibold text-xl mb-3" style="color: var(--brand-orange);">組合</h4>
+                        <p class="text-sm">像交響樂指揮家一樣，根據任務需求選擇最合適的工具組合</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <h4 class="font-semibold text-xl mb-3" style="color: var(--brand-orange);">流程</h4>
+                        <p class="text-sm">將AI工具使用從隨機互動轉變為標準化、自動化的工作流程</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <h4 class="font-semibold text-xl mb-3" style="color: var(--brand-orange);">系統化思維</h4>
+                        <p class="text-sm">成為工作流的設計師和優化者，創造持續產生價值的系統</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tool-card" style="background: linear-gradient(135deg, var(--brand-orange) 0%, #92400E 100%); color: white;">
+                <h3 class="text-2xl font-semibold mb-6">給讀者的行動建議</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3">從今天開始建立你的AI工作流</h4>
+                        <ol class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="font-semibold">1.</span>
+                                <span>盤點你的工作，找出最耗時、重複的環節</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="font-semibold">2.</span>
+                                <span>選擇一個具體任務作為切入點</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="font-semibold">3.</span>
+                                <span>嘗試本文介紹的工作流模板</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="font-semibold">4.</span>
+                                <span>不斷迭代和優化你的流程</span>
+                            </li>
+                        </ol>
+                    </div>
+                    <div>
+                        <div style="background: rgba(255, 255, 255, 0.2); border-radius: 0.5rem; padding: 1rem;">
+                            <p class="text-sm mb-2">記住：</p>
+                            <p class="font-semibold">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                在AI時代，最大的風險不是AI不夠好，而是你沒有開始使用它。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="fade-in-up mt-16 mb-8">
+            <div class="tool-card text-center">
+                <h3 class="text-2xl font-semibold mb-4">準備好開始你的AI工作流了嗎？</h3>
+                <p class="mb-6">讓AIFlowTime幫你建立專屬的AI工作系統</p>
+                <a href="index.html#services" class="inline-block px-8 py-3 text-white rounded-full font-semibold transition-all hover:scale-105" style="background: var(--brand-orange);">
+                    了解我們的服務
+                </a>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // Theme Toggle Functionality
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeToggleMobile = document.getElementById('themeToggleMobile');
+            const body = document.body;
+            
+            // Check for saved theme preference or default to night mode
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            if (currentTheme === 'dark') {
+                body.classList.add('dark-mode');
+                if (themeToggle) themeToggle.checked = true;
+                if (themeToggleMobile) themeToggleMobile.checked = true;
+            }
+            
+            function toggleTheme() {
+                body.classList.toggle('dark-mode');
+                const isDark = body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                
+                // Sync both toggles
+                if (themeToggle) themeToggle.checked = isDark;
+                if (themeToggleMobile) themeToggleMobile.checked = isDark;
+            }
+            
+            if (themeToggle) {
+                themeToggle.addEventListener('change', toggleTheme);
+            }
+            
+            if (themeToggleMobile) {
+                themeToggleMobile.addEventListener('change', toggleTheme);
+            }
+        }
+        
+        // Smooth scroll for TOC links
+        function initTOCLinks() {
+            const tocLinks = document.querySelectorAll('.toc-link');
+            tocLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Scroll Animations
+        function initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.fade-in-up').forEach(el => {
+                observer.observe(el);
+            });
+        }
+        
+        // Initialize all functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            initTOCLinks();
+            initScrollAnimations();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>報名成功｜AIFlowTime 工作坊</title>
+    <meta name="description" content="你已成功報名並完成付款，座位已為你保留。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #2563EB;
+            --brand-orange: #D97706;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: #FEFBF8;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            padding: 48px 32px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 10px 15px -3px rgba(0,0,0,0.08);
+        }
+        .icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0 0 12px;
+            color: var(--text-primary);
+        }
+        .sub {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .detail {
+            text-align: left;
+            background: #F8F9FA;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+        .detail strong { color: var(--text-primary); }
+        a.btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--brand-orange);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        a.btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon" aria-hidden="true">✓</div>
+        <h1>報名成功，座位已為你保留</h1>
+        <p class="sub">多謝你完成付款。我們會將工作坊詳情及連結發送到你的 Email，請留意收件匣。</p>
+        <div class="detail" id="detail">
+            <p><strong>付款已完成。</strong> 你的座位已成功預留。</p>
+        </div>
+        <a href="/ai-beginner-workshop" class="btn">返回工作坊頁面</a>
+    </div>
+    <script>
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var sessionId = params.get('session_id');
+            if (sessionId) {
+                var el = document.getElementById('detail');
+                if (el) el.innerHTML = '<p><strong>付款已完成。</strong> 你的座位已成功預留。如有查詢請聯絡我們。</p>';
+            }
+        })();
+    </script>
+</body>
+</html>

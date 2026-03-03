@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>簽到驗證 | AIFLOWTIME</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7; --bg-off: #E8E4DF; --bg-pampas: #F4F3EE;
+            --accent: #D97757; --accent-text: #C45A3A; --accent-dark: #C56A4B;
+            --text: #3B3B3B; --text-light: #7A7A7A; --white: #FFFFFF;
+            --green: #2E7D32; --green-bg: rgba(76,175,80,0.15);
+            --red: #C62828; --red-bg: rgba(198,40,40,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Noto Sans TC',sans-serif; background:var(--bg-cream); color:var(--text); line-height:1.7; font-size:16px; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+
+        .checkin-card {
+            width:100%; max-width:420px; background:var(--white); border-radius:20px;
+            padding:32px 28px; box-shadow:0 4px 24px rgba(0,0,0,0.06);
+            border:1px solid rgba(255,255,255,0.4); text-align:center;
+        }
+        .checkin-logo { font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:24px; }
+        .checkin-logo span { color:var(--accent); }
+
+        .checkin-icon { width:64px; height:64px; border-radius:18px; display:inline-flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:16px; }
+        .checkin-icon.success { background:var(--green-bg); }
+        .checkin-icon.error { background:var(--red-bg); }
+        .checkin-icon.warn { background:rgba(232,152,63,0.15); }
+        .checkin-icon.checked { background:var(--green-bg); }
+        .checkin-icon.loading { background:var(--bg-pampas); }
+
+        .checkin-title { font-size:22px; font-weight:700; margin-bottom:8px; }
+        .checkin-title.success { color:var(--green); }
+        .checkin-title.error { color:var(--red); }
+        .checkin-title.warn { color:#E8983F; }
+        .checkin-title.checked { color:var(--green); }
+
+        .checkin-msg { font-size:14px; color:var(--text-light); font-weight:500; margin-bottom:20px; }
+
+        .checkin-details { text-align:left; background:var(--bg-pampas); border-radius:14px; padding:16px 20px; margin-bottom:20px; }
+        .checkin-row { display:flex; justify-content:space-between; padding:6px 0; font-size:14px; }
+        .checkin-row-label { color:var(--text-light); font-weight:600; }
+        .checkin-row-value { color:var(--text); font-weight:500; text-align:right; }
+
+        .checkin-btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            height:48px; padding:0 32px; border-radius:12px; border:none;
+            background:var(--green); color:var(--white); font-size:16px; font-weight:700;
+            cursor:pointer; transition:all 0.3s; font-family:'Noto Sans TC',sans-serif; min-width:200px;
+        }
+        .checkin-btn:hover { background:#1B5E20; transform:translateY(-1px); }
+        .checkin-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+        .checkin-btn.done { background:var(--text-light); }
+
+        .checkin-back { display:inline-block; margin-top:16px; font-size:13px; color:var(--text-light); text-decoration:none; font-weight:600; }
+        .checkin-back:hover { color:var(--accent); }
+
+        .spinner { width:36px; height:36px; border:3px solid var(--bg-off); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="checkin-card" id="checkinCard">
+    <div class="checkin-logo">AI<span>FLOW</span>TIME</div>
+    <div class="checkin-icon loading">⏳</div>
+    <div class="spinner"></div>
+    <div class="checkin-title">正在驗證...</div>
+    <div class="checkin-msg">正在查詢簽到資料，請稍候。</div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+var firebaseConfig = {
+    apiKey: "AIzaSyCYHnyFMwwFzRLkYBiPOJHGFLXQMmMSjUo",
+    authDomain: "aiflowtime-hk.firebaseapp.com",
+    projectId: "aiflowtime-hk",
+    storageBucket: "aiflowtime-hk.firebasestorage.app",
+    messagingSenderId: "575616857587",
+    appId: "1:575616857587:web:d7e15a4801ef3b3e0f2cc9"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+var auth = firebase.auth();
+
+function escHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+}
+
+function getStatusText(s) {
+    var map = { pending: '待確認', confirmed: '已確認', cancelled: '已取消', deleted: '已刪除' };
+    return map[s] || s || '—';
+}
+
+function renderCard(type, title, msg, reg, showBtn) {
+    var card = document.getElementById('checkinCard');
+    var iconMap = { success: '✅', error: '❌', warn: '⚠️', checked: '☑️', loading: '⏳' };
+
+    var html = '<div class="checkin-logo">AI<span>FLOW</span>TIME</div>';
+    html += '<div class="checkin-icon ' + type + '">' + iconMap[type] + '</div>';
+    html += '<div class="checkin-title ' + type + '">' + escHtml(title) + '</div>';
+    html += '<div class="checkin-msg">' + escHtml(msg) + '</div>';
+
+    if (reg) {
+        html += '<div class="checkin-details">';
+        html += '<div class="checkin-row"><span class="checkin-row-label">姓名</span><span class="checkin-row-value">' + escHtml(reg.name || '—') + '</span></div>';
+        html += '<div class="checkin-row"><span class="checkin-row-label">工作坊</span><span class="checkin-row-value">' + escHtml(reg.workshopTitle || reg.workshopId || '—') + '</span></div>';
+        html += '<div class="checkin-row"><span class="checkin-row-label">電話</span><span class="checkin-row-value">' + escHtml(reg.phone || '—') + '</span></div>';
+        html += '<div class="checkin-row"><span class="checkin-row-label">狀態</span><span class="checkin-row-value">' + escHtml(getStatusText(reg.status)) + '</span></div>';
+        if (reg.pricePaid) {
+            html += '<div class="checkin-row"><span class="checkin-row-label">已付款</span><span class="checkin-row-value">' + escHtml(reg.pricePaid) + '</span></div>';
+        }
+        html += '</div>';
+    }
+
+    if (showBtn && reg && reg._id) {
+        html += '<button class="checkin-btn" id="checkinBtn" onclick="doCheckin(\'' + escHtml(reg._id) + '\')">✓ 確認簽到</button>';
+    }
+
+    html += '<a class="checkin-back" href="/workshop-cms">← 返回 CMS</a>';
+    card.innerHTML = html;
+}
+
+var _token = null;
+var _regData = null;
+var ADMIN_EMAILS = ['jacobfung1392@gmail.com', 'jacobfung@aiflowtime.com'];
+
+function init() {
+    var params = new URLSearchParams(window.location.search);
+    _token = params.get('token');
+
+    if (!_token) {
+        renderCard('error', '無效連結', '缺少簽到碼參數。請使用有效的 QR Code。', null, false);
+        return;
+    }
+
+    // Wait for auth state
+    auth.onAuthStateChanged(function(user) {
+        if (!user || ADMIN_EMAILS.indexOf(user.email) === -1) {
+            renderCard('warn', '需要管理員登入', '請先以管理員帳號登入，才能進行簽到驗證。', null, false);
+            return;
+        }
+        lookupToken();
+    });
+}
+
+function lookupToken() {
+    // Look up registration
+    db.collection('registrations').where('attendanceToken', '==', _token).limit(1).get().then(function(snap) {
+        if (snap.empty) {
+            renderCard('error', '無效簽到碼', '找不到對應的報名紀錄。此 QR Code 可能已失效或報名已被取消。', null, false);
+            return;
+        }
+
+        var doc = snap.docs[0];
+        var reg = doc.data();
+        reg._id = doc.id;
+        _regData = reg;
+
+        if (reg.status !== 'confirmed') {
+            renderCard('warn', '報名未確認', '此報名狀態為「' + getStatusText(reg.status) + '」，無法進行簽到。', reg, false);
+            return;
+        }
+
+        if (reg.attendedAt) {
+            var attendTime = reg.attendedAt.toDate ? reg.attendedAt.toDate() : new Date(reg.attendedAt);
+            renderCard('checked', '已簽到', '此參加者已於 ' + attendTime.toLocaleString('zh-Hant') + ' 完成簽到。', reg, false);
+            return;
+        }
+
+        // Valid — show confirm button (admin check is optional for speed on workshop day)
+        renderCard('success', '驗證成功', '此參加者已確認付款，可以簽到。', reg, true);
+
+    }).catch(function(err) {
+        renderCard('error', '查詢失敗', '無法查詢報名資料：' + err.message, null, false);
+    });
+}
+
+function doCheckin(regId) {
+    var btn = document.getElementById('checkinBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '正在簽到...'; }
+
+    db.collection('registrations').doc(regId).update({
+        attendedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        renderCard('checked', '簽到成功！', '參加者已成功簽到。', _regData, false);
+    }).catch(function(err) {
+        if (btn) { btn.disabled = false; btn.textContent = '✓ 確認簽到'; }
+        alert('簽到失敗：' + err.message);
+    });
+}
+
+init();
+</script>
+</body>
+</html>

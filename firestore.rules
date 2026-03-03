@@ -1,0 +1,143 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Workshops: public read; full write only for authorised CMS admins
+    // Enrollment counting is now handled server-side via Cloud Functions
+    match /workshops/{workshopId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Users / member profiles: owner can read/write own; admins can read all
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Registrations:
+    //   - Anyone can create (guests + authenticated users)
+    //   - Anyone can read a single document by ID (for shareable receipt links)
+    //   - Authenticated users can read own registrations
+    //   - Admins can read/write all
+    match /registrations/{regId} {
+      allow create: if true;
+      allow get: if true;
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'paymentScreenshotUrl',
+          'name', 'ageGroup', 'phone', 'jobType', 'reasons',
+          'aiProblem', 'expectation',
+          'workshopTitle', 'workshopDate', 'workshopTime', 'workshopDescription',
+          'updatedAt'
+        ]);
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Discount codes: public read (payment page needs to check); admin write
+    match /discountCodes/{codeId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Quiz leads: anyone can create; only admins can read
+    match /quizLeads/{leadId} {
+      allow create: if true;
+      allow read: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Reservations: backend only (Functions use Admin SDK)
+    match /reservations/{reservationId} {
+      allow read, write: if false;
+    }
+
+    // Business projects: admin only
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Business documents: public read (for shareable PDF links), admin write
+    match /businessDocuments/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Business settings: admin only
+    match /businessSettings/{settingId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Workshop settings: admin only
+    match /workshopSettings/{docId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Page layouts: public read (workshop page applies layout), admin write
+    match /pageLayouts/{layoutId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Section presets: admin only
+    match /sectionPresets/{presetId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+  }
+}

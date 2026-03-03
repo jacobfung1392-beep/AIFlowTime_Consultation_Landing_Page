@@ -1,0 +1,242 @@
+/**
+ * AIFLOWTIME Typography System
+ * Bilingual: English (Courier Prime) + Traditional Chinese (LXGW WenKai TC)
+ * Version: 1.0.0
+ */
+
+/* ========================================
+   1. FONT IMPORTS
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=LXGW+WenKai+TC:wght@300;400;700&family=Noto+Serif+TC:wght@400;500;700&display=swap');
+
+/* ========================================
+   2. CSS VARIABLES
+   ======================================== */
+
+:root {
+  /* Font families */
+  --font-primary: 'Courier Prime', 'LXGW WenKai TC', 'Noto Serif TC', 'PingFang TC', 'Microsoft JhengHei', 'Courier New', Courier, monospace;
+  --font-en: 'Courier Prime', 'Courier New', Courier, monospace;
+  --font-zh: 'LXGW WenKai TC', 'Noto Serif TC', 'PingFang TC', 'Microsoft JhengHei', serif;
+  --font-mono: 'Courier Prime', 'Courier New', Courier, monospace;
+  
+  /* Font sizes - Desktop */
+  --font-size-h1: 4rem;          /* 64px */
+  --font-size-h2: 3rem;          /* 48px */
+  --font-size-h3: 2rem;          /* 32px */
+  --font-size-h4: 1.5rem;        /* 24px */
+  --font-size-h5: 1.25rem;       /* 20px */
+  --font-size-body-lg: 1.125rem; /* 18px */
+  --font-size-body: 1rem;        /* 16px */
+  --font-size-body-sm: 0.875rem; /* 14px */
+  --font-size-caption: 0.75rem;  /* 12px */
+  
+  /* Line heights */
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.2;
+  --line-height-normal: 1.3;
+  --line-height-relaxed: 1.4;
+  --line-height-loose: 1.7;
+  
+  /* Letter spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-snug: -0.01em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+}
+
+/* ========================================
+   3. BASE STYLES
+   ======================================== */
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-loose);
+  color: #1a1a1a;
+}
+
+/* ========================================
+   4. HEADING STYLES
+   ======================================== */
+
+h1, .h1 {
+  font-family: var(--font-en);
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: 1.5rem;
+}
+
+h2, .h2 {
+  font-family: var(--font-en);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-snug);
+  margin-bottom: 1.25rem;
+}
+
+h3, .h3 {
+  font-family: var(--font-en);
+  font-size: var(--font-size-h3);
+  font-weight: 400;
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+  margin-bottom: 1rem;
+}
+
+h4, .h4 {
+  font-family: var(--font-en);
+  font-size: var(--font-size-h4);
+  font-weight: 400;
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-normal);
+  margin-bottom: 0.75rem;
+}
+
+h5, .h5 {
+  font-family: var(--font-en);
+  font-size: var(--font-size-h5);
+  font-weight: 700;
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-normal);
+  margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   5. BODY TEXT STYLES
+   ======================================== */
+
+p {
+  margin-bottom: 1rem;
+}
+
+.body-lg {
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-loose);
+}
+
+.body-sm {
+  font-size: var(--font-size-body-sm);
+  line-height: 1.6;
+}
+
+/* ========================================
+   6. UTILITY TEXT STYLES
+   ======================================== */
+
+.caption {
+  font-size: var(--font-size-caption);
+  line-height: 1.5;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.overline {
+  font-size: var(--font-size-caption);
+  line-height: 1;
+  letter-spacing: var(--letter-spacing-widest);
+  text-transform: uppercase;
+}
+
+.button-text {
+  font-size: var(--font-size-body-sm);
+  line-height: 1;
+  letter-spacing: var(--letter-spacing-wider);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ========================================
+   7. EMPHASIS STYLES
+   ======================================== */
+
+em, i, .italic {
+  font-family: var(--font-en);
+  font-style: italic;
+}
+
+strong, b, .bold {
+  font-weight: 700;
+}
+
+/* ========================================
+   8. CODE STYLES
+   ======================================== */
+
+code, pre, .code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-body-sm);
+}
+
+pre {
+  padding: 1rem;
+  background-color: #f5f5f5;
+  overflow-x: auto;
+}
+
+/* ========================================
+   9. LANGUAGE-SPECIFIC CLASSES
+   ======================================== */
+
+.font-en {
+  font-family: var(--font-en);
+}
+
+.font-zh {
+  font-family: var(--font-zh);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ========================================
+   10. RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 992px) {
+  :root {
+    --font-size-h1: 3rem;      /* 48px */
+    --font-size-h2: 2.5rem;    /* 40px */
+    --font-size-h3: 1.75rem;   /* 28px */
+    --font-size-h4: 1.375rem;  /* 22px */
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --font-size-h1: 2.5rem;    /* 40px */
+    --font-size-h2: 2rem;      /* 32px */
+    --font-size-h3: 1.5rem;    /* 24px */
+    --font-size-h4: 1.25rem;   /* 20px */
+    --font-size-h5: 1.125rem;  /* 18px */
+  }
+  
+  body {
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size-h1: 2rem;      /* 32px */
+    --font-size-h2: 1.75rem;   /* 28px */
+    --font-size-h3: 1.375rem;  /* 22px */
+  }
+  
+  html {
+    font-size: 15px;
+  }
+}

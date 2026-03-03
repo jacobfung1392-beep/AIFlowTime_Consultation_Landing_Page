@@ -1,0 +1,2649 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIFlowTime - 用 AI 換時間｜建立會自己跑的工作系統</title>
+    <meta name="description" content="用 AI 快速建立第一條工作流，每星期省返 7 小時。專為斜槓族、媽媽、小生意老闆而設，唔使識 Coding，由 0 到有，一步一步砌好。">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@700&family=Antic&display=swap" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Animation Library -->
+    <link href="https://unpkg.com/splitting@1.0.6/dist/splitting.css" rel="stylesheet">
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
+    
+    <!-- Swiper.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --brand-blue: #2563EB;
+            --brand-orange: #D97706; /* Warm orange-brown from logo */
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-light: #F8F9FA;
+            --border-light: #E5E7EB;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            background: #FEFBF8; /* Warm cream/beige - slightly warmer than white */
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+            transition: background-color 0.7s ease;
+        }
+        
+        body.dark-mode {
+            background: #1D1F2C;
+            color: #ffffff;
+        }
+        
+        /* Warm background layer behind grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #FEFBF8; /* Warm cream/beige */
+            z-index: -1;
+            pointer-events: none;
+            transition: background-color 0.7s ease;
+        }
+        
+        body.dark-mode::before {
+            background: #1D1F2C;
+        }
+        
+        .font-heading {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        
+        /* Scroll Animations - Enhanced with slide effects */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Section slide-in effects */
+        section {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Stagger animation for cards */
+        .tilt-card {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .tilt-card.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        
+        .tilt-card:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+        
+        .tilt-card:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+        
+        .tilt-card:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+        
+        /* Identity Carousel */
+        .identity-carousel {
+            position: relative;
+            height: 80px;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 768px) {
+            .identity-carousel {
+                height: 100px;
+            }
+        }
+        
+        .identity-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+        }
+        
+        .identity-item.active {
+            opacity: 1;
+        }
+        
+        /* Parallax Background */
+        .parallax-bg {
+            transform: translateY(0);
+            transition: transform 0.1s ease-out;
+        }
+        
+        /* Card Hover Effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* 3D Tilt Card Effects */
+        .tilt-card {
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: transform 0.2s ease-out;
+            cursor: pointer;
+            max-width: 20rem;
+            width: 100%;
+            background-color: white;
+        }
+        
+        .tilt-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tilt-card img {
+            width: 100%;
+            height: 13rem;
+            object-fit: cover;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+        
+        .tilt-card-content {
+            padding: 1rem 1rem 1.5rem 1rem;
+        }
+        
+        .tilt-card h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #0f172a;
+            margin-top: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tilt-card .card-category {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--brand-orange);
+            margin-top: 0.25rem;
+        }
+        
+        /* Navigation Scroll Effects */
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-bottom-color: rgba(229, 231, 235, 0.8) !important;
+        }
+        
+        nav.transparent {
+            background: rgba(255, 255, 255, 0) !important;
+            border-bottom-color: rgba(229, 231, 235, 0) !important;
+        }
+        
+        nav.transparent #navBrand,
+        nav.transparent .nav-link {
+            color: white !important;
+        }
+        
+        /* Availability Card Styles */
+        .availability-card {
+            width: 100%;
+            max-width: 28rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-light);
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .availability-card-header {
+            padding: 1.5rem;
+        }
+        
+        .availability-card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            color: var(--text-primary);
+        }
+        
+        .availability-card-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .availability-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            min-width: 60px;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-light);
+            background: white;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 0.75rem;
+        }
+        
+        .availability-slot:hover {
+            transform: scale(1.05);
+            background: #F3F4F6;
+        }
+        
+        .availability-slot:active {
+            transform: scale(0.95);
+        }
+        
+        .availability-slot.selected {
+            background: var(--brand-orange);
+            color: white;
+            border-color: var(--brand-orange);
+            box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.3);
+        }
+        
+        .availability-slot-day {
+            font-size: 1.875rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .availability-slot-month {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .availability-slot.selected .availability-slot-month {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .availability-slot:not(.selected) .availability-slot-month {
+            color: var(--text-secondary);
+        }
+        
+        /* Email Modal Styles */
+        .email-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .email-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .email-modal {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .email-modal-overlay.active .email-modal {
+            transform: scale(1);
+        }
+        
+        body.dark-mode .email-modal {
+            background: #1F2937;
+        }
+        
+        .email-modal-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .email-modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        body.dark-mode .email-modal-header h3 {
+            color: #ffffff;
+        }
+        
+        .email-modal-header p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        body.dark-mode .email-modal-header p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .email-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .email-modal-close:hover {
+            background: #F3F4F6;
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .email-modal-close {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark-mode .email-modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .email-modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .email-modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+            color: #1F2937;
+        }
+        
+        body.dark-mode .email-modal-input {
+            background: #374151;
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        
+        .email-modal-input:focus {
+            outline: none;
+            border-color: var(--brand-orange);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        
+        .email-modal-submit {
+            background: var(--brand-orange);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .email-modal-submit:hover:not(:disabled) {
+            background: #B45309;
+            transform: translateY(-1px);
+        }
+        
+        .email-modal-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .email-modal-submit:disabled {
+            background: #D1D5DB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        body.dark-mode .email-modal-submit:disabled {
+            background: #4B5563;
+            color: #9CA3AF;
+        }
+        
+        .email-modal-checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        body.dark-mode .email-modal-checkbox-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .email-modal-checkbox {
+            margin-top: 0.125rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .email-modal-checkbox-label:hover {
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .email-modal-checkbox-label:hover {
+            color: #ffffff;
+        }
+        
+        .email-modal-image {
+            position: absolute;
+            top: -40px;
+            right: 1rem;
+            width: 120px;
+            height: auto;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 640px) {
+            .email-modal-image {
+                width: 80px;
+                top: -30px;
+                right: 0.5rem;
+            }
+        }
+        
+        /* Interactive Hover Button */
+        .btn-interactive {
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--brand-orange);
+            background-color: transparent;
+            border-radius: 9999px;
+            padding: 0.5rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-interactive .btn-text {
+            display: inline-block;
+            transform: translateX(0.25rem);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-interactive:hover .btn-text {
+            transform: translateX(3rem);
+            opacity: 0;
+        }
+        
+        .btn-interactive .btn-hover-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: white;
+            transform: translateX(3rem);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-interactive:hover .btn-hover-content {
+            transform: translateX(-0.25rem);
+            opacity: 1;
+        }
+        
+        .btn-interactive .btn-bg-circle {
+            position: absolute;
+            left: 20%;
+            top: 40%;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: var(--brand-orange);
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .btn-interactive:hover .btn-bg-circle,
+        .btn-interactive:active .btn-bg-circle {
+            left: 0%;
+            top: 0%;
+            width: 100%;
+            height: 100%;
+            transform: scale(1.8);
+            opacity: 1;
+            border-radius: 9999px;
+        }
+        
+        /* Black button variant for 2 mins test button - Day mode (dark) */
+        .btn-interactive.btn-black {
+            border-color: #000000;
+        }
+        
+        .btn-interactive.btn-black .btn-bg-circle {
+            background-color: #000000;
+        }
+        
+        .btn-interactive.btn-black .btn-text,
+        .btn-interactive.btn-black .btn-hover-content {
+            color: #000000;
+        }
+        
+        /* Make text white when button is filled with black (day mode) */
+        .btn-interactive.btn-black:hover .btn-hover-content,
+        .btn-interactive.btn-black:active .btn-hover-content {
+            color: #FFFFFF;
+        }
+        
+        /* Night mode - white/orange button */
+        body.dark-mode .btn-interactive.btn-black {
+            border-color: #ffffff;
+        }
+        
+        body.dark-mode .btn-interactive.btn-black .btn-bg-circle {
+            background-color: #ffffff;
+        }
+        
+        body.dark-mode .btn-interactive.btn-black .btn-text,
+        body.dark-mode .btn-interactive.btn-black .btn-hover-content {
+            color: #ffffff;
+        }
+        
+        /* Make text dark when button is filled with white (night mode) */
+        body.dark-mode .btn-interactive.btn-black:hover .btn-hover-content,
+        body.dark-mode .btn-interactive.btn-black:active .btn-hover-content {
+            color: #1F2937;
+        }
+        
+        .btn-interactive .btn-arrow {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-interactive:hover .btn-arrow {
+            transform: translateX(0.25rem);
+        }
+        
+        /* Animated Dot Matrix Background */
+        .dot-matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.3; /* 30% opacity for blinking stars */
+            opacity: 1.0;
+        }
+        
+        /* Swiper Carousel Styles */
+        .eventsSwiper {
+            padding-bottom: 50px;
+        }
+        
+        .eventsSwiper .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+        
+        .eventsSwiper .tilt-card {
+            width: 100%;
+            height: auto;
+        }
+        
+        .eventsSwiper .swiper-slide-shadow-left,
+        .eventsSwiper .swiper-slide-shadow-right {
+            background: none;
+        }
+        
+        .eventsSwiper .swiper-pagination-bullet {
+            background-color: var(--brand-orange);
+            opacity: 0.5;
+        }
+        
+        .eventsSwiper .swiper-pagination-bullet-active {
+            opacity: 1;
+        }
+        
+        .eventsSwiper .swiper-button-next,
+        .eventsSwiper .swiper-button-prev {
+            color: var(--brand-orange);
+        }
+        
+        .eventsSwiper .swiper-button-next:after,
+        .eventsSwiper .swiper-button-prev:after {
+            font-size: 24px;
+        }
+        
+        /* Timeline Styles */
+        .timeline-item {
+            position: relative;
+            padding-left: 32px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--brand-orange);
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 20px;
+            width: 2px;
+            height: calc(100% - 12px);
+            background-color: var(--border-light);
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        /* FAQ Accordion */
+        .faq-item {
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .faq-question {
+            cursor: pointer;
+            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        
+        .faq-answer.open {
+            max-height: 200px;
+            padding-bottom: 20px;
+        }
+        
+        /* Quote Block */
+        .quote-block {
+            border-left: 4px solid var(--brand-orange);
+            padding-left: 20px;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        
+        /* Infinite Grid Background */
+        .infinite-grid-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .grid-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .grid-layer-subtle {
+            opacity: 0.15;
+            z-index: 0;
+        }
+        
+        .grid-layer-highlight {
+            opacity: 0.6;
+            z-index: 1;
+            mask-image: radial-gradient(300px circle at 0px 0px, black, transparent);
+            -webkit-mask-image: radial-gradient(300px circle at 0px 0px, black, transparent);
+            transition: mask-image 0.1s ease-out, -webkit-mask-image 0.1s ease-out;
+        }
+        
+        .grid-pattern {
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(229, 231, 235, 0.8) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(229, 231, 235, 0.8) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridScroll 20s linear infinite;
+        }
+        
+        @keyframes gridScroll {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 40px 40px;
+            }
+        }
+        
+        /* Decorative Blur Spheres */
+        .blur-sphere {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .blur-sphere-1 {
+            right: -20%;
+            top: -20%;
+            width: 40%;
+            height: 40%;
+            background: rgba(249, 115, 22, 0.4); /* orange-500/40 */
+        }
+        
+        .blur-sphere-2 {
+            right: 10%;
+            top: -10%;
+            width: 20%;
+            height: 20%;
+            background: rgba(37, 99, 235, 0.3); /* brand-blue/30 */
+        }
+        
+        .blur-sphere-3 {
+            left: -10%;
+            bottom: -20%;
+            width: 40%;
+            height: 40%;
+            background: rgba(59, 130, 246, 0.4); /* blue-500/40 */
+        }
+        
+        /* Ensure content is above grid */
+        body > *:not(.infinite-grid-container):not(::before) {
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Ensure navbar stays on top */
+        nav {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 50 !important;
+        }
+        
+        /* Shuffle Grid Animation */
+        .shuffle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 4px;
+            height: 450px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .shuffle-square {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .shuffle-square.shuffling {
+            animation: shufflePop 0.3s ease-out;
+        }
+        
+        @keyframes shufflePop {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(0.95);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .identity-carousel {
+                height: 90px;
+            }
+            
+            .grid-layer-highlight {
+                mask-image: radial-gradient(200px circle at 0px 0px, black, transparent);
+                -webkit-mask-image: radial-gradient(200px circle at 0px 0px, black, transparent);
+            }
+            
+            .shuffle-grid {
+                height: 350px;
+                max-width: 100%;
+            }
+        }
+        
+        /* SKY TOGGLE CSS */
+        .sky-toggle-wrapper {
+            --toggle-size: 12px;
+            --container-width: 5.625em;
+            --container-height: 2.5em;
+            --container-radius: 6.25em;
+            --container-light-bg: #3D7EAE;
+            --container-night-bg: #1D1F2C;
+            --circle-container-diameter: 3.375em;
+            --sun-moon-diameter: 2.125em;
+            --sun-bg: #ECCA2F;
+            --moon-bg: #C4C9D1;
+            --spot-color: #959DB1;
+            --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+            --stars-color: #fff;
+            --clouds-color: #F3FDFF;
+            --back-clouds-color: #AACADF;
+            --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+            --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+            font-size: var(--toggle-size);
+        }
+        
+        .theme-switch {
+            display: inline-block;
+        }
+        
+        .theme-switch__container {
+            width: var(--container-width);
+            height: var(--container-height);
+            background-color: var(--container-light-bg);
+            border-radius: var(--container-radius);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .theme-switch__container::before {
+            content: "";
+            position: absolute;
+            z-index: 1;
+            inset: 0;
+            box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+            border-radius: var(--container-radius);
+        }
+        
+        .theme-switch__checkbox {
+            display: none;
+        }
+        
+        .theme-switch__circle-container {
+            width: var(--circle-container-diameter);
+            height: var(--circle-container-diameter);
+            background-color: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            left: var(--circle-container-offset);
+            top: var(--circle-container-offset);
+            border-radius: var(--container-radius);
+            box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+            display: flex;
+            transition: var(--circle-transition);
+            pointer-events: none;
+        }
+        
+        .theme-switch__sun-moon-container {
+            pointer-events: auto;
+            position: relative;
+            z-index: 2;
+            width: var(--sun-moon-diameter);
+            height: var(--sun-moon-diameter);
+            margin: auto;
+            border-radius: var(--container-radius);
+            background-color: var(--sun-bg);
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+            filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .theme-switch__moon {
+            transform: translateX(100%);
+            width: 100%;
+            height: 100%;
+            background-color: var(--moon-bg);
+            border-radius: inherit;
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .theme-switch__spot {
+            position: absolute;
+            top: 0.75em;
+            left: 0.312em;
+            width: 0.75em;
+            height: 0.75em;
+            border-radius: var(--container-radius);
+            background-color: var(--spot-color);
+            box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+        }
+        
+        .theme-switch__spot:nth-of-type(2) {
+            width: 0.375em;
+            height: 0.375em;
+            top: 0.937em;
+            left: 1.375em;
+        }
+        
+        .theme-switch__spot:nth-last-of-type(3) {
+            width: 0.25em;
+            height: 0.25em;
+            top: 0.312em;
+            left: 0.812em;
+        }
+        
+        .theme-switch__clouds {
+            width: 1.25em;
+            height: 1.25em;
+            background-color: var(--clouds-color);
+            border-radius: var(--container-radius);
+            position: absolute;
+            bottom: -0.625em;
+            left: 0.312em;
+            box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+            transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+        }
+        
+        .theme-switch__stars-container {
+            position: absolute;
+            color: var(--stars-color);
+            top: -100%;
+            left: 0.312em;
+            width: 2.75em;
+            height: auto;
+            transition: var(--transition);
+        }
+        
+        /* Checked States */
+        .theme-switch__checkbox:checked + .theme-switch__container {
+            background-color: var(--container-night-bg);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+            left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+            left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em);
+        }
+        
+        .theme-switch__circle-container:hover {
+            left: calc(var(--circle-container-offset) + 0.187em);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
+            transform: translate(0);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
+            bottom: -4.062em;
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* FLASHLIGHT GRID EFFECT */
+        .flashlight-grid {
+            mask-image: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                black 0%,
+                transparent 100%
+            );
+            -webkit-mask-image: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                black 0%,
+                transparent 100%
+            );
+        }
+        
+        /* DAY/NIGHT BACKGROUND GRID */
+        .background-grid-container {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .day-grid {
+            position: absolute;
+            inset: 0;
+            transition: opacity 0.7s ease;
+            background-image: linear-gradient(#E5E7EB 1px, transparent 1px), linear-gradient(90deg, #E5E7EB 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(1000px) rotateX(60deg) translateY(-100px) scale(2);
+            transform-origin: top center;
+        }
+        
+        .night-grid {
+            position: absolute;
+            inset: 0;
+            transition: opacity 0.7s ease;
+            background-image: radial-gradient(white 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1; /* 10% opacity for shiny stars */
+        }
+        
+        .day-grid.hidden {
+            opacity: 0;
+        }
+        
+        .night-grid.hidden {
+            opacity: 0;
+        }
+        
+        .flashlight-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-color: rgba(217, 119, 6, 0.1);
+            transition: background-color 0.7s ease;
+        }
+        
+        body.dark-mode .flashlight-overlay {
+            background-color: rgba(217, 119, 6, 0.05);
+        }
+        
+        /* FLOATING ANIMATIONS */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float-delayed {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .animate-float-delayed {
+            animation: float-delayed 7s ease-in-out infinite 1s;
+        }
+        
+        /* HERO TEXT GRADIENT */
+        .hero-gradient-text {
+            background: linear-gradient(to right, #F59E0B, #FCD34D);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        body.dark-mode .hero-gradient-text {
+            background: linear-gradient(to right, #FCD34D, #FEF3C7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Hero text colors - Day mode (dark) */
+        .hero-title {
+            color: #1F2937; /* Dark gray/black for day mode */
+        }
+        
+        .hero-subtitle {
+            color: #374151; /* Dark gray for day mode */
+        }
+        
+        .hero-text-primary {
+            color: #1F2937; /* Dark gray/black for day mode */
+        }
+        
+        .hero-text-secondary {
+            color: #4B5563; /* Medium gray for day mode */
+        }
+        
+        .hero-text-tertiary {
+            color: #6B7280; /* Light gray for day mode */
+        }
+        
+        /* Hero text colors - Night mode (white/orange/yellow) */
+        body.dark-mode .hero-title {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .hero-subtitle {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .hero-text-primary {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .hero-text-secondary {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .hero-text-tertiary {
+            color: #ffffff;
+        }
+        
+        /* Logo switching */
+        #dayLogo {
+            display: block;
+        }
+        
+        #nightLogo {
+            display: none;
+        }
+        
+        body.dark-mode #dayLogo {
+            display: none;
+        }
+        
+        body.dark-mode #nightLogo {
+            display: block;
+        }
+        
+        /* Dark mode text colors - only white, orange, yellow */
+        body.dark-mode {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .text-gray-900,
+        body.dark-mode .text-gray-800,
+        body.dark-mode .text-gray-700,
+        body.dark-mode .text-gray-600,
+        body.dark-mode .text-gray-500,
+        body.dark-mode .text-black {
+            color: #ffffff !important;
+        }
+        
+        body.dark-mode .text-orange-600,
+        body.dark-mode .text-orange-500,
+        body.dark-mode .text-orange-400 {
+            color: var(--brand-orange) !important;
+        }
+        
+        /* Mobile toggle visibility */
+        @media (max-width: 768px) {
+            .sky-toggle-wrapper {
+                display: block !important;
+            }
+            
+            .theme-switch {
+                display: inline-block;
+            }
+        }
+        
+        /* Animated Card Stack Styles */
+        .animated-card-stack-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .animated-card-stack-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 644px;
+        }
+        
+        .animated-card-stack {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .animated-card-stack::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .animated-card-stack-spacer {
+            height: 2000px;
+            pointer-events: none;
+        }
+        
+        .animated-card-stack-viewport {
+            position: sticky;
+            top: 0;
+            height: 500px;
+            pointer-events: none;
+        }
+        
+        .animated-card {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 324px;
+            height: 280px;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-light);
+            background: white;
+            padding: 0.25rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transform: translate(-50%, -50%);
+            backface-visibility: hidden;
+            pointer-events: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .animated-card {
+                width: calc(100% - 2rem);
+                max-width: 400px;
+            }
+        }
+        
+        body.dark-mode .animated-card {
+            background: rgba(30, 30, 40, 0.95);
+            border-color: rgba(55, 65, 81, 0.5);
+        }
+        
+        .animated-card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .animated-card-image {
+            flex-shrink: 0;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            outline: 1px solid rgba(0, 0, 0, 0.1);
+            outline-offset: -1px;
+        }
+        
+        body.dark-mode .animated-card-image {
+            outline-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .animated-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            user-select: none;
+        }
+        
+        .animated-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0 0.75rem 1.5rem 0.75rem;
+            flex: 1;
+        }
+        
+        .animated-card-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .animated-card-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .animated-card-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .animated-card-button {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.125rem;
+            height: 2.5rem;
+            padding: 0 0.75rem 0 1rem;
+            border-radius: 9999px;
+            background: var(--text-primary);
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .animated-card-button:hover {
+            opacity: 0.9;
+        }
+        
+        .animated-card-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .animated-card-stack-controls {
+            position: relative;
+            z-index: 10;
+            margin-top: -1px;
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid var(--border-light);
+            padding: 1rem 0;
+        }
+        
+        .animated-card-button-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            height: 2.25rem;
+            padding: 0 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        body.dark-mode .animated-card-button-control {
+            background: rgba(30, 30, 40, 0.95);
+            border-color: rgba(55, 65, 81, 0.5);
+        }
+        
+        .animated-card-button-control:hover {
+            background: var(--bg-light);
+        }
+        
+        body.dark-mode .animated-card-button-control:hover {
+            background: rgba(40, 40, 50, 0.95);
+        }
+        
+        .animated-card-button-control:active {
+            transform: scale(0.98);
+        }
+        
+        @media (min-width: 640px) {
+            .animated-card {
+                width: 512px;
+            }
+        }
+        
+        /* Service Card (AI 省時諮詢) - Glass effect like event cards */
+        .service-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateZ(0);
+            will-change: auto;
+            backface-visibility: hidden;
+        }
+        
+        .service-card-title {
+            color: #1F2937;
+        }
+        
+        .service-card-text {
+            color: #4B5563;
+        }
+        
+        /* Night mode - transparent glass effect */
+        body.dark-mode .service-card {
+            background: rgba(30, 30, 40, 0.8);
+            border-color: rgba(55, 65, 81, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        body.dark-mode .service-card-title {
+            color: #ffffff;
+        }
+        
+        body.dark-mode .service-card-text {
+            color: #ffffff;
+        }
+        
+        /* Divider Line */
+        .divider-line {
+            width: 100%;
+            max-width: 200px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, currentColor, transparent);
+            opacity: 0.3;
+        }
+        
+        body.dark-mode .divider-line {
+            color: #ffffff;
+        }
+        
+        body:not(.dark-mode) .divider-line {
+            color: #1F2937;
+        }
+        
+        /* Profile Button Styles */
+        .profile-button {
+            height: 40px;
+        }
+        
+        .profile-button img {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+        }
+        
+        body.dark-mode .profile-button {
+            background-color: #ffffff;
+            color: #1F2937;
+        }
+        
+        body.dark-mode .profile-button:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Orbiting Circles Styles */
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg) translateY(var(--radius)) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateY(var(--radius)) rotate(-360deg);
+            }
+        }
+        
+        .orbit-path {
+            stroke-width: 1;
+            fill: none;
+        }
+        
+        body.dark-mode .orbit-path {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+        
+        body:not(.dark-mode) .orbit-path {
+            stroke: rgba(0, 0, 0, 0.1);
+        }
+        
+        .orbit-circle {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            animation: orbit linear infinite;
+            animation-delay: calc(var(--delay) * -1s);
+            left: 50%;
+            top: 50%;
+            margin-left: calc(var(--size) / -2);
+            margin-top: calc(var(--size) / -2);
+        }
+        
+        body.dark-mode .orbit-circle {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        body:not(.dark-mode) .orbit-circle {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .orbit-circle svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Gooey Text Morphing Styles */
+        .gooey-text-container {
+            position: relative;
+            min-height: 200px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+        }
+        
+        .gooey-text-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: url(#threshold);
+            position: relative;
+            width: 100%;
+            height: 200px;
+        }
+        
+        .gooey-text-span {
+            position: absolute;
+            display: inline-block;
+            text-align: center;
+            user-select: none;
+            font-size: 3.75rem;
+            font-weight: 700;
+            color: #1F2937;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .gooey-text-span {
+                font-size: 60pt;
+            }
+        }
+        
+        body.dark-mode .gooey-text-span {
+            color: #ffffff;
+        }
+        
+        .gooey-text-svg {
+            position: absolute;
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+        
+        /* Portfolio Hero Styles - Simplified */
+        .portfolio-hero-simple {
+            position: relative;
+            padding: 4rem 1rem;
+            background: transparent;
+        }
+        
+        .portfolio-hero-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding: 1.5rem;
+        }
+        
+        .portfolio-hero-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1536px;
+            margin: 0 auto;
+        }
+        
+        .portfolio-menu-button {
+            padding: 0.5rem;
+            transition: color 0.3s;
+            z-index: 50;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .portfolio-menu-button svg {
+            width: 2rem;
+            height: 2rem;
+            transition: color 0.3s;
+        }
+        
+        .portfolio-signature {
+            font-size: 2.25rem;
+            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+        }
+        
+        .portfolio-theme-toggle {
+            position: relative;
+            width: 4rem;
+            height: 2rem;
+            border-radius: 9999px;
+            transition: opacity 0.3s, background-color 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .portfolio-theme-toggle:hover {
+            opacity: 0.8;
+        }
+        
+        body.dark-mode .portfolio-theme-toggle {
+            background-color: hsl(0, 0%, 15%);
+        }
+        
+        body:not(.dark-mode) .portfolio-theme-toggle {
+            background-color: hsl(0, 0%, 90%);
+        }
+        
+        .portfolio-theme-toggle-slider {
+            position: absolute;
+            top: 0.25rem;
+            left: 0.25rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 9999px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        
+        body.dark-mode .portfolio-theme-toggle-slider {
+            background-color: hsl(0, 0%, 100%);
+            transform: translateX(2rem);
+        }
+        
+        body:not(.dark-mode) .portfolio-theme-toggle-slider {
+            background-color: hsl(0, 0%, 10%);
+            transform: translateX(0);
+        }
+        
+        .portfolio-menu-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 200px;
+            margin-top: 0.5rem;
+            margin-left: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            z-index: 100;
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-menu-dropdown {
+                width: 240px;
+            }
+        }
+        
+        body.dark-mode .portfolio-menu-dropdown {
+            background-color: hsl(0, 0%, 0%);
+        }
+        
+        body:not(.dark-mode) .portfolio-menu-dropdown {
+            background-color: hsl(0, 0%, 98%);
+        }
+        
+        .portfolio-menu-item {
+            display: block;
+            font-size: 1.125rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            padding: 0.375rem 0.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-menu-item {
+                font-size: 1.25rem;
+            }
+        }
+        
+        .portfolio-menu-item.highlight {
+            color: #C3E41D;
+        }
+        
+        .portfolio-hero-center {
+            position: relative;
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .portfolio-hero-name-container {
+            position: relative;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .portfolio-hero-name {
+            font-weight: 700;
+            line-height: 0.9;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+        }
+        
+        /* Day mode - dark text */
+        body:not(.dark-mode) .portfolio-hero-name {
+            color: #1F2937;
+        }
+        
+        .portfolio-hero-name-text {
+            font-size: 48px;
+        }
+        
+        @media (min-width: 640px) {
+            .portfolio-hero-name-text {
+                font-size: 64px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-hero-name-text {
+                font-size: 80px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .portfolio-hero-name-text {
+                font-size: 96px;
+            }
+        }
+        
+        .portfolio-profile-picture {
+            position: relative;
+            flex-shrink: 0;
+            border-radius: 9999px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        
+        .portfolio-profile-picture:hover {
+            transform: scale(1.05);
+        }
+        
+        .portfolio-profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .portfolio-profile-size-sm {
+            width: 156px;
+            height: 156px;
+        }
+        
+        @media (min-width: 640px) {
+            .portfolio-profile-size-sm {
+                width: 208px;
+                height: 208px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-profile-size-sm {
+                width: 260px;
+                height: 260px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .portfolio-profile-size-sm {
+                width: 312px;
+                height: 312px;
+            }
+        }
+        
+        /* Match image height to name height and enlarge by 30% */
+        @media (min-width: 640px) {
+            .portfolio-profile-size-sm {
+                height: 166px;
+                width: 166px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-profile-size-sm {
+                height: 208px;
+                width: 208px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .portfolio-profile-size-sm {
+                height: 250px;
+                width: 250px;
+            }
+        }
+        
+        .portfolio-tagline {
+            position: absolute;
+            bottom: 4rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            padding: 0 1.5rem;
+        }
+        
+        @media (min-width: 640px) {
+            .portfolio-tagline {
+                bottom: 5rem;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-tagline {
+                bottom: 6rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .portfolio-tagline {
+                bottom: 8rem;
+            }
+        }
+        
+        @media (min-width: 1280px) {
+            .portfolio-tagline {
+                bottom: 9rem;
+            }
+        }
+        
+        .portfolio-tagline-text {
+            font-size: 15px;
+            text-align: center;
+            transition: color 0.3s;
+            font-family: 'Antic', sans-serif;
+        }
+        
+        @media (min-width: 640px) {
+            .portfolio-tagline-text {
+                font-size: 18px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-tagline-text {
+                font-size: 20px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .portfolio-tagline-text {
+                font-size: 22px;
+            }
+        }
+        
+        .portfolio-scroll-indicator {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: color 0.3s;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-scroll-indicator {
+                bottom: 2.5rem;
+            }
+        }
+        
+        .portfolio-scroll-indicator svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            transition: color 0.3s;
+        }
+        
+        @media (min-width: 768px) {
+            .portfolio-scroll-indicator svg {
+                width: 2rem;
+                height: 2rem;
+            }
+        }
+        
+        .blur-text-container {
+            display: inline-flex;
+            flex-wrap: wrap;
+        }
+        
+        .blur-text-segment {
+            display: inline-block;
+            filter: blur(10px);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.5s ease-out;
+        }
+        
+        .blur-text-segment.visible {
+            filter: blur(0);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .blur-text-segment.direction-bottom {
+            transform: translateY(20px);
+        }
+        
+        .blur-text-segment.direction-bottom.visible {
+            transform: translateY(0);
+        }
+        
+        /* Rainbow Button Styles */
+        :root {
+            --color-1: 0 100% 63%;
+            --color-2: 270 100% 63%;
+            --color-3: 210 100% 63%;
+            --color-4: 195 100% 63%;
+            --color-5: 90 100% 63%;
+        }
+        
+        .rainbow-button {
+            position: relative;
+            display: inline-flex;
+            height: 2.75rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            border: 0;
+            background-size: 200%;
+            padding: 0.5rem 2rem;
+            font-weight: 500;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: rainbow 2s infinite linear;
+            background-image: linear-gradient(#121213, #121213), 
+                              linear-gradient(#121213 50%, rgba(18, 18, 19, 0.6) 80%, rgba(18, 18, 19, 0)), 
+                              linear-gradient(90deg, hsl(var(--color-1)), hsl(var(--color-5)), hsl(var(--color-3)), hsl(var(--color-4)), hsl(var(--color-2)));
+            background-clip: padding-box, border-box, border-box;
+            background-origin: border-box;
+            border: calc(0.08 * 1rem) solid transparent;
+        }
+        
+        body:not(.dark-mode) .rainbow-button {
+            background-image: linear-gradient(#fff, #fff), 
+                              linear-gradient(#fff 50%, rgba(255, 255, 255, 0.6) 80%, rgba(0, 0, 0, 0)), 
+                              linear-gradient(90deg, hsl(var(--color-1)), hsl(var(--color-5)), hsl(var(--color-3)), hsl(var(--color-4)), hsl(var(--color-2)));
+            color: #000000;
+        }
+        
+        .rainbow-button::before {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: 50%;
+            z-index: 0;
+            height: 20%;
+            width: 60%;
+            transform: translateX(-50%);
+            animation: rainbow 2s infinite linear;
+            background: linear-gradient(90deg, hsl(var(--color-1)), hsl(var(--color-5)), hsl(var(--color-3)), hsl(var(--color-4)), hsl(var(--color-2)));
+            background-size: 200%;
+            filter: blur(0.8rem);
+        }
+        
+        .rainbow-button:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
+        
+        .rainbow-button:disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        
+        @keyframes rainbow {
+            0% {
+                background-position: 0%;
+            }
+            100% {
+                background-position: 200%;
+            }
+        }
+        
+        /* Background Paths Effect */
+        .background-paths-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .background-paths-svg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .background-path {
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        
+        body.dark-mode .background-path {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+        
+        body:not(.dark-mode) .background-path {
+            stroke: rgba(15, 23, 42, 0.1);
+        }
+        
+        .service-card-container {
+            position: relative;
+            z-index: 1;
+            isolation: isolate;
+        }
+        
+        .service-card {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <!-- Day/Night Background Grid -->
+    <div class="background-grid-container">
+        <!-- Day Mode Grid -->
+        <div class="day-grid hidden" id="dayGrid"></div>
+        
+        <!-- Night Mode Grid (Starry) -->
+        <div class="night-grid" id="nightGrid"></div>
+        
+        <!-- Flashlight Effect -->
+        <div class="flashlight-overlay flashlight-grid" id="flashlightOverlay"></div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav id="mainNav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(229, 231, 235, 0.5);">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="linktree.html" id="navBrand" class="font-heading font-bold text-2xl text-gray-900 transition-colors duration-300 cursor-pointer hover:text-orange-600">
+                    AIFlowTime
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#about" class="text-gray-600 hover:text-orange-600 transition-colors nav-link" style="--tw-text-opacity: 1; color: rgb(234 88 12 / var(--tw-text-opacity));" onmouseover="this.style.color='var(--brand-orange)'" onmouseout="this.style.color='rgb(75 85 99)'">關於我們</a>
+                    <a href="#services" class="text-gray-600 hover:text-orange-600 transition-colors nav-link" style="--tw-text-opacity: 1; color: rgb(234 88 12 / var(--tw-text-opacity));" onmouseover="this.style.color='var(--brand-orange)'" onmouseout="this.style.color='rgb(75 85 99)'">服務</a>
+                    <a href="consultation.html" class="text-gray-600 hover:text-orange-600 transition-colors nav-link" style="--tw-text-opacity: 1; color: rgb(234 88 12 / var(--tw-text-opacity));" onmouseover="this.style.color='var(--brand-orange)'" onmouseout="this.style.color='rgb(75 85 99)'">諮詢</a>
+                    <a href="#contact" class="text-gray-600 hover:text-orange-600 transition-colors nav-link" style="--tw-text-opacity: 1; color: rgb(234 88 12 / var(--tw-text-opacity));" onmouseover="this.style.color='var(--brand-orange)'" onmouseout="this.style.color='rgb(75 85 99)'">聯絡</a>
+                    
+                    <!-- Sky Toggle -->
+                    <div class="sky-toggle-wrapper">
+                        <label class="theme-switch">
+                            <input type="checkbox" class="theme-switch__checkbox" id="themeToggle" checked>
+                            <div class="theme-switch__container">
+                                <div class="theme-switch__clouds"></div>
+                                <div class="theme-switch__stars-container">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" fill="currentColor" />
+                                    </svg>
+                </div>
+                                <div class="theme-switch__circle-container">
+                                    <div class="theme-switch__sun-moon-container">
+                                        <div class="theme-switch__moon">
+                                            <div class="theme-switch__spot"></div>
+                                            <div class="theme-switch__spot"></div>
+                                            <div class="theme-switch__spot"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <button class="btn-interactive">
+                        <span class="btn-text">立即預約</span>
+                        <div class="btn-hover-content">
+                            <span>立即預約</span>
+                            <svg class="btn-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                        </div>
+                        <div class="btn-bg-circle"></div>
+                </button>
+                </div>
+                <div class="flex items-center gap-4 md:hidden">
+                    <!-- Sky Toggle for Mobile -->
+                    <div class="sky-toggle-wrapper">
+                        <label class="theme-switch">
+                            <input type="checkbox" class="theme-switch__checkbox" id="themeToggleMobile" checked>
+                            <div class="theme-switch__container">
+                                <div class="theme-switch__clouds"></div>
+                                <div class="theme-switch__stars-container">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71123C136.607 6.55462 136.996 7.56303 136.996 8.72727C136.996 7.95722 137.172 7.25134 137.525 6.59129C137.886 5.93124 138.372 5.39954 138.98 5.00535C139.598 4.60199 140.268 4.39114 141 4.35447C139.88 4.2903 138.936 3.85027 138.16 3.00688C137.384 2.16348 136.996 1.16425 136.996 0C136.996 1.16425 136.607 2.16348 135.831 3.00688ZM31 23.3545C32.1114 23.2995 33.0551 22.8503 33.8313 22.0069C34.6075 21.1635 34.9956 20.1642 34.9956 19C34.9956 20.1642 35.3837 21.1635 36.1599 22.0069C36.9361 22.8503 37.8798 23.2903 39 23.3545C38.2679 23.3911 37.5976 23.602 36.9802 24.0053C36.3716 24.3995 35.8864 24.9312 35.5248 25.5913C35.172 26.2513 34.9956 26.9572 34.9956 27.7273C34.9956 26.563 34.6075 25.5546 33.8313 24.7112C33.0551 23.8587 32.1114 23.4095 31 23.3545ZM0 36.3545C1.11136 36.2995 2.05513 35.8503 2.83131 35.0069C3.6075 34.1635 3.99559 33.1642 3.99559 32C3.99559 33.1642 4.38368 34.1635 5.15987 35.0069C5.93605 35.8503 6.87982 36.2903 8 36.3545C7.26792 36.3911 6.59757 36.602 5.98015 37.0053C5.37155 37.3995 4.88644 37.9312 4.52481 38.5913C4.172 39.2513 3.99559 39.9572 3.99559 40.7273C3.99559 39.563 3.6075 38.5546 2.83131 37.7112C2.05513 36.8587 1.11136 36.4095 0 36.3545ZM56.8313 24.0069C56.0551 24.8503 55.1114 25.2995 54 25.3545C55.1114 25.4095 56.0551 25.8587 56.8313 26.7112C57.6075 27.5546 57.9956 28.563 57.9956 29.7273C57.9956 28.9572 58.172 28.2513 58.5248 27.5913C58.8864 26.9312 59.3716 26.3995 59.9802 26.0053C60.5976 25.602 61.2679 25.3911 62 25.3545C60.8798 25.2903 59.9361 24.8503 59.1599 24.0069C58.3837 23.1635 57.9956 22.1642 57.9956 21C57.9956 22.1642 57.6075 23.1635 56.8313 24.0069ZM81 25.3545C82.1114 25.2995 83.0551 24.8503 83.8313 24.0069C84.6075 23.1635 84.9956 22.1642 84.9956 21C84.9956 22.1642 85.3837 23.1635 86.1599 24.0069C86.9361 24.8503 87.8798 25.2903 89 25.3545C88.2679 25.3911 87.5976 25.602 86.9802 26.0053C86.3716 26.3995 85.8864 26.9312 85.5248 27.5913C85.172 28.2513 84.9956 28.9572 84.9956 29.7273C84.9956 28.563 84.6075 27.5546 83.8313 26.7112C83.0551 25.8587 82.1114 25.4095 81 25.3545ZM136 36.3545C137.111 36.2995 138.055 35.8503 138.831 35.0069C139.607 34.1635 139.996 33.1642 139.996 32C139.996 33.1642 140.384 34.1635 141.16 35.0069C141.936 35.8503 142.88 36.2903 144 36.3545C143.268 36.3911 142.598 36.602 141.98 37.0053C141.372 37.3995 140.886 37.9312 140.525 38.5913C140.172 39.2513 139.996 39.9572 139.996 40.7273C139.996 39.563 139.607 38.5546 138.831 37.7112C138.055 36.8587 137.111 36.4095 136 36.3545ZM101.831 49.0069C101.055 49.8503 100.111 50.2995 99 50.3545C100.111 50.4095 101.055 50.8587 101.831 51.7112C102.607 52.5546 102.996 53.563 102.996 54.7273C102.996 53.9572 103.172 53.2513 103.525 52.5913C103.886 51.9312 104.372 51.3995 104.98 51.0053C105.598 50.602 106.268 50.3911 107 50.3545C105.88 50.2903 104.936 49.8503 104.16 49.0069C103.384 48.1635 102.996 47.1642 102.996 46C102.996 47.1642 102.607 48.1635 101.831 49.0069Z" fill="currentColor" />
+                                    </svg>
+                                </div>
+                                <div class="theme-switch__circle-container">
+                                    <div class="theme-switch__sun-moon-container">
+                                        <div class="theme-switch__moon">
+                                            <div class="theme-switch__spot"></div>
+                                            <div class="theme-switch__spot"></div>
+                                            <div class="theme-switch__spot"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden relative">
+        <!-- Animated Dot Matrix Background -->
+        <canvas id="heroDotMatrix" class="dot-matrix-canvas"></canvas>
+        
+        <!-- Logo Below Navigation -->
+        <div class="absolute top-20 left-1/2 transform -translate-x-1/2 z-40" style="width: 150px; text-align: center;">
+            <!-- Day Mode Logo -->
+            <img id="dayLogo" src="LOGO_transparent_background.png" alt="AIFlowTime Logo" class="w-32 h-auto mx-auto" style="display: none;">
+            <!-- Night Mode Logo -->
+            <img id="nightLogo" src="Landing-page-logo.png" alt="AIFlowTime Logo" class="w-32 h-auto mx-auto" style="display: block;">
+        </div>
+        <div class="max-w-6xl mx-auto px-6 mt-24 md:mt-28 relative z-10">
+            <div class="flex flex-col items-center">
+                <!-- Main Content - Centered -->
+                <div class="w-full max-w-4xl fade-in-up animate-float">
+                    <h1 class="font-heading font-bold text-5xl lg:text-7xl leading-tight tracking-tight mb-6 hero-title">
+                        馬上搞懂 AI，<br/>
+                        讓你 <span class="hero-gradient-text">輸出翻倍！</span>
+                    </h1>
+                    
+                    <p class="text-xl md:text-2xl hero-subtitle mb-6 font-medium drop-shadow-lg">
+                        AI已能夠代替一個，甚至乎幾個人手，關鍵係，<br><span class="font-bold text-2xl md:text-3xl" style="color: var(--brand-orange);">你識得用未？</span>
+                    </p>
+                    
+                    <div class="text-center mb-12">
+                        <a href="quiz.html" class="btn-interactive btn-black text-lg px-8 py-4 mx-auto inline-block">
+                            <span class="btn-text">2分鐘AI能力評估</span>
+                            <div class="btn-hover-content">
+                                <span>2分鐘AI能力評估</span>
+                                <svg class="btn-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </div>
+                            <div class="btn-bg-circle"></div>
+                        </a>
+                    </div>
+                    
+                    <!-- Divider -->
+                    <div class="my-12 flex items-center justify-center">
+                        <div class="divider-line"></div>
+                    </div>
+                    
+                    <h2 class="text-xl md:text-2xl hero-text-secondary mb-6 font-medium">
+                        用 AI 快速建立第一條工作流｜每星期省返 7 小時
+                    </h2>
+                    
+                    <p class="text-lg hero-text-tertiary mb-8">
+                        唔使識 Coding｜唔使辭工｜由 0 到有，一步一步砌好
+                    </p>
+                    
+                    <!-- Orbiting Circles -->
+                    <div class="relative flex h-[350px] w-full max-w-lg mx-auto flex-col items-center justify-center overflow-visible my-12">
+                        <span class="pointer-events-none whitespace-pre-wrap text-center text-4xl md:text-5xl font-bold leading-none hero-text-primary z-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            AI 工具
+                        </span>
+                        
+                        <!-- Orbit paths and icons will be added by JavaScript -->
+                        <div id="orbitingCirclesContainer" class="absolute inset-0 flex items-center justify-center"></div>
+                </div>
+                
+                    <!-- Divider -->
+                    <div class="my-12 flex items-center justify-center">
+                        <div class="divider-line"></div>
+                </div>
+                
+                    <!-- Portfolio Hero Section - Simplified (Text and Image Only) -->
+                    <div class="portfolio-hero-simple fade-in-up">
+                        <!-- Name on Left, Image on Right -->
+                        <div class="portfolio-hero-center">
+                            <div class="portfolio-hero-name-container">
+                                <div id="portfolioNameJacob" class="portfolio-hero-name portfolio-hero-name-text"></div>
+                                <div id="portfolioNameFung" class="portfolio-hero-name portfolio-hero-name-text"></div>
+            </div>
+                            
+                            <!-- Profile Picture on Right -->
+                            <div class="portfolio-profile-picture portfolio-profile-size-sm">
+                                <img
+                                    src="Jacob.jpg"
+                                    alt="Jacob Fung"
+                                />
+        </div>
+        </div>
+                        
+                        <!-- Who is this guy? Section -->
+                        <div class="portfolio-description text-center mt-8 max-w-2xl mx-auto">
+                            <h3 class="text-2xl font-bold mb-4" style="color: var(--brand-orange);">佢係邊個？</h3>
+                            <p class="text-sm text-gray-600 mb-4">
+                                AIFlowTime 的定位很單純：把 AI 從「工具」變成「系統」。
+                            </p>
+                            <p class="text-sm text-gray-600 mb-4">
+                                面向香港斜槓族與小生意經營者，核心承諾只有一個——每星期省回 7–10 小時，讓時間回到收入、生活與選擇權之中。
+                            </p>
+                            <p class="text-sm text-gray-600 mb-8">
+                                創辦人 Jacob 自 2025 年秋季起在 Instagram 以 Reels 形式持續拆解 AI 工具的真實用法；兩個月累積 20,000 追蹤。這不是單純流量，而是一套把省時方法做到可複製、可交付的工作流框架。
+                            </p>
+                            
+                            <!-- More about Jacob Button -->
+                            <div class="flex justify-center mb-12">
+                                <a href="about-jacob.html" class="profile-button inline-flex items-center justify-center rounded-full bg-gray-900 text-white text-sm font-medium shadow-sm hover:bg-gray-800 transition-colors py-0 ps-0">
+                                    <div class="me-0.5 flex aspect-square h-full p-1.5">
+                                        <img class="h-auto w-full rounded-full" src="Jacob.jpg" alt="Jacob Fung" width="32" height="32" />
+                    </div>
+                                    <span class="px-4">More about Jacob</span>
+                                </a>
+                </div>
+                
+                            <!-- Divider -->
+                            <div class="my-12 flex items-center justify-center">
+                                <div class="divider-line"></div>
+                    </div>
+                        </div>
+                </div>
+                
+                    <!-- Availability Card - Centered Vertically -->
+                    <div class="max-w-4xl mx-auto px-6 text-center">
+                        <div id="availabilityCard" class="w-full flex flex-col justify-center text-center">
+                            <h2 class="font-heading font-bold text-4xl md:text-5xl leading-tight mb-6 hero-text-primary text-center">
+                                Jacob 親身教你點做！
+                            </h2>
+                            
+                            <!-- 適合邊個？ Section -->
+                            <div class="text-center mb-4 fade-in-up">
+                                <h2 class="font-heading font-bold text-3xl md:text-4xl hero-text-primary mb-4 text-center">
+                                    適合邊個？
+                                </h2>
+                                
+                                <!-- Identity Carousel Below Question -->
+                                <div class="mt-2 mb-4 text-center">
+                                    <h2 class="font-heading font-bold text-5xl md:text-6xl lg:text-7xl leading-tight text-center">
+                                        <span class="identity-carousel block text-orange-600" style="color: var(--brand-orange);">
+                                            <span class="identity-item active">斜槓族？</span>
+                                            <span class="identity-item">媽媽？</span>
+                                            <span class="identity-item">小生意老闆？</span>
+                                            <span class="identity-item">AI新手？</span>
+                                            <span class="identity-item">學生？</span>
+                                        </span>
+                                    </h2>
+                                </div>
+                                
+                                <p class="text-xl text-gray-600 text-center mb-8">
+                                    無論你係邊種身份，我哋都有解決方案
+                                </p>
+                                
+                                <!-- Get Free Guide Button -->
+                                <div class="flex justify-center mt-6">
+                                    <button class="btn-interactive text-lg px-8 py-4 w-full md:w-auto" onclick="openEmailModal()">
+                                        <span class="btn-text">領取2026年5個必學AI指南</span>
+                                        <div class="btn-hover-content">
+                                            <span>領取2026年5個必學AI指南</span>
+                                            <svg class="btn-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="btn-bg-circle"></div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Urgency Section -->
+    <section id="urgency" class="py-16">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="fade-in-up">
+                <h2 class="font-heading font-bold text-3xl md:text-4xl text-gray-900 mb-8">
+                    而家入場，會比大多數人更快建立優勢
+                </h2>
+                
+                <p class="text-lg text-gray-700 leading-relaxed mb-8 max-w-3xl mx-auto">
+                    努力不是短缺，系統才是。大部分人用 AI 只是問答案；真正拉開距離的，是把 AI 放進流程。當工作開始自動運行，省下來的時間自然會變成副業的燃料。
+                </p>
+                
+                <!-- Sam Altman Quote Image -->
+                <div class="flex justify-center mb-6">
+                    <img src="Gemini_Generated_Image_xlxr2rxlxr2rxlxr.png" alt="AI One-Person Company" class="max-w-full h-auto" style="max-width: 600px; border: none; outline: none; box-shadow: none;">
+                </div>
+                
+                <div class="quote-block text-left max-w-2xl mx-auto mb-8">
+                    <p class="text-lg mb-2">
+                        "...a one-person billion-dollar company... unimaginable without AI."
+                    </p>
+                    <p class="text-sm">
+                        Sam Altman 曾提到：AI 令「一人公司」做到過去要幾百人先做到嘅事。
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <button class="btn-interactive text-lg px-8 py-4 mx-auto" onclick="window.location.href='consultation.html'">
+                        <span class="btn-text">了解 90 分鐘諮詢內容</span>
+                        <div class="btn-hover-content">
+                            <span>了解 90 分鐘諮詢內容</span>
+                            <svg class="btn-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </div>
+                        <div class="btn-bg-circle"></div>
+                </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service Section -->
+    <section id="services" class="py-16 relative overflow-hidden px-0 md:px-6">
+        <!-- Shader Banner for Title Section - Full Width on Mobile -->
+        <div class="relative mb-16 fade-in-up w-full">
+            <!-- Shader Background Canvas -->
+            <canvas id="servicesShader" class="absolute inset-0 w-full object-contain touch-none" style="height: 200px; background: transparent; z-index: 0; top: -40px; left: 0; right: 0; width: 100%;"></canvas>
+            
+            <div class="text-center relative z-10 px-6 md:px-0" style="padding-top: 60px; padding-bottom: 40px;">
+                <h2 class="font-heading font-bold text-3xl md:text-4xl text-white mb-4 drop-shadow-lg">
+                    服務簡介
+                </h2>
+                <p class="text-xl text-white/90 drop-shadow-md">
+                    專注為你打造最適合的 AI 工作流
+                </p>
+            </div>
+            </div>
+            
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <!-- Background Paths Effect -->
+            <div class="background-paths-container" id="serviceCardPaths"></div>
+            
+            <div class="service-card-container">
+                <div class="service-card rounded-2xl shadow-xl p-8 md:p-12 max-w-2xl mx-auto">
+                <div class="text-center">
+                        <h3 class="font-heading font-bold text-2xl mb-4 service-card-title">AI 省時諮詢</h3>
+                        <p class="text-3xl font-bold mb-2" style="color: var(--brand-orange);">HK$1,500</p>
+                        <p class="service-card-text mb-6">90 分鐘</p>
+                    
+                    <div class="text-left mb-8">
+                        <p class="service-card-text mb-4">
+                            <strong>適合：</strong>想快速釐清方向、建立第一條 AI 工作流的人
+                        </p>
+                        <ul class="service-card-text space-y-2">
+                            <li>• 一對一問題定位（時間黑洞／目標／優先序）</li>
+                            <li>• 工作流設計建議（可落地步驟）</li>
+                            <li>• 即場示範與提示詞調整（按你情境）</li>
+                            <li>• 帶走：流程清單＋可即用 prompts／模板（電子版）</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="text-center space-y-4">
+                        <button class="btn-secondary text-base font-medium" onclick="window.location.href='consultation.html'">
+                            更多詳情
+                    </button>
+                        <div>
+                            <a href="consultation.html" class="rainbow-button text-lg font-medium inline-block" style="text-decoration: none;">
+                                立即預約
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gooey Text Morphing Section -->
+    <section class="pt-8 pb-16">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="gooey-text-container fade-in-up">
+                <!-- SVG Filter for Gooey Effect -->
+                <svg class="gooey-text-svg" aria-hidden="true" focusable="false">
+                    <defs>
+                        <filter id="threshold">
+                            <feColorMatrix
+                                in="SourceGraphic"
+                                type="matrix"
+                                values="1 0 0 0 0
+                                        0 1 0 0 0
+                                        0 0 1 0 0
+                                        0 0 0 255 -140"
+                            />
+                        </filter>
+                    </defs>
+                </svg>
+                
+                <div class="gooey-text-wrapper">
+                    <span id="gooeyText1" class="gooey-text-span"></span>
+                    <span id="gooeyText2" class="gooey-text-span"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="font-heading font-bold text-3xl md:text-4xl mb-4">
+                    即將舉辦活動
+                </h2>
+                <p class="text-xl">
+                    線上工作坊，手把手教你建立 AI 工作流
+                </p>
+            </div>
+            
+            <!-- Animated Card Stack -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="text-white py-16 relative z-50" style="background: linear-gradient(to bottom, #92400E, #78350F);">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid md:grid-cols-3 gap-12">
+                <!-- Brand -->
+                <div>
+                    <div class="font-heading font-bold text-3xl mb-4 text-white">AIFlowTime</div>
+                    <p class="text-white mb-6">
+                        用 AI 換時間｜建立會自己跑的工作系統
+                    </p>
+                    <p class="text-white text-sm">
+                        專為香港人而設嘅 AI 自動化諮詢服務，幫你用最少時間建立最強工作流。
+                    </p>
+                </div>
+                
+                <!-- Contact -->
+                <div>
+                    <h4 class="font-semibold text-lg mb-4 text-white">聯絡我們</h4>
+                    <div class="space-y-3 text-white">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-3 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                            <a href="https://instagram.com/AIFlowTime" target="_blank" class="text-white hover:text-orange-200 transition-colors">@AIFlowTime</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-semibold text-lg mb-4 text-white">快速連結</h4>
+                    <div class="space-y-3">
+                        <div><a href="consultation.html" class="text-white hover:text-orange-200 transition-colors">諮詢服務</a></div>
+                        <div><a href="#services" class="text-white hover:text-orange-200 transition-colors">工作坊</a></div>
+                        <div><a href="#about" class="text-white hover:text-orange-200 transition-colors">關於我們</a></div>
+                        <div><a href="#contact" class="text-white hover:text-orange-200 transition-colors">聯絡方式</a></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/30 mt-12 pt-8 text-center text-white">
+                <p>&copy; 2026 AIFlowTime. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Modal -->
+    <div id="emailModal" class="email-modal-overlay" onclick="closeEmailModalOnOverlay(event)">
+        <div class="email-modal" onclick="event.stopPropagation()">
+            <img src="Working Hard Capy.png" alt="Working Hard Capy" class="email-modal-image">
+            <button class="email-modal-close" onclick="closeEmailModal()" aria-label="Close">&times;</button>
+            <div class="email-modal-header">
+                <h3>領取免費2026年AI指南</h3>
+                <p>想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！</p>
+            </div>
+            <form class="email-modal-form" onsubmit="handleEmailSubmit(event)">
+                <input 
+                    type="text" 
+                    class="email-modal-input" 
+                    placeholder="你的名字" 
+                    required
+                    id="nameInput"
+                    minlength="2"
+                    title="請輸入你的名字"
+                />
+                <input 
+                    type="tel" 
+                    class="email-modal-input" 
+                    placeholder="12345678 (8位數字)" 
+                    required
+                    id="whatsappInput"
+                    pattern="[0-9]{8}"
+                    title="請輸入8位數字WhatsApp號碼"
+                    minlength="8"
+                    maxlength="8"
+                />
+                <label class="email-modal-checkbox-label">
+                    <input 
+                        type="checkbox" 
+                        id="consentCheckbox" 
+                        class="email-modal-checkbox"
+                        required
+                    />
+                    <span>我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。</span>
+                </label>
+                <button type="submit" class="email-modal-submit" id="emailModalSubmit" disabled>
+                    領取免費指南
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

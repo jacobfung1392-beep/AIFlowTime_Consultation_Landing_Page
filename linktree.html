@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIFlowTime - 連結</title>
+    <meta name="description" content="AIFlowTime 的所有連結 - 諮詢、工作坊、內容">
+    <meta name="theme-color" content="#020111">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        :root {
+            --brand-blue: #2563EB;
+            --brand-orange: #D97706;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-light: #F8F9FA;
+            --border-light: #E5E7EB;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            background: #020111;
+            transition: background-color 0.7s ease;
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            position: relative;
+        }
+        
+        body.dark-mode {
+            background: #020111;
+            color: #ffffff;
+        }
+        
+        /* Cosmic Canvas Background */
+        #cosmic-canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+            background: #020111;
+            overflow: hidden;
+        }
+        
+        #cosmic-canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: -1;
+            pointer-events: none;
+            transition: background-color 0.7s ease;
+        }
+        
+        body.dark-mode::before {
+            background: transparent;
+        }
+        
+        /* Background Grid */
+        .background-grid-container {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .day-grid {
+            position: absolute;
+            inset: 0;
+            transition: opacity 0.7s ease;
+            background-image: linear-gradient(#E5E7EB 1px, transparent 1px), linear-gradient(90deg, #E5E7EB 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(1000px) rotateX(60deg) translateY(-100px) scale(2);
+            transform-origin: top center;
+        }
+        
+        .night-grid {
+            position: absolute;
+            inset: 0;
+            transition: opacity 0.7s ease;
+            background-image: radial-gradient(white 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+        }
+        
+        .day-grid.hidden {
+            opacity: 0;
+        }
+        
+        .night-grid.hidden {
+            opacity: 0;
+        }
+        
+        .flashlight-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-color: rgba(217, 119, 6, 0.1);
+            transition: background-color 0.7s ease;
+        }
+        
+        body.dark-mode .flashlight-overlay {
+            background-color: rgba(217, 119, 6, 0.05);
+        }
+        
+        /* SKY TOGGLE CSS */
+        .sky-toggle-wrapper {
+            --toggle-size: 12px;
+            --container-width: 5.625em;
+            --container-height: 2.5em;
+            --container-radius: 6.25em;
+            --container-light-bg: #3D7EAE;
+            --container-night-bg: #1D1F2C;
+            --circle-container-diameter: 3.375em;
+            --sun-moon-diameter: 2.125em;
+            --sun-bg: #ECCA2F;
+            --moon-bg: #C4C9D1;
+            --spot-color: #959DB1;
+            --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
+            --stars-color: #fff;
+            --clouds-color: #F3FDFF;
+            --back-clouds-color: #AACADF;
+            --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
+            --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
+            font-size: var(--toggle-size);
+        }
+        
+        .theme-switch {
+            display: inline-block;
+        }
+        
+        .theme-switch__container {
+            width: var(--container-width);
+            height: var(--container-height);
+            background-color: var(--container-light-bg);
+            border-radius: var(--container-radius);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .theme-switch__container::before {
+            content: "";
+            position: absolute;
+            z-index: 1;
+            inset: 0;
+            box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
+            border-radius: var(--container-radius);
+        }
+        
+        .theme-switch__checkbox {
+            display: none;
+        }
+        
+        .theme-switch__circle-container {
+            width: var(--circle-container-diameter);
+            height: var(--circle-container-diameter);
+            background-color: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            left: var(--circle-container-offset);
+            top: var(--circle-container-offset);
+            border-radius: var(--container-radius);
+            box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
+            display: flex;
+            transition: var(--circle-transition);
+            pointer-events: none;
+        }
+        
+        .theme-switch__sun-moon-container {
+            pointer-events: auto;
+            position: relative;
+            z-index: 2;
+            width: var(--sun-moon-diameter);
+            height: var(--sun-moon-diameter);
+            margin: auto;
+            border-radius: var(--container-radius);
+            background-color: var(--sun-bg);
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
+            filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .theme-switch__moon {
+            transform: translateX(100%);
+            width: 100%;
+            height: 100%;
+            background-color: var(--moon-bg);
+            border-radius: inherit;
+            box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .theme-switch__spot {
+            position: absolute;
+            top: 0.75em;
+            left: 0.312em;
+            width: 0.75em;
+            height: 0.75em;
+            border-radius: var(--container-radius);
+            background-color: var(--spot-color);
+            box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
+        }
+        
+        .theme-switch__spot:nth-of-type(2) {
+            width: 0.375em;
+            height: 0.375em;
+            top: 0.937em;
+            left: 1.375em;
+        }
+        
+        .theme-switch__spot:nth-last-of-type(3) {
+            width: 0.25em;
+            height: 0.25em;
+            top: 0.312em;
+            left: 0.812em;
+        }
+        
+        .theme-switch__clouds {
+            width: 1.25em;
+            height: 1.25em;
+            background-color: var(--clouds-color);
+            border-radius: var(--container-radius);
+            position: absolute;
+            bottom: -0.625em;
+            left: 0.312em;
+            box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
+            transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+        }
+        
+        .theme-switch__stars-container {
+            position: absolute;
+            color: var(--stars-color);
+            top: -100%;
+            left: 0.312em;
+            width: 2.75em;
+            height: auto;
+            transition: var(--transition);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container {
+            background-color: var(--container-night-bg);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
+            left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
+            left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em);
+        }
+        
+        .theme-switch__circle-container:hover {
+            left: calc(var(--circle-container-offset) + 0.187em);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
+            transform: translate(0);
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
+            bottom: -4.062em;
+        }
+        
+        .theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Header */
+        .linktree-header {
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--border-light);
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-mode .profile-avatar {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .profile-name {
+            color: #ffffff;
+        }
+        
+        .profile-bio {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        body.dark-mode .profile-bio {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Links Container */
+        .links-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 1rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tools section label blocks */
+        .linktree-divider-block {
+            margin: 1.75rem 0 1.25rem;
+            text-align: center;
+        }
+        .linktree-divider {
+            height: 1px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .linktree-section-title {
+            margin-top: 1rem;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .linktree-section-subtitle {
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+        
+        .link-item {
+            display: block;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px) saturate(120%);
+            -webkit-backdrop-filter: blur(4px) saturate(120%);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body.dark-mode .link-item {
+            background: rgba(30, 30, 40, 0.85);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        .link-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        body.dark-mode .link-item::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+        
+        .link-item:hover::before {
+            left: 100%;
+        }
+        
+        .link-item:hover {
+            transform: translateZ(0) translateY(-2px); /* Maintain GPU layer */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border-color: rgba(217, 119, 6, 0.4);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(2px) saturate(110%);
+            -webkit-backdrop-filter: blur(2px) saturate(110%);
+        }
+        
+        body.dark-mode .link-item:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border-color: rgba(217, 119, 6, 0.5);
+            background: rgba(30, 30, 40, 0.95);
+            backdrop-filter: blur(2px) saturate(110%);
+            -webkit-backdrop-filter: blur(2px) saturate(110%);
+        }
+        
+        .link-item:active {
+            transform: translateY(0);
+        }
+        
+        .link-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .link-text {
+            flex: 1;
+        }
+        
+        .link-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        body.dark-mode .link-title {
+            color: #ffffff;
+        }
+        
+        .link-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        body.dark-mode .link-description {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* Pixelated text style */
+        .pixelated-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--brand-orange);
+            text-transform: uppercase;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: unset;
+            text-shadow: 
+                1px 1px 0px rgba(0, 0, 0, 0.3),
+                -1px -1px 0px rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-mode .pixelated-text {
+            color: #FFD700;
+            text-shadow: 
+                1px 1px 0px rgba(0, 0, 0, 0.5),
+                -1px -1px 0px rgba(255, 255, 255, 0.1);
+        }
+        
+        .link-icon {
+            width: 24px;
+            height: 24px;
+            margin-left: 1rem;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        
+        .link-item:hover .link-icon {
+            opacity: 1;
+        }
+        
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            display: none !important; /* Hidden on linktree page - always dark mode */
+        }
+        
+        /* Social Links */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 1rem 0;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+        
+        body.dark-mode .social-link {
+            background: rgba(30, 30, 40, 0.95);
+            border-color: rgba(55, 65, 81, 0.5);
+            color: #ffffff;
+        }
+        
+        .social-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border-color: var(--brand-orange);
+        }
+        
+        /* Footer */
+        .linktree-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        body.dark-mode .linktree-footer {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Flashlight Grid Effect */
+        .flashlight-grid {
+            mask-image: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                black 0%,
+                transparent 100%
+            );
+            -webkit-mask-image: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                black 0%,
+                transparent 100%
+            );
+        }
+        
+        /* 
+         * CRITICAL: Prevent browser from removing elements on scroll
+         * These properties force GPU layer promotion and prevent memory reclamation
+         */
+        .fade-in, .link-item, .linktree-divider-block, .linktree-header, .linktree-footer {
+            /* Force GPU layer promotion - keeps element in GPU memory */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            
+            /* Tell browser to keep this element ready for changes */
+            will-change: opacity, transform;
+            
+            /* Prevent browser from hiding/removing this element */
+            content-visibility: visible;
+            
+            /* Create isolated rendering context */
+            contain: layout style;
+            
+            /* Ensure element is always rendered */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        
+        /* Fade in animation - elements start visible, no disappearing */
+        .fade-in {
+            opacity: 1;
+            transform: translateZ(0); /* GPU layer, no Y offset */
+        }
+        
+        /* Initial state before animation (applied via JS) */
+        .fade-in.fade-pending {
+            opacity: 0;
+            transform: translateZ(0) translateY(20px);
+            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+        }
+        
+        /* Animated state - final visible state */
+        .fade-in.animated {
+            opacity: 1;
+            transform: translateZ(0) translateY(0);
+        }
+        
+        /* Link items - always visible after animation */
+        .link-item {
+            opacity: 1;
+            transform: translateZ(0);
+        }
+        
+        /* Initial state before animation (applied via JS) */
+        .link-item.fade-pending {
+            opacity: 0;
+            transform: translateZ(0) translateY(20px);
+            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+        }
+        
+        .link-item.animated {
+            opacity: 1;
+            transform: translateZ(0) translateY(0);
+        }
+        
+        .link-item.fade-pending:nth-child(1) { transition-delay: 0.1s; }
+        .link-item.fade-pending:nth-child(2) { transition-delay: 0.2s; }
+        .link-item.fade-pending:nth-child(3) { transition-delay: 0.3s; }
+        .link-item.fade-pending:nth-child(4) { transition-delay: 0.4s; }
+        .link-item.fade-pending:nth-child(5) { transition-delay: 0.5s; }
+        .link-item.fade-pending:nth-child(6) { transition-delay: 0.6s; }
+        
+        @media (max-width: 640px) {
+            .linktree-header {
+                padding: 1.5rem 1rem 1rem;
+            }
+            
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .profile-name {
+                font-size: 1.25rem;
+            }
+            
+            .links-container {
+                padding: 0 1rem 2rem;
+            }
+        }
+        
+        /* Flow With AI Gooey Text Animation (OPTIMIZED) */
+        .gooey-text-container {
+            position: relative;
+            min-height: 200px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 1rem;
+            margin: 0.25rem 0;
+            transform: translateY(-30px) translateZ(0); /* GPU layer */
+            will-change: transform; /* Hint for GPU */
+            contain: layout style; /* Isolate rendering */
+        }
+        
+        .gooey-text-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: url(#threshold);
+            position: relative;
+            width: 100%;
+            height: 200px;
+            transform: translateZ(0); /* GPU layer */
+            backface-visibility: hidden; /* Optimize rendering */
+        }
+        
+        .gooey-text-span {
+            position: absolute;
+            display: inline-block;
+            text-align: center;
+            user-select: none;
+            font-size: 3.75rem;
+            font-weight: 700;
+            color: #1F2937;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) translateZ(0); /* GPU layer */
+            white-space: nowrap;
+            width: 100%;
+            will-change: filter, opacity; /* Hint browser about animated properties */
+            backface-visibility: hidden; /* Optimize rendering */
+        }
+        
+        @media (min-width: 768px) {
+            .gooey-text-span {
+                font-size: 60pt;
+            }
+        }
+        
+        body.dark-mode .gooey-text-span {
+            color: #ffffff;
+        }
+        
+        .gooey-text-span .ai-text {
+            color: #FFB84D !important; /* Orange-ish yellow */
+        }
+        
+        body.dark-mode .gooey-text-span .ai-text {
+            color: #FFB84D !important; /* Orange-ish yellow for dark mode too */
+        }
+        
+        .gooey-text-svg {
+            position: absolute;
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+        
+        /* WhatsApp Modal Styles */
+        .whatsapp-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            overflow: visible;
+        }
+        
+        .whatsapp-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .whatsapp-modal {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: visible;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .whatsapp-modal-content {
+            max-height: calc(90vh - 4rem);
+            overflow-y: auto;
+            overflow-x: visible;
+        }
+        
+        body.dark-mode .whatsapp-modal {
+            background: #1F2937;
+        }
+        
+        .whatsapp-modal-overlay.active .whatsapp-modal {
+            transform: scale(1);
+        }
+        
+        .whatsapp-modal-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .whatsapp-modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        body.dark-mode .whatsapp-modal-header h3 {
+            color: #ffffff;
+        }
+        
+        .whatsapp-modal-header p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        body.dark-mode .whatsapp-modal-header p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .whatsapp-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .whatsapp-modal-close:hover {
+            background: #F3F4F6;
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .whatsapp-modal-close {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark-mode .whatsapp-modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .whatsapp-modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .whatsapp-modal-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+            color: #1F2937;
+        }
+        
+        body.dark-mode .whatsapp-modal-input {
+            background: #374151;
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+        
+        .whatsapp-modal-input:focus {
+            outline: none;
+            border-color: var(--brand-orange);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+        }
+        
+        .whatsapp-modal-checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        body.dark-mode .whatsapp-modal-checkbox-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .whatsapp-modal-checkbox {
+            margin-top: 0.125rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .whatsapp-modal-checkbox-label:hover {
+            color: var(--text-primary);
+        }
+        
+        body.dark-mode .whatsapp-modal-checkbox-label:hover {
+            color: #ffffff;
+        }
+        
+        .whatsapp-modal-submit {
+            background: var(--brand-orange);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .whatsapp-modal-submit:hover:not(:disabled) {
+            background: #B45309;
+            transform: translateY(-1px);
+        }
+        
+        .whatsapp-modal-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .whatsapp-modal-submit:disabled {
+            background: #D1D5DB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        body.dark-mode .whatsapp-modal-submit:disabled {
+            background: #4B5563;
+            color: #9CA3AF;
+        }
+        
+        .whatsapp-modal-image {
+            position: absolute;
+            top: -50px;
+            right: 1rem;
+            width: 120px;
+            height: auto;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 640px) {
+            .whatsapp-modal {
+                padding: 1.5rem;
+                width: 95%;
+            }
+            
+            .whatsapp-modal-image {
+                width: 80px;
+                top: -40px;
+                right: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Safari Theme Color Helper - Must be at top for Safari to detect -->
+    <div style="position: fixed; top: 0; left: 0; right: 0; height: 100vh; width: 100%; background: #020111; pointer-events: none; z-index: -3;"></div>
+    
+    <!-- Cosmic Canvas Background -->
+    <div id="cosmic-canvas-container"></div>
+    
+    <!-- Background Grid (keeping for now, can be removed if desired) -->
+    <div class="background-grid-container" style="opacity: 0.3;">
+        <!-- Day Mode Grid -->
+        <div class="day-grid hidden" id="dayGrid"></div>
+        
+        <!-- Night Mode Grid (Starry) -->
+        <div class="night-grid" id="nightGrid"></div>
+        
+        <!-- Flashlight Effect -->
+        <div class="flashlight-overlay flashlight-grid" id="flashlightOverlay"></div>
+    </div>
+    
+    <!-- Dark Mode Toggle - REMOVED FOR LINKTREE PAGE (Always Night Mode) -->
+    
+    <!-- Safari Color Detection Bar - Visible deep space area for Safari to sample -->
+    <div style="width: 100%; height: 60px; background: #020111; position: relative; z-index: 10;"></div>
+    
+    <!-- Header -->
+    <header class="linktree-header fade-in" data-section-id="lt-header" data-section-type="hero" style="padding-top: 1rem;">
+        <img src="Landing-page-logo.png" alt="AIFlowTime" class="profile-avatar" id="profileAvatar" width="100" height="100" loading="eager" decoding="async">
+        <h1 class="profile-name">AIFlowTime的世界</h1>
+        <p class="profile-bio" style="font-size: 1.1em;"><strong>用 AI 換時間</strong>｜建立會<span style="color: #FFD700; font-weight: bold; font-size: 1.15em;">自己跑</span>的工作系統<br>專為斜槓族、AI 新手、小生意老闆而設</p>
+    </header>
+    
+    <!-- Links Container -->
+    <div class="links-container">
+        <!-- Flow With AI Animation -->
+        <section class="gooey-text-container fade-in">
+            <!-- SVG Filter for Gooey Effect -->
+            <svg class="gooey-text-svg" aria-hidden="true" focusable="false">
+                <defs>
+                    <filter id="threshold">
+                        <feColorMatrix
+                            in="SourceGraphic"
+                            type="matrix"
+                            values="1 0 0 0 0
+                                    0 1 0 0 0
+                                    0 0 1 0 0
+                                    0 0 0 255 -140"
+                        />
+                    </filter>
+                </defs>
+            </svg>
+            
+            <div class="gooey-text-wrapper">
+                <span id="gooeyText1" class="gooey-text-span"></span>
+                <span id="gooeyText2" class="gooey-text-span"></span>
+            </div>
+        </section>
+        
+        <div data-section-id="lt-services" data-section-type="link-list">
+        <a href="consultation.html" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">有唔識嘅AI問題？將你嘅問題話我知！</div>
+                    <div class="link-description">了解更多諮詢內容與流程</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        
+        <a href="ai-beginner-workshop.html" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span>👩‍🏫 AI 課程工作坊</span>
+                        <span class="pixelated-text">立即報名！</span>
+                    </div>
+                    <div class="link-description">專為斜槓族、小生意老闆、AI 新手而設 — 零基礎也能上手的實戰課程</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        
+        <a href="#" class="link-item fade-in" id="aiGuideLink" onclick="event.preventDefault(); openWhatsAppModal();">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">📚 2026年5個必學AI指南</div>
+                    <div class="link-description">免費領取AI工作流指南</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        
+        <a href="quiz.html" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span>🎯 2分鐘AI能力診斷</span>
+                        <span class="pixelated-text">免費！</span>
+                    </div>
+                    <div class="link-description">搵出你嘅 AI 瓶頸，獲取個人化學習建議</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        
+        <a href="about-jacob.html" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">👤 關於 Jacob</div>
+                    <div class="link-description">了解更多關於創辦人的故事</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        </div>
+
+        <div class="linktree-divider-block fade-in" data-section-id="lt-divider-tools" data-section-type="section-divider">
+            <div class="linktree-divider"></div>
+            <div class="profile-name linktree-section-title">Jacob的AI工具箱</div>
+        </div>
+
+        <div data-section-id="lt-tools" data-section-type="tools-grid">
+        <a href="https://www.kimi.com/?utm_campaign=TR_kWNaAwSQ&utm_content=&utm_medium=Instagram&utm_source=CH_pzQ7f4g6&utm_term=" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">
+                        <img src="KIMI.png" alt="KIMI AI" width="80" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block; mix-blend-mode: screen;">
+                    </div>
+                    <div class="link-description">集深度研究與 Nano Banana 簡報製作於一身的全能 AI 生產力助手。</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+
+        <a href="https://dub.florafauna.ai/fung-tsun-sing" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <img src="Flora_AI.png" alt="Florafauna AI" width="28" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
+                        <span class="pixelated-text">25%OFF with AIFlowTime</span>
+                    </div>
+                    <div class="link-description">FloraFauna AI 是讓創作者在一個智慧畫布上，串連多模型、構建可重複創作流程的專業 AI 工作室。</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+
+        <a href="https://app.lupaupscaler.com/?via=AIFlowTime" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">
+                        <img src="Lupa.png" alt="Lupa AI" width="80" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
+                    </div>
+                    <div class="link-description">讓模糊影像秒變高解析、視角可調、細節自然銳利的專業升級工具。</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+
+        <a href="https://apps.apple.com/hk/app/%E6%A5%B5%E5%BD%B1%E7%9B%B8%E6%A9%9F-%E5%8F%A3%E8%A2%8B%E4%B8%AD%E7%9A%84%E5%B0%88%E6%A5%AD%E7%9B%B8%E6%A9%9F/id1459953293" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">
+                        <img src="Fotorgear.png" alt="Fotorgear" width="120" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
+                    </div>
+                    <div class="link-description">☝️Jacob話最好用嘅iPhone攝影app🤳🏻</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+
+        <a href="https://designsparks.app.creativityai.io/" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">
+                        <img src="DesignSpark.png" alt="Design Sparks" width="120" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
+                    </div>
+                    <div class="link-description">結合 AI 與創意思考術，秒生大量設計點子，支援永續循環設計，專為設計師打造。</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        </div>
+
+        <div class="linktree-divider-block fade-in" data-section-id="lt-divider-coming" data-section-type="section-divider" style="margin-top: 1.25rem;">
+            <div class="linktree-divider"></div>
+            <div class="profile-name linktree-section-title">即將推出！</div>
+            <div class="profile-bio linktree-section-subtitle">快啲加入Google嘅waiting list👇🏻</div>
+        </div>
+
+        <div data-section-id="lt-coming-soon" data-section-type="link-list">
+        <a href="https://labs.google/disco" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
+            <div class="link-content">
+                <div class="link-text">
+                    <div class="link-title">Disco 🌍</div>
+                    <div class="link-description">探索 Google 最新的 AI 網頁功能</div>
+                </div>
+                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </div>
+        </a>
+        </div>
+    </div>
+    
+    <!-- Social Links -->
+    <div class="social-links" data-section-id="lt-social" data-section-type="link-list">
+        <a href="index.html" class="social-link" aria-label="Home">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+        </a>
+        <a href="https://www.instagram.com/aiflowtime" target="_blank" class="social-link" aria-label="Instagram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+        </a>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="linktree-footer fade-in">
+        <p>© 2026 AIFlowTime. All rights reserved.</p>
+    </footer>
+    
+    <!-- WhatsApp Modal -->
+    <div id="whatsappModal" class="whatsapp-modal-overlay" data-section-id="lt-lead-magnet" data-section-type="lead-magnet" onclick="closeWhatsAppModalOnOverlay(event)">
+        <div class="whatsapp-modal" onclick="event.stopPropagation()">
+            <img src="Working Hard Capy.png" alt="Working Hard Capy" class="whatsapp-modal-image" width="100" height="100" loading="eager" decoding="async">
+            <button class="whatsapp-modal-close" onclick="closeWhatsAppModal()" aria-label="Close">&times;</button>
+            <div class="whatsapp-modal-content">
+                <div class="whatsapp-modal-header">
+                    <h3>領取免費2026年AI指南</h3>
+                    <p>想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！</p>
+                </div>
+                <form class="whatsapp-modal-form" onsubmit="handleWhatsAppSubmit(event)">
+                    <input 
+                        type="text" 
+                        class="whatsapp-modal-input" 
+                        placeholder="你的名字" 
+                        required
+                        id="whatsappNameInput"
+                        minlength="2"
+                        title="請輸入你的名字"
+                    />
+                    <input 
+                        type="tel" 
+                        class="whatsapp-modal-input" 
+                        placeholder="12345678 (8位數字)" 
+                        required
+                        id="whatsappNumberInput"
+                        pattern="[0-9]{8}"
+                        title="請輸入8位數字WhatsApp號碼"
+                        minlength="8"
+                        maxlength="8"
+                    />
+                    <label class="whatsapp-modal-checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            id="whatsappConsentCheckbox" 
+                            class="whatsapp-modal-checkbox"
+                            required
+                        />
+                        <span>我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。</span>
+                    </label>
+                    <button type="submit" class="whatsapp-modal-submit" id="whatsappModalSubmit" disabled>
+                        領取免費指南
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Linktree page: Force dark mode always (no toggle)
+        const body = document.body;
+        const dayGrid = document.getElementById('dayGrid');
+        const nightGrid = document.getElementById('nightGrid');
+        
+        // Always force dark mode on linktree page
+        body.classList.add('dark-mode');
+        if (dayGrid) dayGrid.classList.add('hidden');
+        if (nightGrid) nightGrid.classList.remove('hidden');
+        
+        // Optimized fade-in animation: Elements stay visible forever after first animation
+        // CRITICAL: This prevents elements from disappearing on scroll
+        function initFadeInAnimations() {
+            const fadeElements = document.querySelectorAll('.fade-in, .link-item');
+            
+            // Step 1: Mark elements for animation (add pending state)
+            fadeElements.forEach(el => {
+                if (!el.classList.contains('animated')) {
+                    el.classList.add('fade-pending');
+                }
+            });
+            
+            // Step 2: Create IntersectionObserver to trigger animation only once
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const el = entry.target;
+                    
+                    // Only animate if element is intersecting and hasn't been animated yet
+                    if (entry.isIntersecting && !el.classList.contains('animated')) {
+                        // Add animated class to trigger transition
+                        el.classList.add('animated');
+                        
+                        // After transition completes, remove pending state and clean up
+                        // This ensures element stays visible forever
+                        setTimeout(() => {
+                            el.classList.remove('fade-pending');
+                            // Reset will-change to auto to free up GPU memory
+                            // But keep transform for layer promotion
+                            el.style.willChange = 'auto';
+                        }, 700); // Slightly longer than transition duration
+                        
+                        // Stop observing - this element is done forever
+                        observer.unobserve(el);
+                    }
+                });
+            }, {
+                threshold: 0.1, // Trigger when 10% visible
+                rootMargin: '50px 0px 0px 0px' // Start animation before element enters viewport
+            });
+            
+            // Step 3: Observe all elements that need animation
+            fadeElements.forEach(el => {
+                if (!el.classList.contains('animated')) {
+                    observer.observe(el);
+                }
+            });
+        }
+        
+        // Initialize fade-in animations immediately (synchronous)
+        // This runs before any scroll can happen
+        initFadeInAnimations();
+        
+        // Flashlight Effect
+        const flashlightOverlay = document.getElementById('flashlightOverlay');
+        if (flashlightOverlay) {
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                flashlightOverlay.style.setProperty('--mouse-x', `${mouseX}px`);
+                flashlightOverlay.style.setProperty('--mouse-y', `${mouseY}px`);
+            });
+        }
+        
+        // Update avatar - always use dark mode logo on linktree page
+        const profileAvatar = document.getElementById('profileAvatar');
+        if (profileAvatar) {
+            profileAvatar.src = 'Landing-page-logo.png';
+        }
+        
+        // --- Cosmic Orbit 3D Background ---
+        function initCosmicBackground() {
+            // Detect mobile device early for performance optimizations
+            const isMobile = window.innerWidth < 768;
+            
+            // --- Configuration ---
+            const CONFIG = {
+                orbitSpeedMultiplier: 0.1, 
+                cometInterval: 600, 
+                ufoInterval: 900, 
+                colors: {
+                    sun: 0xffaa00,
+                    sunEmissive: 0xff4500,
+                    orbitLine: 0x4faebd
+                }
+            };
+
+            // --- Texture Generator (Procedural Patterns) ---
+            function createPlanetTexture(baseColorHex, type) {
+                // Lower texture resolution on mobile for better performance
+                const size = isMobile ? 256 : 512;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                const baseColor = new THREE.Color(baseColorHex);
+
+                if (type === 'earth') {
+                    ctx.fillStyle = '#006994'; 
+                    ctx.fillRect(0, 0, size, size);
+                    const landColors = ['#3a5f0b', '#4a6f2b', '#8b4513']; 
+                    for(let i=0; i<15; i++) {
+                        const cx = Math.random() * size;
+                        const cy = Math.random() * size;
+                        const rBase = Math.random() * (size / 5) + 30;
+                        ctx.fillStyle = landColors[Math.floor(Math.random()*landColors.length)];
+                        ctx.beginPath();
+                        for(let a=0; a<=Math.PI*2; a+=0.4) {
+                            const r = rBase + (Math.random()-0.5)*30;
+                            const x = cx + Math.cos(a)*r;
+                            const y = cy + Math.sin(a)*r;
+                            if(a===0) ctx.moveTo(x,y);
+                            else ctx.lineTo(x,y);
+                        }
+                        ctx.fill();
+                    }
+                    ctx.fillStyle = '#ffffff';
+                    for(let i=0; i<12; i++) {
+                         ctx.globalAlpha = 0.2 + Math.random()*0.3;
+                         const cx = Math.random() * size;
+                         const cy = Math.random() * size;
+                         const rx = Math.random() * (size/2) + 50;
+                         const ry = Math.random() * 40 + 10;
+                         const rotation = (Math.random() - 0.5) * 0.5;
+                         ctx.save();
+                         ctx.translate(cx, cy);
+                         ctx.rotate(rotation);
+                         ctx.beginPath();
+                         ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI*2);
+                         ctx.fill();
+                         ctx.restore();
+                    }
+                    ctx.globalAlpha = 1.0;
+                } else {
+                    ctx.fillStyle = '#' + baseColor.getHexString();
+                    ctx.fillRect(0, 0, size, size);
+                    if (type === 'gas' || type === 'sun') {
+                        const bands = 20;
+                        for (let i = 0; i < bands; i++) {
+                            const y = Math.random() * size;
+                            const h = Math.random() * (size / 8) + 10;
+                            ctx.globalAlpha = 0.1;
+                            ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#000000';
+                            ctx.fillRect(0, y, size, h);
+                            for(let k=0; k<3; k++){
+                                 ctx.globalAlpha = 0.05;
+                                 ctx.beginPath();
+                                 ctx.arc(Math.random()*size, y + h/2, h*0.8, 0, Math.PI*2);
+                                 ctx.fill();
+                            }
+                        }
+                    } else {
+                        for (let i = 0; i < 150; i++) {
+                            const x = Math.random() * size;
+                            const y = Math.random() * size;
+                            const r = Math.random() * 40 + 5;
+                            ctx.globalAlpha = 0.08;
+                            ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000';
+                            ctx.beginPath();
+                            ctx.arc(x, y, r, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+                const colorTexture = new THREE.CanvasTexture(canvas);
+                let bumpTexture = null;
+                if (type === 'rocky' || type === 'earth') {
+                    const bumpCanvas = document.createElement('canvas');
+                    bumpCanvas.width = size;
+                    bumpCanvas.height = size;
+                    const bCtx = bumpCanvas.getContext('2d');
+                    bCtx.fillStyle = '#808080';
+                    bCtx.fillRect(0, 0, size, size);
+                    for (let i = 0; i < 80; i++) {
+                        const x = Math.random() * size;
+                        const y = Math.random() * size;
+                        const r = Math.random() * 30 + 5;
+                        if (Math.random() > 0.4) {
+                            bCtx.globalAlpha = 0.15;
+                            bCtx.fillStyle = '#ffffff';
+                        } else {
+                            bCtx.globalAlpha = 0.2;
+                            bCtx.fillStyle = '#000000';
+                        }
+                        bCtx.beginPath();
+                        bCtx.arc(x, y, r, 0, Math.PI * 2);
+                        bCtx.fill();
+                    }
+                    bumpTexture = new THREE.CanvasTexture(bumpCanvas);
+                }
+                return { map: colorTexture, bumpMap: bumpTexture };
+            }
+
+            function createSaturnRingTexture() {
+                 // Lower texture resolution on mobile for better performance
+                 const size = isMobile ? 256 : 512;
+                 const canvas = document.createElement('canvas');
+                 canvas.width = size;
+                 canvas.height = size;
+                 const ctx = canvas.getContext('2d');
+                 const centerX = size/2;
+                 const centerY = size/2;
+                 ctx.clearRect(0,0,size,size);
+                 const imageData = ctx.createImageData(size, size);
+                 const data = imageData.data;
+                 for(let y=0; y<size; y++){
+                     for(let x=0; x<size; x++){
+                         const dx = x - centerX;
+                         const dy = y - centerY;
+                         const dist = Math.sqrt(dx*dx + dy*dy);
+                         const r = dist / (size/2); 
+                         if (r > 0.5 && r < 1.0) {
+                             const idx = (y*size + x)*4;
+                             data[idx] = 210;
+                             data[idx+1] = 180;
+                             data[idx+2] = 140;
+                             const noise = Math.random();
+                             const band = Math.sin(r * 80);
+                             let alpha = (noise * 0.4 + band * 0.1 + 0.3) * 255;
+                             if(r < 0.55) alpha *= (r-0.5)/0.05;
+                             if(r > 0.95) alpha *= (1.0-r)/0.05;
+                             data[idx+3] = alpha; 
+                         }
+                     }
+                 }
+                 ctx.putImageData(imageData, 0, 0);
+                 return new THREE.CanvasTexture(canvas);
+            }
+
+            function createMilkyWayTexture() {
+                // Lower texture resolution on mobile for better performance
+                const size = isMobile ? 512 : 1024;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#020111';
+                ctx.fillRect(0, 0, size, size);
+                const gradient = ctx.createRadialGradient(size / 2, size / 2, size / 4, size / 2, size / 2, size);
+                gradient.addColorStop(0, 'rgba(60, 70, 120, 0.2)');
+                gradient.addColorStop(0.5, 'rgba(100, 120, 180, 0.1)'); 
+                gradient.addColorStop(1, 'rgba(10, 20, 40, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, size, size);
+                for (let i = 0; i < 50; i++) {
+                    const x = Math.random() * size;
+                    const y = Math.random() * size;
+                    const radius = Math.random() * 200 + 50;
+                    const cloudGrad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                    cloudGrad.addColorStop(0, 'rgba(200, 220, 255, 0.05)');
+                    cloudGrad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = cloudGrad;
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                for(let i=0; i<5000; i++) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(Math.random()*size, Math.random()*size, Math.random()*0.8, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            function createSmokeTexture() {
+                const size = 128;
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+                grad.addColorStop(0, 'rgba(255,255,255,0.8)');
+                grad.addColorStop(0.3, 'rgba(200,220,255,0.4)');
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0,0,size,size);
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            // --- Scene Setup ---
+            const container = document.getElementById('cosmic-canvas-container');
+            if (!container) return;
+            
+            // Ensure container has proper dimensions
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.zIndex = '-2';
+            container.style.backgroundColor = '#020111';
+            
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020111);
+            scene.fog = new THREE.FogExp2(0x0a1a2a, 0.02);
+            
+            // Get proper dimensions
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            camera.position.set(0, 30, 60);
+            
+            // Check if Three.js is loaded
+            if (typeof THREE === 'undefined') {
+                console.error('Three.js not loaded');
+                return;
+            }
+            
+            // Try WebGL first, fallback to Canvas if needed
+            let renderer;
+            try {
+                renderer = new THREE.WebGLRenderer({ 
+                    antialias: false, // Disable antialiasing on mobile for performance
+                    alpha: false, // Set to false to ensure background shows
+                    powerPreference: "high-performance"
+                });
+                renderer.setClearColor(0x020111, 1); // Deep space background
+            } catch (e) {
+                console.error('WebGL not supported:', e);
+                // Try with different settings
+                try {
+                    renderer = new THREE.WebGLRenderer({ 
+                        antialias: false,
+                        alpha: false
+                    });
+                    renderer.setClearColor(0x020111, 1);
+                } catch (e2) {
+                    console.error('WebGL completely failed:', e2);
+                    return;
+                }
+            }
+            
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio on mobile
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Ensure canvas fills container
+            renderer.domElement.style.width = '100%';
+            renderer.domElement.style.height = '100%';
+            renderer.domElement.style.display = 'block';
+            
+            container.appendChild(renderer.domElement);
+
+            // --- Lighting ---
+            const ambientLight = new THREE.AmbientLight(0x404060, 0.7); 
+            scene.add(ambientLight);
+            const sunLight = new THREE.PointLight(0xffffff, 1.5, 100);
+            sunLight.position.set(0, 0, 0);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024;
+            sunLight.shadow.mapSize.height = 1024;
+            scene.add(sunLight);
+            const rimLight = new THREE.DirectionalLight(0xaaccff, 0.4);
+            rimLight.position.set(0, 20, 10);
+            scene.add(rimLight);
+
+            // --- Objects ---
+            const mwTexture = createMilkyWayTexture();
+            // Reduce geometry complexity on mobile (isMobile already defined at function start)
+            const mwGeo = new THREE.SphereGeometry(500, isMobile ? 32 : 64, isMobile ? 32 : 64); 
+            mwGeo.scale(-1, 1, 1); 
+            const mwMat = new THREE.MeshBasicMaterial({
+                map: mwTexture,
+                side: THREE.BackSide,
+                transparent: true,
+                opacity: 0.8,
+                fog: false
+            });
+            const milkyWay = new THREE.Mesh(mwGeo, mwMat);
+            milkyWay.rotation.x = Math.PI / 4;
+            milkyWay.rotation.z = Math.PI / 6;
+            scene.add(milkyWay);
+
+            const sunGeometry = new THREE.SphereGeometry(4, isMobile ? 32 : 64, isMobile ? 32 : 64);
+            const sunTextures = createPlanetTexture(CONFIG.colors.sun, 'sun'); 
+            const sunMaterial = new THREE.MeshStandardMaterial({
+                map: sunTextures.map,
+                emissive: CONFIG.colors.sunEmissive,
+                emissiveIntensity: 0.6,
+                emissiveMap: sunTextures.map,
+                roughness: 0.4,
+                metalness: 0.1
+            });
+            const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            scene.add(sun);
+            const sunGlowGeo = new THREE.SphereGeometry(4.8, 32, 32);
+            const sunGlowMat = new THREE.MeshBasicMaterial({
+                color: 0xff8800,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.BackSide
+            });
+            const sunGlow = new THREE.Mesh(sunGlowGeo, sunGlowMat);
+            scene.add(sunGlow);
+
+            const planetsData = [
+                { name: "Mercury", size: 0.8, color: 0xA5A5A5, distance: 9, speed: 2.5, type: 'rocky' },
+                { name: "Venus", size: 1.2, color: 0xE6B8B8, distance: 14, speed: 2.0, type: 'gas' }, 
+                { name: "Earth", size: 1.3, color: 0x4faebd, distance: 20, speed: 1.5, type: 'earth', hasMoon: true }, 
+                { name: "Mars", size: 1.0, color: 0xff6b6b, distance: 26, speed: 1.2, type: 'rocky' }, 
+                { name: "Saturn", size: 2.8, color: 0xf4d03f, distance: 38, speed: 0.6, type: 'gas', hasRings: true }, 
+                { name: "Neptune", size: 2.2, color: 0x5D3FD3, distance: 50, speed: 0.4, type: 'gas' } 
+            ];
+            const planets = [];
+            function createOrbitLine(radius) {
+                const points = [];
+                const divisions = 128;
+                for (let i = 0; i <= divisions; i++) {
+                    const theta = (i / divisions) * Math.PI * 2;
+                    points.push(new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius));
+                }
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({ 
+                    color: CONFIG.colors.orbitLine, 
+                    transparent: true, 
+                    opacity: 0.1 
+                });
+                return new THREE.Line(geometry, material);
+            }
+
+            planetsData.forEach(data => {
+                const planetGroup = new THREE.Group();
+                planetGroup.userData = {
+                    angle: Math.random() * Math.PI * 2,
+                    distance: data.distance,
+                    speed: data.speed * CONFIG.orbitSpeedMultiplier,
+                    rotationSpeed: Math.random() * 0.005 + 0.002
+                };
+                const textures = createPlanetTexture(data.color, data.type);
+                const geometry = new THREE.SphereGeometry(data.size, isMobile ? 32 : 64, isMobile ? 32 : 64);
+                const material = new THREE.MeshStandardMaterial({
+                    map: textures.map,
+                    roughness: 0.7,
+                    metalness: 0.1
+                });
+                if (textures.bumpMap) {
+                    material.bumpMap = textures.bumpMap;
+                    material.bumpScale = 0.05; 
+                }
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                let tiltGroup;
+                if (data.name === "Saturn") {
+                    tiltGroup = new THREE.Group();
+                    tiltGroup.add(mesh);
+                    const innerRadius = data.size * 1.4;
+                    const outerRadius = data.size * 2.8;
+                    const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 128);
+                    const pos = ringGeo.attributes.position;
+                    const uv = ringGeo.attributes.uv;
+                    for (let i = 0; i < pos.count; i++) {
+                         const x = pos.getX(i);
+                         const y = pos.getY(i);
+                         const u = (x / outerRadius) * 0.5 + 0.5;
+                         const v = (y / outerRadius) * 0.5 + 0.5;
+                         uv.setXY(i, u, v);
+                    }
+                    const ringTexture = createSaturnRingTexture();
+                    const ringMat = new THREE.MeshStandardMaterial({
+                        map: ringTexture,
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.9,
+                        roughness: 0.8
+                    });
+                    const ring = new THREE.Mesh(ringGeo, ringMat);
+                    ring.rotation.x = -Math.PI / 2; 
+                    tiltGroup.add(ring);
+                    tiltGroup.rotation.z = 27 * (Math.PI / 180);
+                    planetGroup.add(tiltGroup);
+                } else {
+                    planetGroup.add(mesh);
+                }
+                if (data.hasMoon) {
+                    const moonGroup = new THREE.Group();
+                    planetGroup.add(moonGroup);
+                    planetGroup.userData.moonGroup = moonGroup;
+                    const moonTextures = createPlanetTexture(0xcccccc, 'rocky');
+                    const moonGeo = new THREE.SphereGeometry(data.size * 0.27, 32, 32);
+                    const moonMat = new THREE.MeshStandardMaterial({
+                        map: moonTextures.map,
+                        bumpMap: moonTextures.bumpMap,
+                        bumpScale: 0.02,
+                        roughness: 0.8,
+                        metalness: 0.1
+                    });
+                    const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+                    moonMesh.position.set(data.size * 2.5, 0, 0);
+                    moonMesh.castShadow = true;
+                    moonMesh.receiveShadow = true;
+                    moonGroup.add(moonMesh);
+                    moonGroup.rotation.x = 0.5;
+                    moonGroup.rotation.z = 0.2;
+                }
+                scene.add(planetGroup);
+                const planetObj = { 
+                    group: planetGroup, 
+                    mesh: mesh, 
+                    name: data.name,
+                    tiltGroup: tiltGroup
+                };
+                planets.push(planetObj);
+                scene.add(createOrbitLine(data.distance));
+            });
+
+            // Reduce star count on mobile for performance (Optimized: 1000 mobile, 3000 desktop)
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsCount = isMobile ? 1000 : 3000; // Optimized star count
+            const posArray = new Float32Array(starsCount * 3);
+            for(let i = 0; i < starsCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 250;
+            }
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const starsMaterial = new THREE.PointsMaterial({
+                size: isMobile ? 0.2 : 0.15, // Slightly larger on mobile for visibility
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+            const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starsMesh);
+
+            const transientObjects = []; 
+            const smokeParticles = [];
+            const smokeTexture = createSmokeTexture();
+
+            function getSafeFlightPath(startRadius, targetSpread) {
+                const center = new THREE.Vector3(0, 0, 0);
+                const start = new THREE.Vector3();
+                const end = new THREE.Vector3();
+                const line = new THREE.Line3();
+                const closest = new THREE.Vector3();
+                let safe = false;
+                let attempts = 0;
+                while (!safe && attempts < 20) {
+                    attempts++;
+                    const angle = Math.random() * Math.PI * 2;
+                    start.set(
+                        Math.cos(angle) * startRadius,
+                        (Math.random() - 0.5) * 50, 
+                        Math.sin(angle) * startRadius
+                    );
+                    end.set(
+                        (Math.random() - 0.5) * targetSpread,
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * targetSpread
+                    );
+                    line.set(start, end);
+                    line.closestPointToPoint(center, true, closest);
+                    if (closest.length() > 12) {
+                        safe = true;
+                    }
+                }
+                return { start, end };
+            }
+
+            function spawnSmoke(position) {
+                const material = new THREE.SpriteMaterial({ 
+                    map: smokeTexture, 
+                    color: 0xcccccc,
+                    transparent: true,
+                    opacity: 0.6 
+                });
+                const sprite = new THREE.Sprite(material);
+                sprite.position.copy(position);
+                sprite.position.x += (Math.random() - 0.5) * 0.2;
+                sprite.position.y += (Math.random() - 0.5) * 0.2;
+                sprite.position.z += (Math.random() - 0.5) * 0.2;
+                sprite.scale.set(1.5, 1.5, 1.5);
+                scene.add(sprite);
+                smokeParticles.push({
+                    mesh: sprite,
+                    life: 1.0,
+                    growSpeed: 0.03 + Math.random() * 0.02
+                });
+            }
+
+            function spawnComet() {
+                const headGeo = new THREE.SphereGeometry(0.3, 8, 8);
+                const headMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const head = new THREE.Mesh(headGeo, headMat);
+                const path = getSafeFlightPath(90, 60);
+                head.position.copy(path.start);
+                head.lookAt(path.end); 
+                scene.add(head);
+                transientObjects.push({
+                    type: 'comet',
+                    mesh: head,
+                    velocity: new THREE.Vector3().subVectors(path.end, path.start).normalize().multiplyScalar(0.6),
+                    life: 400
+                });
+            }
+            
+            function spawnUFO() {
+                const ufoGroup = new THREE.Group();
+                const bodyGeo = new THREE.CylinderGeometry(0.5, 1.5, 0.5, 16);
+                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.8, roughness: 0.2 });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                ufoGroup.add(body);
+                const domeGeo = new THREE.SphereGeometry(0.8, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+                const domeMat = new THREE.MeshStandardMaterial({ color: 0x88ffff, transparent: true, opacity: 0.7, metalness: 0.9 });
+                const dome = new THREE.Mesh(domeGeo, domeMat);
+                dome.position.y = 0;
+                ufoGroup.add(dome);
+                for(let i=0; i<6; i++) {
+                    const lightGeo = new THREE.SphereGeometry(0.15, 8, 8);
+                    const lightMat = new THREE.MeshBasicMaterial({ color: 0xaaaaff });
+                    const light = new THREE.Mesh(lightGeo, lightMat);
+                    const angle = (i/6) * Math.PI * 2;
+                    light.position.set(Math.cos(angle)*1.2, -0.1, Math.sin(angle)*1.2);
+                    ufoGroup.add(light);
+                    if(!ufoGroup.userData.lights) ufoGroup.userData.lights = [];
+                    ufoGroup.userData.lights.push(lightMat);
+                }
+                const path = getSafeFlightPath(70, 50);
+                ufoGroup.position.copy(path.start);
+                ufoGroup.lookAt(path.end);
+                ufoGroup.rotateX(0.2);
+                scene.add(ufoGroup);
+                transientObjects.push({
+                    type: 'ufo',
+                    mesh: ufoGroup,
+                    velocity: new THREE.Vector3().subVectors(path.end, path.start).normalize().multiplyScalar(0.2),
+                    life: 700,
+                    blinkCounter: 0
+                });
+            }
+
+            const cameraStates = [
+                { type: 'overview', duration: 400 },
+                { type: 'planet_close', duration: 350 },
+                { type: 'mid_orbit', duration: 350 },
+                { type: 'sun_gaze', duration: 250 }
+            ];
+            let currentCameraStateIdx = 0;
+            let stateTimer = 0;
+            let currentFocusTarget = null;
+            const camPos = new THREE.Vector3(0, 40, 70);
+            const camLook = new THREE.Vector3(0, 0, 0);
+            const targetCamPos = new THREE.Vector3(0, 40, 70);
+            const targetCamLook = new THREE.Vector3(0, 0, 0);
+
+            function updateCameraLogic() {
+                stateTimer++;
+                const state = cameraStates[currentCameraStateIdx];
+                if (stateTimer > state.duration) {
+                    stateTimer = 0;
+                    currentCameraStateIdx = (currentCameraStateIdx + 1) % cameraStates.length;
+                    const newState = cameraStates[currentCameraStateIdx];
+                    if (newState.type === 'overview') {
+                        targetCamPos.set(0, 60, 90);
+                        targetCamLook.set(0, 0, 0);
+                    } else if (newState.type === 'planet_close') {
+                        const randomIdx = Math.floor(Math.random() * planets.length);
+                        currentFocusTarget = planets[randomIdx];
+                    } else if (newState.type === 'mid_orbit') {
+                        const angle = Math.random() * Math.PI * 2;
+                        targetCamPos.set(Math.cos(angle)*25, 10, Math.sin(angle)*25);
+                        targetCamLook.set(0, 5, 0);
+                    } else if (newState.type === 'sun_gaze') {
+                        targetCamPos.set(20, 5, 20);
+                        targetCamLook.set(0, 0, 0);
+                    }
+                }
+                if (state.type === 'planet_close' && currentFocusTarget) {
+                    const tPos = currentFocusTarget.group.position;
+                    let offset = 8;
+                    if (currentFocusTarget.name === "Saturn") offset = 12;
+                    if (currentFocusTarget.name === "Mercury") offset = 5;
+                    targetCamPos.set(tPos.x + offset, tPos.y + offset * 0.5, tPos.z + offset);
+                    targetCamLook.copy(tPos);
+                }
+                camPos.lerp(targetCamPos, 0.005);
+                camLook.lerp(targetCamLook, 0.01);
+                camera.position.copy(camPos);
+                camera.lookAt(camLook);
+            }
+
+            // Performance optimizations: 30fps limit and page visibility detection
+            let frameCount = 0;
+            let lastFrameTime = performance.now();
+            const targetFPS = 30; // 30fps instead of 60fps
+            const frameInterval = 1000 / targetFPS;
+            let isPageVisible = !document.hidden;
+            let animationId = null;
+            
+            // Pause animation when page is not visible
+            document.addEventListener('visibilitychange', () => {
+                isPageVisible = !document.hidden;
+                if (isPageVisible && !animationId) {
+                    animate();
+                }
+            });
+            
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                
+                // Skip frame if page is not visible
+                if (!isPageVisible) {
+                    return;
+                }
+                
+                // Frame rate limiting: skip frames to achieve 30fps
+                const now = performance.now();
+                const elapsed = now - lastFrameTime;
+                
+                if (elapsed < frameInterval) {
+                    return; // Skip this frame
+                }
+                
+                lastFrameTime = now - (elapsed % frameInterval);
+                frameCount++;
+                const time = Date.now() * 0.0005;
+                planets.forEach(p => {
+                    const data = p.group.userData;
+                    data.angle += data.speed * 0.01;
+                    p.group.position.x = Math.cos(data.angle) * data.distance;
+                    p.group.position.z = Math.sin(data.angle) * data.distance;
+                    p.mesh.rotation.y += data.rotationSpeed;
+                    if (p.group.userData.moonGroup) {
+                        p.group.userData.moonGroup.rotation.y += 0.02;
+                    }
+                });
+                sunGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.03);
+                if (frameCount % CONFIG.cometInterval === 0 && Math.random() > 0.4) spawnComet();
+                if (frameCount % CONFIG.ufoInterval === 0 && Math.random() > 0.3) spawnUFO();
+                if (typeof transientObjects !== 'undefined') {
+                    for (let i = transientObjects.length - 1; i >= 0; i--) {
+                        const obj = transientObjects[i];
+                        obj.mesh.position.add(obj.velocity);
+                        obj.life--;
+                        if (obj.type === 'comet') {
+                            spawnSmoke(obj.mesh.position);
+                        }
+                        if (obj.type === 'ufo') {
+                            obj.mesh.rotation.y += 0.1;
+                            obj.blinkCounter++;
+                            if (obj.blinkCounter % 10 === 0) {
+                                obj.mesh.userData.lights.forEach(mat => {
+                                    mat.color.setHex(Math.random() > 0.5 ? 0x8899aa : 0xaaaaff);
+                                });
+                            }
+                        }
+                        if (obj.life <= 0) {
+                            scene.remove(obj.mesh);
+                            transientObjects.splice(i, 1);
+                        }
+                    }
+                }
+                for (let i = smokeParticles.length - 1; i >= 0; i--) {
+                    const p = smokeParticles[i];
+                    p.life -= 0.015;
+                    p.mesh.material.opacity = p.life * 0.5;
+                    const scale = p.mesh.scale.x + p.growSpeed;
+                    p.mesh.scale.set(scale, scale, scale);
+                    if (p.life <= 0) {
+                        scene.remove(p.mesh);
+                        smokeParticles.splice(i, 1);
+                    }
+                }
+                starsMesh.rotation.y += 0.00005;
+                updateCameraLogic();
+                renderer.render(scene, camera);
+            }
+
+            window.addEventListener('resize', () => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            });
+
+            // Start animation only if page is visible
+            if (isPageVisible) {
+                animate();
+            }
+        }
+        
+        // Delayed loading: Wait 1.5 seconds before initializing background animation
+        // This allows page content to load first for better perceived performance
+        function initCosmicBackgroundDelayed() {
+            // Check if Three.js is loaded
+            if (typeof THREE === 'undefined') {
+                console.warn('Three.js not loaded yet, retrying...');
+                setTimeout(initCosmicBackgroundDelayed, 200);
+                return;
+            }
+            
+            initCosmicBackground();
+        }
+        
+        // Initialize when DOM is ready, but delay background animation
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                // Delay background animation by 1.5 seconds to prioritize content loading
+                setTimeout(initCosmicBackgroundDelayed, 1500);
+            });
+        } else {
+            // DOM already loaded, delay background animation
+            setTimeout(initCosmicBackgroundDelayed, 1500);
+        }
+        
+        // WhatsApp Modal Functions
+        function openWhatsAppModal() {
+            const modal = document.getElementById('whatsappModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                // Reset form
+                const nameInput = document.getElementById('whatsappNameInput');
+                const numberInput = document.getElementById('whatsappNumberInput');
+                const checkbox = document.getElementById('whatsappConsentCheckbox');
+                const submitButton = document.getElementById('whatsappModalSubmit');
+                if (nameInput) nameInput.value = '';
+                if (numberInput) numberInput.value = '';
+                if (checkbox) checkbox.checked = false;
+                if (submitButton) submitButton.disabled = true;
+            }
+        }
+        
+        function closeWhatsAppModal() {
+            const modal = document.getElementById('whatsappModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        function closeWhatsAppModalOnOverlay(event) {
+            if (event.target.id === 'whatsappModal') {
+                closeWhatsAppModal();
+            }
+        }
+        
+        function updateWhatsAppSubmitButton() {
+            const nameInput = document.getElementById('whatsappNameInput');
+            const numberInput = document.getElementById('whatsappNumberInput');
+            const checkbox = document.getElementById('whatsappConsentCheckbox');
+            const submitButton = document.getElementById('whatsappModalSubmit');
+            
+            if (nameInput && numberInput && checkbox && submitButton) {
+                const whatsappNumber = numberInput.value.trim().replace(/\s+/g, '');
+                const isValid = nameInput.value.trim().length >= 2 && 
+                               /^[0-9]{8}$/.test(whatsappNumber) && 
+                               checkbox.checked;
+                submitButton.disabled = !isValid;
+            }
+        }
+        
+        function handleWhatsAppSubmit(event) {
+            event.preventDefault();
+            console.log('handleWhatsAppSubmit called');
+            
+            const nameInput = document.getElementById('whatsappNameInput');
+            const numberInput = document.getElementById('whatsappNumberInput');
+            const consentCheckbox = document.getElementById('whatsappConsentCheckbox');
+            
+            if (!nameInput || !numberInput || !consentCheckbox) {
+                console.error('Form inputs not found!');
+                return;
+            }
+            
+            const name = nameInput.value.trim();
+            let whatsapp = numberInput.value.trim().replace(/\s+/g, '');
+            const consent = consentCheckbox.checked;
+            
+            console.log('Form values:', { name, whatsapp, consent });
+            
+            // Validate WhatsApp number is exactly 8 digits
+            if (!/^[0-9]{8}$/.test(whatsapp)) {
+                alert('請輸入8位數字WhatsApp號碼');
+                numberInput.focus();
+                return;
+            }
+            
+            if (name && whatsapp && consent) {
+                // Send data to Google Sheets for Lead Magnet (Free AI Guide)
+                const formData = {
+                    name: name,
+                    whatsapp: whatsapp,
+                    timestamp: new Date().toISOString(),
+                    source: 'linktree-lead-magnet',
+                    page: '領取免費2026年AI指南'
+                };
+                
+                console.log('Submitting lead magnet form:', formData);
+                
+                // Lead Magnet Google Script URL
+                const googleScriptURL = 'https://script.google.com/macros/s/AKfycbwcEjkz6roPWxKFyap-Jdn-q87F3Y7tOmhbLWH3HHgywuKsWP9z8oAaupjEhJLrPQDiew/exec';
+                
+                console.log('Sending POST request to:', googleScriptURL);
+                
+                // Submit form data
+                fetch(googleScriptURL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                }).then(() => {
+                    console.log('✅ Form submission sent successfully');
+                }).catch(err => {
+                    console.error('❌ Error submitting form:', err);
+                });
+                
+                // Close modal
+                closeWhatsAppModal();
+                
+                // Small delay before redirect to allow logs to appear
+                setTimeout(() => {
+                    console.log('Redirecting to guide page...');
+                    window.location.href = 'ai-guide-2026.html';
+                }, 500);
+            } else {
+                console.warn('Form validation failed:', { name: !!name, whatsapp: !!whatsapp, consent: consent });
+            }
+        }
+        
+        // Set up event listeners for WhatsApp modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameInput = document.getElementById('whatsappNameInput');
+            const numberInput = document.getElementById('whatsappNumberInput');
+            const checkbox = document.getElementById('whatsappConsentCheckbox');
+            
+            if (nameInput) {
+                nameInput.addEventListener('input', updateWhatsAppSubmitButton);
+            }
+            if (numberInput) {
+                numberInput.addEventListener('input', updateWhatsAppSubmitButton);
+            }
+            if (checkbox) {
+                checkbox.addEventListener('change', updateWhatsAppSubmitButton);
+            }
+            
+            // Close modal on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('whatsappModal');
+                    if (modal && modal.classList.contains('active')) {
+                        closeWhatsAppModal();
+                    }
+                }
+            });
+        });
+        
+        // Flow With AI Gooey Text Morphing Animation (OPTIMIZED)
+        // Optimizations: 30fps throttle, visibility check, reduced blur range
+        function initGooeyTextMorphing() {
+            const texts = ["Flow", "With", "AI", ":)"];
+            const morphTime = 1; // seconds
+            const cooldownTime = 0.25; // seconds
+            
+            const text1Ref = document.getElementById('gooeyText1');
+            const text2Ref = document.getElementById('gooeyText2');
+            
+            if (!text1Ref || !text2Ref) {
+                console.warn('Gooey text elements not found, skipping initialization.');
+                return;
+            }
+            
+            let textIndex = texts.length - 1;
+            let time = performance.now(); // Use performance.now() for accuracy
+            let morph = 0;
+            let cooldown = cooldownTime;
+            
+            // Performance optimizations
+            const targetFPS = 30; // Match Three.js at 30fps
+            const frameInterval = 1000 / targetFPS;
+            let lastFrameTime = performance.now();
+            let isPageVisible = !document.hidden;
+            let animationId = null;
+            
+            // Pause when page is not visible (save battery/CPU)
+            document.addEventListener('visibilitychange', () => {
+                isPageVisible = !document.hidden;
+                if (isPageVisible) {
+                    // Reset time to prevent jump after returning
+                    time = performance.now();
+                    lastFrameTime = performance.now();
+                    if (!animationId) {
+                        animate();
+                    }
+                }
+            });
+            
+            // Optimized setMorph with reduced blur range (max 30px instead of 100px)
+            const setMorph = (fraction) => {
+                if (text1Ref && text2Ref) {
+                    // Reduced blur range: max 30px instead of 100px (less CPU work)
+                    const blur2 = Math.min(8 / fraction - 8, 30);
+                    const opacity2 = Math.pow(fraction, 0.4) * 100;
+                    
+                    text2Ref.style.filter = `blur(${blur2}px)`;
+                    text2Ref.style.opacity = `${opacity2}%`;
+                    
+                    fraction = 1 - fraction;
+                    
+                    const blur1 = Math.min(8 / fraction - 8, 30);
+                    const opacity1 = Math.pow(fraction, 0.4) * 100;
+                    
+                    text1Ref.style.filter = `blur(${blur1}px)`;
+                    text1Ref.style.opacity = `${opacity1}%`;
+                }
+            };
+            
+            const doCooldown = () => {
+                morph = 0;
+                if (text1Ref && text2Ref) {
+                    text2Ref.style.filter = "";
+                    text2Ref.style.opacity = "100%";
+                    text1Ref.style.filter = "";
+                    text1Ref.style.opacity = "0%";
+                }
+            };
+            
+            const doMorph = () => {
+                morph -= cooldown;
+                cooldown = 0;
+                let fraction = morph / morphTime;
+                
+                if (fraction > 1) {
+                    cooldown = cooldownTime;
+                    fraction = 1;
+                }
+                
+                setMorph(fraction);
+            };
+            
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                
+                // Skip if page is not visible (save CPU/battery)
+                if (!isPageVisible) {
+                    return;
+                }
+                
+                // Frame rate limiting: 30fps instead of 60fps
+                const now = performance.now();
+                const elapsed = now - lastFrameTime;
+                
+                if (elapsed < frameInterval) {
+                    return; // Skip this frame
+                }
+                
+                lastFrameTime = now - (elapsed % frameInterval);
+                
+                // Animation logic
+                const dt = Math.min((now - time) / 1000, 0.1); // Cap dt to prevent jumps
+                time = now;
+                
+                cooldown -= dt;
+                
+                if (cooldown <= 0) {
+                    const shouldIncrementIndex = morph === 0;
+                    
+                    if (shouldIncrementIndex) {
+                        textIndex = (textIndex + 1) % texts.length;
+                        
+                        if (text1Ref && text2Ref) {
+                            const text1 = texts[textIndex % texts.length];
+                            const text2 = texts[(textIndex + 1) % texts.length];
+                            
+                            // Wrap "AI" in a span with special color
+                            text1Ref.innerHTML = text1 === 'AI' ? '<span class="ai-text">AI</span>' : text1;
+                            text2Ref.innerHTML = text2 === 'AI' ? '<span class="ai-text">AI</span>' : text2;
+                        }
+                    }
+                    
+                    doMorph();
+                } else {
+                    doCooldown();
+                }
+            }
+            
+            // Initialize with first text
+            if (text1Ref && text2Ref) {
+                const text1 = texts[textIndex % texts.length];
+                const text2 = texts[(textIndex + 1) % texts.length];
+                
+                // Wrap "AI" in a span with special color
+                text1Ref.innerHTML = text1 === 'AI' ? '<span class="ai-text">AI</span>' : text1;
+                text2Ref.innerHTML = text2 === 'AI' ? '<span class="ai-text">AI</span>' : text2;
+                text1Ref.style.opacity = "0%";
+                text2Ref.style.opacity = "100%";
+            }
+            
+            // Start animation only if page is visible
+            if (isPageVisible) {
+                animate();
+            }
+        }
+        
+        // Initialize gooey text animation (delayed slightly for better page load)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(initGooeyTextMorphing, 500); // Delay 0.5s for smoother page load
+            });
+        } else {
+            setTimeout(initGooeyTextMorphing, 500);
+        }
+    </script>
+
+    <!-- Firebase SDK for layout loading -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- Layout Engine (Preview + Public) -->
+    <script>
+    (function() {
+        var _isPreview = new URLSearchParams(window.location.search).has('preview');
+
+        function _escHtml(s) {
+            var d = document.createElement('div');
+            d.textContent = s || '';
+            return d.innerHTML;
+        }
+
+        function applySections(sections) {
+            var allSecs = document.querySelectorAll('[data-section-id]');
+            allSecs.forEach(function(el) { el.style.display = 'none'; el.style.order = ''; });
+
+            if (!sections || !sections.length) {
+                allSecs.forEach(function(el) { el.style.display = ''; });
+                return;
+            }
+
+            var matched = 0;
+            var order = 0;
+            sections.forEach(function(sec) {
+                if (!sec.visible) return;
+                var el = document.querySelector('[data-section-id="' + sec.id + '"]');
+                if (!el) {
+                    var tpl = document.querySelector('[data-section-type="' + sec.type + '"][data-section-id^="_tpl_"]');
+                    if (tpl) {
+                        el = tpl.cloneNode(true);
+                        el.setAttribute('data-section-id', sec.id);
+                        tpl.parentNode.insertBefore(el, tpl);
+                    }
+                }
+                if (!el) { console.warn('[Layout] No template for section:', sec.type, sec.id); return; }
+                matched++;
+                el.style.display = '';
+                el.style.order = order++;
+                applyContent(el, sec);
+            });
+
+            if (matched === 0) {
+                console.warn('[Layout] No sections matched — showing default layout');
+                allSecs.forEach(function(el) { el.style.display = ''; });
+            }
+        }
+
+        function applyContent(el, sec) {
+            var c = sec.content || {};
+            var type = sec.type;
+
+            switch (type) {
+                case 'link-list':
+                    if (c.links) {
+                        el.innerHTML = '';
+                        c.links.forEach(function(lnk) {
+                            var a = document.createElement('a');
+                            a.className = 'link-item fade-in';
+                            a.href = lnk.url || '#';
+                            if (lnk.url && lnk.url.indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+                            var inner = '<div class="link-content"><div class="link-text">';
+                            inner += '<div class="link-title">';
+                            if (lnk.badgeText) {
+                                inner += '<span style="display:flex;align-items:center;gap:0.75rem;"><span>' + _escHtml(lnk.label) + '</span><span class="pixelated-text">' + _escHtml(lnk.badgeText) + '</span></span>';
+                            } else {
+                                inner += _escHtml(lnk.label);
+                            }
+                            inner += '</div>';
+                            if (lnk.description) inner += '<div class="link-description">' + _escHtml(lnk.description) + '</div>';
+                            inner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';
+                            a.innerHTML = inner;
+                            el.appendChild(a);
+                        });
+                    }
+                    break;
+
+                case 'section-divider':
+                    var titleEl = el.querySelector('.linktree-section-title');
+                    if (titleEl && c.title) titleEl.textContent = c.title;
+                    var subEl = el.querySelector('.linktree-section-subtitle');
+                    if (subEl) {
+                        if (c.subtitle) { subEl.textContent = c.subtitle; subEl.style.display = ''; }
+                        else { subEl.style.display = 'none'; }
+                    }
+                    break;
+
+                case 'tools-grid':
+                    if (c.tools) {
+                        el.innerHTML = '';
+                        c.tools.forEach(function(tool) {
+                            var a = document.createElement('a');
+                            a.className = 'link-item fade-in';
+                            a.href = tool.url || '#';
+                            a.target = '_blank';
+                            a.rel = 'noopener noreferrer';
+                            var inner = '<div class="link-content"><div class="link-text">';
+                            inner += '<div class="link-title">';
+                            if (tool.logoUrl) {
+                                inner += '<img src="' + _escHtml(tool.logoUrl) + '" alt="' + _escHtml(tool.name) + '" style="height:28px;width:auto;display:block;">';
+                            } else {
+                                inner += _escHtml(tool.name);
+                            }
+                            if (tool.badgeText) inner += ' <span class="pixelated-text">' + _escHtml(tool.badgeText) + '</span>';
+                            inner += '</div>';
+                            if (tool.description) inner += '<div class="link-description">' + _escHtml(tool.description) + '</div>';
+                            inner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';
+                            a.innerHTML = inner;
+                            el.appendChild(a);
+                        });
+                    }
+                    break;
+            }
+        }
+
+        if (_isPreview) {
+            window.addEventListener('message', function(e) {
+                if (!e.data || e.data.type !== 'layoutPreview') return;
+                applySections(e.data.sections);
+            });
+        } else {
+            try { firebase.app(); } catch(e) {
+                firebase.initializeApp({
+                    projectId: 'aiflowtime-hk',
+                    apiKey: 'AIzaSyDummy',
+                    authDomain: 'aiflowtime-hk.firebaseapp.com'
+                });
+            }
+            var db = firebase.firestore();
+            db.collection('pageLayouts').doc('linktree').get().then(function(doc) {
+                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                console.log('[Layout] Loaded linktree layout from Firestore');
+                applySections(doc.data().sections);
+            }).catch(function(err) {
+                console.log('[Layout] No layout config found for linktree.', err);
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
+

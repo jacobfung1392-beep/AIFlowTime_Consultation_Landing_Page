@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI一對一諮詢 - AIFlowTime</title>
+    <meta name="description" content="預約 AIFlowTime Jacob 1對1諮詢，90分鐘定位問題，設計初步可用AI流程清單">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #111118;
+            --bg-card-hover: #161622;
+            --border: rgba(255,255,255,0.07);
+            --border-glow: rgba(217,119,87,0.35);
+            --accent: #D97757;
+            --accent-dim: rgba(217,119,87,0.15);
+            --accent-glow: rgba(217,119,87,0.4);
+            --text: #f0ede8;
+            --text-dim: rgba(240,237,232,0.55);
+            --text-muted: rgba(240,237,232,0.3);
+            --white: #ffffff;
+            --radius: 16px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        #noise-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background: var(--bg);
+        }
+        #noise-bg .radial-glow {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle 700px at 50% 0px, rgba(217,119,87,0.18), transparent 70%);
+        }
+        #noise-canvas {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            pointer-events: none; image-rendering: pixelated;
+        }
+
+        .page-content { position: relative; z-index: 1; }
+
+        /* ---- Header / Nav ---- */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(10,10,15,0.88);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .header-inner {
+            display: flex; justify-content: space-between; align-items: center;
+            max-width: 72rem; margin: 0 auto; padding: 1rem 1.5rem;
+        }
+        .logo {
+            font-family: 'Noto Sans TC', sans-serif; font-size: 1.35rem; font-weight: 700;
+            color: var(--text); text-decoration: none; letter-spacing: -0.5px; transition: color 0.3s;
+        }
+        .logo:hover { color: var(--accent); }
+        .logo span { color: var(--accent); }
+
+        .nav-desktop { display: none; }
+        .nav-desktop a {
+            color: var(--text-dim); text-decoration: none; margin-left: 32px;
+            font-size: 15px; font-weight: 600; transition: color 0.3s;
+        }
+        .nav-desktop a:hover { color: var(--accent); }
+        .nav-desktop .nav-cta-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 40px; padding: 0 20px; margin-left: 24px;
+            background: var(--accent); color: #fff !important;
+            border-radius: 10px; font-size: 14px; font-weight: 700;
+            text-decoration: none; transition: all 0.3s; border: none;
+        }
+        .nav-desktop .nav-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px var(--accent-glow); }
+
+        .nav-mobile { display: flex; align-items: center; }
+        .hamburger {
+            width: 44px; height: 44px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; gap: 6px;
+            background: none; border: none; cursor: pointer; padding: 10px;
+            border-radius: 8px; transition: background 0.3s; position: relative;
+        }
+        .hamburger:hover { background: var(--accent-dim); }
+        .hamburger .bar {
+            display: block; width: 24px; height: 2px;
+            background: var(--text); transition: all 0.3s ease; border-radius: 2px;
+        }
+        .hamburger.active .bar:nth-child(2) { opacity: 0; }
+        .hamburger.active .bar:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .hamburger.active .bar:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+        .mobile-menu {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: rgba(10,10,15,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); padding: 24px;
+            transform: translateY(-100%); opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; z-index: 99;
+        }
+        .mobile-menu.active { transform: translateY(0); opacity: 1; visibility: visible; }
+        .mobile-menu a {
+            display: flex; align-items: center; color: var(--text); text-decoration: none;
+            padding: 16px 0; font-size: 18px; font-weight: 700;
+            border-bottom: 1px solid var(--border); min-height: 44px;
+        }
+        .mobile-menu a:last-child { border-bottom: none; }
+        .mobile-menu a:hover { color: var(--accent); }
+        .mobile-menu .mob-cta {
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 16px; width: 100%; height: 48px;
+            background: var(--accent); color: #fff !important;
+            border-radius: 12px; font-weight: 700; font-size: 16px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-desktop { display: flex; align-items: center; }
+            .nav-mobile { display: none; }
+            .mobile-menu { display: none; }
+        }
+
+        /* ---- Form Layout ---- */
+        .form-container {
+            max-width: 720px; margin: 0 auto;
+            padding: 120px 20px 60px;
+        }
+
+        .form-header {
+            text-align: center; margin-bottom: 48px;
+        }
+        .form-header-badge {
+            display: inline-block; background: var(--accent-dim); color: var(--accent);
+            font-size: 13px; font-weight: 700; padding: 6px 18px; border-radius: 20px;
+            letter-spacing: 1px; margin-bottom: 20px;
+            font-family: 'Courier Prime', monospace;
+        }
+        .form-header h1 {
+            font-size: 2.4rem; font-weight: 700; color: var(--text);
+            line-height: 1.3; margin-bottom: 12px;
+        }
+        .form-header h1 .accent { color: var(--accent); }
+        .form-header p {
+            font-size: 1.1rem; color: var(--text-dim); line-height: 1.8;
+        }
+        .form-header .highlight {
+            color: var(--accent); font-weight: 600;
+        }
+
+        /* ---- Card Sections ---- */
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+        .form-card:hover { border-color: var(--border-glow); }
+
+        .form-card h2 {
+            font-size: 1.15rem; font-weight: 700; color: var(--accent);
+            margin-bottom: 24px; padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group:last-child { margin-bottom: 0; }
+
+        .form-label {
+            display: block; font-weight: 500; color: var(--text);
+            margin-bottom: 8px; font-size: 0.95rem; line-height: 1.5;
+        }
+        .form-label.required::after { content: " *"; color: var(--accent); }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 14px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid var(--border);
+            border-radius: 12px; font-size: 1rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: var(--text); transition: all 0.2s;
+            -webkit-appearance: none; appearance: none;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--text-muted);
+        }
+        .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D97757' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+            padding-right: 36px; cursor: pointer;
+        }
+        .form-select option { background: var(--bg-card); color: var(--text); }
+        .form-textarea { min-height: 100px; resize: vertical; }
+
+        .form-help-text {
+            font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;
+        }
+
+        /* ---- Checkbox Grid ---- */
+        .checkbox-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 10px; margin-top: 8px;
+        }
+        @media (max-width: 480px) { .checkbox-grid { grid-template-columns: 1fr; } }
+
+        .checkbox-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-radius: 10px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            cursor: pointer; transition: all 0.2s; font-size: 0.95rem; color: var(--text);
+        }
+        .checkbox-item:hover { border-color: var(--accent-dim); background: rgba(217,119,87,0.05); }
+        .checkbox-item:has(input:checked) {
+            border-color: var(--accent); background: var(--accent-dim);
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: 18px; height: 18px; accent-color: var(--accent);
+            flex-shrink: 0; cursor: pointer;
+        }
+
+        .other-topic-wrap { margin-top: 10px; display: none; }
+
+        /* ---- Consent ---- */
+        .consent-row {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 16px 20px; border-radius: 12px;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .consent-row input[type="checkbox"] {
+            width: 20px; height: 20px; accent-color: var(--accent);
+            flex-shrink: 0; margin-top: 3px; cursor: pointer;
+        }
+        .consent-row span {
+            font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;
+        }
+
+        /* ---- Submit Button ---- */
+        .form-submit {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; height: 56px; padding: 0 32px;
+            background: var(--accent); color: #fff; border: none;
+            border-radius: 14px; font-size: 1.1rem; font-weight: 700;
+            font-family: 'Noto Sans TC', sans-serif;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+        .form-submit:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--accent-glow); }
+        .form-submit:active { transform: translateY(0); }
+        .form-submit:disabled {
+            background: rgba(255,255,255,0.1); color: var(--text-muted);
+            cursor: not-allowed; transform: none; box-shadow: none;
+        }
+
+        /* ---- Success State ---- */
+        .form-success {
+            display: none; text-align: center; padding: 60px 32px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        .form-success.show { display: block; }
+        .form-success-icon {
+            width: 72px; height: 72px; margin: 0 auto 24px;
+            background: var(--accent); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; color: #fff;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .form-success h2 {
+            font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 12px;
+        }
+        .form-success p {
+            font-size: 1rem; color: var(--text-dim); margin-bottom: 28px; line-height: 1.7;
+        }
+        .form-success .back-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 48px; padding: 0 28px; background: var(--accent); color: #fff;
+            border-radius: 12px; font-weight: 700; font-size: 15px;
+            text-decoration: none; transition: all 0.3s;
+        }
+        .form-success .back-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px var(--accent-glow); }
+
+        /* ---- Footer ---- */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 40px 24px; text-align: center;
+        }
+        footer p { font-size: 13px; color: var(--text-muted); }
+        footer a { color: var(--text-dim); text-decoration: none; transition: color 0.3s; }
+        footer a:hover { color: var(--accent); }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 480px) {
+            .form-header h1 { font-size: 1.8rem; }
+            .form-card { padding: 24px 20px; }
+            .form-container { padding: 100px 16px 40px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Noise Background -->
+    <div id="noise-bg">
+        <div class="radial-glow"></div>
+        <canvas id="noise-canvas"></canvas>
+    </div>
+
+    <div class="page-content">
+
+    <!-- Header -->
+    <header>
+        <div class="header-inner">
+            <a href="linktree.html" class="logo">AI<span>FLOW</span>TIME</a>
+            <nav class="nav-desktop">
+                <a href="/ai-beginner-workshop#workshops">工作坊</a>
+                <a href="/about-jacob">About Jacob</a>
+                <a href="/ai-beginner-workshop#faq">常見問題</a>
+                <a href="/ai-beginner-workshop#workshops" class="nav-cta-btn">瀏覽所有工作坊</a>
+            </nav>
+            <div class="nav-mobile">
+                <button class="hamburger" aria-label="開啟選單" onclick="toggleMobileMenu()">
+                    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                </button>
+            </div>
+        </div>
+        <nav class="mobile-menu" id="mobileMenu">
+            <a href="/ai-beginner-workshop#workshops" onclick="closeMobileMenu()">工作坊</a>
+            <a href="/about-jacob" onclick="closeMobileMenu()">About Jacob</a>
+            <a href="/ai-beginner-workshop#faq" onclick="closeMobileMenu()">常見問題</a>
+            <a href="/ai-beginner-workshop#workshops" class="mob-cta" onclick="closeMobileMenu()">瀏覽所有工作坊</a>
+        </nav>
+    </header>
+
+    <!-- Form Section -->
+    <div class="form-container">
+
+        <!-- Header -->
+        <div class="form-header">
+            <div class="form-header-badge">1-ON-1 CONSULTATION</div>
+            <h1>AI<span class="accent">一對一</span>諮詢</h1>
+            <p>讓 Jacob 更了解你的情況</p>
+            <p class="highlight" style="margin-top:8px;">90 分鐘定位問題，設計初步可用 AI 流程清單</p>
+        </div>
+
+        <!-- Success Message -->
+        <div id="formSuccess" class="form-success">
+            <div class="form-success-icon">✓</div>
+            <h2>提交成功！</h2>
+            <p>我們已收到你的資料，會盡快與你聯絡安排諮詢時間。</p>
+            <a href="linktree.html" class="back-btn">返回首頁 →</a>
+        </div>
+
+        <!-- Form -->
+        <form id="consultationForm" onsubmit="handleConsultationSubmit(event)">
+
+            <!-- Section 1: Basic Info -->
+            <div class="form-card">
+                <h2>// 基本資料</h2>
+
+                <div class="form-group">
+                    <label for="name" class="form-label required">姓名</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="請輸入你的姓名" required minlength="2">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone" class="form-label required">電話號碼</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+852 xxxx xxxx" required pattern="[\+]?[0-9\s\-]+">
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="igAccount" class="form-label">你的 IG 帳號？</label>
+                    <input type="text" id="igAccount" name="igAccount" class="form-input" placeholder="@your_instagram">
+                    <p class="form-help-text">請輸入你的 Instagram 帳號（包含 @）</p>
+                </div>
+            </div>
+
+            <!-- Section 2: AI Survey -->
+            <div class="form-card">
+                <h2>// AI 應用調查</h2>
+
+                <div class="form-group">
+                    <label for="aiSkillLevel" class="form-label required">你會怎樣形容自己在AI應用方面的能力？</label>
+                    <select id="aiSkillLevel" name="aiSkillLevel" class="form-select" required>
+                        <option value="">請選擇</option>
+                        <option value="從未接觸">從未接觸</option>
+                        <option value="新手">新手</option>
+                        <option value="進階">進階</option>
+                        <option value="專家">專家</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="aiGoal" class="form-label required">你希望在接下來 90 天，透過 AI 最想達成哪一個具體成果？</label>
+                    <textarea id="aiGoal" name="aiGoal" class="form-textarea" placeholder="例如：每週省下 5 小時重複工作、每月多產出 8 條內容等" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">目前你在工作或創業中，已經有在用哪些 AI 工具？（可多選）</label>
+                    <div class="checkbox-grid" role="group" aria-label="AI tools">
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="ChatGPT"> ChatGPT</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Claude"> Claude</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Gemini"> Gemini</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Notion AI"> Notion AI</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Zapier"> Zapier</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Make"> Make</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="n8n"> n8n</label>
+                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Kimi"> Kimi</label>
+                        <label class="checkbox-item"><input type="checkbox" id="currentAIToolsOtherCheck" name="currentAITools" value="其他"> 其他</label>
+                    </div>
+                    <div class="other-topic-wrap" id="currentAIToolsOtherWrap">
+                        <input type="text" id="currentAIToolsOtherText" name="currentAIToolsOtherText" class="form-input" placeholder="請輸入其他 AI 工具...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="successOutcome" class="form-label">用一句話形容：如果這次 1 on 1 諮詢很成功，結束後你希望自己「多了哪一種能力」或「少了哪一種困擾」？</label>
+                    <textarea id="successOutcome" name="successOutcome" class="form-textarea" placeholder="請用一句話描述..."></textarea>
+                </div>
+            </div>
+
+            <!-- Section 3: Needs & Willingness -->
+            <div class="form-card">
+                <h2>// 需求與意願</h2>
+
+                <div class="form-group">
+                    <label for="currentProblem" class="form-label required">你目前最想解決的問題是什麼？</label>
+                    <textarea id="currentProblem" name="currentProblem" class="form-textarea" placeholder="請詳細描述你目前遇到的問題..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="startTiming" class="form-label required">如果我們可以解決你的問題，你希望多快開始進行？</label>
+                    <select id="startTiming" name="startTiming" class="form-select" required>
+                        <option value="">請選擇</option>
+                        <option value="立即開始">立即開始</option>
+                        <option value="1週內">1週內</option>
+                        <option value="2-4週內">2-4週內</option>
+                        <option value="1-3個月內">1-3個月內</option>
+                        <option value="3個月以上">3個月以上</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="willingnessToPay" class="form-label required">這個問題，你願意花錢解決嗎？</label>
+                    <select id="willingnessToPay" name="willingnessToPay" class="form-select" required>
+                        <option value="">請選擇</option>
+                        <option value="非常願意">非常願意</option>
+                        <option value="願意">願意</option>
+                        <option value="考慮中">考慮中</option>
+                        <option value="不太願意">不太願意</option>
+                        <option value="不願意">不願意</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="whyNow" class="form-label">你現在為什麼會想找我們解決問題？是什麼讓你覺得現在就是時機？</label>
+                    <textarea id="whyNow" name="whyNow" class="form-textarea" placeholder="請分享你的想法..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="workshopInterest" class="form-label">你會唔會有興趣參加未來嘅 AI 付費工作坊？</label>
+                    <select id="workshopInterest" name="workshopInterest" class="form-select">
+                        <option value="">請選擇</option>
+                        <option value="有興趣">有興趣</option>
+                        <option value="可能會">可能會</option>
+                        <option value="暫時冇興趣">暫時冇興趣</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">你對邊啲 AI 主題比較有興趣？（可多選）</label>
+                    <div class="checkbox-grid" role="group" aria-label="AI topics">
+                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="內容／文案生成"> 內容／文案生成</label>
+                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="社交媒體內容流程"> 社交媒體內容流程</label>
+                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="工作流自動化（n8n／Zapier／Make）"> 工作流自動化</label>
+                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="簡報／報告／文件整理"> 簡報／報告／文件整理</label>
+                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="客服／銷售"> 客服／銷售</label>
+                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="資料整理／分析"> 資料整理／分析</label>
+                        <label class="checkbox-item"><input type="checkbox" id="aiTopicOtherCheck" name="aiTopics" value="其他"> 其他</label>
+                    </div>
+                    <div class="other-topic-wrap" id="aiTopicsOtherWrap">
+                        <input type="text" id="aiTopicsOtherText" name="aiTopicsOtherText" class="form-input" placeholder="請輸入其他主題...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="additionalInfo" class="form-label">有沒有什麼想讓我們提前知道的？</label>
+                    <textarea id="additionalInfo" name="additionalInfo" class="form-textarea" placeholder="任何額外的資訊、問題或需求..."></textarea>
+                </div>
+            </div>
+
+            <!-- Consent -->
+            <label class="consent-row">
+                <input type="checkbox" id="whatsappConsent" name="whatsappConsent" required>
+                <span>我同意在提交此表單後，透過 WhatsApp 接收由 AIFlowTime 提供的自動化 AI 回覆與相關服務資訊（包括諮詢安排與後續聯絡）。</span>
+            </label>
+
+            <!-- Submit -->
+            <button type="submit" class="form-submit" id="submitButton">
+                提交申請 →
+            </button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            <a href="/ai-beginner-workshop">← 所有工作坊</a> &nbsp;·&nbsp;
+            <a href="https://wa.me/85262880186" target="_blank">WhatsApp 查詢</a> &nbsp;·&nbsp;
+            <a href="https://instagram.com/AIFlowTime" target="_blank">@AIFlowTime</a> &nbsp;·&nbsp;
+            © 2026 AIFLOWTIME
+        </p>
+    </footer>
+
+    </div><!-- end .page-content -->
+
+    <script>
+        // Mobile menu
+        function toggleMobileMenu() {
+            var hamburger = document.querySelector('.hamburger');
+            var menu = document.getElementById('mobileMenu');
+            hamburger.classList.toggle('active');
+            menu.classList.toggle('active');
+        }
+        function closeMobileMenu() {
+            document.querySelector('.hamburger').classList.remove('active');
+            document.getElementById('mobileMenu').classList.remove('active');
+        }
+
+        // Form submission
+        function handleConsultationSubmit(event) {
+            event.preventDefault();
+
+            var submitButton = document.getElementById('submitButton');
+            var form = document.getElementById('consultationForm');
+            var successMessage = document.getElementById('formSuccess');
+
+            submitButton.disabled = true;
+            submitButton.textContent = '提交中...';
+
+            var formData = {
+                name: document.getElementById('name').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                igAccount: document.getElementById('igAccount').value.trim(),
+                aiSkillLevel: document.getElementById('aiSkillLevel').value,
+                aiGoal: document.getElementById('aiGoal').value.trim(),
+                currentAITools: Array.from(document.querySelectorAll('input[name="currentAITools"]:checked')).map(function(el) { return el.value; }),
+                currentAIToolsOtherText: (document.getElementById('currentAIToolsOtherText').value || '').trim(),
+                successOutcome: document.getElementById('successOutcome').value.trim(),
+                currentProblem: document.getElementById('currentProblem').value.trim(),
+                startTiming: document.getElementById('startTiming').value,
+                willingnessToPay: document.getElementById('willingnessToPay').value,
+                whyNow: document.getElementById('whyNow').value.trim(),
+                workshopInterest: (document.getElementById('workshopInterest').value || ''),
+                aiTopics: Array.from(document.querySelectorAll('input[name="aiTopics"]:checked')).map(function(el) { return el.value; }),
+                aiTopicsOtherText: (document.getElementById('aiTopicsOtherText').value || '').trim(),
+                additionalInfo: document.getElementById('additionalInfo').value.trim(),
+                whatsappConsent: document.getElementById('whatsappConsent').checked ? '是' : '否',
+                timestamp: new Date().toISOString(),
+                page: 'IG獲客諮詢表單'
+            };
+
+            var googleScriptURL = 'https://script.google.com/macros/s/AKfycbxE8KP5ohNSbHIFOWxl-JoWgu9_my8N8ofkTEXaeU0b7QB6K-s3qx4KE-5bOz7Qj4_miQ/exec';
+
+            fetch(googleScriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            }).then(function() {
+                console.log('Consultation form data sent successfully');
+            }).catch(function(error) {
+                console.error('Error sending consultation form data:', error);
+            });
+
+            var submissions = JSON.parse(localStorage.getItem('aiflowtime_consultations') || '[]');
+            submissions.push(formData);
+            localStorage.setItem('aiflowtime_consultations', JSON.stringify(submissions));
+
+            form.style.display = 'none';
+            successMessage.classList.add('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // "Other" checkbox toggles
+        document.addEventListener('DOMContentLoaded', function() {
+            // AI Topics "Other"
+            var otherCheck = document.getElementById('aiTopicOtherCheck');
+            var otherWrap = document.getElementById('aiTopicsOtherWrap');
+            var otherText = document.getElementById('aiTopicsOtherText');
+            if (otherCheck && otherWrap && otherText) {
+                function syncOther() {
+                    otherWrap.style.display = otherCheck.checked ? 'block' : 'none';
+                    if (!otherCheck.checked) otherText.value = '';
+                }
+                otherCheck.addEventListener('change', syncOther);
+                syncOther();
+            }
+
+            // AI Tools "Other"
+            var toolsOtherCheck = document.getElementById('currentAIToolsOtherCheck');
+            var toolsOtherWrap = document.getElementById('currentAIToolsOtherWrap');
+            var toolsOtherText = document.getElementById('currentAIToolsOtherText');
+            if (toolsOtherCheck && toolsOtherWrap && toolsOtherText) {
+                function syncToolsOther() {
+                    toolsOtherWrap.style.display = toolsOtherCheck.checked ? 'block' : 'none';
+                    if (!toolsOtherCheck.checked) toolsOtherText.value = '';
+                }
+                toolsOtherCheck.addEventListener('change', syncToolsOther);
+                syncToolsOther();
+            }
+        });
+
+        // Noise canvas
+        (function() {
+            var canvas = document.getElementById('noise-canvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d', { alpha: true });
+            if (!ctx) return;
+            var frame = 0, animId, REFRESH = 2, ALPHA = 18, SIZE = 1024;
+
+            function resize() {
+                canvas.width = SIZE;
+                canvas.height = SIZE;
+            }
+
+            function drawNoise() {
+                frame++;
+                if (frame % REFRESH !== 0) { animId = requestAnimationFrame(drawNoise); return; }
+                var imageData = ctx.createImageData(SIZE, SIZE);
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    var v = Math.random() * 255;
+                    data[i] = v; data[i + 1] = v; data[i + 2] = v; data[i + 3] = ALPHA;
+                }
+                ctx.putImageData(imageData, 0, 0);
+                animId = requestAnimationFrame(drawNoise);
+            }
+
+            resize();
+            drawNoise();
+            window.addEventListener('resize', resize);
+        })();
+    </script>
+</body>
+</html>

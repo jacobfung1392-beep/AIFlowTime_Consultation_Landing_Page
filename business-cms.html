@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Business Documents CMS | AIFLOWTIME</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7; --bg-off: #E8E4DF; --bg-pampas: #F4F3EE;
+            --accent: #D97757; --accent-text: #C45A3A; --accent-dark: #C56A4B;
+            --text: #3B3B3B; --text-light: #7A7A7A; --white: #FFFFFF;
+            --glass-bg: rgba(255,255,255,0.25); --glass-border: rgba(255,255,255,0.4);
+            --shadow: rgba(0,0,0,0.1);
+            --green: #2E7D32; --green-bg: rgba(76,175,80,0.15);
+            --red: #C62828; --red-bg: rgba(198,40,40,0.1);
+            --blue: #1565C0; --blue-bg: rgba(21,101,192,0.1);
+            --orange: #E65100; --orange-bg: rgba(230,81,0,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; overflow-x:hidden; }
+        body { font-family:'Noto Sans TC',sans-serif; background:var(--bg-cream); color:var(--text); line-height:1.7; font-size:16px; overflow-x:hidden; }
+
+        .cms-header {
+            position:sticky; top:0; z-index:100;
+            background:rgba(255,255,255,0.9); backdrop-filter:blur(8px);
+            border-bottom:1px solid rgba(229,231,235,0.5); padding:16px 24px;
+        }
+        .cms-header-inner { display:flex; justify-content:space-between; align-items:center; max-width:1100px; margin:0 auto; }
+        .cms-logo { font-size:1.15rem; font-weight:700; color:var(--text); text-decoration:none; }
+        .cms-logo span { color:var(--accent); }
+        .cms-nav-links { display:flex; align-items:center; gap:16px; font-size:13px; }
+        .cms-nav-links a { color:var(--text-light); text-decoration:none; font-weight:600; transition:color 0.2s; }
+        .cms-nav-links a:hover { color:var(--accent); }
+        .cms-user { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-light); }
+        .cms-user img { width:28px; height:28px; border-radius:50%; }
+
+        .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+
+        .btn {
+            display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 24px;
+            background:var(--accent); color:var(--white); border-radius:12px;
+            font-weight:700; font-size:15px; transition:all 0.3s ease; border:none; cursor:pointer; text-decoration:none; gap:6px;
+        }
+        .btn:hover { background:var(--accent-dark); transform:translateY(-1px); }
+        .btn-outline { background:transparent; border:2px solid var(--accent); color:var(--accent); }
+        .btn-outline:hover { background:var(--accent); color:var(--white); }
+        .btn-sm { height:36px; padding:0 16px; font-size:13px; border-radius:12px; }
+        .btn-xs { height:28px; padding:0 10px; font-size:12px; border-radius:8px; }
+        .btn-danger { background:var(--red); }
+        .btn-danger:hover { background:#B71C1C; }
+        .btn-secondary { background:var(--text-light); }
+        .btn-secondary:hover { background:var(--text); }
+        .btn-green { background:var(--green); }
+        .btn-green:hover { background:#1B5E20; }
+        .btn-wa { background:#25D366; }
+        .btn-wa:hover { background:#1DA851; }
+        .btn-blue { background:var(--blue); }
+        .btn-blue:hover { background:#0D47A1; }
+        .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+        .login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; text-align:center; }
+        .login-card {
+            background:var(--glass-bg); backdrop-filter:blur(20px) saturate(180%);
+            border:1px solid var(--glass-border); border-radius:20px; padding:48px 40px;
+            box-shadow:0 8px 32px var(--shadow); max-width:420px; width:100%;
+        }
+        .login-card h1 { font-size:26px; margin-bottom:8px; }
+        .login-card p { color:var(--text-light); margin-bottom:32px; font-weight:500; }
+        .google-btn {
+            display:inline-flex; align-items:center; gap:12px; height:48px; padding:0 24px;
+            background:var(--white); color:var(--text); border:1px solid var(--bg-off); border-radius:12px;
+            font-weight:600; font-size:15px; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+        }
+        .google-btn:hover { box-shadow:0 4px 16px rgba(0,0,0,0.12); transform:translateY(-1px); }
+        .google-btn svg { width:20px; height:20px; }
+        .login-error { color:var(--red); margin-top:16px; font-size:14px; font-weight:600; display:none; }
+
+        .dashboard { display:none; padding:28px 0 80px; }
+        .dash-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+        .dash-header h1 { font-size:24px; }
+
+        .cms-tabs { display:flex; gap:0; margin-bottom:24px; border-bottom:2px solid var(--bg-off); overflow-x:auto; }
+        .cms-tab {
+            padding:10px 20px; font-size:14px; font-weight:700; color:var(--text-light);
+            cursor:pointer; border:none; background:none; border-bottom:3px solid transparent;
+            margin-bottom:-2px; transition:all 0.2s; white-space:nowrap;
+        }
+        .cms-tab:hover { color:var(--text); }
+        .cms-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        .search-bar {
+            display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;
+        }
+        .search-bar input, .search-bar select {
+            height:40px; padding:0 14px; border:1.5px solid var(--bg-off); border-radius:10px;
+            font-size:14px; background:var(--white); color:var(--text); font-family:inherit;
+            transition:border-color 0.2s;
+        }
+        .search-bar input:focus, .search-bar select:focus { outline:none; border-color:var(--accent); }
+        .search-bar input { flex:1; min-width:200px; }
+
+        .project-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
+        .project-card {
+            background:var(--white); border:1.5px solid var(--bg-off); border-radius:16px;
+            padding:20px; cursor:pointer; transition:all 0.2s;
+        }
+        .project-card:hover { border-color:var(--accent); box-shadow:0 4px 16px rgba(0,0,0,0.06); transform:translateY(-2px); }
+        .project-card h3 { font-size:16px; margin-bottom:4px; }
+        .project-card .pc-client { font-size:13px; color:var(--text-light); margin-bottom:10px; }
+        .project-card .pc-docs { display:flex; gap:6px; margin-bottom:8px; }
+        .project-card .pc-date { font-size:12px; color:var(--text-light); }
+        .doc-badge {
+            display:inline-flex; align-items:center; height:22px; padding:0 8px;
+            border-radius:6px; font-size:11px; font-weight:700; letter-spacing:0.3px;
+        }
+        .doc-badge.quo { background:var(--blue-bg); color:var(--blue); }
+        .doc-badge.inv { background:var(--orange-bg); color:var(--orange); }
+        .doc-badge.rec { background:var(--green-bg); color:var(--green); }
+        .doc-badge.empty { background:var(--bg-off); color:var(--text-light); }
+
+        .back-btn { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:var(--text-light); cursor:pointer; border:none; background:none; margin-bottom:20px; padding:0; }
+        .back-btn:hover { color:var(--accent); }
+
+        .form-section { margin-bottom:24px; }
+        .form-section-title {
+            font-size:13px; font-weight:700; color:var(--text-light); text-transform:uppercase;
+            letter-spacing:0.8px; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid var(--bg-off);
+        }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+        .form-row.three { grid-template-columns:1fr 1fr 1fr; }
+        .form-group { display:flex; flex-direction:column; }
+        .form-group.full { grid-column:1/-1; }
+        .form-group label { font-size:12px; font-weight:600; color:var(--text-light); margin-bottom:4px; }
+        .form-group input, .form-group select, .form-group textarea {
+            height:44px; padding:0 14px; border:1.5px solid var(--bg-off); border-radius:10px;
+            font-size:15px; background:var(--white); color:var(--text); font-family:inherit;
+            transition:border-color 0.2s;
+        }
+        .form-group textarea { height:80px; padding:10px 12px; resize:vertical; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline:none; border-color:var(--accent); }
+
+        .pipeline-section { margin-top:28px; }
+        .pipeline-header { font-size:15px; font-weight:700; margin-bottom:16px; }
+        .pipeline-row { display:flex; gap:12px; align-items:stretch; }
+        .pipeline-card {
+            flex:1; background:var(--white); border:1.5px solid var(--bg-off); border-radius:14px;
+            padding:18px; min-width:0; position:relative;
+        }
+        .pipeline-card.has-doc { border-color:var(--accent); }
+        .pipeline-card-type { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; }
+        .pipeline-card-type.quo { color:var(--blue); }
+        .pipeline-card-type.inv { color:var(--orange); }
+        .pipeline-card-type.rec { color:var(--green); }
+        .pipeline-card-num { font-size:14px; font-weight:700; margin-bottom:4px; }
+        .pipeline-card-amount { font-size:18px; font-weight:700; color:var(--accent); margin-bottom:6px; }
+        .pipeline-card-status { margin-bottom:10px; }
+        .pipeline-card-date { font-size:12px; color:var(--text-light); margin-bottom:12px; }
+        .pipeline-card-actions { display:flex; flex-wrap:wrap; gap:6px; }
+        .pipeline-card-empty { text-align:center; padding:24px 12px; color:var(--text-light); font-size:14px; }
+        .pipeline-rec-group { flex:1; display:flex; gap:8px; min-width:0; }
+        .pipeline-rec-group .pipeline-card { flex:1; min-width:0; }
+        .pipeline-rec-group .pipeline-card-amount { font-size:15px; }
+        .sync-rec-toggle { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+        .sync-rec-toggle label { font-size:14px; font-weight:600; color:var(--text); cursor:pointer; }
+        .toggle-switch { position:relative; width:44px; height:24px; flex-shrink:0; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .toggle-switch .slider { position:absolute; inset:0; background:#ccc; border-radius:28px; cursor:pointer; transition:0.2s; }
+        .toggle-switch .slider:before { content:''; position:absolute; width:20px; height:20px; left:2px; bottom:2px; background:#fff; border-radius:50%; transition:0.2s; }
+        .toggle-switch input:checked + .slider { background:var(--accent); }
+        .toggle-switch input:checked + .slider:before { transform:translateX(20px); }
+        .sync-rec-amounts { background:var(--bg-cream); border:1.5px solid var(--bg-off); border-radius:10px; padding:16px; margin-bottom:12px; }
+        .sync-rec-amounts .form-row { margin-bottom:8px; }
+        .sync-rec-amounts label { font-size:12px; font-weight:600; color:var(--text-light); margin-bottom:4px; display:block; }
+        .sync-rec-amounts input { width:100%; height:38px; padding:0 12px; border:1.5px solid var(--bg-off); border-radius:8px; font-size:14px; background:var(--white); }
+        .sync-rec-amounts input:disabled { background:var(--bg-cream); color:var(--text-light); }
+        .sync-rec-amounts .total-row { display:flex; justify-content:space-between; font-size:13px; color:var(--text-light); margin-top:8px; padding-top:8px; border-top:1px solid var(--bg-off); }
+        .sync-rec-amounts .total-row strong { color:var(--text); }
+        .pipeline-arrow {
+            display:flex; align-items:center; justify-content:center; flex-shrink:0; width:40px;
+        }
+        .pipeline-arrow button {
+            width:36px; height:36px; border-radius:50%; border:2px solid var(--bg-off);
+            background:var(--white); color:var(--text-light); font-size:16px; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; transition:all 0.2s;
+        }
+        .pipeline-arrow button:hover { border-color:var(--accent); color:var(--accent); background:rgba(217,119,87,0.05); }
+        .pipeline-arrow button:disabled { opacity:0.3; cursor:not-allowed; }
+
+        .status-badge {
+            display:inline-flex; align-items:center; height:24px; padding:0 10px;
+            border-radius:6px; font-size:11px; font-weight:700; letter-spacing:0.3px;
+        }
+        .status-draft { background:var(--bg-off); color:var(--text-light); }
+        .status-sent { background:var(--blue-bg); color:var(--blue); }
+        .status-accepted { background:var(--green-bg); color:var(--green); }
+        .status-paid { background:var(--green-bg); color:var(--green); }
+        .status-rejected { background:var(--red-bg); color:var(--red); }
+        .status-overdue { background:var(--red-bg); color:var(--red); }
+        .status-expired { background:var(--orange-bg); color:var(--orange); }
+        .status-cancelled { background:var(--red-bg); color:var(--red); }
+        .status-issued { background:var(--green-bg); color:var(--green); }
+
+        .modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200;
+            display:flex; align-items:center; justify-content:center; padding:20px;
+            overflow-y:auto; backdrop-filter:blur(4px);
+        }
+        .modal-box {
+            background:var(--white); border-radius:20px; width:100%; max-width:720px;
+            box-shadow:0 8px 32px var(--shadow); animation:modalIn 0.25s ease;
+        }
+        .modal-box.wide { max-width:860px; }
+        @keyframes modalIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .modal-header {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:20px 24px; border-bottom:1.5px solid var(--bg-off);
+        }
+        .modal-header h2 { font-size:18px; }
+        .modal-close { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--bg-off); background:var(--white); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+        .modal-close:hover { background:var(--red-bg); color:var(--red); }
+        .modal-body { padding:24px; max-height:calc(100vh - 200px); overflow-y:auto; }
+        .modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1.5px solid var(--bg-off); flex-wrap:wrap; }
+
+        .line-items-table { width:100%; border-collapse:collapse; margin-bottom:12px; }
+        .line-items-table th {
+            text-align:left; font-size:12px; font-weight:700; color:var(--text-light);
+            padding:6px 8px; border-bottom:1.5px solid var(--bg-off); text-transform:uppercase; letter-spacing:0.5px;
+        }
+        .line-items-table td { padding:6px 8px; vertical-align:middle; }
+        .line-items-table input {
+            width:100%; height:36px; padding:0 10px; border:1.5px solid var(--bg-off);
+            border-radius:8px; font-size:14px; font-family:inherit; background:var(--white);
+        }
+        .line-items-table input:focus { outline:none; border-color:var(--accent); }
+        .line-items-table .col-desc { width:60%; }
+        .line-items-table .col-price { width:30%; }
+        .line-items-table .col-action { width:10%; text-align:center; }
+        .li-remove {
+            width:36px; height:36px; border-radius:8px; border:none; background:var(--red-bg);
+            color:var(--red); cursor:pointer; font-size:14px; transition:all 0.2s;
+        }
+        .li-remove:hover { background:var(--red); color:var(--white); }
+
+        .calc-summary {
+            background:var(--bg-pampas); border-radius:10px; padding:16px 18px; margin-top:16px;
+        }
+        .calc-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:14px; }
+        .calc-row.total { font-size:18px; font-weight:700; color:var(--accent); border-top:2px solid var(--bg-off); padding-top:10px; margin-top:6px; }
+        .calc-row label { color:var(--text-light); }
+        .calc-row .calc-val { font-weight:600; }
+        .discount-row, .tax-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .discount-row select, .discount-row input, .tax-row input {
+            height:34px; padding:0 10px; border:1.5px solid var(--bg-off); border-radius:8px;
+            font-size:13px; font-family:inherit; background:var(--white);
+        }
+        .discount-row select { width:120px; }
+        .discount-row input, .tax-row input { width:80px; }
+        .tax-row label { display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; }
+        .tax-row input[type="checkbox"] { width:auto; height:auto; }
+
+        .docs-table-wrap { overflow-x:auto; }
+        .docs-table { width:100%; border-collapse:collapse; font-size:14px; }
+        .docs-table th {
+            text-align:left; padding:10px 12px; font-size:12px; font-weight:700;
+            color:var(--text-light); border-bottom:2px solid var(--bg-off); text-transform:uppercase; letter-spacing:0.5px;
+        }
+        .btn-fetch-default {
+            display:inline-block; margin-left:8px; padding:2px 8px; font-size:11px; font-weight:600;
+            color:var(--accent); background:rgba(217,119,87,0.08); border:1px solid rgba(217,119,87,0.25);
+            border-radius:6px; cursor:pointer; vertical-align:middle; line-height:1.4;
+        }
+        .btn-fetch-default:hover { background:rgba(217,119,87,0.18); }
+
+        .docs-table th.sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+        .docs-table th.sortable:hover { color:var(--accent); }
+        .docs-table th.sortable .sort-arrow { display:inline-block; margin-left:4px; font-size:10px; opacity:0.3; }
+        .docs-table th.sortable.asc .sort-arrow, .docs-table th.sortable.desc .sort-arrow { opacity:1; color:var(--accent); }
+        .docs-table td { padding:10px 12px; border-bottom:1px solid var(--bg-off); vertical-align:middle; }
+        .docs-table tr:hover td { background:rgba(217,119,87,0.03); }
+        .docs-table .td-actions { display:flex; gap:4px; }
+
+        .settings-card {
+            background:var(--white); border:1.5px solid var(--bg-off); border-radius:16px;
+            padding:24px; margin-bottom:20px;
+        }
+        .settings-card h3 { font-size:15px; margin-bottom:16px; }
+        .template-help { font-size:12px; color:var(--text-light); margin-top:8px; line-height:1.6; }
+        .template-help code { background:var(--bg-off); padding:2px 6px; border-radius:4px; font-size:11px; font-family:'Courier Prime',monospace; }
+
+        .empty-state { text-align:center; padding:48px 24px; color:var(--text-light); }
+        .empty-state .empty-icon { font-size:40px; margin-bottom:12px; }
+        .empty-state p { font-size:14px; margin-bottom:16px; }
+
+        .toast {
+            position:fixed; bottom:24px; right:24px; z-index:300;
+            background:var(--text); color:var(--white); padding:12px 20px;
+            border-radius:12px; font-size:14px; font-weight:600;
+            box-shadow:0 4px 16px rgba(0,0,0,0.15);
+            transform:translateY(80px); opacity:0; transition:all 0.3s;
+            max-width:360px;
+        }
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast.success { background:var(--green); }
+        .toast.error { background:var(--red); }
+
+        .loading-overlay {
+            position:absolute; inset:0; background:rgba(250,249,247,0.85);
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            z-index:10; border-radius:16px;
+        }
+        .loading-overlay .lo-spinner {
+            width:44px; height:44px; border:4px solid rgba(0,0,0,0.08);
+            border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite;
+            margin-bottom:12px;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .loading-overlay .lo-text { font-size:14px; font-weight:600; color:var(--text); }
+
+        @media (max-width:768px) {
+            .pipeline-row { flex-direction:column; }
+            .pipeline-rec-group { flex-direction:column; }
+            .pipeline-arrow { width:100%; height:36px; }
+            .pipeline-arrow button { transform:rotate(90deg); }
+            .form-row { grid-template-columns:1fr; }
+            .form-row.three { grid-template-columns:1fr; }
+            .modal-box.wide { max-width:100%; }
+            .modal-overlay { padding:16px 8px; }
+            .project-grid { grid-template-columns:1fr; }
+            .cms-tab { padding:8px 14px; font-size:13px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <h1>業務文件管理</h1>
+        <p>Business Documents CMS</p>
+        <button class="google-btn" onclick="handleGoogleLogin()">
+            <svg viewBox="0 0 533.5 544.3"><path d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z" fill="#4285f4"/><path d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z" fill="#34a853"/><path d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z" fill="#fbbc04"/><path d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z" fill="#ea4335"/></svg>
+            使用 Google 登入
+        </button>
+        <p class="login-error" id="loginError"></p>
+    </div>
+</div>
+
+<!-- ===== MAIN CMS ===== -->
+<div id="cmsMain" class="dashboard">
+    <header class="cms-header">
+        <div class="cms-header-inner">
+            <a class="cms-logo" href="/business-cms">AIFLOW<span>TIME</span> <small style="font-weight:400;font-size:12px;color:var(--text-light);">業務文件</small></a>
+            <div class="cms-nav-links">
+                <a href="/workshop-cms">工作坊 CMS</a>
+                <span style="color:var(--bg-off);">|</span>
+                <span class="cms-user" id="userInfo"></span>
+                <button class="btn btn-xs btn-secondary" onclick="handleLogout()">登出</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" style="padding-top:8px;">
+        <div class="cms-tabs">
+            <button class="cms-tab active" onclick="switchTab('projects')">專案管理</button>
+            <button class="cms-tab" onclick="switchTab('documents')">文件總覽</button>
+            <button class="cms-tab" onclick="switchTab('settings')">設定</button>
+        </div>
+
+        <!-- ===== TAB: PROJECTS ===== -->
+        <div class="tab-content active" id="tabProjects">
+            <div id="projectListView">
+                <div class="dash-header">
+                    <h1>專案管理</h1>
+                    <button class="btn" onclick="openProjectDetail(null)">＋ 新增專案</button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="projectSearch" placeholder="搜尋專案名稱 / 客戶..." oninput="renderProjectList()">
+                </div>
+                <div id="projectList" class="project-grid"></div>
+            </div>
+
+            <div id="projectDetailView" style="display:none;position:relative;">
+                <div class="loading-overlay" id="projectSaveLoading" style="display:none;"><div class="lo-spinner"></div><div class="lo-text">正在儲存專案...</div></div>
+                <button class="back-btn" onclick="closeProjectDetail()">← 返回專案列表</button>
+                <div class="dash-header">
+                    <h1 id="pjTitle">新增專案</h1>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn btn-green" onclick="saveProject()">💾 儲存專案</button>
+                        <button class="btn btn-danger btn-sm" id="pjDeleteBtn" onclick="deleteProject()" style="display:none;">刪除</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Client Information 客戶資訊</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Company 公司</label><input type="text" id="pjClientCompany" placeholder="e.g. ABC Ltd"></div>
+                        <div class="form-group"><label>Contact Person 聯絡人</label><input type="text" id="pjContactPerson" placeholder="e.g. John Chan"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Phone 電話</label><input type="text" id="pjPhone" placeholder="e.g. +852 9123 4567"></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="pjEmail" placeholder="e.g. john@abc.com"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Sender Information 發送人資訊</div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Company Name</label><input type="text" id="pjSenderName" placeholder="AIFlowTime"></div>
+                        <div class="form-group"><label>Website</label><input type="text" id="pjSenderWeb" placeholder="https://aiflowtime-hk.web.app"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>WhatsApp</label><input type="text" id="pjSenderWA" placeholder="+852 6288 0186"></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="pjSenderEmail" placeholder="jacobfung@aiflowtime.com"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-title">Project Settings 專案設定</div>
+                    <div class="form-row three">
+                        <div class="form-group"><label>Project Name 專案名稱</label><input type="text" id="pjName" placeholder="e.g. Website Redesign"></div>
+                        <div class="form-group"><label>Currency 貨幣</label>
+                            <select id="pjCurrency"><option value="HKD">HKD</option><option value="USD">USD</option><option value="RMB">RMB</option></select>
+                        </div>
+                        <div class="form-group"><label>Status 狀態</label>
+                            <select id="pjStatus"><option value="active">Active</option><option value="completed">Completed</option><option value="archived">Archived</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pipeline-section" style="position:relative;">
+                    <div class="loading-overlay" id="syncLoading" style="display:none;"><div class="lo-spinner"></div><div class="lo-text">正在同步文件...</div></div>
+                    <div class="form-section-title">Document Pipeline 文件流程</div>
+                    <div class="pipeline-row">
+                        <div class="pipeline-card" id="pipeQuo"></div>
+                        <div class="pipeline-arrow"><button onclick="syncDoc('quotation','invoice')" title="Sync Quotation → Invoice" id="syncQuoInv" disabled>→</button></div>
+                        <div class="pipeline-card" id="pipeInv"></div>
+                        <div class="pipeline-arrow"><button onclick="openSyncReceiptModal()" title="Sync Invoice → Receipt" id="syncInvRec" disabled>→</button></div>
+                        <div class="pipeline-rec-group" id="pipeRecGroup">
+                            <div class="pipeline-card" id="pipeRecDeposit"></div>
+                            <div class="pipeline-card" id="pipeRecFinal"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: ALL DOCUMENTS ===== -->
+        <div class="tab-content" id="tabDocuments">
+            <div class="dash-header">
+                <h1>文件總覽</h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="allDocsSearch" placeholder="搜尋文件號碼 / 客戶 / 專案..." oninput="renderAllDocuments()">
+                <select id="allDocsTypeFilter" onchange="renderAllDocuments()">
+                    <option value="">全部類型</option>
+                    <option value="quotation">Quotation</option>
+                    <option value="invoice">Invoice</option>
+                    <option value="receipt">Receipt</option>
+                </select>
+                <select id="allDocsStatusFilter" onchange="renderAllDocuments()">
+                    <option value="">全部狀態</option>
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="expired">Expired</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="issued">Issued</option>
+                </select>
+            </div>
+            <div class="docs-table-wrap">
+                <table class="docs-table">
+                    <thead><tr>
+                        <th class="sortable" onclick="sortAllDocs('documentNumber')">文件 #<span class="sort-arrow">▲</span></th>
+                        <th class="sortable" onclick="sortAllDocs('type')">類型<span class="sort-arrow">▲</span></th>
+                        <th class="sortable" onclick="sortAllDocs('projectName')">專案<span class="sort-arrow">▲</span></th>
+                        <th class="sortable" onclick="sortAllDocs('client')">客戶<span class="sort-arrow">▲</span></th>
+                        <th class="sortable" onclick="sortAllDocs('total')">金額<span class="sort-arrow">▲</span></th>
+                        <th class="sortable" onclick="sortAllDocs('status')">狀態<span class="sort-arrow">▲</span></th>
+                        <th class="sortable" onclick="sortAllDocs('date')">日期<span class="sort-arrow">▲</span></th>
+                        <th>操作</th>
+                    </tr></thead>
+                    <tbody id="allDocsBody"></tbody>
+                </table>
+            </div>
+            <div id="allDocsEmpty" class="empty-state" style="display:none;">
+                <div class="empty-icon">📄</div>
+                <p>尚未建立任何文件</p>
+            </div>
+        </div>
+
+        <!-- ===== TAB: SETTINGS ===== -->
+        <div class="tab-content" id="tabSettings" style="position:relative;">
+            <div class="loading-overlay" id="settingsLoading" style="display:none;"><div class="lo-spinner"></div><div class="lo-text">正在儲存設定...</div></div>
+            <div class="dash-header"><h1>設定</h1></div>
+
+            <div class="settings-card">
+                <h3>預設發送人資訊 Default Sender Info</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Company Name</label><input type="text" id="stSenderName" placeholder="AIFlowTime"></div>
+                    <div class="form-group"><label>Website</label><input type="text" id="stSenderWeb" placeholder="https://aiflowtime-hk.web.app"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>WhatsApp</label><input type="text" id="stSenderWA" placeholder="+852 6288 0186"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="stSenderEmail" placeholder="jacobfung@aiflowtime.com"></div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>WhatsApp 訊息模板</h3>
+                <div class="template-help" style="margin-bottom:12px;">
+                    可用變數 Available variables:
+                    <code>{clientName}</code> <code>{clientCompany}</code> <code>{documentType}</code> <code>{documentTypeZh}</code>
+                    <code>{documentNumber}</code> <code>{total}</code> <code>{currency}</code> <code>{link}</code>
+                </div>
+                <div class="form-group full" style="margin-bottom:12px;">
+                    <label>Quotation 報價單模板</label>
+                    <textarea id="stWATemplateQuo" rows="4" style="height:100px;"></textarea>
+                </div>
+                <div class="form-group full" style="margin-bottom:12px;">
+                    <label>Invoice 發票模板</label>
+                    <textarea id="stWATemplateInv" rows="4" style="height:100px;"></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>Receipt 收據模板</label>
+                    <textarea id="stWATemplateRec" rows="4" style="height:100px;"></textarea>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>預設條款 — Quotation Terms 報價單條款</h3>
+                <div class="form-group full" style="margin-bottom:12px;">
+                    <label>Payment Terms 付款條款</label>
+                    <textarea id="stQuoPaymentTerms" rows="2" placeholder="e.g. 50% deposit required upon acceptance..."></textarea>
+                </div>
+                <div class="form-group full" style="margin-bottom:12px;">
+                    <label>Terms & Conditions 條款及細則</label>
+                    <textarea id="stQuoTerms" rows="3" placeholder="e.g. This quotation is valid for 30 days..."></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>Notes 備註</label>
+                    <textarea id="stQuoNotes" rows="2" placeholder="e.g. Thank you for your enquiry..."></textarea>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>預設條款 — Invoice Payment Terms 發票條款</h3>
+                <div class="form-group full" style="margin-bottom:12px;">
+                    <label>Payment Terms 付款條款</label>
+                    <textarea id="stInvPaymentTerms" rows="2" placeholder="e.g. Payment due within 14 days..."></textarea>
+                </div>
+                <div class="form-group full" style="margin-bottom:12px;">
+                    <label>Terms & Conditions 條款及細則</label>
+                    <textarea id="stInvTerms" rows="3" placeholder="e.g. Late payment may incur interest..."></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>Notes 備註</label>
+                    <textarea id="stInvNotes" rows="2" placeholder="e.g. Please reference invoice number in payment..."></textarea>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>預設條款 — Deposit Receipt Terms 訂金收據條款</h3>
+                <div class="form-group full">
+                    <label>Terms & Notes 條款與備註</label>
+                    <textarea id="stDepRecTerms" rows="4" placeholder="e.g. Deposit received. Remaining balance due upon project completion..."></textarea>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>預設條款 — Final Receipt Terms 尾款收據條款</h3>
+                <div class="form-group full">
+                    <label>Terms & Notes 條款與備註</label>
+                    <textarea id="stFinRecTerms" rows="4" placeholder="e.g. Final payment received in full. Thank you for your business..."></textarea>
+                </div>
+            </div>
+
+            <button class="btn btn-green" id="settingsSaveBtn" onclick="saveSettings()">💾 儲存設定</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== DOCUMENT EDITOR MODAL ===== -->
+<div class="modal-overlay" id="docEditorModal" style="display:none;">
+    <div class="modal-box wide" style="position:relative;">
+        <div class="loading-overlay" id="docSaveLoading" style="display:none;">
+            <div class="lo-spinner"></div>
+            <div class="lo-text">儲存中 Saving...</div>
+        </div>
+        <div class="modal-header">
+            <h2 id="deTitle">Document Editor</h2>
+            <button class="modal-close" onclick="closeDocEditor()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row three">
+                <div class="form-group"><label>Document # 文件編號</label><input type="text" id="deNumber" readonly style="background:var(--bg-pampas);"></div>
+                <div class="form-group"><label>Status 狀態</label><select id="deStatus"></select></div>
+                <div class="form-group" id="deDateGroup"><label id="deDateLabel">Date</label><input type="date" id="deDate"></div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Client Information</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Company</label><input type="text" id="deClientCompany"></div>
+                    <div class="form-group"><label>Contact Person</label><input type="text" id="deContactPerson"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Phone</label><input type="text" id="dePhone"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="deEmail"></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Sender Information</div>
+                <div class="form-row">
+                    <div class="form-group"><label>Company</label><input type="text" id="deSenderName"></div>
+                    <div class="form-group"><label>Website</label><input type="text" id="deSenderWeb"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>WhatsApp</label><input type="text" id="deSenderWA"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="deSenderEmail"></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Service Items 服務項目</div>
+                <div class="form-row" style="margin-bottom:8px;">
+                    <div class="form-group" style="max-width:150px;"><label>Currency 貨幣</label><select id="deCurrency" onchange="recalculate()"><option value="HKD">HKD</option><option value="USD">USD</option><option value="RMB">RMB</option></select></div>
+                </div>
+                <table class="line-items-table">
+                    <thead><tr><th class="col-desc">Description 項目描述</th><th class="col-price">Price 價格</th><th class="col-action"></th></tr></thead>
+                    <tbody id="deLineItems"></tbody>
+                </table>
+                <button class="btn btn-outline btn-sm" onclick="addLineItem()">＋ 新增項目</button>
+
+                <div class="calc-summary">
+                    <div class="calc-row"><label>Subtotal 小計</label><span class="calc-val" id="deSubtotal">$0.00</span></div>
+                    <div class="calc-row">
+                        <div class="discount-row">
+                            <label>Discount 折扣</label>
+                            <select id="deDiscountType" onchange="recalculate()"><option value="none">None</option><option value="percentage">%</option><option value="fixed">Fixed</option></select>
+                            <input type="number" id="deDiscountValue" value="0" min="0" step="any" oninput="recalculate()" style="display:none;">
+                        </div>
+                        <span class="calc-val" id="deDiscountAmt" style="color:var(--green);">-$0.00</span>
+                    </div>
+                    <div class="calc-row">
+                        <div class="tax-row">
+                            <label><input type="checkbox" id="deTaxEnabled" onchange="recalculate()"> Tax 稅項</label>
+                            <input type="number" id="deTaxRate" value="0" min="0" step="any" oninput="recalculate()" placeholder="%" style="display:none;">
+                        </div>
+                        <span class="calc-val" id="deTaxAmt">+$0.00</span>
+                    </div>
+                    <div class="calc-row total"><label>Total 總計</label><span class="calc-val" id="deTotal">$0.00</span></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">Terms & Notes 條款與備註</div>
+                <div class="form-group full" style="margin-bottom:12px;" id="dePaymentTermsRow">
+                    <label>Payment Terms 付款條款 <button type="button" class="btn-fetch-default" onclick="fetchDefault('paymentTerms')">📥 載入預設</button></label>
+                    <textarea id="dePaymentTerms" rows="2"></textarea>
+                </div>
+                <div class="form-group full" style="margin-bottom:12px;" id="deTermsRow">
+                    <label id="deTermsLabel">Terms & Conditions 條款及細則 <button type="button" class="btn-fetch-default" onclick="fetchDefault('terms')">📥 載入預設</button></label>
+                    <textarea id="deTerms" rows="3"></textarea>
+                </div>
+                <div class="form-group full" id="deNotesRow">
+                    <label>Notes 備註 <button type="button" class="btn-fetch-default" onclick="fetchDefault('notes')">📥 載入預設</button></label>
+                    <textarea id="deNotes" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDocEditor()">取消</button>
+            <button class="btn" onclick="saveDocument()">💾 儲存</button>
+            <button class="btn btn-blue" onclick="previewDocument()">👁 預覽 PDF</button>
+            <button class="btn btn-wa" onclick="openWhatsApp()">📱 WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== WHATSAPP MODAL ===== -->
+<div class="modal-overlay" id="waModal" style="display:none;" onclick="if(event.target===this)closeWAModal()">
+    <div class="modal-box" style="max-width:520px;position:relative;">
+        <div class="loading-overlay" id="waSaveLoading" style="display:none;"><div class="spinner"></div></div>
+        <div class="modal-header">
+            <h2>📱 WhatsApp 訊息</h2>
+            <button class="modal-close" onclick="closeWAModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group full" style="margin-bottom:12px;">
+                <label>Recipient Phone 收件人電話</label>
+                <input type="text" id="waPhone" placeholder="+852...">
+            </div>
+            <div class="form-group full" style="margin-bottom:12px;">
+                <label>Message 訊息內容</label>
+                <textarea id="waMessage" rows="6" style="height:140px;" readonly></textarea>
+            </div>
+            <div class="template-help" style="margin-bottom:12px;">此訊息根據模板自動生成，如需修改模板請按「✏️ 編輯模板」</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline btn-sm" onclick="openWATemplateEditor()">✏️ 編輯模板</button>
+            <button class="btn btn-wa" onclick="sendWhatsApp()">📱 開啟 WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== WA TEMPLATE EDITOR MODAL ===== -->
+<div class="modal-overlay" id="waTplEditorModal" style="display:none;z-index:1100;" onclick="if(event.target===this)closeWATplEditor()">
+    <div class="modal-box" style="max-width:540px;position:relative;">
+        <div class="loading-overlay" id="waTplSaveLoading" style="display:none;"><div class="spinner"></div></div>
+        <div class="modal-header">
+            <h2>✏️ 編輯 WhatsApp 模板</h2>
+            <button class="modal-close" onclick="closeWATplEditor()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group full" style="margin-bottom:8px;">
+                <label id="waTplEditorLabel">模板</label>
+                <textarea id="waTplEditorText" rows="8" style="height:180px;font-family:monospace;font-size:13px;"></textarea>
+            </div>
+            <div class="template-help">
+                可用變數 Available variables:<br>
+                <code>{clientName}</code> <code>{clientCompany}</code> <code>{documentType}</code> <code>{documentTypeZh}</code><br>
+                <code>{documentNumber}</code> <code>{total}</code> <code>{currency}</code> <code>{link}</code>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-sm" onclick="closeWATplEditor()">取消</button>
+            <button class="btn btn-sm" onclick="saveWATplEditor()">💾 儲存模板</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CONFIRM MODAL ===== -->
+<div class="modal-overlay" id="confirmModal" style="display:none;" onclick="if(event.target===this)closeConfirm()">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-header"><h2 id="confirmTitle">確認</h2><button class="modal-close" onclick="closeConfirm()">✕</button></div>
+        <div class="modal-body"><p id="confirmMsg"></p></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-sm" onclick="closeConfirm()">取消</button>
+            <button class="btn btn-danger btn-sm" id="confirmBtn" onclick="">確認</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== SYNC RECEIPT MODAL ===== -->
+<div class="modal-overlay" id="syncRecModal" style="display:none;" onclick="if(event.target===this)closeSyncRecModal()">
+    <div class="modal-box" style="max-width:440px;">
+        <div class="modal-header"><h2>同步收據 Sync Receipt</h2><button class="modal-close" onclick="closeSyncRecModal()">✕</button></div>
+        <div class="modal-body">
+            <p style="font-size:13px;color:var(--text-light);margin-bottom:14px;">從 Invoice 同步資料並建立收據</p>
+            <div class="sync-rec-toggle">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="syncRecSplit" checked onchange="toggleSyncRecSplit()">
+                    <span class="slider"></span>
+                </label>
+                <label for="syncRecSplit">拆分收據 Split Receipt (Deposit + Final)</label>
+            </div>
+            <div id="syncRecSplitFields">
+                <div class="sync-rec-amounts">
+                    <div style="margin-bottom:10px;">
+                        <label>Deposit 訂金</label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="number" id="syncRecDeposit" step="0.01" min="0" oninput="updateSyncRecFinal()" style="flex:1;">
+                            <button type="button" class="btn-fetch-default" id="syncRecModeBtn" onclick="toggleSyncRecMode()" style="white-space:nowrap;padding:6px 10px;font-size:12px;">$ 金額</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:4px;">
+                        <label>Final Amount 尾款金額</label>
+                        <input type="number" id="syncRecFinal" disabled>
+                    </div>
+                    <div class="total-row">
+                        <span>Invoice Total:</span>
+                        <strong id="syncRecTotal">HK$ 0.00</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-sm" onclick="closeSyncRecModal()">取消</button>
+            <button class="btn btn-green btn-sm" onclick="executeSyncReceipt()">確認同步</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* ================================================================
+   STATE
+   ================================================================ */
+var db, auth, _bizApp = null;
+var currentUser = null;
+var currentProjectId = null;
+var currentDocId = null;
+var editingDocType = null;
+var editingReceiptSubtype = null;
+var _settingsDirty = false;
+var allProjects = [];
+var projectDocsCache = {};
+var allDocumentsCache = [];
+var allDocsSortKey = 'date';
+var allDocsSortDir = 'desc';
+var bizSettings = {};
+
+var DEFAULT_SENDER = {
+    name: 'AIFlowTime',
+    website: 'https://aiflowtime-hk.web.app',
+    whatsapp: '+852 6288 0186',
+    email: 'jacobfung@aiflowtime.com'
+};
+
+var DEFAULT_WA_TEMPLATES = {
+    quotation: '您好，{clientName}，\n\n請查收來自 AIFlowTime 的報價單（編號：#{documentNumber}）。\n\n金額：{currency} {total}\n查閱連結：{link}\n\n如有疑問，歡迎隨時聯絡。謝謝！\n\nAIFlowTime',
+    invoice: '您好，{clientName}，\n\n請查收來自 AIFlowTime 的發票（編號：#{documentNumber}）。\n\n應付金額：{currency} {total}\n查閱連結：{link}\n\n請按發票條款安排付款。如有疑問，歡迎隨時聯絡。謝謝！\n\nAIFlowTime',
+    receipt: '您好，{clientName}，\n\n感謝您的付款！請查收來自 AIFlowTime 的{documentTypeZh}（編號：#{documentNumber}）。\n\n已付金額：{currency} {total}\n查閱連結：{link}\n\n如有疑問，歡迎隨時聯絡。謝謝！\n\nAIFlowTime'
+};
+var DEFAULT_WA_TEMPLATE = DEFAULT_WA_TEMPLATES.quotation;
+
+var STATUS_OPTIONS = {
+    quotation: ['draft','sent','accepted','rejected','expired'],
+    invoice:   ['draft','sent','paid','overdue','cancelled'],
+    receipt:   ['draft','issued']
+};
+
+var TYPE_LABELS = { quotation:'Quotation', invoice:'Invoice', receipt:'Receipt' };
+var TYPE_LABELS_ZH = { quotation:'報價單', invoice:'發票', receipt:'收據' };
+
+/* ================================================================
+   FIREBASE INIT & AUTH
+   ================================================================ */
+(function() {
+    var script = document.createElement('script');
+    script.src = '/__/firebase/init.js';
+    script.onload = function() { initBizApp(); };
+    script.onerror = function() {
+        if (!firebase.apps.length) {
+            firebase.initializeApp({ projectId:'aiflowtime-hk', apiKey:'AIzaSyDummy_replace_with_real_key', authDomain:'aiflowtime-hk.firebaseapp.com', storageBucket:'aiflowtime-hk.appspot.com' });
+        }
+        initBizApp();
+    };
+    document.head.appendChild(script);
+})();
+
+function initBizApp() {
+    var config = firebase.app().options;
+    try { _bizApp = firebase.app('bizCms'); } catch(e) { _bizApp = firebase.initializeApp(config, 'bizCms'); }
+    db = _bizApp.firestore();
+    auth = _bizApp.auth();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
+        auth.onAuthStateChanged(function(user) {
+            if (user) { verifyAdmin(user); } else { showLogin(); }
+        });
+    });
+}
+
+function verifyAdmin(user) {
+    db.collection('registrations').where('status','==','confirmed').limit(1).get()
+        .then(function() { showDashboard(user); })
+        .catch(function() { auth.signOut(); showLoginError('此帳號無權限存取 CMS。'); });
+}
+
+function handleGoogleLogin() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt:'select_account' });
+    auth.signInWithPopup(provider).catch(function(err) { showLoginError('登入失敗：' + err.message); });
+}
+
+function handleLogout() { if (confirm('確定要登出嗎？')) auth.signOut(); }
+
+function showLogin() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('cmsMain').style.display = 'none';
+}
+
+function showLoginError(msg) {
+    var el = document.getElementById('loginError');
+    el.textContent = msg; el.style.display = 'block';
+}
+
+function showDashboard(user) {
+    currentUser = user;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('cmsMain').style.display = 'block';
+    document.getElementById('userInfo').innerHTML =
+        (user.photoURL ? '<img src="' + user.photoURL + '">' : '') + '<span>' + (user.displayName || user.email) + '</span>';
+    loadSettings().then(function() {
+        loadAllProjects();
+        loadAllDocuments();
+    });
+}
+
+/* ================================================================
+   TAB NAVIGATION
+   ================================================================ */
+function _doSwitchTab(tabId, triggerEl) {
+    document.querySelectorAll('.cms-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    if (triggerEl) triggerEl.classList.add('active');
+    else {
+        var tabs = ['projects','documents','settings'];
+        document.querySelectorAll('.cms-tab').forEach(function(t, i) {
+            t.classList.toggle('active', tabs[i] === tabId);
+        });
+    }
+    var map = { projects:'tabProjects', documents:'tabDocuments', settings:'tabSettings' };
+    document.getElementById(map[tabId]).classList.add('active');
+    if (tabId === 'documents') renderAllDocuments();
+}
+
+function switchTab(tabId) {
+    var triggerEl = event.target;
+    if (_settingsDirty && _currentTab() === 'settings' && tabId !== 'settings') {
+        _confirmUnsavedSettings(function() { _doSwitchTab(tabId, triggerEl); });
+        return;
+    }
+    _doSwitchTab(tabId, triggerEl);
+}
+
+function _currentTab() {
+    var active = document.querySelector('.tab-content.active');
+    if (!active) return null;
+    var id = active.id;
+    return id === 'tabProjects' ? 'projects' : id === 'tabDocuments' ? 'documents' : id === 'tabSettings' ? 'settings' : null;
+}
+
+function _confirmUnsavedSettings(leaveCb) {
+    document.getElementById('confirmTitle').textContent = '未儲存的設定';
+    document.getElementById('confirmMsg').textContent = '您有未儲存的設定變更。是否儲存後離開？';
+    var confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.textContent = '💾 儲存並離開';
+    confirmBtn.className = 'btn btn-green btn-sm';
+    confirmBtn.onclick = async function() {
+        closeConfirm();
+        await saveSettings();
+        leaveCb();
+    };
+    var cancelBtn = document.querySelector('#confirmModal .btn-secondary');
+    cancelBtn.textContent = '不儲存，直接離開';
+    cancelBtn.onclick = function() {
+        closeConfirm();
+        _settingsDirty = false;
+        leaveCb();
+    };
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+function _restoreConfirmModal() {
+    var confirmBtn = document.getElementById('confirmBtn');
+    confirmBtn.textContent = '確認';
+    confirmBtn.className = 'btn btn-danger btn-sm';
+    var cancelBtn = document.querySelector('#confirmModal .btn-secondary');
+    cancelBtn.textContent = '取消';
+    cancelBtn.onclick = function() { closeConfirm(); };
+}
+
+/* ================================================================
+   SETTINGS
+   ================================================================ */
+async function loadSettings() {
+    try {
+        var snap = await db.collection('businessSettings').doc('config').get();
+        bizSettings = snap.exists ? snap.data() : {};
+    } catch(e) { bizSettings = {}; }
+
+    if (!bizSettings.counters) bizSettings.counters = {};
+    if (!bizSettings.waTemplates) bizSettings.waTemplates = {};
+    if (!bizSettings.sender) bizSettings.sender = Object.assign({}, DEFAULT_SENDER);
+    if (!bizSettings.defaults) bizSettings.defaults = {};
+
+    var s = bizSettings.sender || {};
+    document.getElementById('stSenderName').value = s.name || DEFAULT_SENDER.name;
+    document.getElementById('stSenderWeb').value = s.website || DEFAULT_SENDER.website;
+    document.getElementById('stSenderWA').value = s.whatsapp || DEFAULT_SENDER.whatsapp;
+    document.getElementById('stSenderEmail').value = s.email || DEFAULT_SENDER.email;
+    var wt = bizSettings.waTemplates || {};
+    function _cleanTpl(tpl, fallback) {
+        if (!tpl) return fallback;
+        if (tpl.indexOf('{link}') === -1 && tpl.indexOf('aiflowtime-hk.web.app/doc?id=') !== -1) return fallback;
+        return tpl;
+    }
+    document.getElementById('stWATemplateQuo').value = _cleanTpl(wt.quotation || bizSettings.waTemplate, DEFAULT_WA_TEMPLATES.quotation);
+    document.getElementById('stWATemplateInv').value = _cleanTpl(wt.invoice, DEFAULT_WA_TEMPLATES.invoice);
+    document.getElementById('stWATemplateRec').value = _cleanTpl(wt.receipt, DEFAULT_WA_TEMPLATES.receipt);
+
+    var d = bizSettings.defaults || {};
+    document.getElementById('stQuoPaymentTerms').value = d.quoPaymentTerms || '';
+    document.getElementById('stQuoTerms').value = d.quoTerms || '';
+    document.getElementById('stQuoNotes').value = d.quoNotes || '';
+    document.getElementById('stInvPaymentTerms').value = d.invPaymentTerms || '';
+    document.getElementById('stInvTerms').value = d.invTerms || '';
+    document.getElementById('stInvNotes').value = d.invNotes || '';
+    document.getElementById('stDepRecTerms').value = d.depRecTerms || '';
+    document.getElementById('stFinRecTerms').value = d.finRecTerms || '';
+
+    _settingsDirty = false;
+    var settingsTab = document.getElementById('tabSettings');
+    if (settingsTab && !settingsTab._dirtyListenerAdded) {
+        settingsTab.addEventListener('input', function() { _settingsDirty = true; });
+        settingsTab.addEventListener('change', function() { _settingsDirty = true; });
+        settingsTab._dirtyListenerAdded = true;
+    }
+}
+
+async function saveSettings() {
+    var btn = document.getElementById('settingsSaveBtn');
+    btn.disabled = true; btn.innerHTML = '<span class="lo-spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;"></span> 儲存中...';
+    document.getElementById('settingsLoading').style.display = 'flex';
+    try {
+        var data = {
+            sender: {
+                name: document.getElementById('stSenderName').value.trim() || DEFAULT_SENDER.name,
+                website: document.getElementById('stSenderWeb').value.trim() || DEFAULT_SENDER.website,
+                whatsapp: document.getElementById('stSenderWA').value.trim() || DEFAULT_SENDER.whatsapp,
+                email: document.getElementById('stSenderEmail').value.trim() || DEFAULT_SENDER.email,
+            },
+            waTemplates: {
+                quotation: document.getElementById('stWATemplateQuo').value.trim() || DEFAULT_WA_TEMPLATES.quotation,
+                invoice: document.getElementById('stWATemplateInv').value.trim() || DEFAULT_WA_TEMPLATES.invoice,
+                receipt: document.getElementById('stWATemplateRec').value.trim() || DEFAULT_WA_TEMPLATES.receipt,
+            },
+            defaults: {
+                quoPaymentTerms: document.getElementById('stQuoPaymentTerms').value.trim(),
+                quoTerms: document.getElementById('stQuoTerms').value.trim(),
+                quoNotes: document.getElementById('stQuoNotes').value.trim(),
+                invPaymentTerms: document.getElementById('stInvPaymentTerms').value.trim(),
+                invTerms: document.getElementById('stInvTerms').value.trim(),
+                invNotes: document.getElementById('stInvNotes').value.trim(),
+                depRecTerms: document.getElementById('stDepRecTerms').value.trim(),
+                finRecTerms: document.getElementById('stFinRecTerms').value.trim(),
+            },
+            counters: bizSettings.counters || {},
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        await db.collection('businessSettings').doc('config').set(data, { merge:true });
+        bizSettings = Object.assign(bizSettings, data);
+        toast('設定已儲存', 'success');
+    } catch(e) { toast('儲存失敗: ' + e.message, 'error'); }
+    document.getElementById('settingsLoading').style.display = 'none';
+    _settingsDirty = false;
+    btn.disabled = false; btn.innerHTML = '💾 儲存設定';
+}
+
+/* ================================================================
+   PROJECTS — CRUD
+   ================================================================ */
+async function loadAllProjects() {
+    try {
+        var snap = await db.collection('projects').orderBy('createdAt','desc').get();
+        allProjects = [];
+        snap.forEach(function(doc) { var d = doc.data(); d._id = doc.id; allProjects.push(d); });
+    } catch(e) { allProjects = []; }
+    renderProjectList();
+}
+
+function renderProjectList() {
+    var q = (document.getElementById('projectSearch').value || '').toLowerCase();
+    var filtered = allProjects.filter(function(p) {
+        if (!q) return true;
+        return (p.projectName||'').toLowerCase().includes(q) || (p.clientCompany||'').toLowerCase().includes(q) || (p.contactPerson||'').toLowerCase().includes(q);
+    });
+    var container = document.getElementById('projectList');
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">📁</div><p>尚未建立任何專案</p></div>';
+        return;
+    }
+    var html = '';
+    filtered.forEach(function(p) {
+        var docs = projectDocsCache[p._id] || [];
+        var quo = docs.find(function(d){ return d.type==='quotation'; });
+        var inv = docs.find(function(d){ return d.type==='invoice'; });
+        var recs = docs.filter(function(d){ return d.type==='receipt'; });
+        var recBadge = '<span class="doc-badge empty">REC</span>';
+        if (recs.length === 1 && !recs[0].receiptSubtype) recBadge = '<span class="doc-badge rec">REC</span>';
+        else if (recs.length >= 1) {
+            var hasDep = recs.some(function(r){ return r.receiptSubtype==='deposit'; });
+            var hasFin = recs.some(function(r){ return r.receiptSubtype==='final'; });
+            recBadge = (hasDep ? '<span class="doc-badge rec">DEP</span>' : '<span class="doc-badge empty">DEP</span>')
+                     + (hasFin ? '<span class="doc-badge rec">FIN</span>' : '<span class="doc-badge empty">FIN</span>');
+        }
+        html += '<div class="project-card" onclick="openProjectDetail(\'' + p._id + '\')">'
+            + '<h3>' + esc(p.projectName || 'Untitled') + '</h3>'
+            + '<div class="pc-client">' + esc(p.clientCompany || '') + (p.contactPerson ? ' · ' + esc(p.contactPerson) : '') + '</div>'
+            + '<div class="pc-docs">'
+            + (quo ? '<span class="doc-badge quo">QUO</span>' : '<span class="doc-badge empty">QUO</span>')
+            + (inv ? '<span class="doc-badge inv">INV</span>' : '<span class="doc-badge empty">INV</span>')
+            + recBadge
+            + '</div>'
+            + '<div class="pc-date">' + formatTimestamp(p.createdAt) + '</div>'
+            + '</div>';
+    });
+    container.innerHTML = html;
+}
+
+async function openProjectDetail(projectId) {
+    document.getElementById('projectListView').style.display = 'none';
+    document.getElementById('projectDetailView').style.display = 'block';
+
+    if (projectId) {
+        currentProjectId = projectId;
+        var proj = allProjects.find(function(p){ return p._id === projectId; });
+        if (!proj) { closeProjectDetail(); return; }
+        document.getElementById('pjTitle').textContent = proj.projectName || 'Untitled Project';
+        document.getElementById('pjName').value = proj.projectName || '';
+        document.getElementById('pjClientCompany').value = proj.clientCompany || '';
+        document.getElementById('pjContactPerson').value = proj.contactPerson || '';
+        document.getElementById('pjPhone').value = proj.phone || '';
+        document.getElementById('pjEmail').value = proj.email || '';
+        document.getElementById('pjSenderName').value = proj.senderName || bizSettings.sender.name || DEFAULT_SENDER.name;
+        document.getElementById('pjSenderWeb').value = proj.senderWebsite || bizSettings.sender.website || DEFAULT_SENDER.website;
+        document.getElementById('pjSenderWA').value = proj.senderWhatsapp || bizSettings.sender.whatsapp || DEFAULT_SENDER.whatsapp;
+        document.getElementById('pjSenderEmail').value = proj.senderEmail || bizSettings.sender.email || DEFAULT_SENDER.email;
+        document.getElementById('pjCurrency').value = proj.currency || 'HKD';
+        document.getElementById('pjStatus').value = proj.status || 'active';
+        document.getElementById('pjDeleteBtn').style.display = 'inline-flex';
+        await loadProjectDocs(projectId);
+    } else {
+        currentProjectId = null;
+        document.getElementById('pjTitle').textContent = '新增專案';
+        document.getElementById('pjName').value = '';
+        document.getElementById('pjClientCompany').value = '';
+        document.getElementById('pjContactPerson').value = '';
+        document.getElementById('pjPhone').value = '';
+        document.getElementById('pjEmail').value = '';
+        var s = bizSettings.sender || DEFAULT_SENDER;
+        document.getElementById('pjSenderName').value = s.name || DEFAULT_SENDER.name;
+        document.getElementById('pjSenderWeb').value = s.website || DEFAULT_SENDER.website;
+        document.getElementById('pjSenderWA').value = s.whatsapp || DEFAULT_SENDER.whatsapp;
+        document.getElementById('pjSenderEmail').value = s.email || DEFAULT_SENDER.email;
+        document.getElementById('pjCurrency').value = 'HKD';
+        document.getElementById('pjStatus').value = 'active';
+        document.getElementById('pjDeleteBtn').style.display = 'none';
+        projectDocsCache[null] = [];
+        renderPipeline();
+    }
+}
+
+function closeProjectDetail() {
+    document.getElementById('projectDetailView').style.display = 'none';
+    document.getElementById('projectListView').style.display = 'block';
+    currentProjectId = null;
+    loadAllProjects();
+}
+
+function getProjectFormData() {
+    return {
+        projectName: document.getElementById('pjName').value.trim(),
+        clientCompany: document.getElementById('pjClientCompany').value.trim(),
+        contactPerson: document.getElementById('pjContactPerson').value.trim(),
+        phone: document.getElementById('pjPhone').value.trim(),
+        email: document.getElementById('pjEmail').value.trim(),
+        senderName: document.getElementById('pjSenderName').value.trim(),
+        senderWebsite: document.getElementById('pjSenderWeb').value.trim(),
+        senderWhatsapp: document.getElementById('pjSenderWA').value.trim(),
+        senderEmail: document.getElementById('pjSenderEmail').value.trim(),
+        currency: document.getElementById('pjCurrency').value,
+        status: document.getElementById('pjStatus').value,
+    };
+}
+
+async function saveProject() {
+    var data = getProjectFormData();
+    if (!data.projectName) { toast('請輸入專案名稱', 'error'); return; }
+    data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+
+    document.getElementById('projectSaveLoading').style.display = 'flex';
+    try {
+        if (currentProjectId) {
+            await db.collection('projects').doc(currentProjectId).update(data);
+            var snap = await db.collection('projects').doc(currentProjectId).get();
+            var fresh = snap.data(); fresh._id = snap.id;
+            var idx = allProjects.findIndex(function(p){ return p._id === currentProjectId; });
+            if (idx >= 0) allProjects[idx] = fresh; else allProjects.unshift(fresh);
+            document.getElementById('pjTitle').textContent = fresh.projectName;
+        } else {
+            data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            var ref = await db.collection('projects').add(data);
+            currentProjectId = ref.id;
+            var snap = await db.collection('projects').doc(ref.id).get();
+            var fresh = snap.data(); fresh._id = snap.id;
+            allProjects.unshift(fresh);
+            document.getElementById('pjTitle').textContent = fresh.projectName;
+            document.getElementById('pjDeleteBtn').style.display = 'inline-flex';
+        }
+        toast('專案已儲存', 'success');
+    } catch(e) { toast('儲存失敗: ' + e.message, 'error'); }
+    document.getElementById('projectSaveLoading').style.display = 'none';
+}
+
+async function deleteProject() {
+    if (!currentProjectId) return;
+    showConfirm('刪除此專案？', '此操作將同時刪除專案下所有文件，且無法復原。', async function() {
+        try {
+            var docs = projectDocsCache[currentProjectId] || [];
+            for (var i = 0; i < docs.length; i++) {
+                await db.collection('businessDocuments').doc(docs[i]._id).delete();
+            }
+            await db.collection('projects').doc(currentProjectId).delete();
+            allProjects = allProjects.filter(function(p){ return p._id !== currentProjectId; });
+            delete projectDocsCache[currentProjectId];
+            toast('專案已刪除', 'success');
+            closeProjectDetail();
+        } catch(e) { toast('刪除失敗: ' + e.message, 'error'); }
+    });
+}
+
+/* ================================================================
+   PROJECT DOCUMENTS — LOAD & RENDER PIPELINE
+   ================================================================ */
+async function loadProjectDocs(projectId) {
+    try {
+        var snap = await db.collection('businessDocuments').where('projectId','==', projectId).get();
+        var docs = [];
+        snap.forEach(function(d) { var data = d.data(); data._id = d.id; docs.push(data); });
+        projectDocsCache[projectId] = docs;
+    } catch(e) { projectDocsCache[projectId] = []; }
+    renderPipeline();
+}
+
+function _renderPipelineCard(el, doc, type, shortId, labelOverride) {
+    var label = labelOverride || (TYPE_LABELS[type] + ' ' + TYPE_LABELS_ZH[type]);
+    if (doc) {
+        el.className = 'pipeline-card has-doc';
+        el.innerHTML =
+            '<div class="pipeline-card-type ' + shortId.toLowerCase() + '">' + label + '</div>'
+            + '<div class="pipeline-card-num">' + esc(doc.documentNumber || '—') + '</div>'
+            + '<div class="pipeline-card-amount">' + formatCurrency(doc.total || 0, doc.currency || 'HKD') + '</div>'
+            + '<div class="pipeline-card-status">' + statusBadge(doc.status) + '</div>'
+            + '<div class="pipeline-card-date">' + formatTimestamp(doc.updatedAt || doc.createdAt) + '</div>'
+            + '<div class="pipeline-card-actions">'
+            + '<button class="btn btn-sm" onclick="event.stopPropagation();openDocEditor(\'' + doc._id + '\',\'' + type + '\')">✏️ 編輯</button>'
+            + '<button class="btn btn-blue btn-sm" onclick="event.stopPropagation();previewDoc(\'' + doc._id + '\')">👁</button>'
+            + '<button class="btn btn-wa btn-sm" onclick="event.stopPropagation();openWAForDoc(\'' + doc._id + '\')">📱</button>'
+            + '<button class="btn btn-danger btn-xs" onclick="event.stopPropagation();deleteDocument(\'' + doc._id + '\')">🗑</button>'
+            + '</div>';
+    } else {
+        el.className = 'pipeline-card';
+        el.innerHTML =
+            '<div class="pipeline-card-empty">'
+            + '<div class="pipeline-card-type ' + shortId.toLowerCase() + '">' + label + '</div>'
+            + '<p style="margin:12px 0;font-size:13px;">尚未建立</p>'
+            + '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openDocEditor(null,\'' + type + '\')">＋ 建立</button>'
+            + '</div>';
+    }
+}
+
+function renderPipeline() {
+    var docs = projectDocsCache[currentProjectId] || [];
+
+    ['quotation','invoice'].forEach(function(type) {
+        var doc = docs.find(function(d){ return d.type === type; });
+        var shortId = type === 'quotation' ? 'Quo' : 'Inv';
+        var el = document.getElementById('pipe' + shortId);
+        _renderPipelineCard(el, doc, type, shortId);
+    });
+
+    var receipts = docs.filter(function(d){ return d.type === 'receipt'; });
+    var depositRec = receipts.find(function(d){ return d.receiptSubtype === 'deposit'; });
+    var finalRec = receipts.find(function(d){ return d.receiptSubtype === 'final'; });
+    var singleRec = receipts.find(function(d){ return !d.receiptSubtype; });
+
+    var elDep = document.getElementById('pipeRecDeposit');
+    var elFin = document.getElementById('pipeRecFinal');
+
+    if (singleRec && !depositRec && !finalRec) {
+        _renderPipelineCard(elDep, singleRec, 'receipt', 'Rec', 'Receipt 收據');
+        elFin.className = 'pipeline-card';
+        elFin.innerHTML = '<div class="pipeline-card-empty"><div class="pipeline-card-type rec">Final Receipt 尾款收據</div><p style="margin:12px 0;font-size:13px;">不適用 (已建立完整收據)</p></div>';
+    } else {
+        _renderPipelineCard(elDep, depositRec, 'receipt', 'Rec', 'Deposit Receipt 訂金收據');
+        _renderPipelineCard(elFin, finalRec, 'receipt', 'Rec', 'Final Receipt 尾款收據');
+    }
+
+    var quoExists = docs.some(function(d){ return d.type==='quotation'; });
+    var invExists = docs.some(function(d){ return d.type==='invoice'; });
+    document.getElementById('syncQuoInv').disabled = !quoExists;
+    document.getElementById('syncInvRec').disabled = !invExists;
+}
+
+/* ================================================================
+   DOCUMENT EDITOR
+   ================================================================ */
+function _applyTermsLayout(docType, receiptSubtype) {
+    var isSplitReceipt = docType === 'receipt' && (receiptSubtype === 'deposit' || receiptSubtype === 'final');
+    document.getElementById('dePaymentTermsRow').style.display = isSplitReceipt ? 'none' : '';
+    document.getElementById('deNotesRow').style.display = isSplitReceipt ? 'none' : '';
+    var lbl = document.getElementById('deTermsLabel');
+    if (isSplitReceipt) {
+        lbl.innerHTML = 'Terms & Notes 條款與備註 <button type="button" class="btn-fetch-default" onclick="fetchDefault(\'terms\')">📥 載入預設</button>';
+        document.getElementById('deTerms').rows = 5;
+    } else {
+        lbl.innerHTML = 'Terms & Conditions 條款及細則 <button type="button" class="btn-fetch-default" onclick="fetchDefault(\'terms\')">📥 載入預設</button>';
+        document.getElementById('deTerms').rows = 3;
+    }
+}
+
+function openDocEditor(docId, docType) {
+    if (!currentProjectId) { toast('請先儲存專案', 'error'); return; }
+
+    currentDocId = docId;
+    editingDocType = docType;
+    editingReceiptSubtype = null;
+
+    var statusSelect = document.getElementById('deStatus');
+    statusSelect.innerHTML = '';
+    (STATUS_OPTIONS[docType] || []).forEach(function(s) {
+        statusSelect.innerHTML += '<option value="' + s + '">' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+    });
+
+    var dateGroup = document.getElementById('deDateGroup');
+    var dateLabel = document.getElementById('deDateLabel');
+    var dateInput = document.getElementById('deDate');
+    if (docType === 'quotation') { dateGroup.style.display = ''; dateLabel.textContent = 'Valid Until 有效期至'; }
+    else if (docType === 'invoice') { dateGroup.style.display = ''; dateLabel.textContent = 'Due Date 到期日'; }
+    else { dateGroup.style.display = 'none'; }
+
+    if (docId) {
+        var docs = projectDocsCache[currentProjectId] || [];
+        var doc = docs.find(function(d){ return d._id === docId; });
+        if (!doc) { toast('找不到文件', 'error'); return; }
+        editingReceiptSubtype = doc.receiptSubtype || null;
+        var titleExtra = '';
+        if (doc.receiptSubtype === 'deposit') titleExtra = ' (Deposit 訂金)';
+        else if (doc.receiptSubtype === 'final') titleExtra = ' (Final 尾款)';
+        document.getElementById('deTitle').textContent = TYPE_LABELS[docType] + ' ' + TYPE_LABELS_ZH[docType] + titleExtra;
+        _applyTermsLayout(docType, editingReceiptSubtype);
+        fillDocForm(doc);
+    } else {
+        document.getElementById('deTitle').textContent = '新增 ' + TYPE_LABELS[docType] + ' ' + TYPE_LABELS_ZH[docType];
+        _applyTermsLayout(docType, null);
+        var proj = allProjects.find(function(p){ return p._id === currentProjectId; }) || {};
+        fillDocFormFromProject(proj, docType);
+    }
+
+    document.getElementById('docEditorModal').style.display = 'flex';
+}
+
+function fillDocForm(doc) {
+    document.getElementById('deNumber').value = doc.documentNumber || '';
+    document.getElementById('deStatus').value = doc.status || 'draft';
+    document.getElementById('deDate').value = doc.validUntil || doc.dueDate || '';
+    document.getElementById('deClientCompany').value = doc.clientCompany || '';
+    document.getElementById('deContactPerson').value = doc.contactPerson || '';
+    document.getElementById('dePhone').value = doc.phone || '';
+    document.getElementById('deEmail').value = doc.email || '';
+    document.getElementById('deSenderName').value = doc.senderName || '';
+    document.getElementById('deSenderWeb').value = doc.senderWebsite || '';
+    document.getElementById('deSenderWA').value = doc.senderWhatsapp || '';
+    document.getElementById('deSenderEmail').value = doc.senderEmail || '';
+    document.getElementById('deCurrency').value = doc.currency || 'HKD';
+    document.getElementById('deDiscountType').value = doc.discountType || 'none';
+    document.getElementById('deDiscountValue').value = doc.discountValue || 0;
+    document.getElementById('deDiscountValue').style.display = (doc.discountType && doc.discountType !== 'none') ? '' : 'none';
+    document.getElementById('deTaxEnabled').checked = !!doc.taxEnabled;
+    document.getElementById('deTaxRate').value = doc.taxRate || 0;
+    document.getElementById('deTaxRate').style.display = doc.taxEnabled ? '' : 'none';
+    document.getElementById('dePaymentTerms').value = doc.paymentTerms || '';
+    document.getElementById('deTerms').value = doc.termsAndConditions || '';
+    document.getElementById('deNotes').value = doc.notes || '';
+
+    renderLineItems(doc.items || [{ description:'', price:'' }]);
+    recalculate();
+}
+
+function fillDocFormFromProject(proj, docType) {
+    document.getElementById('deNumber').value = '(auto)';
+    document.getElementById('deStatus').value = 'draft';
+    document.getElementById('deDate').value = '';
+    document.getElementById('deClientCompany').value = proj.clientCompany || '';
+    document.getElementById('deContactPerson').value = proj.contactPerson || '';
+    document.getElementById('dePhone').value = proj.phone || '';
+    document.getElementById('deEmail').value = proj.email || '';
+    document.getElementById('deSenderName').value = proj.senderName || bizSettings.sender.name || DEFAULT_SENDER.name;
+    document.getElementById('deSenderWeb').value = proj.senderWebsite || bizSettings.sender.website || DEFAULT_SENDER.website;
+    document.getElementById('deSenderWA').value = proj.senderWhatsapp || bizSettings.sender.whatsapp || DEFAULT_SENDER.whatsapp;
+    document.getElementById('deSenderEmail').value = proj.senderEmail || bizSettings.sender.email || DEFAULT_SENDER.email;
+    document.getElementById('deCurrency').value = proj.currency || 'HKD';
+    document.getElementById('deDiscountType').value = 'none';
+    document.getElementById('deDiscountValue').value = 0;
+    document.getElementById('deDiscountValue').style.display = 'none';
+    document.getElementById('deTaxEnabled').checked = false;
+    document.getElementById('deTaxRate').value = 0;
+    document.getElementById('deTaxRate').style.display = 'none';
+
+    var d = bizSettings.defaults || {};
+    var prefix = { quotation:'quo', invoice:'inv', receipt:'rec' }[docType] || 'quo';
+    document.getElementById('dePaymentTerms').value = d[prefix + 'PaymentTerms'] || '';
+    document.getElementById('deTerms').value = d[prefix + 'Terms'] || '';
+    document.getElementById('deNotes').value = d[prefix + 'Notes'] || '';
+
+    renderLineItems([{ description:'', price:'' }]);
+    recalculate();
+}
+
+function closeDocEditor() {
+    document.getElementById('docEditorModal').style.display = 'none';
+    currentDocId = null;
+    editingDocType = null;
+    editingReceiptSubtype = null;
+}
+
+function fetchDefault(field) {
+    if (!editingDocType) return;
+    var d = bizSettings.defaults || {};
+
+    if (editingDocType === 'receipt' && editingReceiptSubtype) {
+        var recKey = editingReceiptSubtype === 'deposit' ? 'depRecTerms' : 'finRecTerms';
+        var elMap = { paymentTerms:'dePaymentTerms', terms:'deTerms', notes:'deNotes' };
+        var el = elMap[field];
+        if (!el) return;
+        if (field === 'terms') {
+            var val = d[recKey] || '';
+            if (!val) { toast('尚未設定預設條款', 'error'); return; }
+            document.getElementById(el).value = val;
+            toast('已載入預設內容', 'success');
+        } else {
+            toast('收據僅設定條款預設值', 'error');
+        }
+        return;
+    }
+
+    var prefix = { quotation:'quo', invoice:'inv', receipt:'rec' }[editingDocType] || 'quo';
+    var map = {
+        paymentTerms: { key: prefix + 'PaymentTerms', el: 'dePaymentTerms' },
+        terms:        { key: prefix + 'Terms',        el: 'deTerms' },
+        notes:        { key: prefix + 'Notes',        el: 'deNotes' }
+    };
+    var m = map[field];
+    if (!m) return;
+    var val = d[m.key] || '';
+    if (!val) { toast('尚未設定預設' + field, 'error'); return; }
+    document.getElementById(m.el).value = val;
+    toast('已載入預設內容', 'success');
+}
+
+/* ================================================================
+   LINE ITEMS
+   ================================================================ */
+function renderLineItems(items) {
+    var tbody = document.getElementById('deLineItems');
+    tbody.innerHTML = '';
+    items.forEach(function(item, i) {
+        tbody.innerHTML +=
+            '<tr>'
+            + '<td class="col-desc"><input type="text" value="' + escAttr(item.description || '') + '" data-li="desc" data-idx="' + i + '" oninput="recalculate()" placeholder="Service description..."></td>'
+            + '<td class="col-price"><input type="number" value="' + (item.price || '') + '" data-li="price" data-idx="' + i + '" oninput="recalculate()" step="any" min="0" placeholder="0.00"></td>'
+            + '<td class="col-action"><button class="li-remove" onclick="removeLineItem(' + i + ')">✕</button></td>'
+            + '</tr>';
+    });
+}
+
+function addLineItem() {
+    var items = getLineItems();
+    items.push({ description:'', price:'' });
+    renderLineItems(items);
+}
+
+function removeLineItem(idx) {
+    var items = getLineItems();
+    if (items.length <= 1) return;
+    items.splice(idx, 1);
+    renderLineItems(items);
+    recalculate();
+}
+
+function getLineItems() {
+    var items = [];
+    var rows = document.getElementById('deLineItems').querySelectorAll('tr');
+    rows.forEach(function(row) {
+        var desc = row.querySelector('[data-li="desc"]').value;
+        var price = parseFloat(row.querySelector('[data-li="price"]').value) || 0;
+        items.push({ description:desc, price:price });
+    });
+    return items;
+}
+
+/* ================================================================
+   CALCULATIONS
+   ================================================================ */
+function recalculate() {
+    var items = getLineItems();
+    var currency = document.getElementById('deCurrency').value;
+    var discountType = document.getElementById('deDiscountType').value;
+    var discountValue = parseFloat(document.getElementById('deDiscountValue').value) || 0;
+    var taxEnabled = document.getElementById('deTaxEnabled').checked;
+    var taxRate = parseFloat(document.getElementById('deTaxRate').value) || 0;
+
+    document.getElementById('deDiscountValue').style.display = (discountType !== 'none') ? '' : 'none';
+    document.getElementById('deTaxRate').style.display = taxEnabled ? '' : 'none';
+
+    var subtotal = 0;
+    items.forEach(function(item) { subtotal += (item.price || 0); });
+
+    var discountAmt = 0;
+    if (discountType === 'percentage') discountAmt = subtotal * discountValue / 100;
+    else if (discountType === 'fixed') discountAmt = discountValue;
+
+    var afterDiscount = Math.max(subtotal - discountAmt, 0);
+    var taxAmt = taxEnabled ? afterDiscount * taxRate / 100 : 0;
+    var total = afterDiscount + taxAmt;
+
+    document.getElementById('deSubtotal').textContent = formatCurrency(subtotal, currency);
+    document.getElementById('deDiscountAmt').textContent = '-' + formatCurrency(discountAmt, currency);
+    document.getElementById('deTaxAmt').textContent = '+' + formatCurrency(taxAmt, currency);
+    document.getElementById('deTotal').textContent = formatCurrency(total, currency);
+}
+
+/* ================================================================
+   SAVE DOCUMENT
+   ================================================================ */
+async function getNextDocNumber(type) {
+    var year = new Date().getFullYear();
+    var counterKey = type + '_' + year;
+    var prefix = { quotation:'QUO', invoice:'INV', receipt:'REC' }[type];
+    var configRef = db.collection('businessSettings').doc('config');
+
+    var newCount = 1;
+    try {
+        await db.runTransaction(async function(t) {
+            var snap = await t.get(configRef);
+            var data = snap.exists ? snap.data() : {};
+            var counters = data.counters || {};
+            newCount = (counters[counterKey] || 0) + 1;
+            counters[counterKey] = newCount;
+            t.set(configRef, { counters: counters }, { merge:true });
+        });
+    } catch(e) {
+        newCount = Date.now() % 10000;
+    }
+    bizSettings.counters = bizSettings.counters || {};
+    bizSettings.counters[counterKey] = newCount;
+    return prefix + '-' + year + '-' + String(newCount).padStart(3, '0');
+}
+
+function getDocFormData() {
+    var items = getLineItems();
+    var currency = document.getElementById('deCurrency').value;
+    var discountType = document.getElementById('deDiscountType').value;
+    var discountValue = parseFloat(document.getElementById('deDiscountValue').value) || 0;
+    var taxEnabled = document.getElementById('deTaxEnabled').checked;
+    var taxRate = parseFloat(document.getElementById('deTaxRate').value) || 0;
+
+    var subtotal = 0;
+    items.forEach(function(item) { subtotal += (item.price || 0); });
+    var discountAmt = 0;
+    if (discountType === 'percentage') discountAmt = subtotal * discountValue / 100;
+    else if (discountType === 'fixed') discountAmt = discountValue;
+    var afterDiscount = Math.max(subtotal - discountAmt, 0);
+    var taxAmt = taxEnabled ? afterDiscount * taxRate / 100 : 0;
+    var total = afterDiscount + taxAmt;
+
+    var data = {
+        projectId: currentProjectId,
+        projectName: document.getElementById('pjName').value.trim(),
+        type: editingDocType,
+        status: document.getElementById('deStatus').value,
+        clientCompany: document.getElementById('deClientCompany').value.trim(),
+        contactPerson: document.getElementById('deContactPerson').value.trim(),
+        phone: document.getElementById('dePhone').value.trim(),
+        email: document.getElementById('deEmail').value.trim(),
+        senderName: document.getElementById('deSenderName').value.trim(),
+        senderWebsite: document.getElementById('deSenderWeb').value.trim(),
+        senderWhatsapp: document.getElementById('deSenderWA').value.trim(),
+        senderEmail: document.getElementById('deSenderEmail').value.trim(),
+        currency: currency,
+        items: items.filter(function(it) { return (it.description || '').trim() || it.price > 0; }),
+        subtotal: subtotal,
+        discountType: discountType,
+        discountValue: discountValue,
+        discountAmount: discountAmt,
+        taxEnabled: taxEnabled,
+        taxRate: taxRate,
+        taxAmount: taxAmt,
+        total: total,
+        paymentTerms: document.getElementById('dePaymentTerms').value.trim(),
+        termsAndConditions: document.getElementById('deTerms').value.trim(),
+        notes: document.getElementById('deNotes').value.trim(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (editingDocType === 'quotation') data.validUntil = document.getElementById('deDate').value;
+    if (editingDocType === 'invoice') data.dueDate = document.getElementById('deDate').value;
+
+    return data;
+}
+
+async function saveDocument() {
+    var data = getDocFormData();
+    if (!data.items.length) { toast('請至少新增一個服務項目', 'error'); return; }
+
+    document.getElementById('docSaveLoading').style.display = 'flex';
+    try {
+        if (currentDocId) {
+            await db.collection('businessDocuments').doc(currentDocId).update(data);
+            toast('文件已更新', 'success');
+        } else {
+            data.documentNumber = await getNextDocNumber(editingDocType);
+            data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            var ref = await db.collection('businessDocuments').add(data);
+            currentDocId = ref.id;
+            document.getElementById('deNumber').value = data.documentNumber;
+            toast('文件已建立：' + data.documentNumber, 'success');
+        }
+        await loadProjectDocs(currentProjectId);
+        renderPipeline();
+        loadAllDocuments();
+    } catch(e) { toast('儲存失敗: ' + e.message, 'error'); }
+    document.getElementById('docSaveLoading').style.display = 'none';
+}
+
+/* ================================================================
+   PREVIEW & DELETE DOCUMENT
+   ================================================================ */
+async function previewDocument() {
+    if (!currentDocId) {
+        await saveDocument();
+        if (!currentDocId) return;
+    }
+    window.open('/doc?id=' + currentDocId, '_blank');
+}
+
+function previewDoc(docId) {
+    window.open('/doc?id=' + docId, '_blank');
+}
+
+function deleteDocument(docId) {
+    var docs = projectDocsCache[currentProjectId] || [];
+    var targetDoc = docs.find(function(d){ return d._id === docId; });
+    var linkedId = targetDoc && targetDoc.linkedReceiptId ? targetDoc.linkedReceiptId : null;
+    var msg = linkedId ? '此操作將同時刪除關聯的收據，且無法復原。' : '此操作無法復原。';
+
+    showConfirm('刪除文件？', msg, async function() {
+        try {
+            var batch = db.batch();
+            batch.delete(db.collection('businessDocuments').doc(docId));
+            if (linkedId) batch.delete(db.collection('businessDocuments').doc(linkedId));
+            await batch.commit();
+            toast('文件已刪除', 'success');
+            await loadProjectDocs(currentProjectId);
+            renderPipeline();
+            loadAllDocuments();
+        } catch(e) { toast('刪除失敗: ' + e.message, 'error'); }
+    });
+}
+
+/* ================================================================
+   SYNC DOCUMENT (Quotation → Invoice → Receipt)
+   ================================================================ */
+async function syncDoc(sourceType, targetType) {
+    if (!currentProjectId) return;
+    var docs = projectDocsCache[currentProjectId] || [];
+    var source = docs.find(function(d){ return d.type === sourceType; });
+    if (!source) { toast('找不到 ' + TYPE_LABELS[sourceType] + ' 可同步', 'error'); return; }
+    var target = docs.find(function(d){ return d.type === targetType; });
+
+    var msg = target
+        ? '這將覆蓋現有的 ' + TYPE_LABELS[targetType] + '。繼續？'
+        : '將 ' + TYPE_LABELS[sourceType] + ' 同步為新的 ' + TYPE_LABELS[targetType] + '？';
+
+    showConfirm('同步文件', msg, async function() {
+        document.getElementById('syncLoading').style.display = 'flex';
+        try {
+            var d = bizSettings.defaults || {};
+            var prefix = { quotation:'quo', invoice:'inv', receipt:'rec' }[targetType] || 'inv';
+            var data = {
+                projectId: source.projectId,
+                projectName: source.projectName,
+                type: targetType,
+                status: 'draft',
+                clientCompany: source.clientCompany,
+                contactPerson: source.contactPerson,
+                phone: source.phone,
+                email: source.email,
+                senderName: source.senderName,
+                senderWebsite: source.senderWebsite,
+                senderWhatsapp: source.senderWhatsapp,
+                senderEmail: source.senderEmail,
+                currency: source.currency,
+                items: source.items || [],
+                subtotal: source.subtotal || 0,
+                discountType: source.discountType || 'none',
+                discountValue: source.discountValue || 0,
+                discountAmount: source.discountAmount || 0,
+                taxEnabled: !!source.taxEnabled,
+                taxRate: source.taxRate || 0,
+                taxAmount: source.taxAmount || 0,
+                total: source.total || 0,
+                paymentTerms: d[prefix + 'PaymentTerms'] || '',
+                termsAndConditions: d[prefix + 'Terms'] || '',
+                notes: d[prefix + 'Notes'] || '',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (targetType === 'invoice') data.dueDate = '';
+            if (targetType === 'quotation') data.validUntil = '';
+
+            if (target) {
+                await db.collection('businessDocuments').doc(target._id).update(data);
+            } else {
+                data.documentNumber = await getNextDocNumber(targetType);
+                data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection('businessDocuments').add(data);
+            }
+
+            toast(TYPE_LABELS[sourceType] + ' → ' + TYPE_LABELS[targetType] + ' 同步完成', 'success');
+            await loadProjectDocs(currentProjectId);
+            renderPipeline();
+            loadAllDocuments();
+        } catch(e) { toast('同步失敗: ' + e.message, 'error'); }
+        document.getElementById('syncLoading').style.display = 'none';
+    });
+}
+
+/* ================================================================
+   SYNC RECEIPT MODAL
+   ================================================================ */
+var _syncRecInvoice = null;
+var _syncRecMode = 'amount';
+
+function openSyncReceiptModal() {
+    if (!currentProjectId) return;
+    var docs = projectDocsCache[currentProjectId] || [];
+    var inv = docs.find(function(d){ return d.type === 'invoice'; });
+    if (!inv) { toast('找不到 Invoice 可同步', 'error'); return; }
+    _syncRecInvoice = inv;
+    _syncRecMode = 'amount';
+
+    var total = parseFloat(inv.total) || 0;
+    var cur = inv.currency || 'HKD';
+    document.getElementById('syncRecDeposit').value = (total / 2).toFixed(2);
+    document.getElementById('syncRecDeposit').step = '0.01';
+    document.getElementById('syncRecFinal').value = (total / 2).toFixed(2);
+    document.getElementById('syncRecTotal').textContent = formatCurrency(total, cur);
+    document.getElementById('syncRecModeBtn').textContent = '$ 金額';
+    document.getElementById('syncRecSplit').checked = true;
+    document.getElementById('syncRecSplitFields').style.display = '';
+    document.getElementById('syncRecModal').style.display = 'flex';
+}
+
+function closeSyncRecModal() {
+    document.getElementById('syncRecModal').style.display = 'none';
+    _syncRecInvoice = null;
+}
+
+function toggleSyncRecSplit() {
+    var split = document.getElementById('syncRecSplit').checked;
+    document.getElementById('syncRecSplitFields').style.display = split ? '' : 'none';
+}
+
+function toggleSyncRecMode() {
+    if (!_syncRecInvoice) return;
+    var total = parseFloat(_syncRecInvoice.total) || 0;
+    var input = document.getElementById('syncRecDeposit');
+    var btn = document.getElementById('syncRecModeBtn');
+
+    if (_syncRecMode === 'amount') {
+        var curAmt = parseFloat(input.value) || 0;
+        var pct = total > 0 ? Math.round((curAmt / total) * 100) : 50;
+        _syncRecMode = 'percentage';
+        input.value = pct;
+        input.step = '1';
+        btn.textContent = '% 百分比';
+    } else {
+        var curPct = parseFloat(input.value) || 50;
+        var amt = (total * curPct / 100);
+        _syncRecMode = 'amount';
+        input.value = amt.toFixed(2);
+        input.step = '0.01';
+        btn.textContent = '$ 金額';
+    }
+    updateSyncRecFinal();
+}
+
+function _getDepositAmount() {
+    if (!_syncRecInvoice) return 0;
+    var total = parseFloat(_syncRecInvoice.total) || 0;
+    var val = parseFloat(document.getElementById('syncRecDeposit').value) || 0;
+    if (_syncRecMode === 'percentage') return Math.round(total * val / 100 * 100) / 100;
+    return val;
+}
+
+function updateSyncRecFinal() {
+    if (!_syncRecInvoice) return;
+    var total = parseFloat(_syncRecInvoice.total) || 0;
+    var dep = _getDepositAmount();
+    var fin = Math.max(0, total - dep);
+    document.getElementById('syncRecFinal').value = fin.toFixed(2);
+}
+
+async function executeSyncReceipt() {
+    if (!_syncRecInvoice || !currentProjectId) return;
+    var source = _syncRecInvoice;
+    var split = document.getElementById('syncRecSplit').checked;
+    var capturedDepAmt = _getDepositAmount();
+
+    closeSyncRecModal();
+    document.getElementById('syncLoading').style.display = 'flex';
+
+    try {
+        var d = bizSettings.defaults || {};
+
+        function _buildReceiptData(overrides) {
+            var base = {
+                projectId: source.projectId,
+                projectName: source.projectName,
+                type: 'receipt',
+                status: 'draft',
+                clientCompany: source.clientCompany,
+                contactPerson: source.contactPerson,
+                phone: source.phone,
+                email: source.email,
+                senderName: source.senderName,
+                senderWebsite: source.senderWebsite,
+                senderWhatsapp: source.senderWhatsapp,
+                senderEmail: source.senderEmail,
+                currency: source.currency,
+                items: source.items || [],
+                subtotal: source.subtotal || 0,
+                discountType: source.discountType || 'none',
+                discountValue: source.discountValue || 0,
+                discountAmount: source.discountAmount || 0,
+                taxEnabled: !!source.taxEnabled,
+                taxRate: source.taxRate || 0,
+                taxAmount: source.taxAmount || 0,
+                total: source.total || 0,
+                paymentTerms: '',
+                termsAndConditions: '',
+                notes: '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            for (var k in overrides) base[k] = overrides[k];
+            return base;
+        }
+
+        var existingReceipts = (projectDocsCache[currentProjectId] || []).filter(function(dd){ return dd.type === 'receipt'; });
+        var batch = db.batch();
+        existingReceipts.forEach(function(r){ batch.delete(db.collection('businessDocuments').doc(r._id)); });
+        await batch.commit();
+
+        if (split) {
+            var depAmt = capturedDepAmt;
+            var invTotal = parseFloat(source.total) || 0;
+            var finAmt = Math.max(0, invTotal - depAmt);
+
+            var baseNum = await getNextDocNumber('receipt');
+
+            var depData = _buildReceiptData({
+                receiptSubtype: 'deposit',
+                total: depAmt,
+                documentNumber: baseNum + '-D',
+                termsAndConditions: d.depRecTerms || ''
+            });
+            var finData = _buildReceiptData({
+                receiptSubtype: 'final',
+                total: finAmt,
+                documentNumber: baseNum + '-F',
+                termsAndConditions: d.finRecTerms || ''
+            });
+
+            var depRef = await db.collection('businessDocuments').add(depData);
+            var finRef = await db.collection('businessDocuments').add(finData);
+
+            await depRef.update({ linkedReceiptId: finRef.id });
+            await finRef.update({ linkedReceiptId: depRef.id });
+
+            toast('Invoice → Deposit + Final Receipt 同步完成', 'success');
+        } else {
+            var singleData = _buildReceiptData({ receiptSubtype: null, linkedReceiptId: null });
+            singleData.documentNumber = await getNextDocNumber('receipt');
+            await db.collection('businessDocuments').add(singleData);
+            toast('Invoice → Receipt 同步完成', 'success');
+        }
+
+        await loadProjectDocs(currentProjectId);
+        renderPipeline();
+        loadAllDocuments();
+    } catch(e) { toast('同步失敗: ' + e.message, 'error'); }
+    document.getElementById('syncLoading').style.display = 'none';
+}
+
+/* ================================================================
+   WHATSAPP
+   ================================================================ */
+function openWAForDoc(docId) {
+    var docs = projectDocsCache[currentProjectId] || [];
+    var doc = docs.find(function(d){ return d._id === docId; });
+    if (!doc) { toast('找不到文件', 'error'); return; }
+    showWAModal(doc);
+}
+
+function openWhatsApp() {
+    if (!currentDocId) { toast('請先儲存文件', 'error'); return; }
+    var docs = projectDocsCache[currentProjectId] || [];
+    var doc = docs.find(function(d){ return d._id === currentDocId; });
+    if (!doc) { toast('請先儲存文件', 'error'); return; }
+    showWAModal(doc);
+}
+
+var _waDocType = null;
+var _waDocValues = null;
+
+function showWAModal(doc) {
+    var docType = doc.type || 'quotation';
+    _waDocType = docType;
+    var wt = bizSettings.waTemplates || {};
+    var rawTpl = wt[docType] || '';
+    if (rawTpl && rawTpl.indexOf('{link}') === -1 && rawTpl.indexOf('aiflowtime-hk.web.app/doc?id=') !== -1) rawTpl = '';
+    var template = rawTpl || DEFAULT_WA_TEMPLATES[docType] || DEFAULT_WA_TEMPLATES.quotation;
+    var link = window.location.origin + '/doc?id=' + doc._id;
+    var displayType = TYPE_LABELS[doc.type] || '';
+    var displayTypeZh = TYPE_LABELS_ZH[doc.type] || '';
+    if (doc.receiptSubtype === 'deposit') { displayType = 'Deposit Receipt'; displayTypeZh = '訂金收據'; }
+    else if (doc.receiptSubtype === 'final') { displayType = 'Final Receipt'; displayTypeZh = '尾款收據'; }
+    _waDocValues = {
+        clientName: doc.contactPerson || '',
+        clientCompany: doc.clientCompany || '',
+        documentType: displayType,
+        documentTypeZh: displayTypeZh,
+        documentNumber: doc.documentNumber || '',
+        total: formatCurrency(doc.total || 0, doc.currency || 'HKD'),
+        currency: doc.currency || 'HKD',
+        link: link
+    };
+
+    var msg = template
+        .replace(/\{clientName\}/g, _waDocValues.clientName)
+        .replace(/\{clientCompany\}/g, _waDocValues.clientCompany)
+        .replace(/\{documentType\}/g, _waDocValues.documentType)
+        .replace(/\{documentTypeZh\}/g, _waDocValues.documentTypeZh)
+        .replace(/\{documentNumber\}/g, _waDocValues.documentNumber)
+        .replace(/\{total\}/g, _waDocValues.total)
+        .replace(/\{currency\}/g, _waDocValues.currency)
+        .replace(/\{link\}/g, _waDocValues.link);
+
+    document.getElementById('waPhone').value = doc.phone || '';
+    document.getElementById('waMessage').value = msg;
+    document.getElementById('waModal').style.display = 'flex';
+}
+
+function closeWAModal() { document.getElementById('waModal').style.display = 'none'; }
+
+function sendWhatsApp() {
+    var phone = document.getElementById('waPhone').value.trim().replace(/[^0-9+]/g, '');
+    var msg = document.getElementById('waMessage').value.trim();
+    if (!phone) { toast('請輸入電話號碼', 'error'); return; }
+    var cleanPhone = phone.replace(/^\+/, '');
+    var url = 'https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+}
+
+function openWATemplateEditor() {
+    var docType = _waDocType || 'quotation';
+    var wt = bizSettings.waTemplates || {};
+    var tpl = wt[docType] || DEFAULT_WA_TEMPLATES[docType] || '';
+    var typeNames = { quotation: 'Quotation 報價單', invoice: 'Invoice 發票', receipt: 'Receipt 收據' };
+    document.getElementById('waTplEditorLabel').textContent = (typeNames[docType] || 'Template') + ' 模板';
+    document.getElementById('waTplEditorText').value = tpl;
+    document.getElementById('waTplEditorModal').style.display = 'flex';
+}
+
+function closeWATplEditor() {
+    document.getElementById('waTplEditorModal').style.display = 'none';
+}
+
+function _renderWAMessage(template) {
+    var v = _waDocValues || {};
+    return template
+        .replace(/\{clientName\}/g, v.clientName || '')
+        .replace(/\{clientCompany\}/g, v.clientCompany || '')
+        .replace(/\{documentType\}/g, v.documentType || '')
+        .replace(/\{documentTypeZh\}/g, v.documentTypeZh || '')
+        .replace(/\{documentNumber\}/g, v.documentNumber || '')
+        .replace(/\{total\}/g, v.total || '')
+        .replace(/\{currency\}/g, v.currency || '')
+        .replace(/\{link\}/g, v.link || '');
+}
+
+async function saveWATplEditor() {
+    var tpl = document.getElementById('waTplEditorText').value.trim();
+    var docType = _waDocType || 'quotation';
+    document.getElementById('waTplSaveLoading').style.display = 'flex';
+    try {
+        if (!bizSettings.waTemplates) bizSettings.waTemplates = {};
+        bizSettings.waTemplates[docType] = tpl;
+        await db.collection('businessSettings').doc('config').set({ waTemplates: bizSettings.waTemplates }, { merge:true });
+        var fieldMap = { quotation: 'stWATemplateQuo', invoice: 'stWATemplateInv', receipt: 'stWATemplateRec' };
+        var el = document.getElementById(fieldMap[docType]);
+        if (el) el.value = tpl;
+        document.getElementById('waMessage').value = _renderWAMessage(tpl);
+        toast(TYPE_LABELS[docType] + ' WhatsApp 模板已儲存', 'success');
+        closeWATplEditor();
+    } catch(e) { toast('儲存失敗', 'error'); }
+    document.getElementById('waTplSaveLoading').style.display = 'none';
+}
+
+/* ================================================================
+   ALL DOCUMENTS TAB
+   ================================================================ */
+async function loadAllDocuments() {
+    try {
+        var snap = await db.collection('businessDocuments').orderBy('createdAt','desc').get();
+        allDocumentsCache = [];
+        snap.forEach(function(d) { var data = d.data(); data._id = d.id; allDocumentsCache.push(data); });
+
+        allDocumentsCache.forEach(function(doc) {
+            if (!projectDocsCache[doc.projectId]) projectDocsCache[doc.projectId] = [];
+            var existing = projectDocsCache[doc.projectId].findIndex(function(d){ return d._id === doc._id; });
+            if (existing >= 0) projectDocsCache[doc.projectId][existing] = doc;
+            else projectDocsCache[doc.projectId].push(doc);
+        });
+    } catch(e) { allDocumentsCache = []; }
+}
+
+function sortAllDocs(key) {
+    if (allDocsSortKey === key) {
+        allDocsSortDir = allDocsSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+        allDocsSortKey = key;
+        allDocsSortDir = key === 'date' ? 'desc' : 'asc';
+    }
+    renderAllDocuments();
+}
+
+function _getSortVal(d, key) {
+    switch(key) {
+        case 'documentNumber': return (d.documentNumber || '').toLowerCase();
+        case 'type': return d.type || '';
+        case 'projectName': return (d.projectName || '').toLowerCase();
+        case 'client': return (d.clientCompany || d.contactPerson || '').toLowerCase();
+        case 'total': return parseFloat(d.total) || 0;
+        case 'status': return d.status || '';
+        case 'date':
+            var ts = d.updatedAt || d.createdAt;
+            if (!ts) return 0;
+            return ts.seconds ? ts.seconds : new Date(ts).getTime() / 1000;
+        default: return '';
+    }
+}
+
+function renderAllDocuments() {
+    var q = (document.getElementById('allDocsSearch').value || '').toLowerCase();
+    var typeFilter = document.getElementById('allDocsTypeFilter').value;
+    var statusFilter = document.getElementById('allDocsStatusFilter').value;
+
+    var filtered = allDocumentsCache.filter(function(d) {
+        if (typeFilter && d.type !== typeFilter) return false;
+        if (statusFilter && d.status !== statusFilter) return false;
+        if (q) {
+            var haystack = [d.documentNumber, d.projectName, d.clientCompany, d.contactPerson].join(' ').toLowerCase();
+            if (!haystack.includes(q)) return false;
+        }
+        return true;
+    });
+
+    filtered.sort(function(a, b) {
+        var va = _getSortVal(a, allDocsSortKey);
+        var vb = _getSortVal(b, allDocsSortKey);
+        var cmp = 0;
+        if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+        else cmp = String(va).localeCompare(String(vb));
+        return allDocsSortDir === 'asc' ? cmp : -cmp;
+    });
+
+    document.querySelectorAll('.docs-table th.sortable').forEach(function(th) {
+        th.classList.remove('asc', 'desc');
+        var arrow = th.querySelector('.sort-arrow');
+        if (arrow) arrow.textContent = '▲';
+    });
+    var activeIdx = { documentNumber:0, type:1, projectName:2, client:3, total:4, status:5, date:6 }[allDocsSortKey];
+    var ths = document.querySelectorAll('.docs-table th.sortable');
+    if (ths[activeIdx]) {
+        ths[activeIdx].classList.add(allDocsSortDir);
+        var arrow = ths[activeIdx].querySelector('.sort-arrow');
+        if (arrow) arrow.textContent = allDocsSortDir === 'asc' ? '▲' : '▼';
+    }
+
+    var tbody = document.getElementById('allDocsBody');
+    var emptyEl = document.getElementById('allDocsEmpty');
+    var tableWrap = tbody.closest('.docs-table-wrap');
+
+    if (!filtered.length) {
+        tbody.innerHTML = '';
+        if (tableWrap) tableWrap.style.display = 'none';
+        emptyEl.style.display = 'block';
+        return;
+    }
+    if (tableWrap) tableWrap.style.display = '';
+    emptyEl.style.display = 'none';
+
+    var html = '';
+    filtered.forEach(function(d) {
+        var shortType = { quotation:'quo', invoice:'inv', receipt:'rec' }[d.type];
+        var badgeText = (TYPE_LABELS[d.type] || d.type).toUpperCase();
+        if (d.receiptSubtype === 'deposit') badgeText = 'DEPOSIT REC';
+        else if (d.receiptSubtype === 'final') badgeText = 'FINAL REC';
+        html += '<tr>'
+            + '<td><strong>' + esc(d.documentNumber || '—') + '</strong></td>'
+            + '<td><span class="doc-badge ' + shortType + '">' + badgeText + '</span></td>'
+            + '<td>' + esc(d.projectName || '—') + '</td>'
+            + '<td>' + esc(d.clientCompany || d.contactPerson || '—') + '</td>'
+            + '<td><strong>' + formatCurrency(d.total || 0, d.currency || 'HKD') + '</strong></td>'
+            + '<td>' + statusBadge(d.status) + '</td>'
+            + '<td>' + formatTimestamp(d.updatedAt || d.createdAt) + '</td>'
+            + '<td><div class="td-actions">'
+            + '<button class="btn btn-blue btn-xs" onclick="previewDoc(\'' + d._id + '\')">👁</button>'
+            + '<button class="btn btn-wa btn-xs" onclick="goToProjectAndWA(\'' + d.projectId + '\',\'' + d._id + '\')">📱</button>'
+            + '<button class="btn btn-xs" onclick="goToProjectDoc(\'' + d.projectId + '\',\'' + d._id + '\',\'' + d.type + '\')">✏️</button>'
+            + '</div></td>'
+            + '</tr>';
+    });
+    tbody.innerHTML = html;
+}
+
+async function goToProjectDoc(projectId, docId, docType) {
+    switchTabTo('projects');
+    await openProjectDetail(projectId);
+    openDocEditor(docId, docType);
+}
+
+async function goToProjectAndWA(projectId, docId) {
+    if (!projectDocsCache[projectId]) await loadProjectDocs(projectId);
+    var docs = projectDocsCache[projectId] || [];
+    var doc = docs.find(function(d){ return d._id === docId; });
+    if (doc) showWAModal(doc);
+}
+
+function switchTabTo(tabId) {
+    _doSwitchTab(tabId, null);
+}
+
+/* ================================================================
+   CONFIRM MODAL
+   ================================================================ */
+var _confirmCallback = null;
+function showConfirm(title, msg, cb) {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    _confirmCallback = cb;
+    document.getElementById('confirmBtn').onclick = function() { var fn = _confirmCallback; closeConfirm(); if (fn) fn(); };
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+function closeConfirm() {
+    document.getElementById('confirmModal').style.display = 'none';
+    _confirmCallback = null;
+    _restoreConfirmModal();
+}
+
+/* ================================================================
+   UTILITIES
+   ================================================================ */
+function esc(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function escAttr(str) {
+    return (str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatCurrency(amount, currency) {
+    var num = parseFloat(amount) || 0;
+    var formatted = num.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    var symbols = { HKD:'HK$', USD:'US$', RMB:'RMB ' };
+    return (symbols[currency] || '$') + formatted;
+}
+
+function formatTimestamp(ts) {
+    if (!ts) return '—';
+    var d = ts.seconds ? new Date(ts.seconds * 1000) : new Date(ts);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function statusBadge(status) {
+    return '<span class="status-badge status-' + (status || 'draft') + '">' + (status || 'draft').toUpperCase() + '</span>';
+}
+
+function toast(msg, type) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast ' + (type || '') + ' show';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.className = 'toast'; }, 3000);
+}
+
+window.addEventListener('beforeunload', function(e) {
+    if (_settingsDirty) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>
+</body>
+</html>

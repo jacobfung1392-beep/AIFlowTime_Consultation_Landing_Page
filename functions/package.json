@@ -1,0 +1,17 @@
+{
+  "name": "aiflowtime-functions",
+  "description": "Workshop seat reservation and Stripe payment",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.1",
+    "firebase-functions": "^7.0.5",
+    "stripe": "^14.10.0"
+  }
+}

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What You'll Experience - Benefit Cards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#0f172a',
+                        'dark-card': '#1e293b',
+                        'coral': '#f87171',
+                        'coral-light': '#fca5a5',
+                        'cream': '#f8fafc',
+                        'cream-muted': '#cbd5e1',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for smooth animations */
+        .benefit-card {
+            opacity: 0;
+            transform: translateY(30px);
+            will-change: transform, opacity;
+        }
+        
+        .benefit-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Icon container styling */
+        .icon-container {
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .benefit-card:hover .icon-container {
+            transform: scale(1.1);
+            background-color: rgba(248, 113, 113, 0.2);
+        }
+        
+        /* Card number styling */
+        .card-number {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Gradient background accent */
+        .section-bg-accent {
+            background: radial-gradient(ellipse at 50% 0%, rgba(248, 113, 113, 0.08) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-dark-bg min-h-screen">
+
+    <!-- What You'll Experience Section -->
+    <section id="experience-section" class="relative py-20 md:py-28 lg:py-32 overflow-hidden">
+        <!-- Background gradient accent -->
+        <div class="absolute inset-0 section-bg-accent pointer-events-none"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Title -->
+            <div class="text-center mb-14 md:mb-18 lg:mb-20">
+                <h2 class="section-title text-3xl sm:text-4xl md:text-5xl font-bold text-cream tracking-tight">
+                    在這 2.5 小時，你會經歷什麼？
+                </h2>
+                <div class="mt-4 w-20 h-1 bg-coral mx-auto rounded-full"></div>
+            </div>
+            
+            <!-- Benefit Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                
+                <!-- Card 1: AI Mirror -->
+                <div class="benefit-card group">
+                    <div class="h-full bg-dark-card border border-slate-700/50 rounded-2xl p-6 lg:p-8 
+                                transition-all duration-300 ease-out
+                                hover:-translate-y-2 hover:shadow-2xl hover:shadow-coral/10 hover:border-coral/30">
+                        <!-- Icon -->
+                        <div class="icon-container w-14 h-14 rounded-xl bg-slate-800/80 flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                                <path d="M12 22c4.97 0 9-4.03 9-9"/>
+                                <path d="M12 2c4.97 0 9 4.03 9 9"/>
+                                <path d="M12 6v12"/>
+                            </svg>
+                        </div>
+                        <!-- Number -->
+                        <span class="card-number text-coral/60 text-sm font-semibold tracking-wider uppercase">01</span>
+                        <!-- Content -->
+                        <h3 class="mt-2 text-xl font-semibold text-cream group-hover:text-coral-light transition-colors duration-300">
+                            AI 是一面鏡子
+                        </h3>
+                        <p class="mt-3 text-cream-muted leading-relaxed">
+                            你會明白為什麼同一個 AI，有人用得好、有人用得差
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Card 2: Prompt Challenge -->
+                <div class="benefit-card group">
+                    <div class="h-full bg-dark-card border border-slate-700/50 rounded-2xl p-6 lg:p-8 
+                                transition-all duration-300 ease-out
+                                hover:-translate-y-2 hover:shadow-2xl hover:shadow-coral/10 hover:border-coral/30">
+                        <!-- Icon -->
+                        <div class="icon-container w-14 h-14 rounded-xl bg-slate-800/80 flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </div>
+                        <!-- Number -->
+                        <span class="card-number text-coral/60 text-sm font-semibold tracking-wider uppercase">02</span>
+                        <!-- Content -->
+                        <h3 class="mt-2 text-xl font-semibold text-cream group-hover:text-coral-light transition-colors duration-300">
+                            即場寫問句挑戰
+                        </h3>
+                        <p class="mt-3 text-cream-muted leading-relaxed">
+                            開場寫一個，學完再寫一個，自己比較分別
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Card 3: Case Analysis -->
+                <div class="benefit-card group">
+                    <div class="h-full bg-dark-card border border-slate-700/50 rounded-2xl p-6 lg:p-8 
+                                transition-all duration-300 ease-out
+                                hover:-translate-y-2 hover:shadow-2xl hover:shadow-coral/10 hover:border-coral/30">
+                        <!-- Icon -->
+                        <div class="icon-container w-14 h-14 rounded-xl bg-slate-800/80 flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="3" y1="9" x2="21" y2="9"/>
+                                <line x1="9" y1="21" x2="9" y2="9"/>
+                                <line x1="15" y1="15" x2="15" y2="21"/>
+                                <line x1="15" y1="12" x2="15" y2="12"/>
+                            </svg>
+                        </div>
+                        <!-- Number -->
+                        <span class="card-number text-coral/60 text-sm font-semibold tracking-wider uppercase">03</span>
+                        <!-- Content -->
+                        <h3 class="mt-2 text-xl font-semibold text-cream group-hover:text-coral-light transition-colors duration-300">
+                            拆解真實高手的問句
+                        </h3>
+                        <p class="mt-3 text-cream-muted leading-relaxed">
+                            用真實案例學會結構，不靠死記硬背
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Card 4: Smart Techniques -->
+                <div class="benefit-card group md:col-span-2 lg:col-span-1 lg:col-start-1">
+                    <div class="h-full bg-dark-card border border-slate-700/50 rounded-2xl p-6 lg:p-8 
+                                transition-all duration-300 ease-out
+                                hover:-translate-y-2 hover:shadow-2xl hover:shadow-coral/10 hover:border-coral/30">
+                        <!-- Icon -->
+                        <div class="icon-container w-14 h-14 rounded-xl bg-slate-800/80 flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <!-- Number -->
+                        <span class="card-number text-coral/60 text-sm font-semibold tracking-wider uppercase">04</span>
+                        <!-- Content -->
+                        <h3 class="mt-2 text-xl font-semibold text-cream group-hover:text-coral-light transition-colors duration-300">
+                            3 個讓 AI 即刻變聰明的技巧
+                        </h3>
+                        <p class="mt-3 text-cream-muted leading-relaxed">
+                            簡單、實用、課後馬上能用
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Card 5: Cheat Sheet -->
+                <div class="benefit-card group md:col-span-2 lg:col-span-1 lg:col-start-2">
+                    <div class="h-full bg-dark-card border border-slate-700/50 rounded-2xl p-6 lg:p-8 
+                                transition-all duration-300 ease-out
+                                hover:-translate-y-2 hover:shadow-2xl hover:shadow-coral/10 hover:border-coral/30">
+                        <!-- Icon -->
+                        <div class="icon-container w-14 h-14 rounded-xl bg-slate-800/80 flex items-center justify-center mb-5">
+                            <svg class="w-7 h-7 text-coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                        </div>
+                        <!-- Number -->
+                        <span class="card-number text-coral/60 text-sm font-semibold tracking-wider uppercase">05</span>
+                        <!-- Content -->
+                        <h3 class="mt-2 text-xl font-semibold text-cream group-hover:text-coral-light transition-colors duration-300">
+                            帶走問句速查表
+                        </h3>
+                        <p class="mt-3 text-cream-muted leading-relaxed">
+                            一頁紙，課後隨時翻閱
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Register ScrollTrigger plugin
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Animate section title
+            gsap.from('.section-title', {
+                scrollTrigger: {
+                    trigger: '#experience-section',
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                },
+                opacity: 0,
+                y: 30,
+                duration: 0.8,
+                ease: 'power2.out'
+            });
+            
+            // Animate benefit cards with stagger
+            const cards = document.querySelectorAll('.benefit-card');
+            
+            gsap.to(cards, {
+                scrollTrigger: {
+                    trigger: '#experience-section',
+                    start: 'top 70%',
+                    toggleActions: 'play none none none'
+                },
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                stagger: 0.1,
+                ease: 'power2.out',
+                onComplete: function() {
+                    cards.forEach(card => card.classList.add('revealed'));
+                }
+            });
+            
+            // Alternative: Intersection Observer fallback for non-JS environments
+            if (!window.gsap) {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.1
+                };
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry, index) => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => {
+                                entry.target.classList.add('revealed');
+                            }, index * 100);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+                
+                cards.forEach(card => observer.observe(card));
+            }
+        });
+    </script>
+
+</body>
+</html>

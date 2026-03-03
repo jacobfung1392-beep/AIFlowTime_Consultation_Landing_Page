@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>版面編輯 Layout Editor | AIFLOWTIME</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7;
+            --bg-off: #E8E4DF;
+            --bg-pampas: #F4F3EE;
+            --accent: #D97757;
+            --accent-text: #C45A3A;
+            --accent-dark: #C56A4B;
+            --text: #3B3B3B;
+            --text-light: #7A7A7A;
+            --white: #FFFFFF;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --green: #2E7D32;
+            --green-bg: rgba(76, 175, 80, 0.15);
+            --red: #C62828;
+            --red-bg: rgba(198, 40, 40, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+
+        .cms-header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .cms-header-inner {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 24px;
+        }
+        .cms-logo {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 18px; font-weight: 700;
+            color: var(--text); text-decoration: none;
+        }
+        .cms-logo span { color: var(--accent); }
+        .cms-user { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--text-light); }
+        .cms-user img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+        .login-screen {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: var(--bg-cream);
+        }
+        .login-card {
+            background: var(--white); border-radius: 20px; padding: 48px;
+            text-align: center; box-shadow: 0 8px 40px var(--shadow);
+            max-width: 400px; width: 100%;
+        }
+        .login-card h1 { font-size: 28px; margin-bottom: 8px; }
+        .login-card h1 span { color: var(--accent); }
+        .login-card p { color: var(--text-light); margin-bottom: 28px; font-size: 14px; }
+        .google-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 12px 24px; border: 1px solid var(--bg-off); border-radius: 12px;
+            background: var(--white); font-family: inherit; font-size: 15px; font-weight: 600;
+            color: var(--text); cursor: pointer; transition: all 0.2s;
+        }
+        .google-btn:hover { border-color: var(--accent); background: rgba(217,119,87,0.04); }
+        .google-btn svg { width: 20px; height: 20px; }
+        .login-error { color: var(--red); font-size: 13px; margin-top: 12px; }
+
+        .dashboard { display: none; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 22px; border-radius: 10px; font-family: inherit;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            border: none; transition: all 0.2s;
+            background: var(--accent); color: var(--white);
+        }
+        .btn:hover { opacity: 0.88; }
+        .btn-outline {
+            background: transparent; color: var(--accent);
+            border: 1.5px solid var(--accent);
+        }
+        .btn-outline:hover { background: rgba(217,119,87,0.06); }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+        .btn-danger { background: var(--red); }
+        .btn-danger:hover { opacity: 0.88; }
+
+        /* =============================================
+           EDITOR LAYOUT — 3 panels
+        ============================================= */
+        .editor-wrap {
+            display: grid;
+            grid-template-columns: 280px 1fr 420px;
+            gap: 16px;
+            min-height: calc(100vh - 80px);
+        }
+
+        @media (max-width: 1200px) {
+            .editor-wrap { grid-template-columns: 300px 1fr; }
+            .panel-preview { display: none; }
+        }
+        @media (max-width: 900px) {
+            .editor-wrap { grid-template-columns: 1fr; }
+            .panel-preview { display: none; }
+        }
+
+        /* LEFT PANEL — SECTION LIST */
+        .panel-left {
+            position: sticky; top: 72px;
+            height: calc(100vh - 96px);
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        .panel-left::-webkit-scrollbar { width: 4px; }
+        .panel-left::-webkit-scrollbar-track { background: transparent; }
+        .panel-left::-webkit-scrollbar-thumb { background: var(--bg-off); border-radius: 4px; }
+
+        .panel-title {
+            font-size: 18px; font-weight: 700; margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .section-list { display: flex; flex-direction: column; gap: 6px; }
+
+        .sec-row {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 12px; border-radius: 12px;
+            background: var(--white);
+            border: 1.5px solid transparent;
+            cursor: pointer; transition: all 0.15s;
+            user-select: none;
+        }
+        .sec-row:hover { border-color: rgba(217,119,87,0.3); }
+        .sec-row.active { border-color: var(--accent); background: rgba(217,119,87,0.04); }
+        .sec-row.hidden-section { opacity: 0.45; }
+        .sec-row.drag-over { border-color: var(--accent); border-style: dashed; }
+        .sec-row.dragging { opacity: 0.4; }
+
+        .drag-handle {
+            cursor: grab; color: var(--text-light); font-size: 18px; line-height: 1;
+            flex-shrink: 0; padding: 2px;
+        }
+        .drag-handle:active { cursor: grabbing; }
+
+        .sec-info { flex: 1; min-width: 0; }
+        .sec-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sec-type { font-size: 11px; color: var(--text-light); }
+
+        .sec-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .sec-btn {
+            width: 28px; height: 28px; border-radius: 6px; border: none;
+            background: transparent; cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; color: var(--text-light);
+        }
+        .sec-btn:hover { background: var(--bg-pampas); color: var(--text); }
+        .sec-btn.vis-on { color: var(--accent); }
+        .sec-btn.del-btn:hover { background: var(--red-bg); color: var(--red); }
+
+        .add-section-bar {
+            margin-top: 12px;
+            display: flex; justify-content: center;
+        }
+
+        /* RIGHT PANEL — EDIT FORM */
+        .panel-right {
+            min-height: 400px;
+        }
+        .edit-card {
+            background: var(--white); border-radius: 16px;
+            padding: 28px; box-shadow: 0 2px 12px var(--shadow);
+        }
+        .edit-card-title {
+            font-size: 16px; font-weight: 700; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .edit-card-title .badge {
+            font-size: 11px; font-weight: 600; padding: 2px 10px;
+            border-radius: 8px; background: rgba(217,119,87,0.1); color: var(--accent);
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-size: 13px; font-weight: 700;
+            margin-bottom: 6px; color: var(--text);
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--bg-off);
+            border-radius: 10px; font-family: inherit; font-size: 14px;
+            background: var(--white); transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: var(--accent);
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+
+        /* Image upload component */
+        .img-upload-zone {
+            border: 2px dashed var(--bg-off); border-radius: 12px;
+            padding: 20px; text-align: center; cursor: pointer;
+            transition: all 0.25s; position: relative; overflow: hidden;
+            min-height: 120px; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 6px; background: var(--bg-pampas);
+        }
+        .img-upload-zone:hover, .img-upload-zone.drag-over {
+            border-color: var(--accent); background: rgba(217,119,87,0.04);
+        }
+        .img-upload-zone.has-image { padding: 0; background: transparent; border-style: solid; border-color: var(--bg-off); }
+        .img-upload-zone.has-image:hover { border-color: var(--accent); }
+        .img-upload-zone .upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+        .img-upload-zone .upload-placeholder .upload-icon-lg { font-size: 28px; color: var(--bg-off); }
+        .img-upload-zone .upload-placeholder .upload-hint { font-size: 13px; color: var(--text-light); font-weight: 500; }
+        .img-upload-zone .upload-placeholder .upload-hint-sm { font-size: 11px; color: var(--text-light); opacity: 0.7; }
+        .img-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .img-upload-zone .preview-wrap {
+            position: relative; width: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        .img-upload-zone .preview-wrap img {
+            max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 10px; display: block;
+        }
+        .img-upload-zone .preview-wrap .img-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.45); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .img-upload-zone .preview-wrap:hover .img-overlay { opacity: 1; }
+        .img-upload-zone .preview-wrap .img-overlay button {
+            padding: 6px 14px; border-radius: 8px; border: none; font-size: 13px;
+            font-weight: 600; cursor: pointer; font-family: inherit;
+        }
+        .img-upload-zone .preview-wrap .img-overlay .btn-change {
+            background: var(--white); color: var(--text);
+        }
+        .img-upload-zone .preview-wrap .img-overlay .btn-remove {
+            background: var(--red); color: var(--white);
+        }
+        .img-upload-progress {
+            margin-top: 6px; height: 4px; background: var(--bg-off); border-radius: 4px;
+            overflow: hidden; display: none;
+        }
+        .img-upload-progress .bar { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; transition: width 0.3s; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .array-group { margin-bottom: 16px; }
+        .array-group-title {
+            font-size: 13px; font-weight: 700; margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .array-item {
+            background: var(--bg-pampas); border-radius: 10px; padding: 12px;
+            margin-bottom: 8px; position: relative;
+        }
+        .array-item .remove-item {
+            position: absolute; top: 8px; right: 8px;
+            width: 22px; height: 22px; border-radius: 6px; border: none;
+            background: var(--red-bg); color: var(--red); cursor: pointer;
+            font-size: 12px; display: flex; align-items: center; justify-content: center;
+        }
+        .array-item .form-group { margin-bottom: 8px; }
+        .array-item .form-group:last-child { margin-bottom: 0; }
+
+        .form-actions {
+            margin-top: 20px; display: flex; gap: 10px;
+        }
+
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 300px; color: var(--text-light); text-align: center;
+        }
+        .empty-state p { font-size: 15px; margin-bottom: 8px; }
+
+        /* ADD SECTION MODAL */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--white); border-radius: 20px; padding: 32px;
+            max-width: 520px; width: 92%; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 16px 60px rgba(0,0,0,0.15);
+        }
+        .modal-box h3 { font-size: 18px; margin-bottom: 16px; }
+        .modal-close {
+            float: right; background: none; border: none; font-size: 22px;
+            cursor: pointer; color: var(--text-light); line-height: 1;
+        }
+        .type-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        }
+        .type-option {
+            padding: 14px; border-radius: 12px; border: 1.5px solid var(--bg-off);
+            cursor: pointer; transition: all 0.15s; text-align: center;
+        }
+        .type-option:hover { border-color: var(--accent); background: rgba(217,119,87,0.04); }
+        .type-option-preview {
+            width: 100%; height: 64px;
+            background: var(--bg-off); border-radius: 8px;
+            margin-bottom: 8px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .type-option-preview svg { width: 100%; height: 100%; }
+        .type-option-icon { font-size: 22px; margin-bottom: 4px; }
+        .type-option-name { font-size: 13px; font-weight: 700; }
+        .type-option-desc { font-size: 11px; color: var(--text-light); }
+        .add-modal-tabs {
+            display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--bg-off);
+        }
+        .add-modal-tab {
+            padding: 8px 20px; font-size: 13px; font-weight: 700; border: none; background: none;
+            color: var(--text-light); cursor: pointer; border-bottom: 2px solid transparent;
+            margin-bottom: -2px; transition: color 0.2s, border-color 0.2s;
+        }
+        .add-modal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .add-modal-tab:hover { color: var(--text); }
+
+        /* LOADING OVERLAY */
+        .loading-overlay {
+            display: none; position: fixed; inset: 0; z-index: 300;
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 12px;
+        }
+        .loading-overlay.show { display: flex; }
+        .spinner {
+            width: 36px; height: 36px; border: 3px solid var(--bg-off);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 14px; font-weight: 600; color: var(--text); }
+
+        /* PREVIEW PANEL */
+        .panel-preview {
+            position: sticky; top: 72px;
+            height: calc(100vh - 96px);
+            display: flex; flex-direction: column;
+        }
+        .preview-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .preview-header span {
+            font-size: 13px; font-weight: 700; color: var(--text-light);
+        }
+        .preview-frame-wrap {
+            flex: 1; border-radius: 12px; overflow: hidden;
+            border: 1.5px solid var(--bg-off);
+            background: var(--white);
+            position: relative;
+        }
+        .preview-frame-wrap iframe {
+            width: 100%; height: 100%; border: none;
+            transform-origin: top left;
+            transition: width 0.3s ease, transform 0.3s ease;
+        }
+        .preview-frame-wrap.mobile-mode iframe {
+            width: 375px;
+            height: 100%;
+            margin: 0 auto;
+            display: block;
+        }
+        .preview-frame-wrap.mobile-mode {
+            display: flex;
+            justify-content: center;
+            background: #e5e5e5;
+        }
+        .viewport-toggle {
+            display: inline-flex;
+            border: 1.5px solid var(--bg-off);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 8px;
+        }
+        .viewport-toggle button {
+            height: 32px;
+            padding: 0 12px;
+            border: none;
+            background: transparent;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .viewport-toggle button.active {
+            background: var(--accent);
+            color: #fff;
+        }
+        .viewport-toggle button:not(.active):hover {
+            background: var(--bg-off);
+        }
+
+        /* DROP INDICATOR */
+        .drop-indicator {
+            height: 3px; background: var(--accent); border-radius: 2px;
+            margin: -2px 0; position: relative; z-index: 5;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+
+        /* UNDO / REDO TOOLBAR */
+        .undo-redo-bar {
+            display: flex; align-items: center; gap: 4px;
+        }
+        .undo-redo-bar button {
+            width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--bg-off);
+            background: var(--white); cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; color: var(--text);
+        }
+        .undo-redo-bar button:hover:not(:disabled) {
+            border-color: var(--accent); background: rgba(217,119,87,0.04);
+        }
+        .undo-redo-bar button:disabled {
+            opacity: 0.3; cursor: not-allowed;
+        }
+
+        /* STATUS BAR */
+        .status-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+        }
+        .status-msg {
+            font-size: 13px; color: var(--text-light); font-weight: 500;
+        }
+        .status-msg.saved { color: var(--green); }
+        .status-msg.unsaved { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-card">
+        <h1>AI<span>FLOW</span>TIME</h1>
+        <p>版面編輯 Layout Editor - 管理員登入</p>
+        <button class="google-btn" id="googleLoginBtn" onclick="handleGoogleLogin()">
+            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            使用 Google 帳號登入
+        </button>
+        <p class="login-error" id="loginError"></p>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dashboard" id="dashboard">
+    <header class="cms-header">
+        <div class="cms-header-inner">
+            <a href="/workshop-cms" class="cms-logo">AI<span>FLOW</span>TIME 版面編輯</a>
+            <div class="cms-user">
+                <a href="/workshop-cms" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;">← 返回 CMS</a>
+                <span id="userEmail"></span>
+                <img id="userAvatar" src="" alt="">
+                <button class="btn btn-sm btn-outline" onclick="handleLogout()">登出</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="status-bar">
+            <div>
+                <h1 style="font-size:22px;font-weight:700;">頁面版面編輯 Page Layout</h1>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+                    <select id="pageSelector" onchange="switchPage(this.value)" style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;"></select>
+                    <a id="previewPageLink" href="/ai-beginner-workshop" target="_blank" style="color:var(--accent);font-size:13px;">查看頁面 ↗</a>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="undo-redo-bar">
+                    <button id="undoBtn" title="復原 (Ctrl/Cmd+Z)" onclick="undo()" disabled>↩</button>
+                    <button id="redoBtn" title="重做 (Ctrl/Cmd+Shift+Z)" onclick="redo()" disabled>↪</button>
+                </div>
+                <span class="status-msg" id="statusMsg"></span>
+                <button class="btn" onclick="saveLayout()" id="saveBtn">儲存版面</button>
+            </div>
+        </div>
+
+        <div class="editor-wrap">
+            <!-- LEFT: Section List -->
+            <div class="panel-left">
+                <div class="panel-title">
+                    <span>頁面區塊 Sections</span>
+                    <span style="font-size:12px;color:var(--text-light);font-weight:500;" id="sectionCount"></span>
+                </div>
+                <div class="section-list" id="sectionList"></div>
+                <div class="add-section-bar">
+                    <button class="btn btn-outline btn-sm" onclick="openAddModal()">+ 新增區塊</button>
+                </div>
+            </div>
+
+            <!-- MIDDLE: Edit Form -->
+            <div class="panel-right" id="editPanel">
+                <div class="empty-state" id="emptyState">
+                    <p style="font-size:28px;margin-bottom:12px;">←</p>
+                    <p>選擇左側的區塊以編輯內容</p>
+                    <p style="font-size:13px;">拖拽可改變區塊順序</p>
+                </div>
+                <div class="edit-card" id="editCard" style="display:none;"></div>
+            </div>
+
+            <!-- RIGHT: Live Preview -->
+            <div class="panel-preview" id="previewPanel">
+                <div class="preview-header">
+                    <span>即時預覽 Live Preview</span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <div class="viewport-toggle" id="viewportToggle">
+                            <button class="active" data-mode="desktop" onclick="setPreviewMode('desktop')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                Desktop
+                            </button>
+                            <button data-mode="mobile" onclick="setPreviewMode('mobile')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                Mobile
+                            </button>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="refreshPreview()">重新整理</button>
+                    </div>
+                </div>
+                <div class="preview-frame-wrap">
+                    <iframe id="previewFrame" src="/ai-beginner-workshop?preview=1"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Section Modal -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeAddModal()">&times;</button>
+        <h3>新增區塊 Add Section</h3>
+        <div class="add-modal-tabs">
+            <button class="add-modal-tab active" onclick="switchAddTab('types', this)">區塊類型</button>
+            <button class="add-modal-tab" onclick="switchAddTab('presets', this)">已儲存預設</button>
+        </div>
+        <div class="type-grid" id="typeGrid"></div>
+        <div class="type-grid" id="presetGrid" style="display:none;"></div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">儲存中...</div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+
+<script>
+// ============================================================
+// SECTION TYPE REGISTRY
+// ============================================================
+var SECTION_TYPES = {
+    hero: {
+        label: 'Hero 主視覺',
+        icon: '🎯',
+        desc: '標題、副標題、CTA 按鈕、GIF',
+        defaults: {
+            title: '把 AI 變成你的時間槓桿',
+            subtitle: '學會建立可複製的工作系統，每週多出 5–10 小時，從混亂走向掌控。',
+            ctaText: '立即預留名額',
+            ctaLink: '#workshops',
+            gifUrl: 'Capy Yawn.gif'
+        }
+    },
+    'pain-points': {
+        label: '痛點 Pain Points',
+        icon: '💡',
+        desc: '痛點卡片、名言、AI 數據',
+        defaults: {
+            sectionTitle: '你的生活可以變成這樣。',
+            cards: [
+                { title: '忙到沒時間，現在終於能喘口氣。', description: '寫文案、回訊息、做圖、記帳——以前全部自己來。現在讓 AI 處理重複性工作，每天省下 2–3 小時。' },
+                { title: '想到就能做到，不必再等別人幫忙。', description: '想做好看的社群圖、寫吸引人的文案——現在 AI 幫你補足技能缺口，一個人也能把想法變成成品。' },
+                { title: '不是 AI 不行，是之前沒人教你怎麼用。', description: '學會怎麼跟 AI 溝通之後，你會發現同一個工具，能交出完全不同等級的成果。' }
+            ],
+            insightQuote: 'AI不是未來，而是現在。學懂與AI協作，是未來3年能否轉營的關鍵。'
+        }
+    },
+    'how-it-works': {
+        label: '報名流程 How It Works',
+        icon: '📋',
+        desc: '步驟時間線',
+        defaults: {
+            sectionTitle: '報名流程',
+            subtitle: '從瀏覽到入座，只需幾個簡單步驟。',
+            steps: [
+                { title: '瀏覽工作坊詳情', description: '查看工作坊內容、日期和費用，選擇適合你的課程。' },
+                { title: '登入 Google 帳號報名', description: '用 Google 帳號登入後再報名，即享會員專屬 95 折優惠。' },
+                { title: '填寫個人資料並報名', description: '按「立即報名」，填寫姓名、電話等基本資料。' },
+                { title: '以 PayMe 或 FPS 付款', description: '選擇你偏好的付款方式，完成付款後上傳付款截圖。' },
+                { title: '我們極速審核', description: '收到截圖後，我們會盡快確認你的報名。' },
+                { title: '收到確認，準備上課', description: '你會收到 WhatsApp 確認訊息。' }
+            ]
+        }
+    },
+    trust: {
+        label: '信任 Trust / Why Us',
+        icon: '✦',
+        desc: '優勢卡片 + GIF',
+        defaults: {
+            sectionTitle: '點解揀AIFLOWTIME？',
+            cards: [
+                { title: '小班教學，逐個跟進。', description: '我們刻意控制人數，不做大班。', gifUrl: '小班教學，逐個跟進.gif' },
+                { title: '不只教工具，教你用 AI 的思維。', description: '我們從思維方式開始，讓你學會自己判斷什麼時候用什麼工具、怎麼用。', gifUrl: '不只教工具，教你用 AI 的思維.gif' },
+                { title: '導師每天都在用 AI 做實事。', description: 'AIFLOWTIME 創辦人本身是香港 AI 創作者，擁有超過 34,000 位追蹤者。', gifUrl: '導師每天都在用 AI 做實事.gif' }
+            ]
+        }
+    },
+    testimonials: {
+        label: '學員評價 Testimonials',
+        icon: '💬',
+        desc: '學員推薦',
+        defaults: {
+            sectionTitle: '學員怎麼說',
+            items: [
+                { quote: '好多謝Jacob 咁用心解答我無論係AI定係自媒體上嘅問題。', name: 'Heidi', role: '1-on-1 諮詢客戶', avatarLetter: 'H' }
+            ]
+        }
+    },
+    workshops: {
+        label: '工作坊列表 Workshops',
+        icon: '🎓',
+        desc: '動態載入工作坊卡片（來自 Firestore）',
+        defaults: {
+            sectionTitle: '工作坊一覽',
+            subtitle: '零基礎也能上手。學會用 AI 的思維，不管你的背景是什麼，這裡都能開始。',
+            badgeText: '✦ 不需要任何技術背景'
+        }
+    },
+    about: {
+        label: '講師介紹 About',
+        icon: '👤',
+        desc: '講師照片、簡介、徽章',
+        defaults: {
+            sectionTitle: '關於講師',
+            name: 'Jacob',
+            role: 'AIFLOWTIME 創辦人',
+            bio: 'Jacob 相信 AI 不應該讓人感到技術複雜。它本來就是為了打破門檻而存在，讓普通人也能完成幾年前只屬於專家的事情。',
+            badges: 'KIMI 品牌合作, Higgsfield 品牌合作',
+            photoUrl: 'About_Jacob.jpg',
+            linkUrl: '/about-jacob',
+            linkText: '了解更多關於 Jacob →',
+            tagline: '每日用 AI 創作內容、教學、經營生意'
+        }
+    },
+    countdown: {
+        label: '倒數計時 Countdown',
+        icon: '⏱️',
+        desc: '限時折扣碼倒數與 CTA',
+        defaults: {
+            sectionTitle: '專屬折扣碼',
+            discountCodeId: '',
+            ctaText: 'Claim the discount',
+            ctaLink: '/workshop-payment'
+        }
+    },
+    faq: {
+        label: '常見問題 FAQ',
+        icon: '❓',
+        desc: '折疊式問答列表',
+        defaults: {
+            sectionTitle: '常見問題',
+            items: [
+                { question: '需要編程背景嗎？', answer: '完全不需要！我們的課程專為零技術背景的香港在職人士設計。' },
+                { question: '課程是線上還是實體？', answer: '我們提供線上及實體兩種模式。' },
+                { question: '學完真的有幫助嗎？', answer: '我們的課程內容全部取材自香港真實職場場景。' }
+            ]
+        }
+    },
+    waitlist: {
+        label: '等候名單 Waitlist',
+        icon: '📝',
+        desc: '報名表格',
+        defaults: {
+            sectionTitle: '加入等候名單',
+            subtitle: '暫時未決定？留低你嘅資料，我哋會第一時間通知你開班詳情。'
+        }
+    },
+    'final-cta': {
+        label: '最終 CTA',
+        icon: '🚀',
+        desc: '結尾號召行動',
+        defaults: {
+            title: '唔使同人比，自己學好AI，慢慢黎。',
+            subtitle: '無論你想提升效率、增加競爭力，還是為職涯轉型鋪路，AIFLOWTIME都能為你提供最適合的學習路徑',
+            ctaText: '瀏覽所有工作坊',
+            ctaLink: '#workshops',
+            whatsappUrl: 'https://wa.me/85262880186',
+            instagramUrl: 'https://instagram.com/aiflowtime'
+        }
+    },
+    video: {
+        label: '影片 Video',
+        icon: '🎬',
+        desc: '9:16 直式影片區塊',
+        defaults: {
+            videoUrl: '',
+            posterUrl: '',
+            caption: ''
+        }
+    },
+    'image-chain': {
+        label: '圖片串鏈 Image Chain',
+        icon: '🔗',
+        desc: '交錯浮動圖片卡 + 曲線連接',
+        defaults: {
+            sectionTitle: '從生成圖片 到設計視覺',
+            cards: [
+                { imageUrl: '', label: 'Example 1', alt: '' },
+                { imageUrl: '', label: 'Example 2', alt: '' },
+                { imageUrl: '', label: 'Example 3', alt: '' }
+            ]
+        }
+    },
+    'mindset-shift': {
+        label: '思維轉變 Mindset Shift',
+        icon: '💭',
+        desc: '大字排版 — 刪除線 + 重點句',
+        defaults: {
+            beforeText: '你一直在生成圖片。',
+            afterText: '是時候開始設計視覺。',
+            description: '問題不是工具。是視覺決策能力。'
+        }
+    },
+    'learning-outcomes': {
+        label: '學習成果 Learning Outcomes',
+        icon: '🎯',
+        desc: '編號成果列表 + 工具標籤 + 示範承諾',
+        defaults: {
+            sectionTitle: '你會掌握什麼',
+            items: [
+                { title: '控制風格參數', description: '學會精準控制 AI 圖像的風格、色調和構圖。' },
+                { title: '建立品牌視覺語調', description: '為你的品牌定義一致的視覺語言。' },
+                { title: '快速輸出商業素材', description: '一小時內從構想到成品。' }
+            ],
+            tools: [
+                { name: 'Midjourney' },
+                { name: 'FloraFauna' },
+                { name: 'Higgsfield' }
+            ],
+            demoText: '現場完成 1 個品牌視覺專案示範'
+        }
+    },
+    'audience-fit': {
+        label: '適合對象 Audience Fit',
+        icon: '👥',
+        desc: '「適合你」vs「不適合你」雙欄',
+        defaults: {
+            forTitle: '適合你，如果你是...',
+            forItems: [
+                { text: '自媒體經營者' },
+                { text: '創業者' },
+                { text: '品牌經營者' },
+                { text: '設計師' }
+            ],
+            notForTitle: '不適合你，如果你...',
+            notForItems: [
+                { text: '只是想玩玩看 AI' },
+                { text: '想用一鍵模板解決一切' },
+                { text: '不打算實際應用於品牌' }
+            ]
+        }
+    },
+    'logistics-card': {
+        label: '活動資訊 Logistics Card',
+        icon: '📍',
+        desc: '單一活動資訊卡 + 名額進度條',
+        defaults: {
+            workshopId: '',
+            ctaText: '立即報名',
+            ctaLink: '/workshop-payment?id='
+        }
+    },
+    transformation: {
+        label: '前後對比 Transformation',
+        icon: '🔄',
+        desc: '之前/之後對比卡片',
+        defaults: {
+            sectionTitle: '你的轉變',
+            cards: [
+                { theme: '精準表達', beforeText: '試了很多 prompt 但結果不穩定', afterText: '掌握結構化指令，穩定輸出高質量內容' },
+                { theme: '先問 AI', beforeText: '遇到問題先 Google 再自己摸索', afterText: '養成 AI-first 思維，效率提升 3 倍' },
+                { theme: '核心邏輯', beforeText: '只會用一兩個工具', afterText: '理解底層邏輯，任何新工具都能快速上手' }
+            ]
+        }
+    },
+    'link-list': {
+        label: '連結列表 Link List',
+        icon: '🔗',
+        desc: '垂直連結卡片列表',
+        defaults: {
+            sectionTitle: '',
+            links: [
+                { label: 'Link 1', url: '#', description: '', badgeText: '' },
+                { label: 'Link 2', url: '#', description: '', badgeText: '' }
+            ]
+        }
+    },
+    'tools-grid': {
+        label: '工具展示 Tools Grid',
+        icon: '🧰',
+        desc: '產品/工具卡片 + Logo',
+        defaults: {
+            sectionTitle: '常用工具',
+            tools: [
+                { name: 'Tool 1', description: '', logoUrl: '', url: '#', badgeText: '' },
+                { name: 'Tool 2', description: '', logoUrl: '', url: '#', badgeText: '' }
+            ]
+        }
+    },
+    'section-divider': {
+        label: '分隔線 Divider',
+        icon: '➖',
+        desc: '標題分隔線',
+        defaults: {
+            title: '分隔標題',
+            subtitle: ''
+        }
+    },
+    'lead-magnet': {
+        label: '表單彈窗 Lead Magnet',
+        icon: '📩',
+        desc: '按鈕觸發表單彈窗',
+        defaults: {
+            title: '領取免費資源',
+            description: '',
+            imageUrl: '',
+            formFields: [
+                { label: '姓名', type: 'text' },
+                { label: '電話', type: 'tel' }
+            ],
+            submitText: '提交',
+            triggerText: '立即領取'
+        }
+    },
+    'origin-story': {
+        label: '故事時間線 Origin Story',
+        icon: '📖',
+        desc: '垂直時間線 + 敘事步驟',
+        defaults: {
+            sectionTitle: '我的故事',
+            introText: '',
+            steps: [
+                { title: '第一步', description: '' },
+                { title: '第二步', description: '' },
+                { title: '第三步', description: '' }
+            ]
+        }
+    },
+    'tools-tags': {
+        label: '工具標籤雲 Tools Tags',
+        icon: '🏷',
+        desc: '標籤雲 + 提示框',
+        defaults: {
+            sectionTitle: '我常用的工具',
+            description: '',
+            tags: [
+                { name: 'ChatGPT' },
+                { name: 'Notion' },
+                { name: 'Midjourney' }
+            ],
+            calloutText: ''
+        }
+    },
+    'photo-block': {
+        label: '圖片區塊 Photo Block',
+        icon: '🖼',
+        desc: '全寬圖片',
+        defaults: {
+            imageUrl: '',
+            alt: '',
+            caption: ''
+        }
+    },
+    cta: {
+        label: 'CTA 行動呼籲',
+        icon: '🚀',
+        desc: '標題 + 描述 + 按鈕',
+        defaults: {
+            title: '準備好了嗎？',
+            description: '',
+            ctaText: '了解更多',
+            ctaLink: '#'
+        }
+    }
+};
+
+var PAGE_REGISTRY = {
+    'workshop-main': {
+        label: '工作坊主頁面',
+        previewUrl: '/ai-beginner-workshop',
+        firestoreDoc: 'workshop-main',
+        sectionTypes: ['hero', 'pain-points', 'how-it-works', 'trust', 'testimonials', 'workshops', 'about', 'faq', 'waitlist', 'final-cta', 'video', 'image-chain', 'mindset-shift', 'learning-outcomes', 'audience-fit', 'logistics-card', 'transformation', 'countdown'],
+        defaultSections: [
+            { id: 'hero_default', type: 'hero', visible: true },
+            { id: 'pain-points_default', type: 'pain-points', visible: true },
+            { id: 'how-it-works_default', type: 'how-it-works', visible: true },
+            { id: 'trust_default', type: 'trust', visible: true },
+            { id: 'testimonials_default', type: 'testimonials', visible: true },
+            { id: 'workshops_default', type: 'workshops', visible: true },
+            { id: 'about_default', type: 'about', visible: true },
+            { id: 'faq_default', type: 'faq', visible: true },
+            { id: 'waitlist_default', type: 'waitlist', visible: true },
+            { id: 'final-cta_default', type: 'final-cta', visible: true }
+        ]
+    },
+    'linktree': {
+        label: 'Linktree',
+        previewUrl: '/linktree',
+        firestoreDoc: 'linktree',
+        sectionTypes: ['hero', 'link-list', 'tools-grid', 'section-divider', 'lead-magnet', 'workshops', 'faq', 'final-cta', 'cta'],
+        defaultSections: [
+            { id: 'lt-header', type: 'hero', visible: true },
+            { id: 'lt-services', type: 'link-list', visible: true, content: {
+                sectionTitle: '',
+                links: [
+                    { label: '有唔識嘅AI問題？將你嘅問題話我知！', url: '/consultation', description: '了解更多諮詢內容與流程', badgeText: '' },
+                    { label: '👩‍🏫 AI 課程工作坊', url: '/ai-beginner-workshop', description: '專為斜槓族、小生意老闆、AI 新手而設', badgeText: '立即報名！' },
+                    { label: '📚 2026年5個必學AI指南', url: '#', description: '免費領取AI工作流指南', badgeText: '' },
+                    { label: '🎯 2分鐘AI能力診斷', url: '/quiz', description: '搵出你嘅 AI 瓶頸，獲取個人化學習建議', badgeText: '免費！' },
+                    { label: '👤 關於 Jacob', url: '/about-jacob', description: '了解更多關於創辦人的故事', badgeText: '' }
+                ]
+            }},
+            { id: 'lt-divider-tools', type: 'section-divider', visible: true, content: { title: 'Jacob的AI工具箱', subtitle: '' } },
+            { id: 'lt-tools', type: 'tools-grid', visible: true, content: {
+                sectionTitle: '',
+                tools: [
+                    { name: 'KIMI AI', description: '集深度研究與 Nano Banana 簡報製作於一身的全能 AI 生產力助手。', logoUrl: 'KIMI.png', url: 'https://www.kimi.com/', badgeText: '' },
+                    { name: 'FloraFauna AI', description: '串連多模型、構建可重複創作流程的專業 AI 工作室。', logoUrl: 'Flora_AI.png', url: 'https://dub.florafauna.ai/fung-tsun-sing', badgeText: '25%OFF' },
+                    { name: 'Lupa', description: '讓模糊影像秒變高解析的專業升級工具。', logoUrl: 'Lupa.png', url: 'https://app.lupaupscaler.com/?via=AIFlowTime', badgeText: '' },
+                    { name: 'Fotorgear', description: 'Jacob話最好用嘅iPhone攝影app', logoUrl: 'Fotorgear.png', url: '#', badgeText: '' },
+                    { name: 'Design Sparks', description: '結合 AI 與創意思考術，秒生大量設計點子。', logoUrl: 'DesignSpark.png', url: 'https://designsparks.app.creativityai.io/', badgeText: '' }
+                ]
+            }},
+            { id: 'lt-divider-coming', type: 'section-divider', visible: true, content: { title: '即將推出！', subtitle: '快啲加入Google嘅waiting list👇🏻' } },
+            { id: 'lt-coming-soon', type: 'link-list', visible: true, content: {
+                sectionTitle: '',
+                links: [
+                    { label: 'Disco 🌍', url: 'https://labs.google/disco', description: '探索 Google 最新的 AI 網頁功能', badgeText: '' }
+                ]
+            }},
+            { id: 'lt-social', type: 'link-list', visible: true, content: {
+                sectionTitle: '',
+                links: [
+                    { label: 'Home', url: '/', description: '', badgeText: '' },
+                    { label: 'Instagram', url: 'https://www.instagram.com/aiflowtime', description: '', badgeText: '' }
+                ]
+            }},
+            { id: 'lt-lead-magnet', type: 'lead-magnet', visible: true, content: {
+                title: '領取免費2026年AI指南',
+                description: '想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！',
+                imageUrl: '',
+                formFields: [{ label: '姓名', type: 'text' }, { label: 'WhatsApp 號碼', type: 'tel' }],
+                submitText: '免費領取指南',
+                triggerText: '📚 領取免費AI指南'
+            }}
+        ]
+    },
+    'about-jacob': {
+        label: 'About Jacob',
+        previewUrl: '/about-jacob',
+        firestoreDoc: 'about-jacob',
+        sectionTypes: ['hero', 'origin-story', 'cta', 'photo-block', 'tools-tags', 'faq', 'about', 'testimonials', 'final-cta', 'section-divider'],
+        defaultSections: [
+            { id: 'aj-hero', type: 'hero', visible: true },
+            { id: 'aj-origin', type: 'origin-story', visible: true, content: {
+                sectionTitle: '',
+                introText: '我曾經是一個攝影師——\n沒有流量、沒有關注，也沒有人在意我的服務。\n然後，我做了三件事。',
+                steps: [
+                    { title: '學會與 AI 對話，重新打磨商業定位', description: '透過 AI 重新梳理我的服務價值、受眾痛點與表達方式，讓原本無人問津的業務開始被看見、被理解、被需要。' },
+                    { title: '用 AI 建立以前想都不敢想的網站與系統', description: '沒有技術背景，卻靠著正確的 AI 工具與工作流，從零搭建出品牌網站、自動化報名流程、CMS 管理後台。' },
+                    { title: '把學到的一切，分享到 Instagram', description: '開始用 Reels 記錄我的 AI 實戰經驗與工作流設計，不到兩個月，從零累積超過 20,000 追蹤。' }
+                ]
+            }},
+            { id: 'aj-why', type: 'cta', visible: true },
+            { id: 'aj-photo', type: 'photo-block', visible: true, content: { imageUrl: 'Jacob_not_ugly.jpg', alt: 'Jacob', caption: '' } },
+            { id: 'aj-timeline', type: 'origin-story', visible: true, content: {
+                sectionTitle: 'Timeline',
+                introText: '',
+                steps: [
+                    { title: '2025 秋', description: '開始在 Instagram 以 Reels 分享 AI 工具與工作流實測' },
+                    { title: '兩個月內', description: '品牌累積 20,000 追蹤' },
+                    { title: '現在', description: '把內容沉澱成諮詢、工作坊、會員與模板資源' }
+                ]
+            }},
+            { id: 'aj-who', type: 'cta', visible: true },
+            { id: 'aj-how', type: 'cta', visible: true },
+            { id: 'aj-tools', type: 'tools-tags', visible: true, content: {
+                sectionTitle: '我常用的工具',
+                description: '我唔追工具榜單；只用可以長期放入流程的工具。你會見到的不是「最新功能」，而是「可以複製的做法」。',
+                tags: [
+                    { name: 'Notion' }, { name: 'ChatGPT' }, { name: 'Google Calendar' },
+                    { name: 'Xmind' }, { name: 'Perplexity' }, { name: 'NotebookLM' }, { name: 'CapCut' }
+                ],
+                calloutText: 'Jacob is still learning~ 自動化係 AIFlowTime 下一個重點章節。'
+            }},
+            { id: 'aj-note', type: 'cta', visible: true },
+            { id: 'aj-cta', type: 'cta', visible: true },
+            { id: 'aj-faq', type: 'faq', visible: true }
+        ]
+    },
+    'countdown': {
+        label: '倒數優惠頁 Countdown',
+        previewUrl: '/countdown',
+        firestoreDoc: 'countdown',
+        sectionTypes: ['countdown'],
+        defaultSections: [
+            { id: 'countdown_default', type: 'countdown', visible: true, content: {
+                sectionTitle: '專屬折扣碼',
+                discountCodeId: '',
+                ctaText: 'Claim the discount',
+                ctaLink: '/workshop-payment'
+            }}
+        ]
+    },
+    'workshop-0': {
+        label: 'Workshop 0 落地頁',
+        previewUrl: '/workshop-0',
+        firestoreDoc: 'workshop-0',
+        sectionTypes: ['hero', 'video', 'image-chain', 'mindset-shift', 'learning-outcomes', 'audience-fit', 'logistics-card', 'transformation', 'cta', 'section-divider', 'countdown', 'final-cta'],
+        defaultSections: []
+    },
+    'workshop-c': {
+        label: 'Workshop C 落地頁',
+        previewUrl: '/workshop-c',
+        firestoreDoc: 'workshop-c',
+        sectionTypes: ['hero', 'video', 'image-chain', 'mindset-shift', 'learning-outcomes', 'audience-fit', 'logistics-card', 'transformation', 'cta', 'section-divider', 'countdown', 'final-cta'],
+        defaultSections: []
+    },
+    'consultation': {
+        label: '諮詢頁 Consultation',
+        previewUrl: '/consultation',
+        firestoreDoc: 'consultation',
+        sectionTypes: ['hero', 'link-list', 'cta', 'section-divider', 'final-cta'],
+        defaultSections: []
+    },
+    'quiz': {
+        label: 'AI 診斷 Quiz',
+        previewUrl: '/quiz',
+        firestoreDoc: 'quiz',
+        sectionTypes: ['hero', 'cta', 'section-divider'],
+        defaultSections: []
+    }
+};
+
+var currentPageId = 'workshop-main';
+
+var DEFAULT_SECTIONS = PAGE_REGISTRY['workshop-main'].defaultSections;
+
+// ============================================================
+// STATE
+// ============================================================
+var db, auth, storage, _cmsApp;
+var layoutSections = [];
+var selectedSectionId = null;
+var isDirty = false;
+var dragSrcIdx = null;
+
+// Undo/Redo
+var undoStack = [];
+var redoStack = [];
+var MAX_HISTORY = 50;
+
+// ============================================================
+// FIREBASE INIT
+// ============================================================
+(function() {
+    var script = document.createElement('script');
+    script.src = '/__/firebase/init.js';
+    script.onload = function() { initApp(); };
+    script.onerror = function() {
+        if (!firebase.apps.length) {
+            firebase.initializeApp({
+                projectId: 'aiflowtime-hk',
+                apiKey: 'AIzaSyDummy_replace_with_real_key',
+                authDomain: 'aiflowtime-hk.firebaseapp.com',
+                storageBucket: 'aiflowtime-hk.appspot.com'
+            });
+        }
+        initApp();
+    };
+    document.head.appendChild(script);
+})();
+
+function initApp() {
+    var config = firebase.app().options;
+    try { _cmsApp = firebase.app('cms'); } catch(e) {
+        _cmsApp = firebase.initializeApp(config, 'cms');
+    }
+    db = _cmsApp.firestore();
+    auth = _cmsApp.auth();
+    storage = _cmsApp.storage();
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                verifyAdminAccess(user);
+            } else {
+                showLogin();
+            }
+        });
+    });
+}
+
+function verifyAdminAccess(user) {
+    db.collection('registrations')
+        .where('status', '==', 'confirmed')
+        .limit(1)
+        .get()
+        .then(function() { showDashboard(user); })
+        .catch(function() {
+            auth.signOut();
+            showLoginError('此帳號無權限存取。僅限授權的 AIFLOWTIME 帳號登入。');
+        });
+}
+
+function handleGoogleLogin() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    auth.signInWithPopup(provider).catch(function(err) {
+        showLoginError('登入失敗：' + err.message);
+    });
+}
+
+function handleLogout() {
+    if (isDirty && !confirm('你有未儲存的變更，確定要登出嗎？')) return;
+    auth.signOut();
+}
+
+function showLogin() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
+}
+
+function showLoginError(msg) {
+    showLogin();
+    document.getElementById('loginError').textContent = msg;
+}
+
+function showDashboard(user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('userEmail').textContent = user.email;
+    if (user.photoURL) {
+        document.getElementById('userAvatar').src = user.photoURL;
+        document.getElementById('userAvatar').style.display = 'inline-block';
+    }
+    initPageSelector();
+    loadLayout();
+}
+
+// ============================================================
+// LOAD / SAVE LAYOUT
+// ============================================================
+function showLoading(msg) {
+    document.getElementById('loadingText').textContent = msg || '儲存中...';
+    document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+function loadLayout() {
+    showLoading('載入版面配置...');
+    loadPresets();
+    var page = PAGE_REGISTRY[currentPageId];
+    var docId = page ? page.firestoreDoc : 'workshop-main';
+    var defaults = page ? page.defaultSections : PAGE_REGISTRY['workshop-main'].defaultSections;
+
+    function buildFromDefaults() {
+        return defaults.map(function(s, i) {
+            var typeDef = SECTION_TYPES[s.type];
+            var def = typeDef ? JSON.parse(JSON.stringify(typeDef.defaults)) : {};
+            if (s.content) {
+                var merged = JSON.parse(JSON.stringify(s.content));
+                for (var k in def) { if (!(k in merged)) merged[k] = def[k]; }
+                def = merged;
+            }
+            return { id: s.id, type: s.type, visible: s.visible, order: i, content: def };
+        });
+    }
+
+    db.collection('pageLayouts').doc(docId).get().then(function(doc) {
+        if (doc.exists && doc.data().sections && doc.data().sections.length > 0) {
+            layoutSections = doc.data().sections;
+        } else {
+            layoutSections = buildFromDefaults();
+        }
+        layoutSections.sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
+        renderSectionList();
+        setDirty(false);
+        hideLoading();
+        undoStack = []; redoStack = []; updateUndoRedoButtons();
+        setTimeout(function() { sendPreviewUpdate(); }, 1500);
+    }).catch(function(err) {
+        console.error('Load layout error:', err);
+        layoutSections = buildFromDefaults();
+        renderSectionList();
+        setDirty(false);
+        hideLoading();
+        undoStack = []; redoStack = []; updateUndoRedoButtons();
+        setTimeout(function() { sendPreviewUpdate(); }, 1500);
+    });
+}
+
+function saveLayout() {
+    commitCurrentEdit();
+    showLoading('儲存版面配置...');
+
+    var toSave = layoutSections.map(function(s, i) {
+        return { id: s.id, type: s.type, visible: s.visible, order: i, content: s.content || {} };
+    });
+
+    var page = PAGE_REGISTRY[currentPageId];
+    var docId = page ? page.firestoreDoc : 'workshop-main';
+    db.collection('pageLayouts').doc(docId).set({
+        sections: toSave,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: auth.currentUser ? auth.currentUser.email : 'unknown'
+    }).then(function() {
+        setDirty(false);
+        hideLoading();
+        showStatus('已儲存', true);
+    }).catch(function(err) {
+        hideLoading();
+        alert('儲存失敗：' + err.message);
+    });
+}
+
+function setDirty(val) {
+    isDirty = val;
+    if (val) showStatus('未儲存的變更', false);
+    else showStatus('', true);
+}
+
+function showStatus(msg, saved) {
+    var el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + (saved ? 'saved' : 'unsaved');
+}
+
+// ============================================================
+// UNDO / REDO
+// ============================================================
+function pushUndo() {
+    undoStack.push(JSON.stringify(layoutSections));
+    if (undoStack.length > MAX_HISTORY) undoStack.shift();
+    redoStack = [];
+    updateUndoRedoButtons();
+}
+
+function undo() {
+    if (undoStack.length === 0) return;
+    redoStack.push(JSON.stringify(layoutSections));
+    layoutSections = JSON.parse(undoStack.pop());
+    selectedSectionId = null;
+    renderSectionList();
+    document.getElementById('editCard').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'flex';
+    setDirty(true);
+    updateUndoRedoButtons();
+    sendPreviewUpdate();
+}
+
+function redo() {
+    if (redoStack.length === 0) return;
+    undoStack.push(JSON.stringify(layoutSections));
+    layoutSections = JSON.parse(redoStack.pop());
+    selectedSectionId = null;
+    renderSectionList();
+    document.getElementById('editCard').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'flex';
+    setDirty(true);
+    updateUndoRedoButtons();
+    sendPreviewUpdate();
+}
+
+function updateUndoRedoButtons() {
+    document.getElementById('undoBtn').disabled = undoStack.length === 0;
+    document.getElementById('redoBtn').disabled = redoStack.length === 0;
+}
+
+document.addEventListener('keydown', function(e) {
+    var isMod = e.metaKey || e.ctrlKey;
+    if (isMod && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+    } else if (isMod && e.key === 'z' && e.shiftKey) {
+        e.preventDefault();
+        redo();
+    } else if (isMod && e.key === 'y') {
+        e.preventDefault();
+        redo();
+    }
+});
+
+// ============================================================
+// LIVE PREVIEW
+// ============================================================
+function sendPreviewUpdate() {
+    var frame = document.getElementById('previewFrame');
+    if (!frame || !frame.contentWindow) return;
+    try {
+        frame.contentWindow.postMessage({
+            type: 'layoutPreview',
+            sections: layoutSections
+        }, '*');
+    } catch(e) {}
+}
+
+function refreshPreview() {
+    var frame = document.getElementById('previewFrame');
+    if (frame) {
+        var page = PAGE_REGISTRY[currentPageId];
+        var url = page ? page.previewUrl : '/ai-beginner-workshop';
+        frame.src = url + '?preview=1&t=' + Date.now();
+        setTimeout(function() { sendPreviewUpdate(); }, 2000);
+    }
+}
+
+function setPreviewMode(mode) {
+    var wrap = document.querySelector('.preview-frame-wrap');
+    var btns = document.querySelectorAll('#viewportToggle button');
+    btns.forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-mode') === mode); });
+    if (mode === 'mobile') {
+        wrap.classList.add('mobile-mode');
+    } else {
+        wrap.classList.remove('mobile-mode');
+    }
+}
+
+function initPageSelector() {
+    var sel = document.getElementById('pageSelector');
+    if (!sel) return;
+    sel.innerHTML = '';
+    Object.keys(PAGE_REGISTRY).forEach(function(pid) {
+        var opt = document.createElement('option');
+        opt.value = pid;
+        opt.textContent = PAGE_REGISTRY[pid].label;
+        if (pid === currentPageId) opt.selected = true;
+        sel.appendChild(opt);
+    });
+    updatePageLink();
+}
+
+function updatePageLink() {
+    var link = document.getElementById('previewPageLink');
+    if (!link) return;
+    var page = PAGE_REGISTRY[currentPageId];
+    link.href = page ? page.previewUrl : '/ai-beginner-workshop';
+}
+
+function switchPage(pageId) {
+    if (pageId === currentPageId) return;
+    if (isDirty) {
+        if (!confirm('目前有未儲存的變更。確定要切換頁面嗎？未儲存的變更將會丟失。')) {
+            document.getElementById('pageSelector').value = currentPageId;
+            return;
+        }
+    }
+    currentPageId = pageId;
+    DEFAULT_SECTIONS = PAGE_REGISTRY[pageId].defaultSections;
+    selectedSectionId = null;
+    document.getElementById('editCard').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'flex';
+    updatePageLink();
+    refreshPreview();
+    loadLayout();
+}
+
+// ============================================================
+// SECTION LIST RENDERING
+// ============================================================
+function renderSectionList() {
+    var list = document.getElementById('sectionList');
+    list.innerHTML = '';
+    document.getElementById('sectionCount').textContent = layoutSections.length + ' 個區塊';
+
+    layoutSections.forEach(function(sec, idx) {
+        var info = SECTION_TYPES[sec.type] || { label: sec.type, icon: '📦' };
+        var row = document.createElement('div');
+        row.className = 'sec-row' + (sec.visible === false ? ' hidden-section' : '') + (sec.id === selectedSectionId ? ' active' : '');
+        row.setAttribute('data-idx', idx);
+        row.draggable = true;
+
+        var displayName = (sec.content && (sec.content.sectionTitle || sec.content.title)) || info.label;
+
+        row.innerHTML =
+            '<span class="drag-handle" title="拖拽排序">⠿</span>' +
+            '<div class="sec-info" onclick="selectSection(\'' + sec.id + '\')">' +
+                '<div class="sec-name">' + escHtml(displayName) + '</div>' +
+                '<div class="sec-type">' + info.icon + ' ' + info.label + '</div>' +
+            '</div>' +
+            '<div class="sec-actions">' +
+                '<button class="sec-btn ' + (sec.visible !== false ? 'vis-on' : '') + '" title="' + (sec.visible !== false ? '隱藏' : '顯示') + '" onclick="toggleVisibility(' + idx + ');">' +
+                    (sec.visible !== false ? '👁' : '👁‍🗨') +
+                '</button>' +
+                '<button class="sec-btn" title="複製" onclick="duplicateSection(' + idx + ');">⧉</button>' +
+                '<button class="sec-btn del-btn" title="刪除" onclick="deleteSection(' + idx + ');">✕</button>' +
+            '</div>';
+
+        row.addEventListener('dragstart', function(e) { onDragStart(e, idx); });
+        row.addEventListener('dragover', function(e) { onDragOver(e, idx); });
+        row.addEventListener('dragleave', function(e) { onDragLeave(e); });
+        row.addEventListener('drop', function(e) { onDrop(e, idx); });
+        row.addEventListener('dragend', function() { onDragEnd(); });
+
+        list.appendChild(row);
+    });
+}
+
+function escHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// DRAG AND DROP — insert-between logic
+// ============================================================
+var dropTargetIdx = null;
+
+function onDragStart(e, idx) {
+    dragSrcIdx = idx;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', idx);
+    setTimeout(function() {
+        var rows = document.querySelectorAll('.sec-row');
+        if (rows[idx]) rows[idx].classList.add('dragging');
+    }, 0);
+}
+
+function onDragOver(e, idx) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragSrcIdx === null) return;
+
+    var row = e.target.closest('.sec-row');
+    if (!row) return;
+
+    var rect = row.getBoundingClientRect();
+    var midY = rect.top + rect.height / 2;
+    var insertIdx = e.clientY < midY ? idx : idx + 1;
+
+    if (insertIdx === dragSrcIdx || insertIdx === dragSrcIdx + 1) {
+        clearDropIndicator();
+        dropTargetIdx = null;
+        return;
+    }
+
+    dropTargetIdx = insertIdx;
+    showDropIndicator(insertIdx);
+}
+
+function onDragLeave(e) {
+    var list = document.getElementById('sectionList');
+    if (!list.contains(e.relatedTarget)) {
+        clearDropIndicator();
+        dropTargetIdx = null;
+    }
+}
+
+function onDrop(e, idx) {
+    e.preventDefault();
+    if (dragSrcIdx === null || dropTargetIdx === null) { clearDropIndicator(); return; }
+
+    var insertAt = dropTargetIdx;
+    if (insertAt === dragSrcIdx || insertAt === dragSrcIdx + 1) { clearDropIndicator(); return; }
+
+    commitCurrentEdit();
+    pushUndo();
+
+    var item = layoutSections.splice(dragSrcIdx, 1)[0];
+    var adjustedIdx = insertAt > dragSrcIdx ? insertAt - 1 : insertAt;
+    layoutSections.splice(adjustedIdx, 0, item);
+    layoutSections.forEach(function(s, i) { s.order = i; });
+
+    clearDropIndicator();
+    renderSectionList();
+    setDirty(true);
+    sendPreviewUpdate();
+}
+
+function onDragEnd() {
+    dragSrcIdx = null;
+    dropTargetIdx = null;
+    clearDropIndicator();
+    document.querySelectorAll('.sec-row').forEach(function(r) {
+        r.classList.remove('dragging', 'drag-over');
+    });
+}
+
+function showDropIndicator(insertIdx) {
+    clearDropIndicator();
+    var list = document.getElementById('sectionList');
+    var rows = list.querySelectorAll('.sec-row');
+    var indicator = document.createElement('div');
+    indicator.className = 'drop-indicator';
+    indicator.id = 'dropIndicator';
+
+    if (insertIdx >= rows.length) {
+        list.appendChild(indicator);
+    } else {
+        list.insertBefore(indicator, rows[insertIdx]);
+    }
+}
+
+function clearDropIndicator() {
+    var existing = document.getElementById('dropIndicator');
+    if (existing) existing.remove();
+}
+
+// ============================================================
+// SECTION ACTIONS
+// ============================================================
+function toggleVisibility(idx) {
+    pushUndo();
+    layoutSections[idx].visible = layoutSections[idx].visible === false ? true : false;
+    renderSectionList();
+    setDirty(true);
+    sendPreviewUpdate();
+}
+
+function duplicateSection(idx) {
+    commitCurrentEdit();
+    pushUndo();
+    var src = layoutSections[idx];
+    var clone = JSON.parse(JSON.stringify(src));
+    clone.id = src.type + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    layoutSections.splice(idx + 1, 0, clone);
+    layoutSections.forEach(function(s, i) { s.order = i; });
+    renderSectionList();
+    selectSection(clone.id);
+    setDirty(true);
+    sendPreviewUpdate();
+}
+
+function deleteSection(idx) {
+    var sec = layoutSections[idx];
+    var info = SECTION_TYPES[sec.type] || { label: sec.type };
+    if (!confirm('確定要刪除「' + info.label + '」區塊嗎？\n\n可透過「新增區塊」重新加回。')) return;
+    pushUndo();
+    if (selectedSectionId === sec.id) {
+        selectedSectionId = null;
+        document.getElementById('editCard').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'flex';
+    }
+    layoutSections.splice(idx, 1);
+    layoutSections.forEach(function(s, i) { s.order = i; });
+    renderSectionList();
+    setDirty(true);
+    sendPreviewUpdate();
+}
+
+function selectSection(id) {
+    commitCurrentEdit();
+    selectedSectionId = id;
+    renderSectionList();
+    renderEditForm();
+}
+
+// ============================================================
+// ADD SECTION MODAL
+// ============================================================
+var SECTION_PREVIEWS = {
+    hero:          '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="40" y="10" width="80" height="6" rx="2" fill="#D97757"/><rect x="30" y="22" width="100" height="4" rx="1.5" fill="#ccc"/><rect x="50" y="30" width="60" height="4" rx="1.5" fill="#ddd"/><rect x="55" y="42" width="50" height="12" rx="4" fill="#D97757"/></svg>',
+    'pain-points': '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="10" y="8" width="40" height="48" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="60" y="8" width="40" height="48" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="110" y="8" width="40" height="48" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="16" y="16" width="28" height="3" rx="1" fill="#D97757"/><rect x="66" y="16" width="28" height="3" rx="1" fill="#D97757"/><rect x="116" y="16" width="28" height="3" rx="1" fill="#D97757"/></svg>',
+    'how-it-works':'<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><circle cx="30" cy="32" r="8" fill="#D97757"/><circle cx="80" cy="32" r="8" fill="#D97757"/><circle cx="130" cy="32" r="8" fill="#D97757"/><line x1="38" y1="32" x2="72" y2="32" stroke="#D97757" stroke-width="2"/><line x1="88" y1="32" x2="122" y2="32" stroke="#D97757" stroke-width="2"/><text x="30" y="35" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">1</text><text x="80" y="35" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">2</text><text x="130" y="35" text-anchor="middle" fill="#fff" font-size="8" font-weight="700">3</text></svg>',
+    trust:         '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="10" y="10" width="44" height="44" rx="6" fill="#fff" stroke="#e0e0e0"/><rect x="58" y="10" width="44" height="44" rx="6" fill="#fff" stroke="#e0e0e0"/><rect x="106" y="10" width="44" height="44" rx="6" fill="#fff" stroke="#e0e0e0"/><text x="32" y="36" text-anchor="middle" fill="#D97757" font-size="16">✦</text><text x="80" y="36" text-anchor="middle" fill="#D97757" font-size="16">✦</text><text x="128" y="36" text-anchor="middle" fill="#D97757" font-size="16">✦</text></svg>',
+    testimonials:  '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="20" y="12" width="120" height="40" rx="8" fill="#fff" stroke="#e0e0e0"/><text x="32" y="28" fill="#D97757" font-size="18" font-weight="700">&ldquo;</text><rect x="40" y="24" width="80" height="3" rx="1" fill="#ddd"/><rect x="50" y="32" width="60" height="3" rx="1" fill="#eee"/><circle cx="44" cy="44" r="4" fill="#D97757"/><rect x="52" y="42" width="30" height="3" rx="1" fill="#ccc"/></svg>',
+    workshops:     '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="8" y="8" width="68" height="48" rx="6" fill="#fff" stroke="#D97757"/><rect x="84" y="8" width="68" height="48" rx="6" fill="#fff" stroke="#e0e0e0"/><rect x="14" y="14" width="40" height="4" rx="1" fill="#D97757"/><rect x="14" y="22" width="56" height="3" rx="1" fill="#ddd"/><rect x="90" y="14" width="40" height="4" rx="1" fill="#ccc"/><rect x="90" y="22" width="56" height="3" rx="1" fill="#ddd"/></svg>',
+    about:         '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><circle cx="40" cy="32" r="16" fill="#e0e0e0"/><rect x="70" y="18" width="60" height="5" rx="2" fill="#333"/><rect x="70" y="28" width="50" height="3" rx="1" fill="#D97757"/><rect x="70" y="36" width="70" height="3" rx="1" fill="#ddd"/><rect x="70" y="43" width="55" height="3" rx="1" fill="#ddd"/></svg>',
+    countdown:     '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="20" y="8" width="32" height="20" rx="4" fill="#fff" stroke="#D97757"/><rect x="56" y="8" width="32" height="20" rx="4" fill="#fff" stroke="#D97757"/><rect x="92" y="8" width="32" height="20" rx="4" fill="#fff" stroke="#D97757"/><rect x="128" y="8" width="24" height="20" rx="4" fill="#fff" stroke="#D97757"/><text x="36" y="22" text-anchor="middle" fill="#D97757" font-size="10" font-weight="700">0</text><text x="72" y="22" text-anchor="middle" fill="#D97757" font-size="10" font-weight="700">0</text><text x="108" y="22" text-anchor="middle" fill="#D97757" font-size="10" font-weight="700">0</text><text x="140" y="22" text-anchor="middle" fill="#D97757" font-size="10" font-weight="700">0</text><rect x="40" y="36" width="80" height="12" rx="4" fill="#D97757" opacity="0.2"/><rect x="50" y="52" width="60" height="8" rx="4" fill="#D97757"/></svg>',
+    faq:           '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="20" y="8" width="120" height="14" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="26" y="13" width="60" height="3" rx="1" fill="#333"/><rect x="126" y="13" width="8" height="3" rx="1" fill="#D97757"/><rect x="20" y="26" width="120" height="14" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="26" y="31" width="50" height="3" rx="1" fill="#333"/><rect x="126" y="31" width="8" height="3" rx="1" fill="#D97757"/><rect x="20" y="44" width="120" height="14" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="26" y="49" width="55" height="3" rx="1" fill="#333"/><rect x="126" y="49" width="8" height="3" rx="1" fill="#D97757"/></svg>',
+    waitlist:      '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="30" y="10" width="100" height="5" rx="2" fill="#333"/><rect x="30" y="22" width="100" height="12" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="30" y="40" width="100" height="12" rx="4" fill="#fff" stroke="#e0e0e0"/><rect x="55" y="55" width="50" height="8" rx="3" fill="#D97757"/></svg>',
+    'final-cta':   '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="30" y="12" width="100" height="6" rx="2" fill="#333"/><rect x="40" y="24" width="80" height="4" rx="1.5" fill="#ddd"/><rect x="45" y="38" width="70" height="14" rx="5" fill="#D97757"/></svg>',
+    video:         '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="55" y="4" width="50" height="56" rx="4" fill="#222"/><polygon points="73,25 73,39 85,32" fill="#D97757"/></svg>',
+    'image-chain': '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="15" y="8" width="30" height="24" rx="4" fill="#e0e0e0" transform="rotate(-3 30 20)"/><rect x="65" y="16" width="30" height="24" rx="4" fill="#e0e0e0" transform="rotate(2 80 28)"/><rect x="115" y="8" width="30" height="24" rx="4" fill="#e0e0e0" transform="rotate(-2 130 20)"/><path d="M45 20 Q55 40 65 28" stroke="#D97757" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/><path d="M95 28 Q105 10 115 20" stroke="#D97757" stroke-width="1.5" fill="none" stroke-dasharray="3,2"/></svg>',
+    'link-list':   '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="20" y="6" width="120" height="16" rx="6" fill="#fff" stroke="#e0e0e0"/><rect x="26" y="12" width="60" height="4" rx="1" fill="#D97757"/><rect x="20" y="26" width="120" height="16" rx="6" fill="#fff" stroke="#e0e0e0"/><rect x="26" y="32" width="50" height="4" rx="1" fill="#D97757"/><rect x="20" y="46" width="120" height="16" rx="6" fill="#fff" stroke="#e0e0e0"/><rect x="26" y="52" width="55" height="4" rx="1" fill="#D97757"/></svg>',
+    'tools-grid':  '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="10" y="8" width="40" height="48" rx="6" fill="#fff" stroke="#e0e0e0"/><circle cx="30" cy="24" r="8" fill="#e0e0e0"/><rect x="18" y="38" width="24" height="3" rx="1" fill="#333"/><rect x="60" y="8" width="40" height="48" rx="6" fill="#fff" stroke="#e0e0e0"/><circle cx="80" cy="24" r="8" fill="#e0e0e0"/><rect x="68" y="38" width="24" height="3" rx="1" fill="#333"/><rect x="110" y="8" width="40" height="48" rx="6" fill="#fff" stroke="#e0e0e0"/><circle cx="130" cy="24" r="8" fill="#e0e0e0"/><rect x="118" y="38" width="24" height="3" rx="1" fill="#333"/></svg>',
+    'section-divider':'<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><line x1="20" y1="32" x2="60" y2="32" stroke="#e0e0e0" stroke-width="1.5"/><rect x="62" y="26" width="36" height="12" rx="4" fill="#D97757"/><line x1="100" y1="32" x2="140" y2="32" stroke="#e0e0e0" stroke-width="1.5"/></svg>',
+    'lead-magnet': '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="30" y="6" width="100" height="52" rx="8" fill="#fff" stroke="#D97757"/><rect x="42" y="14" width="76" height="5" rx="2" fill="#333"/><rect x="42" y="26" width="76" height="10" rx="4" fill="#f0f0f0" stroke="#e0e0e0"/><rect x="42" y="40" width="76" height="10" rx="4" fill="#f0f0f0" stroke="#e0e0e0"/></svg>',
+    'origin-story':'<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><circle cx="30" cy="16" r="5" fill="#D97757"/><line x1="30" y1="21" x2="30" y2="35" stroke="#D97757" stroke-width="1.5"/><circle cx="30" cy="40" r="5" fill="#D97757"/><line x1="30" y1="45" x2="30" y2="56" stroke="#D97757" stroke-width="1.5"/><rect x="44" y="12" width="80" height="3" rx="1" fill="#333"/><rect x="44" y="18" width="60" height="3" rx="1" fill="#ddd"/><rect x="44" y="36" width="70" height="3" rx="1" fill="#333"/><rect x="44" y="42" width="55" height="3" rx="1" fill="#ddd"/></svg>',
+    'tools-tags':  '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="15" y="20" width="36" height="12" rx="6" fill="#D97757" opacity="0.15" stroke="#D97757"/><rect x="56" y="20" width="28" height="12" rx="6" fill="#D97757" opacity="0.15" stroke="#D97757"/><rect x="89" y="20" width="40" height="12" rx="6" fill="#D97757" opacity="0.15" stroke="#D97757"/><rect x="30" y="38" width="32" height="12" rx="6" fill="#D97757" opacity="0.15" stroke="#D97757"/><rect x="67" y="38" width="44" height="12" rx="6" fill="#D97757" opacity="0.15" stroke="#D97757"/></svg>',
+    'photo-block': '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="20" y="6" width="120" height="52" rx="6" fill="#e0e0e0"/><circle cx="50" cy="26" r="8" fill="#ccc"/><polygon points="40,48 80,24 120,48" fill="#ddd"/></svg>',
+    cta:           '<svg viewBox="0 0 160 64"><rect width="160" height="64" fill="#f5f4f2"/><rect x="30" y="10" width="100" height="6" rx="2" fill="#333"/><rect x="40" y="22" width="80" height="4" rx="1.5" fill="#ddd"/><rect x="50" y="36" width="60" height="14" rx="5" fill="#D97757"/></svg>'
+};
+
+function openAddModal() {
+    var grid = document.getElementById('typeGrid');
+    grid.innerHTML = '';
+    var page = PAGE_REGISTRY[currentPageId];
+    var allowedTypes = page && page.sectionTypes ? page.sectionTypes : Object.keys(SECTION_TYPES);
+    allowedTypes.forEach(function(type) {
+        var info = SECTION_TYPES[type];
+        if (!info) return;
+        var preview = SECTION_PREVIEWS[type] || '';
+        var el = document.createElement('div');
+        el.className = 'type-option';
+        el.innerHTML =
+            (preview ? '<div class="type-option-preview">' + preview + '</div>' : '') +
+            '<div class="type-option-icon">' + info.icon + '</div>' +
+            '<div class="type-option-name">' + info.label + '</div>' +
+            '<div class="type-option-desc">' + info.desc + '</div>';
+        el.onclick = function() { addSection(type); };
+        grid.appendChild(el);
+    });
+    renderPresetsTab();
+    switchAddTab('types');
+    document.getElementById('addModal').classList.add('show');
+}
+
+function closeAddModal() {
+    document.getElementById('addModal').classList.remove('show');
+}
+
+function switchAddTab(tab, btn) {
+    document.getElementById('typeGrid').style.display = tab === 'types' ? '' : 'none';
+    document.getElementById('presetGrid').style.display = tab === 'presets' ? '' : 'none';
+    document.querySelectorAll('.add-modal-tab').forEach(function(t) { t.classList.remove('active'); });
+    if (btn) {
+        btn.classList.add('active');
+    } else {
+        var tabs = document.querySelectorAll('.add-modal-tab');
+        tabs[tab === 'types' ? 0 : 1].classList.add('active');
+    }
+    if (tab === 'presets') renderPresetsTab();
+}
+
+function addSection(type) {
+    pushUndo();
+    var def = JSON.parse(JSON.stringify(SECTION_TYPES[type].defaults));
+    var newSec = {
+        id: type + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        type: type,
+        visible: true,
+        order: layoutSections.length,
+        content: def
+    };
+    layoutSections.push(newSec);
+    closeAddModal();
+    renderSectionList();
+    selectSection(newSec.id);
+    setDirty(true);
+    sendPreviewUpdate();
+}
+
+// ============================================================
+// EDIT FORM RENDERING
+// ============================================================
+function getSelectedSection() {
+    for (var i = 0; i < layoutSections.length; i++) {
+        if (layoutSections[i].id === selectedSectionId) return layoutSections[i];
+    }
+    return null;
+}
+
+function commitCurrentEdit() {
+    var sec = getSelectedSection();
+    if (!sec) return;
+    var card = document.getElementById('editCard');
+    if (card.style.display === 'none') return;
+
+    var fields = card.querySelectorAll('[data-field]');
+    fields.forEach(function(el) {
+        var path = el.getAttribute('data-field').split('.');
+        var obj = sec.content;
+        for (var i = 0; i < path.length - 1; i++) {
+            if (!obj[path[i]]) obj[path[i]] = {};
+            obj = obj[path[i]];
+        }
+        obj[path[path.length - 1]] = el.value;
+    });
+
+    commitArrayFields(sec);
+
+    if (sec.type === 'countdown' && sec.content.discountCodeId) {
+        var dcId = sec.content.discountCodeId;
+        var nameEl = card.querySelector('#countdownDcName');
+        var codeEl = card.querySelector('#countdownDcCode');
+        var amountEl = card.querySelector('#countdownDcAmount');
+        var typeEl = card.querySelector('#countdownDcType');
+        var maxUsesEl = card.querySelector('#countdownDcMaxUses');
+        var expiryEl = card.querySelector('#countdownDcExpiry');
+        if (nameEl && codeEl && amountEl && typeEl) {
+            var code = codeEl.value.trim().toUpperCase();
+            var amount = parseFloat(amountEl.value) || 0;
+            var data = {
+                name: nameEl.value.trim(),
+                code: code,
+                amount: amount,
+                type: typeEl.value,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            var maxUsesVal = maxUsesEl ? maxUsesEl.value.trim() : '';
+            data.maxUses = maxUsesVal !== '' ? (parseInt(maxUsesVal) || 0) : null;
+            var expiryVal = expiryEl ? expiryEl.value : '';
+            data.expiresAt = expiryVal ? firebase.firestore.Timestamp.fromDate(new Date(expiryVal)) : null;
+            db.collection('discountCodes').doc(dcId).update(data).catch(function(err) { console.warn('Countdown: failed to sync discount code', err); });
+        }
+    }
+}
+
+function commitArrayFields(sec) {
+    var card = document.getElementById('editCard');
+    var arrayGroups = card.querySelectorAll('[data-array]');
+    arrayGroups.forEach(function(group) {
+        var arrayName = group.getAttribute('data-array');
+        var items = group.querySelectorAll('.array-item');
+        var arr = [];
+        items.forEach(function(item) {
+            var obj = {};
+            item.querySelectorAll('[data-afield]').forEach(function(el) {
+                obj[el.getAttribute('data-afield')] = el.value;
+            });
+            arr.push(obj);
+        });
+        sec.content[arrayName] = arr;
+    });
+}
+
+function renderEditForm() {
+    var sec = getSelectedSection();
+    var card = document.getElementById('editCard');
+    var empty = document.getElementById('emptyState');
+
+    if (!sec) {
+        card.style.display = 'none';
+        empty.style.display = 'flex';
+        return;
+    }
+
+    card.style.display = 'block';
+    empty.style.display = 'none';
+
+    var info = SECTION_TYPES[sec.type] || { label: sec.type, icon: '📦' };
+    var c = sec.content || {};
+    var html = '<div class="edit-card-title">' + info.icon + ' ' + escHtml(info.label) + ' <span class="badge">' + sec.type + '</span></div>';
+
+    switch (sec.type) {
+        case 'hero':
+            html += field('標題 Title', 'title', c.title);
+            html += textareaField('副標題 Subtitle', 'subtitle', c.subtitle);
+            html += '<div class="form-row">' + field('CTA 文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
+            html += field('GIF / 圖片 URL', 'gifUrl', c.gifUrl);
+            break;
+
+        case 'pain-points':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += textareaField('重點引言', 'insightQuote', c.insightQuote);
+            html += arrayEditor('cards', '痛點卡片', c.cards || [], [
+                { key: 'title', label: '標題' },
+                { key: 'description', label: '描述', type: 'textarea' }
+            ]);
+            break;
+
+        case 'how-it-works':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += field('副標題', 'subtitle', c.subtitle);
+            html += arrayEditor('steps', '步驟', c.steps || [], [
+                { key: 'title', label: '標題' },
+                { key: 'description', label: '描述', type: 'textarea' }
+            ]);
+            break;
+
+        case 'trust':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('cards', '信任卡片', c.cards || [], [
+                { key: 'title', label: '標題' },
+                { key: 'description', label: '描述', type: 'textarea' },
+                { key: 'gifUrl', label: 'GIF / 圖片 URL' }
+            ]);
+            break;
+
+        case 'testimonials':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('items', '學員評價', c.items || [], [
+                { key: 'quote', label: '引言', type: 'textarea' },
+                { key: 'name', label: '姓名' },
+                { key: 'role', label: '身份' },
+                { key: 'avatarLetter', label: '頭像字母' }
+            ]);
+            break;
+
+        case 'workshops':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += textareaField('副標題', 'subtitle', c.subtitle);
+            html += field('徽章文字', 'badgeText', c.badgeText);
+            html += '<div style="margin-top:12px;"><label style="font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:8px;display:block;">工作坊卡片排序與顯示</label>' +
+                '<div id="wsCardList" style="display:flex;flex-direction:column;gap:6px;"><div style="padding:12px;background:var(--bg-pampas);border-radius:10px;font-size:13px;color:var(--text-light);">載入中...</div></div>' +
+                '<button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="loadWorkshopCards()">重新載入</button></div>';
+            setTimeout(function() { loadWorkshopCards(); }, 100);
+            break;
+
+        case 'about':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += '<div class="form-row">' + field('講師姓名', 'name', c.name) + field('職銜', 'role', c.role) + '</div>';
+            html += imageUploadField('講師照片', 'photoUrl', c.photoUrl);
+            html += textareaField('簡介', 'bio', c.bio);
+            html += field('徽章（逗號分隔）', 'badges', c.badges);
+            html += field('連結 URL', 'linkUrl', c.linkUrl);
+            html += field('連結文字', 'linkText', c.linkText);
+            html += field('標語', 'tagline', c.tagline);
+            break;
+
+        case 'countdown':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += '<div class="form-group"><label>選擇折扣碼（與工作坊 CMS 折扣碼管理同步）</label>' +
+                '<select id="countdownDcSelect" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;font-size:14px;background:var(--white);">' +
+                '<option value="">— 載入中 —</option></select>' +
+                '<input type="hidden" data-field="discountCodeId" id="countdownDiscountCodeId" value="' + escHtml(c.discountCodeId || '') + '">' +
+                '</div>';
+            html += '<div class="form-group"><label>折扣碼名稱（內部備註）</label><input type="text" id="countdownDcName" value="" placeholder="例：早鳥優惠" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;"></div>';
+            html += '<div class="form-group"><label>折扣碼 *</label><input type="text" id="countdownDcCode" value="" placeholder="例：EARLY50" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;text-transform:uppercase;font-weight:700;"></div>';
+            html += '<div class="form-row">' +
+                '<div class="form-group"><label>折扣金額 *</label><input type="number" id="countdownDcAmount" value="" min="0" placeholder="數字" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;"></div>' +
+                '<div class="form-group"><label>折扣類型</label><select id="countdownDcType" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;"><option value="fixed">固定金額 (HKD)</option><option value="percent">百分比 (%)</option></select></div>' +
+                '</div>';
+            html += '<div class="form-row">' +
+                '<div class="form-group"><label>使用次數上限（留空=無限）</label><input type="number" id="countdownDcMaxUses" value="" min="0" placeholder="留空=無限" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;"></div>' +
+                '<div class="form-group"><label>到期日期時間</label><input type="datetime-local" id="countdownDcExpiry" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;"></div>' +
+                '</div>';
+            html += '<div class="form-row">' + field('CTA 按鈕文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
+            html += '<p style="font-size:12px;color:var(--text-light);margin-top:8px;">變更上述折扣碼資料會同步至「工作坊 CMS → 折扣碼管理」。</p>';
+            break;
+
+        case 'faq':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('items', '問答項目', c.items || [], [
+                { key: 'question', label: '問題' },
+                { key: 'answer', label: '回答', type: 'textarea' }
+            ]);
+            break;
+
+        case 'waitlist':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += field('副標題', 'subtitle', c.subtitle);
+            break;
+
+        case 'final-cta':
+            html += field('標題', 'title', c.title);
+            html += textareaField('副標題', 'subtitle', c.subtitle);
+            html += '<div class="form-row">' + field('CTA 文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
+            html += '<div class="form-row">' + field('WhatsApp URL', 'whatsappUrl', c.whatsappUrl) + field('Instagram URL', 'instagramUrl', c.instagramUrl) + '</div>';
+            break;
+
+        case 'video':
+            html += field('影片 URL', 'videoUrl', c.videoUrl);
+            html += field('封面圖 URL', 'posterUrl', c.posterUrl);
+            html += field('說明文字', 'caption', c.caption);
+            break;
+
+        case 'image-chain':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('cards', '圖片卡', c.cards || [], [
+                { key: 'imageUrl', label: '圖片 URL' },
+                { key: 'label', label: '標籤' },
+                { key: 'alt', label: 'Alt 文字' }
+            ]);
+            break;
+
+        case 'mindset-shift':
+            html += field('刪除線文字 (Before)', 'beforeText', c.beforeText);
+            html += field('重點句 (After)', 'afterText', c.afterText);
+            html += textareaField('描述', 'description', c.description);
+            break;
+
+        case 'learning-outcomes':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('items', '學習成果', c.items || [], [
+                { key: 'title', label: '標題' },
+                { key: 'description', label: '描述', type: 'textarea' }
+            ]);
+            html += arrayEditor('tools', '工具標籤', c.tools || [], [
+                { key: 'name', label: '工具名稱' }
+            ]);
+            html += field('示範承諾', 'demoText', c.demoText);
+            break;
+
+        case 'audience-fit':
+            html += field('適合標題', 'forTitle', c.forTitle);
+            html += arrayEditor('forItems', '適合項目', c.forItems || [], [
+                { key: 'text', label: '項目' }
+            ]);
+            html += field('不適合標題', 'notForTitle', c.notForTitle);
+            html += arrayEditor('notForItems', '不適合項目', c.notForItems || [], [
+                { key: 'text', label: '項目' }
+            ]);
+            break;
+
+        case 'logistics-card':
+            html += field('工作坊 ID (Firestore)', 'workshopId', c.workshopId);
+            html += '<div class="form-row">' + field('CTA 文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
+            html += '<div style="padding:12px;background:var(--bg-pampas);border-radius:10px;font-size:13px;color:var(--text-light);margin-top:8px;">日期、時間、費用、名額等資料會從 Firestore 的 workshops 集合自動載入。</div>';
+            break;
+
+        case 'transformation':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('cards', '對比卡片', c.cards || [], [
+                { key: 'theme', label: '主題' },
+                { key: 'beforeText', label: '之前', type: 'textarea' },
+                { key: 'afterText', label: '之後', type: 'textarea' }
+            ]);
+            break;
+
+        case 'link-list':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('links', '連結', c.links || [], [
+                { key: 'label', label: '標籤' },
+                { key: 'url', label: 'URL' },
+                { key: 'description', label: '描述' },
+                { key: 'badgeText', label: '徽章文字' }
+            ]);
+            break;
+
+        case 'tools-grid':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += arrayEditor('tools', '工具', c.tools || [], [
+                { key: 'name', label: '名稱' },
+                { key: 'description', label: '描述' },
+                { key: 'logoUrl', label: 'Logo URL' },
+                { key: 'url', label: '連結 URL' },
+                { key: 'badgeText', label: '徽章文字' }
+            ]);
+            break;
+
+        case 'section-divider':
+            html += field('標題', 'title', c.title);
+            html += field('副標題', 'subtitle', c.subtitle);
+            break;
+
+        case 'lead-magnet':
+            html += field('標題', 'title', c.title);
+            html += textareaField('描述', 'description', c.description);
+            html += field('圖片 URL', 'imageUrl', c.imageUrl);
+            html += arrayEditor('formFields', '表單欄位', c.formFields || [], [
+                { key: 'label', label: '欄位標籤' },
+                { key: 'type', label: '類型 (text/tel/email)' }
+            ]);
+            html += field('提交按鈕文字', 'submitText', c.submitText);
+            html += field('觸發按鈕文字', 'triggerText', c.triggerText);
+            break;
+
+        case 'origin-story':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += textareaField('引言', 'introText', c.introText);
+            html += arrayEditor('steps', '步驟', c.steps || [], [
+                { key: 'title', label: '標題' },
+                { key: 'description', label: '描述', type: 'textarea' }
+            ]);
+            break;
+
+        case 'tools-tags':
+            html += field('區塊標題', 'sectionTitle', c.sectionTitle);
+            html += textareaField('描述', 'description', c.description);
+            html += arrayEditor('tags', '標籤', c.tags || [], [
+                { key: 'name', label: '標籤名稱' }
+            ]);
+            html += textareaField('提示框文字', 'calloutText', c.calloutText);
+            break;
+
+        case 'photo-block':
+            html += field('圖片 URL', 'imageUrl', c.imageUrl);
+            html += field('Alt 文字', 'alt', c.alt);
+            html += field('說明文字', 'caption', c.caption);
+            break;
+
+        case 'cta':
+            html += field('標題', 'title', c.title);
+            html += textareaField('描述', 'description', c.description);
+            html += '<div class="form-row">' + field('CTA 文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
+            break;
+
+        default:
+            html += '<p style="color:var(--text-light);">此區塊類型沒有可編輯的欄位。</p>';
+    }
+
+    html += '<div class="form-actions">' +
+        '<button class="btn" onclick="applyEdit()">套用變更</button>' +
+        '<button class="btn btn-outline" onclick="saveAsPreset()" style="margin-left:8px;" title="儲存為可重用預設">儲存為預設</button>' +
+        '</div>';
+    card.innerHTML = html;
+    if (sec.type === 'countdown') loadCountdownDcForm(card, sec);
+}
+
+function loadCountdownDcForm(card, sec) {
+    var sel = card.querySelector('#countdownDcSelect');
+    var hidden = card.querySelector('#countdownDiscountCodeId');
+    var c = sec.content || {};
+    var selectedId = c.discountCodeId || '';
+    db.collection('discountCodes').orderBy('createdAt', 'desc').get().then(function(snap) {
+        sel.innerHTML = '<option value="">— 選擇折扣碼 —</option>';
+        snap.forEach(function(doc) {
+            var d = doc.data();
+            var opt = document.createElement('option');
+            opt.value = doc.id;
+            opt.textContent = (d.code || doc.id) + (d.name ? ' (' + d.name + ')' : '');
+            if (doc.id === selectedId) opt.selected = true;
+            sel.appendChild(opt);
+        });
+        sel.onchange = function() {
+            var id = sel.value;
+            hidden.value = id;
+            setDirty(true);
+            if (!id) return;
+            db.collection('discountCodes').doc(id).get().then(function(doc) {
+                if (!doc.exists) return;
+                var d = doc.data();
+                card.querySelector('#countdownDcName').value = d.name || '';
+                card.querySelector('#countdownDcCode').value = d.code || '';
+                card.querySelector('#countdownDcAmount').value = d.amount != null ? d.amount : '';
+                card.querySelector('#countdownDcType').value = d.type === 'percent' ? 'percent' : 'fixed';
+                card.querySelector('#countdownDcMaxUses').value = d.maxUses != null ? d.maxUses : '';
+                var exp = d.expiresAt;
+                if (exp && (exp.toDate || exp.seconds)) {
+                    var dt = exp.toDate ? exp.toDate() : new Date(exp.seconds * 1000);
+                    card.querySelector('#countdownDcExpiry').value = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0') + 'T' + String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+                } else {
+                    card.querySelector('#countdownDcExpiry').value = '';
+                }
+            });
+        };
+        if (selectedId) sel.onchange();
+    }).catch(function() { sel.innerHTML = '<option value="">載入失敗</option>'; });
+}
+
+function field(label, name, value) {
+    return '<div class="form-group"><label>' + escHtml(label) + '</label>' +
+        '<input type="text" data-field="' + name + '" value="' + escHtml(value || '') + '" onchange="setDirty(true)"></div>';
+}
+
+function textareaField(label, name, value) {
+    return '<div class="form-group"><label>' + escHtml(label) + '</label>' +
+        '<textarea data-field="' + name + '" onchange="setDirty(true)">' + escHtml(value || '') + '</textarea></div>';
+}
+
+function imageUploadField(label, fieldName, currentUrl) {
+    var hasImg = !!currentUrl;
+    var safeUrl = escHtml(currentUrl || '');
+    var html = '<div class="form-group">' +
+        '<label>' + escHtml(label) + '</label>' +
+        '<div class="img-upload-zone' + (hasImg ? ' has-image' : '') + '" ' +
+            'data-img-field="' + fieldName + '" ' +
+            'ondragover="imgDragOver(event, this)" ondragleave="imgDragLeave(event, this)" ' +
+            'ondrop="imgDrop(event, this)" onclick="imgZoneClick(this)">';
+    if (hasImg) {
+        html += '<div class="preview-wrap">' +
+            '<img src="' + safeUrl + '" alt="preview">' +
+            '<div class="img-overlay">' +
+                '<button class="btn-change" onclick="event.stopPropagation(); imgZoneClick(this.closest(\'.img-upload-zone\'))">更換圖片</button>' +
+                '<button class="btn-remove" onclick="event.stopPropagation(); imgRemove(this.closest(\'.img-upload-zone\'))">移除</button>' +
+            '</div>' +
+        '</div>';
+    } else {
+        html += '<div class="upload-placeholder">' +
+            '<span class="upload-icon-lg">&#x1F5BC;</span>' +
+            '<span class="upload-hint">點擊或拖放上傳圖片</span>' +
+            '<span class="upload-hint-sm">支援 JPG, PNG, WebP（最大 5MB）</span>' +
+        '</div>';
+    }
+    html += '<input type="file" accept="image/jpeg,image/png,image/webp" onchange="imgFileSelected(this)">' +
+        '</div>' +
+        '<div class="img-upload-progress"><div class="bar"></div></div>' +
+        '<input type="hidden" data-field="' + fieldName + '" value="' + safeUrl + '">' +
+    '</div>';
+    return html;
+}
+
+function imgDragOver(e, zone) { e.preventDefault(); zone.classList.add('drag-over'); }
+function imgDragLeave(e, zone) { zone.classList.remove('drag-over'); }
+function imgDrop(e, zone) {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) _uploadLayoutImage(zone, file);
+}
+function imgZoneClick(zone) {
+    var inp = zone.querySelector('input[type="file"]');
+    if (inp) inp.click();
+}
+function imgFileSelected(inp) {
+    var file = inp.files && inp.files[0];
+    if (!file) return;
+    _uploadLayoutImage(inp.closest('.img-upload-zone'), file);
+    inp.value = '';
+}
+function imgRemove(zone) {
+    var fieldName = zone.getAttribute('data-img-field');
+    var hidden = zone.parentElement.querySelector('input[data-field="' + fieldName + '"]');
+    if (hidden) hidden.value = '';
+    zone.classList.remove('has-image');
+    zone.innerHTML = '<div class="upload-placeholder">' +
+        '<span class="upload-icon-lg">&#x1F5BC;</span>' +
+        '<span class="upload-hint">點擊或拖放上傳圖片</span>' +
+        '<span class="upload-hint-sm">支援 JPG, PNG, WebP（最大 5MB）</span>' +
+    '</div>' +
+    '<input type="file" accept="image/jpeg,image/png,image/webp" onchange="imgFileSelected(this)">';
+    setDirty(true);
+}
+
+function _uploadLayoutImage(zone, file) {
+    if (file.size > 5 * 1024 * 1024) { alert('圖片大小不能超過 5MB'); return; }
+    var progressWrap = zone.parentElement.querySelector('.img-upload-progress');
+    var progressBar = progressWrap ? progressWrap.querySelector('.bar') : null;
+    if (progressWrap) { progressWrap.style.display = 'block'; }
+    if (progressBar) { progressBar.style.width = '0%'; }
+
+    var ext = file.name.split('.').pop().toLowerCase();
+    var path = 'workshop-images/layout_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.' + ext;
+    var ref = storage.ref(path);
+    var task = ref.put(file);
+
+    task.on('state_changed',
+        function(snap) {
+            var pct = (snap.bytesTransferred / snap.totalBytes) * 100;
+            if (progressBar) progressBar.style.width = pct + '%';
+        },
+        function(err) {
+            alert('上傳失敗：' + err.message);
+            if (progressWrap) progressWrap.style.display = 'none';
+        },
+        function() {
+            task.snapshot.ref.getDownloadURL().then(function(url) {
+                if (progressWrap) progressWrap.style.display = 'none';
+                var fieldName = zone.getAttribute('data-img-field');
+                var hidden = zone.parentElement.querySelector('input[data-field="' + fieldName + '"]');
+                if (hidden) hidden.value = url;
+
+                zone.classList.add('has-image');
+                zone.innerHTML = '<div class="preview-wrap">' +
+                    '<img src="' + url + '" alt="preview">' +
+                    '<div class="img-overlay">' +
+                        '<button class="btn-change" onclick="event.stopPropagation(); imgZoneClick(this.closest(\'.img-upload-zone\'))">更換圖片</button>' +
+                        '<button class="btn-remove" onclick="event.stopPropagation(); imgRemove(this.closest(\'.img-upload-zone\'))">移除</button>' +
+                    '</div>' +
+                '</div>' +
+                '<input type="file" accept="image/jpeg,image/png,image/webp" onchange="imgFileSelected(this)">';
+                setDirty(true);
+            });
+        }
+    );
+}
+
+function arrayEditor(arrayName, title, items, fieldDefs) {
+    var html = '<div class="array-group" data-array="' + arrayName + '">';
+    html += '<div class="array-group-title"><span>' + escHtml(title) + ' (' + items.length + ')</span>' +
+        '<button class="btn btn-outline btn-sm" onclick="addArrayItem(\'' + arrayName + '\', this)">+ 新增</button></div>';
+    html += '<div class="array-items" data-array-items="' + arrayName + '">';
+
+    items.forEach(function(item, idx) {
+        html += renderArrayItem(arrayName, item, fieldDefs, idx);
+    });
+
+    html += '</div></div>';
+
+    window['_arrayFieldDefs_' + arrayName] = fieldDefs;
+    return html;
+}
+
+function renderArrayItem(arrayName, item, fieldDefs, idx) {
+    var html = '<div class="array-item">';
+    html += '<button class="remove-item" onclick="removeArrayItem(this)" title="移除">✕</button>';
+    fieldDefs.forEach(function(fd) {
+        html += '<div class="form-group"><label>' + escHtml(fd.label) + '</label>';
+        if (fd.type === 'textarea') {
+            html += '<textarea data-afield="' + fd.key + '" onchange="setDirty(true)">' + escHtml(item[fd.key] || '') + '</textarea>';
+        } else {
+            html += '<input type="text" data-afield="' + fd.key + '" value="' + escHtml(item[fd.key] || '') + '" onchange="setDirty(true)">';
+        }
+        html += '</div>';
+    });
+    html += '</div>';
+    return html;
+}
+
+function addArrayItem(arrayName, btn) {
+    var fieldDefs = window['_arrayFieldDefs_' + arrayName];
+    if (!fieldDefs) return;
+    var container = document.querySelector('[data-array-items="' + arrayName + '"]');
+    if (!container) return;
+    var empty = {};
+    fieldDefs.forEach(function(fd) { empty[fd.key] = ''; });
+    var temp = document.createElement('div');
+    temp.innerHTML = renderArrayItem(arrayName, empty, fieldDefs, container.children.length);
+    container.appendChild(temp.firstChild);
+    var countEl = btn.closest('.array-group').querySelector('.array-group-title span');
+    countEl.textContent = countEl.textContent.replace(/\(\d+\)/, '(' + container.children.length + ')');
+    setDirty(true);
+}
+
+function removeArrayItem(btn) {
+    var item = btn.closest('.array-item');
+    var container = item.parentElement;
+    var group = container.closest('.array-group');
+    item.remove();
+    var countEl = group.querySelector('.array-group-title span');
+    countEl.textContent = countEl.textContent.replace(/\(\d+\)/, '(' + container.children.length + ')');
+    setDirty(true);
+}
+
+function applyEdit() {
+    pushUndo();
+    commitCurrentEdit();
+    setDirty(true);
+    renderSectionList();
+    showStatus('變更已套用（記得按「儲存版面」）', false);
+    sendPreviewUpdate();
+}
+
+// ============================================================
+// PRESET LIBRARY
+// ============================================================
+var _presets = [];
+
+function loadPresets() {
+    return db.collection('sectionPresets').orderBy('createdAt', 'desc').get().then(function(snap) {
+        _presets = [];
+        snap.forEach(function(doc) {
+            var d = doc.data();
+            d._id = doc.id;
+            _presets.push(d);
+        });
+    }).catch(function() { _presets = []; });
+}
+
+function saveAsPreset() {
+    var sec = getSelectedSection();
+    if (!sec) return;
+    var name = prompt('為此預設命名 Name this preset:', (SECTION_TYPES[sec.type] || {}).label || sec.type);
+    if (!name || !name.trim()) return;
+    showLoading('儲存預設中...');
+    db.collection('sectionPresets').add({
+        name: name.trim(),
+        type: sec.type,
+        content: JSON.parse(JSON.stringify(sec.content || {})),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdBy: (auth.currentUser && auth.currentUser.email) || ''
+    }).then(function() {
+        hideLoading();
+        showStatus('預設已儲存');
+        return loadPresets();
+    }).catch(function(err) {
+        hideLoading();
+        showStatus('儲存預設失敗：' + err.message);
+    });
+}
+
+function deletePreset(presetId) {
+    if (!confirm('確定要刪除此預設嗎？')) return;
+    db.collection('sectionPresets').doc(presetId).delete().then(function() {
+        showStatus('預設已刪除');
+        return loadPresets();
+    }).then(function() {
+        renderPresetsTab();
+    }).catch(function(err) {
+        showStatus('刪除失敗：' + err.message);
+    });
+}
+
+function addSectionFromPreset(preset) {
+    pushUndo();
+    var content = JSON.parse(JSON.stringify(preset.content || {}));
+    var newSec = {
+        id: preset.type + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        type: preset.type,
+        visible: true,
+        order: layoutSections.length,
+        content: content
+    };
+    layoutSections.push(newSec);
+    closeAddModal();
+    renderSectionList();
+    selectSection(newSec.id);
+    setDirty(true);
+    sendPreviewUpdate();
+}
+
+function renderPresetsTab() {
+    var container = document.getElementById('presetGrid');
+    if (!container) return;
+    if (!_presets.length) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:24px 0;grid-column:1/-1;">尚未儲存任何預設。在編輯區塊後按「儲存為預設」即可建立。</p>';
+        return;
+    }
+    var html = '';
+    _presets.forEach(function(p) {
+        var info = SECTION_TYPES[p.type] || { icon: '📦', label: p.type };
+        html += '<div class="type-option" style="position:relative;">' +
+            '<div style="cursor:pointer;" onclick="addSectionFromPreset(_presets.find(function(x){return x._id===\'' + p._id + '\'}))">' +
+            '<div class="type-option-icon">' + info.icon + '</div>' +
+            '<div class="type-option-name">' + escHtml(p.name) + '</div>' +
+            '<div class="type-option-desc">' + escHtml(info.label) + '</div>' +
+            '</div>' +
+            '<button onclick="event.stopPropagation();deletePreset(\'' + p._id + '\')" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;" title="刪除預設">&times;</button>' +
+            '</div>';
+    });
+    container.innerHTML = html;
+}
+
+// ============================================================
+// UNSAVED CHANGES WARNING
+// ============================================================
+window.addEventListener('beforeunload', function(e) {
+    if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// ============================================================
+// WORKSHOP CARD ORDERING & VISIBILITY
+// ============================================================
+var _wsCards = [];
+
+function loadWorkshopCards() {
+    var list = document.getElementById('wsCardList');
+    if (!list) return;
+    list.innerHTML = '<div style="padding:12px;background:var(--bg-pampas);border-radius:10px;font-size:13px;color:var(--text-light);">載入中...</div>';
+    db.collection('workshops').get().then(function(snap) {
+        _wsCards = [];
+        snap.forEach(function(doc) {
+            var d = doc.data();
+            _wsCards.push({ id: doc.id, title: d.title || doc.id, order: d.order || 0, visible: d.visible !== false, workshopNumber: d.workshopNumber || '' });
+        });
+        _wsCards.sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
+        renderWsCardList();
+    }).catch(function(err) {
+        list.innerHTML = '<div style="padding:12px;color:var(--red);font-size:13px;">載入失敗: ' + err.message + '</div>';
+    });
+}
+
+function renderWsCardList() {
+    var list = document.getElementById('wsCardList');
+    if (!list) return;
+    if (!_wsCards.length) {
+        list.innerHTML = '<div style="padding:12px;background:var(--bg-pampas);border-radius:10px;font-size:13px;color:var(--text-light);">沒有工作坊。</div>';
+        return;
+    }
+    var html = '';
+    _wsCards.forEach(function(ws, idx) {
+        var label = ws.workshopNumber ? ws.workshopNumber + ' — ' + ws.title : ws.title;
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--white);border:1.5px solid var(--bg-off);border-radius:10px;' + (ws.visible ? '' : 'opacity:0.5;') + '">' +
+            '<div style="display:flex;flex-direction:column;gap:2px;">' +
+                '<button style="border:none;background:none;cursor:pointer;font-size:12px;color:var(--text-light);padding:0;line-height:1;" onclick="moveWsCard(' + idx + ',-1)" ' + (idx === 0 ? 'disabled' : '') + '>▲</button>' +
+                '<button style="border:none;background:none;cursor:pointer;font-size:12px;color:var(--text-light);padding:0;line-height:1;" onclick="moveWsCard(' + idx + ',1)" ' + (idx === _wsCards.length - 1 ? 'disabled' : '') + '>▼</button>' +
+            '</div>' +
+            '<div style="flex:1;font-size:13px;font-weight:600;">' + escHtml(label) + '</div>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-light);cursor:pointer;">' +
+                '<input type="checkbox" ' + (ws.visible ? 'checked' : '') + ' onchange="toggleWsCardVis(' + idx + ',this.checked)">' +
+                '顯示' +
+            '</label>' +
+        '</div>';
+    });
+    html += '<button class="btn btn-sm" style="margin-top:6px;" onclick="saveWsCardOrder()">儲存排序</button>';
+    list.innerHTML = html;
+}
+
+function moveWsCard(idx, dir) {
+    var target = idx + dir;
+    if (target < 0 || target >= _wsCards.length) return;
+    var tmp = _wsCards[idx];
+    _wsCards[idx] = _wsCards[target];
+    _wsCards[target] = tmp;
+    renderWsCardList();
+}
+
+function toggleWsCardVis(idx, val) {
+    _wsCards[idx].visible = val;
+    renderWsCardList();
+}
+
+function saveWsCardOrder() {
+    var batch = db.batch();
+    _wsCards.forEach(function(ws, idx) {
+        var ref = db.collection('workshops').doc(ws.id);
+        batch.update(ref, { order: idx, visible: ws.visible });
+    });
+    batch.commit().then(function() {
+        alert('工作坊排序已儲存');
+        refreshPreview();
+    }).catch(function(err) {
+        alert('儲存失敗: ' + err.message);
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI課程工作坊 | AIFLOWTIME - 香港在職人士AI進修首選</title>
+    <meta name="description" content="AIFLOWTIME提供實用AI課程與工作坊，專為香港在職人士設計。零基礎學習Prompt Engineering及AI工具，即學即用提升職場效率。立即報名！">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7;
+            --bg-off: #E8E4DF;
+            --bg-pampas: #F4F3EE;
+            --accent: #D97757;
+            --accent-text: #C45A3A;
+            --accent-dark: #C56A4B;
+            --text: #3B3B3B;
+            --text-light: #7A7A7A;
+            --white: #FFFFFF;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+        
+        /* Scroll animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--text);
+        }
+        
+        h1 {
+            font-size: clamp(40px, 6vw, 64px);
+        }
+        
+        h2 {
+            font-size: clamp(32px, 4vw, 48px);
+        }
+        
+        h3 {
+            font-size: clamp(24px, 3vw, 32px);
+        }
+        
+        h4 {
+            font-size: clamp(20px, 2vw, 24px);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            padding: 0 32px;
+            background: var(--accent);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        
+        .btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(217, 119, 87, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-outline:hover {
+            background: var(--accent);
+            color: var(--white);
+        }
+        
+        /* Focus styles for accessibility */
+        a:focus-visible,
+        button:focus-visible,
+        .btn:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+        
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            z-index: 1000;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 16px;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .glass-card {
+                padding: 32px;
+            }
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Level Badge */
+        .level-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            position: absolute;
+            top: 24px;
+            left: 24px;
+        }
+        
+        @media (min-width: 768px) {
+            .level-badge {
+                top: 32px;
+                left: 32px;
+            }
+        }
+        
+        .level-beginner {
+            background: rgba(76, 175, 80, 0.15);
+            color: #2E7D32;
+        }
+        
+        .level-intermediate {
+            background: rgba(191, 64, 0, 0.15);
+            color: #BF4000;
+        }
+        
+        /* Free trial badge */
+        .trial-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent);
+            color: var(--white);
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 16px 0;
+            background: rgba(250, 249, 247, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+        
+        /* Desktop Navigation */
+        .nav-desktop {
+            display: none;
+        }
+        
+        .nav-desktop a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 15px;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+        
+        .nav-desktop a:hover {
+            color: var(--accent);
+        }
+        
+        /* Mobile Navigation */
+        .nav-mobile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .hamburger {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        
+        .hamburger:hover {
+            background: rgba(217, 119, 87, 0.1);
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--text);
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(250, 249, 247, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            transform: translateY(-100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+        
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .mobile-menu a {
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            padding: 16px 0;
+            font-size: 18px;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-menu a:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-menu a:hover {
+            color: var(--accent);
+        }
+        
+        .mobile-menu .btn {
+            margin-top: 16px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            position: relative;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+        }
+        
+        .tagline {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 14px;
+            color: var(--accent-text);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            font-weight: 700;
+        }
+        
+        .hero h1 {
+            margin-bottom: 24px;
+        }
+        
+        .hero-subheadline {
+            font-size: clamp(18px, 2.5vw, 22px);
+            color: var(--text);
+            margin-bottom: 16px;
+            max-width: 600px;
+            font-weight: 700;
+        }
+        
+        .hero-oneliner {
+            font-size: clamp(24px, 3vw, 32px);
+            color: var(--accent-text);
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+        
+        .hero-cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        /* Section Styles */
+        section {
+            padding: 100px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+        
+        .section-header h2 {
+            margin-bottom: 16px;
+        }
+        
+        /* Pain Points */
+        .pain-points-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .pain-point-card {
+            background: var(--bg-pampas);
+            border-radius: 16px;
+            padding: 32px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .pain-point-card h4 {
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+        
+        .pain-point-card p {
+            color: var(--text);
+            opacity: 0.9;
+            font-weight: 700;
+        }
+        
+        .insight-box {
+            background: var(--accent);
+            color: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .insight-box p {
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: 700;
+            line-height: 1.5;
+        }
+        
+        /* Workshops */
+        .workshops-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .workshop-card {
+            position: relative;
+            padding-top: 64px;
+        }
+        
+        @media (min-width: 768px) {
+            .workshop-card {
+                padding-top: 72px;
+            }
+        }
+        
+        .workshop-card h4 {
+            margin-bottom: 8px;
+            margin-top: 0;
+        }
+        
+        .workshop-duration {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 700;
+        }
+        
+        .workshop-card p {
+            margin-bottom: 20px;
+            opacity: 0.95;
+            font-weight: 700;
+        }
+        
+        .workshop-card ul {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+        
+        .workshop-card li {
+            padding-left: 24px;
+            position: relative;
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .workshop-card li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+        }
+        
+        /* Trust Section */
+        .trust-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .trust-card {
+            text-align: center;
+            padding: 40px 32px;
+        }
+        
+        .trust-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 28px;
+        }
+        
+        .trust-card h4 {
+            margin-bottom: 12px;
+        }
+        
+        .trust-card p {
+            opacity: 0.9;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        
+        /* Social Proof Stats */
+        .social-proof-stats {
+            background: var(--accent);
+            color: var(--white);
+            border-radius: 20px;
+            padding: 40px 32px;
+            text-align: center;
+            margin-top: 48px;
+        }
+        
+        .social-proof-stats .stat-number {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .social-proof-stats .stat-label {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .testimonial-card {
+            padding: 32px;
+        }
+        
+        .testimonial-quote {
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text);
+        }
+        
+        .testimonial-quote::before {
+            content: '"';
+            font-size: 48px;
+            color: var(--accent);
+            line-height: 1;
+            display: block;
+            margin-bottom: -16px;
+            opacity: 0.5;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .testimonial-info h5 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .testimonial-info p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        /* FAQ Section */
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background: var(--bg-pampas);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            width: 100%;
+            padding: 24px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 44px;
+            transition: color 0.3s;
+        }
+        
+        .faq-question:hover {
+            color: var(--accent);
+        }
+        
+        .faq-question::after {
+            content: '+';
+            font-family: 'Courier Prime', monospace;
+            font-size: 24px;
+            color: var(--accent);
+            transition: transform 0.3s;
+        }
+        
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+        
+        .faq-answer p {
+            padding: 0 24px 24px;
+            color: var(--text);
+            opacity: 0.95;
+            line-height: 1.8;
+            font-weight: 700;
+        }
+        
+        /* Final CTA */
+        .final-cta {
+            text-align: center;
+            padding: 120px 0;
+        }
+        
+        .final-cta h2 {
+            margin-bottom: 24px;
+        }
+        
+        .final-cta p {
+            max-width: 600px;
+            margin: 0 auto 32px;
+            font-size: 18px;
+            opacity: 0.95;
+            font-weight: 700;
+        }
+        
+        .final-cta .btn {
+            height: 56px;
+            padding: 0 48px;
+            font-size: 18px;
+        }
+        
+        .urgency {
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--accent-text);
+            font-weight: 700;
+        }
+        
+        .contact-info {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-info a {
+            color: var(--text);
+            text-decoration: none;
+            margin: 0 16px;
+            padding: 12px 0;
+            display: inline-block;
+            transition: color 0.3s;
+            min-height: 44px;
+        }
+        
+        .contact-info a:hover,
+        .contact-info a:focus {
+            color: var(--accent);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--text);
+            color: var(--bg-off);
+            padding: 48px 0;
+            text-align: center;
+        }
+        
+        footer .logo {
+            color: var(--white);
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        
+        footer p {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 700;
+        }
+        
+        /* Tablet */
+        @media (min-width: 768px) {
+            .nav-desktop {
+                display: flex;
+                align-items: center;
+            }
+            
+            .nav-mobile {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: none;
+            }
+            
+            .pain-points-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .workshops-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .trust-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Desktop */
+        @media (min-width: 1024px) {
+            .workshops-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .workshop-card:first-child {
+                grid-column: span 1;
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Fallback for no backdrop-filter */
+        @supports not (backdrop-filter: blur(20px)) {
+            .glass-card {
+                background: rgba(255, 255, 255, 0.85);
+            }
+            
+            header {
+                background: rgba(250, 249, 247, 0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip navigation link for accessibility -->
+    <a href="#main-content" class="skip-link">跳至主要內容</a>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <a href="#" class="logo">AI<span>FLOW</span>TIME</a>
+                
+                <!-- Desktop Navigation -->
+                <nav class="nav-desktop">
+                    <a href="#pain-points">點解學AI</a>
+                    <a href="#workshops">工作坊</a>
+                    <a href="#trust">點解揀我們</a>
+                    <a href="#faq">常見問題</a>
+                    <a href="#register" class="btn" style="height: 44px; padding: 0 24px; font-size: 14px; min-width: auto;">立即預約免費諮詢</a>
+                </nav>
+                
+                <!-- Mobile Navigation -->
+                <div class="nav-mobile">
+                    <button class="hamburger" aria-label="開啟選單" aria-expanded="false" onclick="toggleMobileMenu()">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <nav class="mobile-menu" id="mobileMenu" aria-hidden="true">
+            <a href="#pain-points" onclick="closeMobileMenu()">點解學AI</a>
+            <a href="#workshops" onclick="closeMobileMenu()">工作坊</a>
+            <a href="#trust" onclick="closeMobileMenu()">點解揀我們</a>
+            <a href="#faq" onclick="closeMobileMenu()">常見問題</a>
+            <a href="#register" class="btn" onclick="closeMobileMenu()">立即預約免費諮詢</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <p class="tagline">學識AI，準時收工。</p>
+                <h1>你仲用緊人手做？同事已經用AI收工。</h1>
+                <p class="hero-subheadline">香港在職人士專屬AI課程，無需編程背景，週末兩天掌握實用AI工具</p>
+                <p class="hero-oneliner">學識AI，唔使OT。</p>
+                <div class="hero-cta">
+                    <a href="#register" class="btn">立即預約免費諮詢</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pain Points Section -->
+    <section id="pain-points">
+        <div class="container">
+            <div class="section-header">
+                <h2>點解要學AI？</h2>
+            </div>
+            <div class="pain-points-grid">
+                <div class="pain-point-card fade-in">
+                    <h4>做極都做唔完，OT已成常態。</h4>
+                    <p>每日被重複性工作淹沒，報告、電郵、數據整理佔據大部分時間，無法專注於真正有價值的事務</p>
+                </div>
+                <div class="pain-point-card fade-in">
+                    <h4>升職永遠輪唔到自己。</h4>
+                    <p>當同事開始用AI提升效率，你卻仍在用傳統方法硬幹，競爭力逐漸落後</p>
+                </div>
+                <div class="pain-point-card fade-in">
+                    <h4>驚被淘汰，但唔知點學起。</h4>
+                    <p>網上資源零散且多為英文，不知道哪些工具適合香港職場，學習無從入手</p>
+                </div>
+            </div>
+            <div class="insight-box">
+                <p>AI不是未來，而是現在。學懂與AI協作，是未來3年能否轉營的關鍵。</p>
+            </div>
+            
+            <!-- AI Adoption Data Section -->
+            <div class="ai-data-section" style="margin-top: 64px;">
+                <h3 style="text-align: center; margin-bottom: 48px; font-size: clamp(24px, 3vw, 32px);">香港AI應用率與全球比較</h3>
+                
+                <!-- Chart 1: AI Adoption Rate Comparison -->
+                <div class="chart-container" style="background: var(--bg-pampas); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+                    <h4 style="margin-bottom: 24px; font-size: 20px;">世界各地AI普及率比較 (2025下半年)</h4>
+                    <div class="bar-chart" style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="bar-item" style="display: flex; align-items: center; gap: 16px;">
+                            <span style="min-width: 80px; font-weight: 500;">美國</span>
+                            <div class="bar-bg" style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 10px; height: 32px; overflow: hidden;">
+                                <div class="bar-fill" style="width: 28.3%; background: linear-gradient(90deg, #E8A88C, #D97757); height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; color: white; font-weight: 700; font-size: 14px;">28.3%</div>
+                            </div>
+                        </div>
+                        <div class="bar-item" style="display: flex; align-items: center; gap: 16px;">
+                            <span style="min-width: 80px; font-weight: 500;">台灣</span>
+                            <div class="bar-bg" style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 10px; height: 32px; overflow: hidden;">
+                                <div class="bar-fill" style="width: 28.4%; background: linear-gradient(90deg, #E8A88C, #D97757); height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; color: white; font-weight: 700; font-size: 14px;">28.4%</div>
+                            </div>
+                        </div>
+                        <div class="bar-item" style="display: flex; align-items: center; gap: 16px;">
+                            <span style="min-width: 80px; font-weight: 500;">香港</span>
+                            <div class="bar-bg" style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 10px; height: 32px; overflow: hidden;">
+                                <div class="bar-fill" style="width: 26.4%; background: linear-gradient(90deg, #D97757, #C45A3A); height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; color: white; font-weight: 700; font-size: 14px;">26.4%</div>
+                            </div>
+                        </div>
+                        <div class="bar-item" style="display: flex; align-items: center; gap: 16px;">
+                            <span style="min-width: 80px; font-weight: 500;">日本</span>
+                            <div class="bar-bg" style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 10px; height: 32px; overflow: hidden;">
+                                <div class="bar-fill" style="width: 19.1%; background: linear-gradient(90deg, #F5C4B0, #E8A88C); height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; color: white; font-weight: 700; font-size: 14px;">19.1%</div>
+                            </div>
+                        </div>
+                        <div class="bar-item" style="display: flex; align-items: center; gap: 16px;">
+                            <span style="min-width: 80px; font-weight: 500;">全球平均</span>
+                            <div class="bar-bg" style="flex: 1; background: rgba(0,0,0,0.1); border-radius: 10px; height: 32px; overflow: hidden;">
+                                <div class="bar-fill" style="width: 16.3%; background: linear-gradient(90deg, #F5C4B0, #E8A88C); height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; color: white; font-weight: 700; font-size: 14px;">16.3%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 16px; font-size: 14px; color: var(--text-light); text-align: center;">數據來源：Microsoft AI Economy Institute, 2025</p>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div class="stat-card" style="background: var(--bg-pampas); border-radius: 16px; padding: 24px; text-align: center;">
+                        <div style="font-size: 48px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">55%</div>
+                        <div style="font-size: 16px; color: var(--text);">香港中小企已使用或計劃使用AI工具</div>
+                        <div style="font-size: 14px; color: var(--text-light); margin-top: 8px;">香港生產力促進局, 2025</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--bg-pampas); border-radius: 16px; padding: 24px; text-align: center;">
+                        <div style="font-size: 48px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">88%</div>
+                        <div style="font-size: 16px; color: var(--text);">香港企業員工已在工作中使用AI</div>
+                        <div style="font-size: 14px; color: var(--text-light); margin-top: 8px;">HKPC AI Readiness Survey, 2025</div>
+                    </div>
+                    <div class="stat-card" style="background: var(--bg-pampas); border-radius: 16px; padding: 24px; text-align: center;">
+                        <div style="font-size: 48px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">22%</div>
+                        <div style="font-size: 16px; color: var(--text);">香港員工每日使用AI (落後亞太29%)</div>
+                        <div style="font-size: 14px; color: var(--text-light); margin-top: 8px;">PwC Hong Kong, 2025</div>
+                    </div>
+                </div>
+                
+                <!-- Key Insight -->
+                <div style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); color: white; border-radius: 16px; padding: 24px; text-align: center;">
+                    <p style="font-size: 18px; line-height: 1.6; margin: 0;"><strong>關鍵洞察：</strong>香港雖有88%企業員工接觸過AI，但僅22%每日使用，遠低於亞太區29%平均水平。在30個全球市場中，香港AI準備度排名最末，僅2%企業被評為「領先者」(全球平均13%)。這正是你需要的起跑優勢——現在學懂AI，就能超越同儕。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workshops Section -->
+    <section id="workshops">
+        <div class="container">
+            <div class="section-header">
+                <h2>工作坊一覽</h2>
+            </div>
+            <div class="workshops-grid">
+                <!-- Workshop 0 -->
+                <div class="glass-card workshop-card fade-in">
+                    <span class="level-badge level-beginner">初階 Beginner</span>
+                    <div style="position: absolute; top: 24px; right: 24px; font-family: 'Courier Prime', monospace; font-size: 16px; font-weight: 700; color: var(--text);">Workshop 0</div>
+                    <h4>Change Your Mind</h4>
+                    <p class="workshop-duration">課時約 1.5 小時</p>
+                    <p>AI 不是魔法，而是一面鏡子——你問得多深，它就答得多準。這堂課不教你任何工具，而是先教你如何「用腦」與 AI 對話。</p>
+                    <button class="details-toggle" onclick="toggleDetails(this)" style="background: none; border: 2px solid var(--accent); color: var(--accent); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; margin-bottom: 16px; transition: all 0.3s;">查看詳情</button>
+                    <div class="workshop-details" style="display: none;">
+                        <ul>
+                            <li>告別盲目提問，學識問出精準答案</li>
+                            <li>認清 AI 的能力邊界，避免浪費時間</li>
+                            <li>掌握深度提問思維，讓 AI 真正理解你的需求</li>
+                            <li>學會三大核心技巧：Few-Shot、Context Injection、Chain of Thought</li>
+                            <li>突破自己的認知邊界，獲取超出專業的洞察</li>
+                            <li>拆解專家級 Prompt 的設計邏輯</li>
+                            <li>即場實戰演練，帶走屬於你的有效 Prompt</li>
+                        </ul>
+                    </div>
+                    <a href="#register" class="btn">立即預約</a>
+                </div>
+
+                <!-- Workshop A -->
+                <div class="glass-card workshop-card fade-in">
+                    <span class="level-badge level-beginner">初階 Beginner</span>
+                    <div style="position: absolute; top: 24px; right: 24px; font-family: 'Courier Prime', monospace; font-size: 16px; font-weight: 700; color: var(--text);">Workshop A</div>
+                    <h4>AI 原住民養成班 — 從陌生到自在</h4>
+                    <p>覺得 AI 永遠答非所問？仲要俾啲垃圾圖你？你不是一個人，而且這不是你的問題。大部分人從來冇人教過點樣正確使用呢啲工具。呢堂課，我哋會一齊動手試用唔同嘅 AI 工具，搵到最適合你嗰幾個，讓你帶走真正用得上的結果。</p>
+                    <button class="details-toggle" onclick="toggleDetails(this)" style="background: none; border: 2px solid var(--accent); color: var(--accent); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; margin-bottom: 16px; transition: all 0.3s;">查看詳情</button>
+                    <div class="workshop-details" style="display: none;">
+                        <ul>
+                            <li><strong>為什麼 AI 以前「不聽話」</strong> — 我們會在課堂上即場診斷 AI 給你差結果的真正原因，並當場修正</li>
+                            <li><strong>用對工具做對事</strong> — 不同 AI 工具擅長不同的事。學會什麼時候用哪個，不再靠猜</li>
+                            <li><strong>動手試用真實 AI 工具</strong> — 用你工作中真正需要完成的任務來練習。不講理論，只講實戰</li>
+                            <li><strong>角色扮演（Role-Playing）</strong> — 給 AI 一個明確身份，讓它不再給你千篇一律的答案</li>
+                            <li><strong>元提示（Meta Prompting）</strong> — 讓 AI 幫你改進你自己的 Prompt——「用 AI 教你用 AI」</li>
+                            <li><strong>打造你的個人 AI 工具箱</strong> — 帶著你選好的工具、測試過的 Prompt、和明天就能用的信心離開</li>
+                        </ul>
+                    </div>
+                    <a href="#register" class="btn">立即預約</a>
+                </div>
+
+                <!-- Workshop B -->
+                <div class="glass-card workshop-card fade-in">
+                    <span class="level-badge level-intermediate">中階 Intermediate</span>
+                    <div style="position: absolute; top: 24px; right: 24px; font-family: 'Courier Prime', monospace; font-size: 16px; font-weight: 700; color: var(--text);">Workshop B</div>
+                    <h4>時間回購術 — 用 AI 奪回你的一天</h4>
+                    <p>時間是你最昂貴的資源。這個工作坊教你如何識別並擺脫「時間吸血鬼」，將低價值的重複性任務系統性地委派給 AI。</p>
+                    <button class="details-toggle" onclick="toggleDetails(this)" style="background: none; border: 2px solid var(--accent); color: var(--accent); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; margin-bottom: 16px; transition: all 0.3s;">查看詳情</button>
+                    <div class="workshop-details" style="display: none;">
+                        <ul>
+                            <li>識別日常工作中最消耗精力但價值低的重複性任務</li>
+                            <li>掌握系統化的任務委派方法，讓 AI 成為得力助手</li>
+                            <li>親手打造能即時應用於工作與生活的實用 Workflow</li>
+                            <li>轉變工作方式，遇到重複任務第一時間想到自動化</li>
+                            <li>根據實際需求建立個人化的 AI 應用組合</li>
+                            <li>透過每日小練習鞏固所學，養成持續優化的習慣</li>
+                        </ul>
+                    </div>
+                    <a href="#register" class="btn">立即預約</a>
+                </div>
+
+                <!-- Workshop C -->
+                <div class="glass-card workshop-card fade-in">
+                    <span class="level-badge level-beginner">初階至中階</span>
+                    <div style="position: absolute; top: 24px; right: 24px; font-family: 'Courier Prime', monospace; font-size: 16px; font-weight: 700; color: var(--text);">Workshop C</div>
+                    <h4>AI × 自我突破 — 用科技推動個人成長</h4>
+                    <p>這個工作坊不談技術，只談成長。你會學到七種獨特的方法，運用AI進行自我探索、整理思緒，並為自己制定真正可行的改變計劃。無需任何程式背景，只需要一顆想要變得更好的心。</p>
+                    <button class="details-toggle" onclick="toggleDetails(this)" style="background: none; border: 2px solid var(--accent); color: var(--accent); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; margin-bottom: 16px; transition: all 0.3s;">查看詳情</button>
+                    <div class="workshop-details" style="display: none;">
+                        <ul>
+                            <li>建立結構化的學習路徑，每一步都看得見成果</li>
+                            <li>運用AI拆解書籍核心概念，針對你的處境提出適用的見解</li>
+                            <li>透過對話式提問發現思維慣性中的限制</li>
+                            <li>從願景到具體步驟，把模糊的「想要」轉化為清晰的「做到」</li>
+                            <li>學會與AI建立有溫度的對話關係，成為你的思考夥伴</li>
+                        </ul>
+                    </div>
+                    <a href="#register" class="btn">立即預約</a>
+                </div>
+
+                <!-- Workshop D -->
+                <div class="glass-card workshop-card fade-in">
+                    <span class="level-badge level-intermediate">中階 Intermediate</span>
+                    <div style="position: absolute; top: 24px; right: 24px; font-family: 'Courier Prime', monospace; font-size: 16px; font-weight: 700; color: var(--text);">Workshop D</div>
+                    <h4>下一級視覺 — 用 AI 打造商業級圖像</h4>
+                    <p>學懂用 AI 工具快速生成符合品牌風格的商業圖像與短片，再配合簡單的後製技巧，輸出可直接用於社交媒體、網站及宣傳素材的專業視覺內容。</p>
+                    <button class="details-toggle" onclick="toggleDetails(this)" style="background: none; border: 2px solid var(--accent); color: var(--accent); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; margin-bottom: 16px; transition: all 0.3s;">查看詳情</button>
+                    <div class="workshop-details" style="display: none;">
+                        <ul>
+                            <li>認識最實用的 AI 圖像及影片生成工具，減少來來回回改稿的時間成本</li>
+                            <li>調整風格參數、統一視覺語調，生成符合品牌調性的商業級素材</li>
+                            <li>掌握 AI 生成後的簡易修圖及剪輯技巧，由構思到成品一小時內完成</li>
+                        </ul>
+                    </div>
+                    <a href="#register" class="btn">立即預約</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section id="trust">
+        <div class="container">
+            <div class="section-header">
+                <h2>點解揀AIFLOWTIME？</h2>
+            </div>
+            <div class="trust-grid">
+                <div class="glass-card trust-card fade-in">
+                    <div class="trust-icon" aria-label="香港地區">HK</div>
+                    <h4>專為香港職場設計</h4>
+                    <p>課程內容貼地，案例取自香港真實工作場景，學完即刻應用</p>
+                </div>
+                <div class="glass-card trust-card fade-in">
+                    <div class="trust-icon" aria-label="零基礎">0</div>
+                    <h4>零編程背景都學得識</h4>
+                    <p>無需技術背景，從基礎概念到實戰應用，循序漸進輕鬆掌握</p>
+                </div>
+                <div class="glass-card trust-card fade-in">
+                    <div class="trust-icon" aria-label="實用">%</div>
+                    <h4>學完即刻用得著</h4>
+                    <p>學員回饋實用度高，課堂所學能直接應用於日常工作</p>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2>常見問題</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">需要編程背景嗎？</button>
+                    <div class="faq-answer">
+                        <p>完全不需要！我們的課程專為零技術背景的香港在職人士設計。你不需要懂寫程式，只需要會用電腦和願意學習的心。我們會從基礎概念開始，循序漸進帶你掌握AI工具。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">課程是線上還是實體？</button>
+                    <div class="faq-answer">
+                        <p>我們提供線上及實體兩種模式。線上課程讓你可以在家舒適學習；實體課程於中環及觀塘的培訓中心舉行。報名時可以選擇你偏好的模式。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">學完真的有幫助嗎？</button>
+                    <div class="faq-answer">
+                        <p>我們的課程內容全部取材自香港真實職場場景，學員普遍反映學完後能立即應用於工作。根據學員回饋，平均每人每週可節省5-10小時的重複性工作時間。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">可以退款嗎？</button>
+                    <div class="faq-answer">
+                        <p>報名後不設退款。我們建議你先參加免費的AI認知工作坊，了解課程風格是否適合自己，滿意後再報讀其他付費課程。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">如何付款？</button>
+                    <div class="faq-answer">
+                        <p>我們目前接受PayMe及轉數快（FPS）付款。報名後會收到詳細付款指引。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="register" class="final-cta">
+        <div class="container">
+            <h2>唔使同人比，自己學好AI，慢慢黎。</h2>
+            <p>無論你想提升效率、增加競爭力，還是為職涯轉型鋪路，AIFLOWTIME都能為你提供最適合的學習路徑</p>
+            <a href="#register" class="btn">立即預約免費諮詢</a>
+            <p class="urgency">每月只開2班，每班限8人，下週日開課</p>
+            <div class="contact-info">
+                <!-- WhatsApp: Replace YOUR_NUMBER with actual number -->
+                <a href="https://wa.me/85262880186">WhatsApp查詢</a>
+                <a href="https://instagram.com/aiflowtime">Instagram @aiflowtime</a>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <a href="#" class="logo">AI<span>FLOW</span>TIME</a>
+            <p>© 2025 AIFLOWTIME. 專為香港在職人士而設的AI課程。</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
+            
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            hamburger.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.setAttribute('aria-hidden', isExpanded);
+        }
+        
+        function closeMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+        }
+        
+        // Workshop details toggle
+        function toggleDetails(button) {
+            const details = button.nextElementSibling;
+            const isVisible = details.style.display === 'block';
+            
+            if (isVisible) {
+                details.style.display = 'none';
+                button.textContent = '查看詳情';
+            } else {
+                details.style.display = 'block';
+                button.textContent = '收起詳情';
+            }
+        }
+        
+        // FAQ accordion
+        function toggleFaq(button) {
+            const faqItem = button.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Open clicked item if it wasn't active
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+        
+        // Scroll animations
+        function initScrollAnimations() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            fadeElements.forEach(el => observer.observe(el));
+        }
+        
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScrollAnimations);
+        } else {
+            initScrollAnimations();
+        }
+    </script>
+</body>
+</html>

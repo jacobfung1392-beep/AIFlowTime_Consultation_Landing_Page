@@ -1,0 +1,331 @@
+<!-- ============================================ -->
+<!-- LOGISTICS SECTION - 工作坊資訊 -->
+<!-- ============================================ -->
+
+<section id="logistics" class="logistics-section">
+  <div class="container">
+    <!-- Section Header -->
+    <div class="section-header">
+      <h2 class="section-title">工作坊資訊</h2>
+      <div class="title-underline"></div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+      <!-- Duration -->
+      <div class="info-card" data-animate="fade-up" data-delay="0">
+        <div class="info-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="info-content">
+          <span class="info-label">時長</span>
+          <span class="info-value">2.5 小時</span>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="info-card" data-animate="fade-up" data-delay="100">
+        <div class="info-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <div class="info-content">
+          <span class="info-label">地點</span>
+          <span class="info-value placeholder">（待定）</span>
+        </div>
+      </div>
+
+      <!-- Fee -->
+      <div class="info-card" data-animate="fade-up" data-delay="200">
+        <div class="info-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="info-content">
+          <span class="info-label">費用</span>
+          <span class="info-value placeholder">HK$___</span>
+        </div>
+      </div>
+
+      <!-- Date -->
+      <div class="info-card" data-animate="fade-up" data-delay="300">
+        <div class="info-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div class="info-content">
+          <span class="info-label">日期</span>
+          <span class="info-value placeholder">（待定）</span>
+        </div>
+      </div>
+
+      <!-- Capacity -->
+      <div class="info-card full-width" data-animate="fade-up" data-delay="400">
+        <div class="info-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <div class="info-content">
+          <span class="info-label">人數</span>
+          <span class="info-value">小班制（<span class="placeholder">_</span>人）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- STYLES -->
+<!-- ============================================ -->
+<style>
+/* --------------------------------------------
+   LOGISTICS SECTION STYLES
+   -------------------------------------------- */
+
+.logistics-section {
+  width: 100%;
+  padding: 6rem 1.5rem;
+  background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background pattern */
+.logistics-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 127, 80, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 127, 80, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* --------------------------------------------
+   SECTION HEADER
+   -------------------------------------------- */
+.section-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.section-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #f5f0e8;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.title-underline {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ff7f50, #ff9f7a);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* --------------------------------------------
+   INFO GRID
+   -------------------------------------------- */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+/* --------------------------------------------
+   INFO CARD
+   -------------------------------------------- */
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 127, 80, 0.2);
+  transform: translateY(-2px);
+}
+
+.info-card.full-width {
+  grid-column: 1 / -1;
+  justify-content: center;
+}
+
+/* --------------------------------------------
+   INFO ICON
+   -------------------------------------------- */
+.info-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 127, 80, 0.15), rgba(255, 159, 122, 0.1));
+  border-radius: 10px;
+}
+
+.info-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #ff7f50;
+}
+
+/* --------------------------------------------
+   INFO CONTENT
+   -------------------------------------------- */
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(245, 240, 232, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.info-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #f5f0e8;
+}
+
+.info-value.placeholder {
+  color: rgba(245, 240, 232, 0.6);
+  font-style: italic;
+}
+
+/* --------------------------------------------
+   ANIMATION INITIAL STATES
+   -------------------------------------------- */
+[data-animate="fade-up"] {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+[data-animate="fade-up"].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------------------
+   RESPONSIVE DESIGN
+   -------------------------------------------- */
+@media (max-width: 640px) {
+  .logistics-section {
+    padding: 4rem 1rem;
+  }
+
+  .section-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .info-card {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .info-card.full-width {
+    justify-content: flex-start;
+  }
+
+  .info-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .info-value {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-card.full-width {
+    grid-column: 1 / -1;
+  }
+}
+</style>
+
+<!-- ============================================ -->
+<!-- ANIMATION SCRIPT
+<!-- ============================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // Animation configuration
+  const config = {
+    threshold: 0.15,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  // Intersection Observer for scroll-triggered animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const element = entry.target;
+        const delay = parseInt(element.dataset.delay) || 0;
+
+        // Apply staggered delay
+        setTimeout(() => {
+          element.classList.add('is-visible');
+        }, delay);
+
+        // Unobserve after animation
+        observer.unobserve(element);
+      }
+    });
+  }, config);
+
+  // Initialize animations when DOM is ready
+  function initAnimations() {
+    const animatedElements = document.querySelectorAll('[data-animate="fade-up"]');
+    animatedElements.forEach(el => observer.observe(el));
+  }
+
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnimations);
+  } else {
+    initAnimations();
+  }
+})();
+</script>

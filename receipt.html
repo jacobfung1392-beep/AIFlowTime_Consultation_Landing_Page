@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收據 Receipt | AIFLOWTIME</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-cream:#FAF9F7; --accent:#D97757; --text:#3B3B3B; --text-light:#7A7A7A; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-cream);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+        .receipt-status{text-align:center;max-width:420px;}
+        .receipt-status h2{font-size:20px;margin-bottom:8px;}
+        .receipt-status p{font-size:14px;color:var(--text-light);line-height:1.6;}
+        .spinner{width:40px;height:40px;border:4px solid rgba(0,0,0,0.08);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 20px;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .error-icon{font-size:48px;margin-bottom:12px;}
+        .back-link{display:inline-block;margin-top:16px;color:var(--accent);font-weight:700;text-decoration:none;font-size:14px;}
+        .back-link:hover{text-decoration:underline;}
+    </style>
+</head>
+<body>
+    <div class="receipt-status" id="statusBox">
+        <div class="spinner"></div>
+        <h2>正在生成收據...</h2>
+        <p>Generating your receipt, please wait.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs2@0.0.2/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script>
+    if (!firebase.apps.length) firebase.initializeApp({ projectId:'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com' });
+    var db = firebase.firestore();
+
+    function showError(msg) {
+        document.getElementById('statusBox').innerHTML =
+            '<div class="error-icon">😕</div>' +
+            '<h2>無法生成收據</h2>' +
+            '<p>' + msg + '</p>' +
+            '<a class="back-link" href="/ai-beginner-workshop">← 返回工作坊頁面</a>';
+    }
+
+    function _safeText(str) {
+        if (!str) return '';
+        return String(str).replace(/\s+/g, ' ').trim();
+    }
+
+    var FONT_URLS = [
+        'https://raw.githubusercontent.com/google/fonts/main/ofl/notosanshk/NotoSansHK%5Bwght%5D.ttf',
+        'https://raw.githubusercontent.com/google/fonts/main/ofl/notosanstc/NotoSansTC%5Bwght%5D.ttf'
+    ];
+    var FONT_CACHE_DB = 'pdfFontCache';
+    var FONT_CACHE_KEY = 'cjkFontHK_v2';
+
+    function _arrayBufferToBase64(buffer) {
+        var bytes = new Uint8Array(buffer);
+        var binary = '';
+        var chunkSize = 8192;
+        for (var i = 0; i < bytes.length; i += chunkSize) {
+            var chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+            binary += String.fromCharCode.apply(null, chunk);
+        }
+        return btoa(binary);
+    }
+
+    function _openFontDB() {
+        return new Promise(function(resolve) {
+            try {
+                var req = indexedDB.open(FONT_CACHE_DB, 1);
+                req.onupgradeneeded = function(e) { e.target.result.createObjectStore('fonts'); };
+                req.onsuccess = function(e) { resolve(e.target.result); };
+                req.onerror = function() { resolve(null); };
+            } catch(e) { resolve(null); }
+        });
+    }
+
+    function _getCachedFont() {
+        return _openFontDB().then(function(idb) {
+            if (!idb) return null;
+            return new Promise(function(resolve) {
+                var tx = idb.transaction('fonts', 'readonly');
+                var req = tx.objectStore('fonts').get(FONT_CACHE_KEY);
+                req.onsuccess = function() { resolve(req.result || null); };
+                req.onerror = function() { resolve(null); };
+            });
+        });
+    }
+
+    function _setCachedFont(base64) {
+        return _openFontDB().then(function(idb) {
+            if (!idb) return;
+            var tx = idb.transaction('fonts', 'readwrite');
+            tx.objectStore('fonts').put(base64, FONT_CACHE_KEY);
+        }).catch(function(){});
+    }
+
+    async function _loadFont() {
+        var cached = await _getCachedFont();
+        if (cached) return cached;
+        var p = document.querySelector('#statusBox p');
+        if (p) p.textContent = 'Downloading Chinese font (first time only)...';
+        for (var i = 0; i < FONT_URLS.length; i++) {
+            try {
+                var resp = await fetch(FONT_URLS[i]);
+                if (!resp.ok) continue;
+                var buf = await resp.arrayBuffer();
+                if (buf.byteLength < 500000) continue;
+                var base64 = _arrayBufferToBase64(buf);
+                _setCachedFont(base64);
+                return base64;
+            } catch(e) {}
+        }
+        return null;
+    }
+
+    function _parseDateToEnglish(dateStr) {
+        if (!dateStr) return '';
+        var m = String(dateStr).match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+        if (m) {
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return m[3] + ' ' + months[parseInt(m[2]) - 1] + ' ' + m[1];
+        }
+        return _safeText(dateStr);
+    }
+
+    function _loadImageAsDataUrl(src) {
+        return new Promise(function(resolve) {
+            var img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                var c = document.createElement('canvas');
+                c.width = img.naturalWidth; c.height = img.naturalHeight;
+                c.getContext('2d').drawImage(img, 0, 0);
+                resolve(c.toDataURL('image/png'));
+            };
+            img.onerror = function() { resolve(null); };
+            img.src = src;
+        });
+    }
+
+    function _generateQrDataUrl(text, size) {
+        return new Promise(function(resolve) {
+            if (typeof QRCode === 'undefined' || !text) { resolve(null); return; }
+            var wrap = document.createElement('div');
+            wrap.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+            document.body.appendChild(wrap);
+            new QRCode(wrap, { text: text, width: size || 200, height: size || 200, colorDark: '#3B3B3B', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+            setTimeout(function() {
+                var canvas = wrap.querySelector('canvas');
+                var dataUrl = canvas ? canvas.toDataURL('image/png') : null;
+                document.body.removeChild(wrap);
+                resolve(dataUrl);
+            }, 150);
+        });
+    }
+
+    async function buildAndOpenReceipt(reg, ws) {
+        if (!window.jspdf || !window.jspdf.jsPDF) { showError('PDF library failed to load. Please refresh.'); return; }
+
+        var fontBase64 = await _loadFont();
+        var logoDataUrl = await _loadImageAsDataUrl('/LOGO_transparent_background.png');
+
+        var wsMode = ws.mode || 'offline';
+        var qrDataUrl = null;
+        if (reg.attendanceToken && wsMode !== 'online') {
+            var checkinUrl = window.location.origin + '/checkin?token=' + encodeURIComponent(reg.attendanceToken);
+            qrDataUrl = await _generateQrDataUrl(checkinUrl, 200);
+        }
+
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        var W = doc.internal.pageSize.getWidth();
+        var margin = 20;
+        var y = 14;
+
+        var hasCJKFont = false;
+        if (fontBase64) {
+            try {
+                doc.addFileToVFS('NotoSansHK.ttf', fontBase64);
+                doc.addFont('NotoSansHK.ttf', 'NotoSansHK', 'normal');
+                hasCJKFont = true;
+            } catch(e) { hasCJKFont = false; }
+        }
+
+        function setLabel(size) { doc.setFontSize(size); doc.setFont('helvetica', 'bold'); }
+        function setLabelNormal(size) { doc.setFontSize(size); doc.setFont('helvetica', 'normal'); }
+        function setCJK(size) {
+            doc.setFontSize(size);
+            if (hasCJKFont) doc.setFont('NotoSansHK', 'normal');
+            else doc.setFont('helvetica', 'normal');
+        }
+        function setCJKBold(size) {
+            doc.setFontSize(size);
+            if (hasCJKFont) doc.setFont('NotoSansHK', 'normal');
+            else doc.setFont('helvetica', 'bold');
+        }
+
+        var receiptNo = (reg._id || '').substring(0, 8).toUpperCase();
+        var confirmDate = '';
+        if (reg.confirmedAt) {
+            var cd = reg.confirmedAt.seconds ? new Date(reg.confirmedAt.seconds * 1000) : new Date(reg.confirmedAt);
+            if (!isNaN(cd.getTime())) confirmDate = cd.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+        }
+        if (!confirmDate) confirmDate = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+
+        var safeName = _safeText(reg.name) || 'N/A';
+        var safeEmail = _safeText(reg.userEmail);
+        var safePhone = _safeText(reg.phone);
+        var safeTitle = _safeText(ws.title ? (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + ws.title : reg.workshopTitle) || 'Workshop';
+        var sessionLines = [];
+        var safeRoundLabel = '';
+        // For continuous courses, show only the selected round's sessions
+        if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
+            var matchedRound = ws.rounds.find(function(r) { return r.id === reg.selectedRound; });
+            if (matchedRound) {
+                safeRoundLabel = _safeText(matchedRound.label || reg.selectedRoundLabel || '');
+                var roundSessions = (matchedRound.sessions || []).filter(function(s) { return s.visible !== false; }).sort(function(a, b) {
+                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    return da < db2 ? -1 : da > db2 ? 1 : 0;
+                });
+                for (var si = 0; si < roundSessions.length; si++) {
+                    var s = roundSessions[si];
+                    var line = '';
+                    if (s.label) line += _safeText(s.label) + ': ';
+                    line += _parseDateToEnglish(s.date);
+                    if (s.time) line += ' | ' + _safeText(s.time);
+                    if (line) sessionLines.push(line);
+                }
+            }
+        }
+        // For single-multi-date: resolve session_N to the specific chosen session
+        if (!sessionLines.length && reg.selectedRound && reg.selectedRound.indexOf('session_') === 0 && ws.sessions && ws.sessions.length > 1) {
+            var sorted = ws.sessions.slice().sort(function(a, b) {
+                var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                if (da !== db2) return da < db2 ? -1 : 1;
+                var ta = (a.time || '').replace(/[^0-9:]/g, '');
+                var tb = (b.time || '').replace(/[^0-9:]/g, '');
+                return ta < tb ? -1 : ta > tb ? 1 : 0;
+            });
+            var idx = parseInt(reg.selectedRound.replace('session_', ''), 10);
+            if (idx >= 0 && idx < sorted.length) {
+                var s = sorted[idx];
+                var line = '';
+                if (s.label) line += _safeText(s.label) + ': ';
+                line += _parseDateToEnglish(s.date);
+                if (s.time) line += ' | ' + _safeText(s.time);
+                if (line) sessionLines.push(line);
+                safeRoundLabel = _safeText(reg.selectedRoundLabel || '');
+            }
+        }
+        if (!sessionLines.length && ws.sessions && ws.sessions.length) {
+            var sorted = ws.sessions.filter(function(s) { return s.visible !== false; }).sort(function(a, b) {
+                var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                if (da !== db2) return da < db2 ? -1 : 1;
+                var ta = (a.time || '').replace(/[^0-9:]/g, '');
+                var tb = (b.time || '').replace(/[^0-9:]/g, '');
+                return ta < tb ? -1 : ta > tb ? 1 : 0;
+            });
+            for (var si = 0; si < sorted.length; si++) {
+                var s = sorted[si];
+                var line = '';
+                if (s.label) line += _safeText(s.label) + ': ';
+                line += _parseDateToEnglish(s.date);
+                if (s.time) line += ' | ' + _safeText(s.time);
+                if (line) sessionLines.push(line);
+            }
+        }
+        if (!sessionLines.length && reg.allSessionDates && reg.allSessionDates.length) {
+            reg.allSessionDates.forEach(function(sd) {
+                var line = '';
+                if (sd.label) line += _safeText(sd.label) + ': ';
+                line += _parseDateToEnglish(sd.date);
+                if (sd.time) line += ' | ' + _safeText(sd.time);
+                if (line) sessionLines.push(line);
+            });
+        }
+        if (!sessionLines.length) {
+            var fallbackDate = _parseDateToEnglish(ws.date || reg.workshopDate);
+            var fallbackTime = _safeText(ws.time || reg.workshopTime);
+            var fb = [fallbackDate, fallbackTime].filter(Boolean).join(' | ');
+            if (fb) sessionLines.push(fb);
+        }
+        var safePricePaid = _safeText(reg.pricePaid) || 'N/A';
+        var safePromo = _safeText(reg.promoCode);
+        var safeLocation = _safeText(ws.location);
+
+        // Header bar
+        doc.setFillColor(217, 119, 87);
+        doc.rect(0, 0, W, 8, 'F');
+
+        // Logo
+        if (logoDataUrl) {
+            var logoW = 30, logoH = 30;
+            doc.addImage(logoDataUrl, 'PNG', (W - logoW) / 2, y, logoW, logoH);
+            y += logoH + 4;
+        } else { y += 8; }
+
+        // Title
+        setLabel(20);
+        doc.setTextColor(40, 40, 40);
+        doc.text('RECEIPT', W / 2, y, { align: 'center' });
+        y += 5;
+        setLabelNormal(9);
+        doc.setTextColor(120, 120, 120);
+        doc.text('AIFlowTime Workshop Payment Receipt', W / 2, y, { align: 'center' });
+
+        setLabelNormal(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Receipt #: ' + (receiptNo || 'N/A'), W - margin, y - 5, { align: 'right' });
+        doc.text('Date: ' + confirmDate, W - margin, y, { align: 'right' });
+
+        y += 8;
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.4);
+        doc.line(margin, y, W - margin, y);
+        y += 8;
+
+        // FROM
+        setLabel(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text('FROM', margin, y);
+        y += 5;
+        setLabel(11);
+        doc.setTextColor(40, 40, 40);
+        doc.text('AIFlowTime', margin, y);
+        y += 5;
+        setLabelNormal(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text('https://aiflowtime-hk.web.app', margin, y);
+        y += 4;
+        doc.text('WhatsApp: +852 6288 0186', margin, y);
+        y += 9;
+
+        // TO
+        setLabel(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text('TO', margin, y);
+        y += 5;
+        setCJKBold(11);
+        doc.setTextColor(40, 40, 40);
+        doc.text(safeName, margin, y);
+        y += 5;
+        setCJK(9);
+        doc.setTextColor(100, 100, 100);
+        if (safeEmail) { doc.text(safeEmail, margin, y); y += 4; }
+        if (safePhone) { doc.text('WhatsApp: ' + safePhone, margin, y); y += 4; }
+        y += 7;
+
+        // Table header
+        doc.setFillColor(245, 245, 245);
+        doc.rect(margin, y, W - margin * 2, 8, 'F');
+        setLabel(9);
+        doc.setTextColor(80, 80, 80);
+        doc.text('DESCRIPTION', margin + 4, y + 5.5);
+        doc.text('AMOUNT', W - margin - 4, y + 5.5, { align: 'right' });
+        y += 12;
+
+        // Workshop row — title may contain Chinese
+        setCJKBold(10);
+        doc.setTextColor(40, 40, 40);
+        var titleLines = doc.splitTextToSize(safeTitle, W - margin * 2 - 50);
+        doc.text(titleLines, margin + 4, y);
+        setCJK(10);
+        doc.setTextColor(80, 80, 80);
+        doc.text(safePricePaid, W - margin - 4, y, { align: 'right' });
+        y += titleLines.length * 5 + 2;
+
+        // Round label (for continuous courses)
+        if (safeRoundLabel) {
+            setCJKBold(9);
+            doc.setTextColor(217, 119, 87);
+            doc.text(safeRoundLabel, margin + 4, y);
+            y += 5;
+        }
+        // Session lines may contain Chinese labels
+        if (sessionLines.length) {
+            setCJK(9);
+            doc.setTextColor(120, 120, 120);
+            for (var sl = 0; sl < sessionLines.length; sl++) {
+                doc.text(sessionLines[sl], margin + 4, y);
+                y += 4.5;
+            }
+            y += 0.5;
+        }
+
+        if (safeLocation) {
+            setCJK(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Location: ' + safeLocation, margin + 4, y);
+            y += 5;
+        }
+
+        if (safePromo) {
+            setCJK(9);
+            doc.setTextColor(46, 125, 50);
+            doc.text('Promo Code: ' + safePromo, margin + 4, y);
+            y += 5;
+        }
+        if (reg.discountApplied) {
+            setLabelNormal(9);
+            doc.setTextColor(46, 125, 50);
+            doc.text('Member Discount (5%) Applied', margin + 4, y);
+            y += 5;
+        }
+
+        y += 4;
+        doc.setDrawColor(220, 220, 220);
+        doc.line(margin, y, W - margin, y);
+        y += 8;
+
+        // Total
+        setLabel(12);
+        doc.setTextColor(40, 40, 40);
+        doc.text('TOTAL PAID', margin + 4, y);
+        doc.setTextColor(217, 119, 87);
+        doc.text(safePricePaid, W - margin - 4, y, { align: 'right' });
+        y += 10;
+
+        // Status badge
+        doc.setFillColor(232, 245, 233);
+        doc.roundedRect(margin, y, 50, 8, 2, 2, 'F');
+        setLabel(9);
+        doc.setTextColor(46, 125, 50);
+        doc.text('PAYMENT CONFIRMED', margin + 4, y + 5.5);
+        y += 16;
+
+        // Notice — may contain Chinese
+        var safeNotice = _safeText(ws.notice);
+        if (safeNotice) {
+            doc.setDrawColor(220, 220, 220);
+            doc.line(margin, y, W - margin, y);
+            y += 8;
+            setLabel(10);
+            doc.setTextColor(60, 60, 60);
+            doc.text('NOTICE', margin + 4, y);
+            y += 5;
+            setCJK(9);
+            doc.setTextColor(80, 80, 80);
+            var noticeLines = doc.splitTextToSize(safeNotice, W - margin * 2 - 8);
+            doc.text(noticeLines, margin + 4, y);
+            y += noticeLines.length * 4.5 + 6;
+        }
+
+        // QR Code
+        if (qrDataUrl) {
+            doc.setDrawColor(220, 220, 220);
+            doc.line(margin, y, W - margin, y);
+            y += 8;
+            setLabel(10);
+            doc.setTextColor(60, 60, 60);
+            doc.text('ATTENDANCE QR CODE', W / 2, y, { align: 'center' });
+            y += 3;
+            setLabelNormal(8);
+            doc.setTextColor(140, 140, 140);
+            doc.text('Present this QR code at the workshop for check-in', W / 2, y, { align: 'center' });
+            y += 4;
+            var qrSize = 40;
+            doc.addImage(qrDataUrl, 'PNG', (W - qrSize) / 2, y, qrSize, qrSize);
+            y += qrSize + 8;
+        }
+
+        // Footer
+        doc.setDrawColor(220, 220, 220);
+        doc.line(margin, y, W - margin, y);
+        y += 6;
+        setLabelNormal(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text('This receipt is automatically generated by AIFlowTime.', margin, y);
+        y += 4;
+        doc.text('For enquiries, please contact us via WhatsApp at +852 6288 0186.', margin, y);
+
+        // Bottom bar
+        doc.setFillColor(217, 119, 87);
+        doc.rect(0, doc.internal.pageSize.getHeight() - 6, W, 6, 'F');
+
+        var fileName = 'Receipt_' + (safeName.replace(/\s+/g, '_') || 'Workshop') + '.pdf';
+        doc.save(fileName);
+
+        document.getElementById('statusBox').innerHTML =
+            '<div style="font-size:48px;margin-bottom:12px;">✅</div>' +
+            '<h2>收據已下載</h2>' +
+            '<p>Your receipt <strong>' + fileName + '</strong> has been downloaded.</p>' +
+            '<button onclick="location.reload()" style="margin-top:16px;padding:10px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;">重新下載 Download Again</button>' +
+            '<br><a class="back-link" href="/profile">← 返回個人頁面</a>';
+    }
+
+    (async function init() {
+        var params = new URLSearchParams(window.location.search);
+        var regId = params.get('id');
+        if (!regId) { showError('Missing registration ID.'); return; }
+
+        try {
+            var regSnap = await db.collection('registrations').doc(regId).get();
+            if (!regSnap.exists) { showError('Registration not found. The link may be invalid.'); return; }
+            var reg = regSnap.data();
+            reg._id = regSnap.id;
+
+            if (reg.status !== 'confirmed') {
+                showError('This registration has not been confirmed yet. Receipt is only available for confirmed payments.');
+                return;
+            }
+
+            var ws = {};
+            if (reg.workshopId) {
+                var wsSnap = await db.collection('workshops').doc(reg.workshopId).get();
+                if (wsSnap.exists) ws = wsSnap.data();
+            }
+
+            await buildAndOpenReceipt(reg, ws);
+        } catch (err) {
+            showError('Failed to load data: ' + err.message);
+        }
+    })();
+    </script>
+</body>
+</html>

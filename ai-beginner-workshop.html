@@ -1,0 +1,3511 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI課程工作坊 | AIFLOWTIME - 香港在職人士AI進修首選</title>
+    <meta name="description" content="AIFLOWTIME提供實用AI課程與工作坊，專為香港在職人士設計。零基礎學習Prompt Engineering及AI工具，即學即用提升職場效率。立即報名！">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7;
+            --bg-off: #E8E4DF;
+            --bg-pampas: #F4F3EE;
+            --accent: #D97757;
+            --accent-text: #C45A3A;
+            --accent-dark: #C56A4B;
+            --text: #3B3B3B;
+            --text-light: #7A7A7A;
+            --white: #FFFFFF;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+        
+        /* Scroll animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--text);
+        }
+        
+        h1 {
+            font-size: clamp(40px, 6vw, 64px);
+        }
+        
+        h2 {
+            font-size: clamp(32px, 4vw, 48px);
+        }
+        
+        h3 {
+            font-size: clamp(24px, 3vw, 32px);
+        }
+        
+        h4 {
+            font-size: clamp(20px, 2vw, 24px);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            padding: 0 32px;
+            background: var(--accent);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        
+        .btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Shimmer effect for CTA buttons */
+        @keyframes btn-shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.35) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: btn-shimmer 2.5s ease-in-out infinite;
+            box-shadow: 0 8px 24px rgba(217, 119, 87, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-outline:hover {
+            background: var(--accent);
+            color: var(--white);
+        }
+        
+        /* Focus styles for accessibility */
+        a:focus-visible,
+        button:focus-visible,
+        .btn:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+        
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            z-index: 1000;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 16px;
+        }
+        
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .glass-card {
+                padding: 32px;
+            }
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Category pill - above title in card body */
+        .workshop-category {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 6px;
+            background: var(--text);
+            color: var(--bg-cream);
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            align-self: flex-start;
+        }
+
+        /* Diamond difficulty rating */
+        .workshop-diamonds {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-bottom: 12px;
+        }
+        .workshop-diamonds .diamond {
+            font-size: 14px;
+            line-height: 1;
+        }
+        .workshop-diamonds .diamond.filled { color: var(--text); }
+        .workshop-diamonds .diamond.empty { color: #D1D5DB; }
+        .workshop-diamonds .difficulty-label {
+            margin-left: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+        .difficulty-label.dl-beginner { background: rgba(76,175,80,0.12); color: #2E7D32; }
+        .difficulty-label.dl-intermediate { background: rgba(255,152,0,0.12); color: #E65100; }
+        .difficulty-label.dl-advanced { background: rgba(198,40,40,0.1); color: #C62828; }
+        
+        /* Free trial badge */
+        .trial-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent);
+            color: var(--white);
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        /* Header (reference: about-jacob) */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 72rem;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+        
+        .logo {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+        
+        .logo:hover {
+            color: var(--accent);
+        }
+        
+        .logo span {
+            color: var(--accent);
+        }
+        
+        /* Desktop Navigation */
+        .nav-desktop {
+            display: none;
+        }
+        
+        .nav-desktop a {
+            color: var(--text);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 15px;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+        
+        .nav-desktop a:hover {
+            color: var(--accent);
+        }
+        
+        /* Mobile Navigation */
+        .nav-mobile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .hamburger {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        
+        .hamburger:hover {
+            background: rgba(217, 119, 87, 0.1);
+        }
+        
+        .hamburger .bar {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--text);
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .hamburger.active .bar:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger.active .bar:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active .bar:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(250, 249, 247, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            transform: translateY(-100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+        
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .mobile-menu a {
+            display: block;
+            color: var(--text);
+            text-decoration: none;
+            padding: 16px 0;
+            font-size: 18px;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-menu a:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-menu a:hover {
+            color: var(--accent);
+        }
+        
+        .mobile-menu .btn {
+            margin-top: 16px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 0 80px;
+            position: relative;
+        }
+
+        .hero-gif {
+            width: 100%;
+            max-width: 420px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 480px) {
+            .hero-gif {
+                max-width: 85vw;
+            }
+        }
+        
+        .hero-content {
+            max-width: 800px;
+        }
+        
+        .hero h1 {
+            margin-bottom: 24px;
+        }
+        
+        .hero-cta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        /* Section Styles */
+        section {
+            padding: 100px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+        
+        .section-header h2 {
+            margin-bottom: 16px;
+        }
+        
+        /* Pain Points */
+        .pain-points-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .pain-point-card {
+            background: var(--bg-pampas);
+            border-radius: 16px;
+            padding: 32px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .pain-point-card h4 {
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+        
+        .pain-point-card p {
+            color: var(--text);
+            opacity: 0.9;
+            font-weight: 700;
+        }
+        
+        .insight-box {
+            background: var(--accent);
+            color: var(--white);
+            border-radius: 9999px;
+            padding: 12px 28px;
+            text-align: center;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        .insight-box p {
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: 700;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        /* How It Works timeline */
+        .hiw-timeline {
+            display: flex; flex-direction: column; gap: 0;
+            max-width: 600px; margin: 0 auto;
+            position: relative;
+            padding-left: 40px;
+        }
+        .hiw-timeline::before {
+            content: ''; position: absolute; left: 18px; top: 24px; bottom: 24px;
+            width: 2px; background: linear-gradient(180deg, var(--accent) 0%, rgba(217,119,87,0.15) 100%);
+        }
+        .hiw-step {
+            display: flex; align-items: flex-start; gap: 20px;
+            position: relative; padding: 18px 0;
+        }
+        .hiw-step-num {
+            position: absolute; left: -40px;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--accent); color: #fff;
+            font-weight: 800; font-size: 15px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; z-index: 1;
+            box-shadow: 0 2px 8px rgba(217,119,87,0.25);
+        }
+        .hiw-step-body h4 {
+            font-size: 17px; font-weight: 700; margin: 0 0 4px; color: var(--text);
+        }
+        .hiw-step-body p {
+            font-size: 14px; color: var(--text-light); margin: 0; line-height: 1.6;
+        }
+
+        /* Testimonial */
+        .testimonial-card {
+            max-width: 620px; margin: 0 auto;
+            background: var(--bg-pampas); border-radius: 20px;
+            padding: 40px 36px 32px; position: relative;
+            border: 1.5px solid rgba(217,119,87,0.1);
+        }
+        .testimonial-quote {
+            position: absolute; top: -8px; left: 28px;
+            font-size: 72px; font-weight: 800; color: var(--accent);
+            line-height: 1; opacity: 0.25; font-family: Georgia, serif;
+        }
+        .testimonial-text {
+            font-size: 16px; line-height: 1.8; color: var(--text);
+            margin: 0 0 24px; font-style: italic; border: none; padding: 0;
+        }
+        .testimonial-author {
+            display: flex; align-items: center; gap: 14px;
+        }
+        .testimonial-avatar {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--accent); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 18px; flex-shrink: 0;
+        }
+        .testimonial-name { font-weight: 700; font-size: 15px; color: var(--text); }
+        .testimonial-role { font-size: 13px; color: var(--text-light); margin-top: 2px; }
+
+        /* Data expand section */
+        .data-expand-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 14px 28px; border-radius: 14px;
+            background: var(--bg-pampas); border: 1.5px solid rgba(217,119,87,0.15);
+            color: var(--text); font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .data-expand-btn:hover { border-color: var(--accent); background: rgba(217,119,87,0.06); }
+        .data-expand-icon { font-size: 18px; }
+        .data-expand-arrow { font-size: 12px; transition: transform 0.3s; color: var(--text-light); }
+        .data-expand-btn.open .data-expand-arrow { transform: rotate(180deg); }
+        .data-expand-body {
+            max-height: 0; overflow: hidden; transition: max-height 0.5s ease, opacity 0.4s ease;
+            opacity: 0; margin-top: 0;
+        }
+        .data-expand-body.open { max-height: 1200px; opacity: 1; margin-top: 24px; }
+        @media (max-width: 600px) {
+            .data-stats-grid { grid-template-columns: 1fr !important; }
+        }
+
+        /* Workshops – single-column timeline */
+        .workshops-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            max-width: 640px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Vertical connecting line behind the cards */
+        .workshops-grid::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1.5px;
+            background: var(--accent);
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        
+        .glass-card.workshop-card {
+            position: relative;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            border: 1.5px solid var(--accent);
+            z-index: 1;
+            will-change: transform;
+            overflow: hidden;
+        }
+
+        /* Workshop card image area (top half) — flush edge-to-edge */
+        .workshop-card-image {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            background: var(--bg-pampas);
+            position: relative;
+        }
+
+        .workshop-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .workshop-card-image .image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 48px;
+            opacity: 0.3;
+        }
+
+        /* Badge overlay on image */
+        .workshop-card .level-badge {
+            z-index: 3;
+        }
+
+        /* Workshop number overlay on image */
+        .workshop-card .workshop-number {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-family: 'Courier Prime', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            z-index: 2;
+        }
+
+        /* Card body content */
+        .workshop-card-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            .workshop-card-body {
+                padding: 32px;
+            }
+        }
+        
+        .workshop-card h4 {
+            margin-bottom: 6px;
+            margin-top: 0;
+        }
+        .workshop-subtitle {
+            font-size: 15px; font-weight: 700; color: var(--accent);
+            margin: 0 0 10px; line-height: 1.5;
+        }
+
+        /* Description directly below title */
+        .workshop-card p.workshop-desc {
+            margin-bottom: 14px;
+            opacity: 0.95;
+            font-weight: 500;
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: var(--text-light);
+        }
+        .workshop-meta-line {
+            font-size: 13px; line-height: 1.55; color: var(--text);
+            margin: 0 0 6px; padding: 0;
+        }
+        .workshop-meta-label {
+            font-weight: 700; color: var(--accent);
+        }
+
+        /* Info + capacity footer section */
+        .workshop-card-footer {
+            background: var(--bg);
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+
+        .workshop-info-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .workshop-info-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--white);
+            color: var(--text);
+            border: 1px solid rgba(0,0,0,0.06);
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .workshop-info-tag svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            stroke: var(--text-light);
+        }
+
+        .workshop-info-tag.tag-mode {
+            color: #1565C0;
+            font-weight: 700;
+            border-color: rgba(33,150,243,0.2);
+            background: rgba(33,150,243,0.06);
+        }
+
+        /* Mode pill inside date boxes */
+        .date-mode-pill {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--accent);
+            color: #fff;
+            line-height: 1.4;
+            margin-top: 3px;
+        }
+
+        /* Per-date capacity wrapper */
+        .date-capacity-wrap {
+            margin-top: 6px;
+            width: 100%;
+        }
+        .date-capacity-wrap .capacity-bar {
+            margin-bottom: 4px;
+        }
+        .date-capacity-wrap .capacity-text {
+            font-size: 11px;
+        }
+        .workshop-info-tag.tag-price {
+            color: var(--accent-text);
+            font-weight: 700;
+            border-color: rgba(217,119,87,0.2);
+            background: rgba(217,119,87,0.06);
+        }
+
+        /* Capacity scale bar */
+        .capacity-bar {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            margin-bottom: 6px;
+        }
+
+        .capacity-rect {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            max-width: 22px;
+            border-radius: 6px;
+            background: #D1D5DB;
+            transition: background 0.3s ease;
+        }
+
+        .capacity-rect.filled {
+            background: var(--accent);
+        }
+
+        .capacity-text {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+        
+        .workshop-card-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            margin-top: auto;
+            padding-top: 8px;
+        }
+        .workshop-card-actions .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            max-width: 280px;
+        }
+        .details-toggle-link {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 14px;
+            color: var(--accent);
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+            transition: opacity 0.2s;
+        }
+        .details-toggle-link:hover {
+            opacity: 0.7;
+        }
+        .details-toggle-link .arrow {
+            font-size: 11px;
+            transition: transform 0.2s;
+        }
+        .details-toggle-link.open .arrow {
+            transform: rotate(180deg);
+        }
+        /* Join waiting list: dark background (page text color), keep text white */
+        .workshop-card-actions .btn.btn-waiting {
+            background: var(--text);
+            color: var(--white);
+        }
+        .workshop-card-actions .btn.btn-waiting:hover {
+            background: #2a2a2a;
+            color: var(--white);
+        }
+        .workshop-card ul {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+        
+        .workshop-card li {
+            padding-left: 24px;
+            position: relative;
+            margin-bottom: 12px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .workshop-card li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-family: 'Courier Prime', monospace;
+            font-weight: 700;
+        }
+
+        /* Loading skeleton for workshop cards */
+        .workshop-skeleton {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: skeleton-pulse 1.5s ease-in-out infinite;
+        }
+        .workshop-skeleton .skel-img {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            background: var(--bg-pampas);
+        }
+        .workshop-skeleton .skel-body {
+            padding: 24px;
+        }
+        .workshop-skeleton .skel-line {
+            height: 16px;
+            background: var(--bg-off);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .workshop-skeleton .skel-line.short { width: 60%; }
+        .workshop-skeleton .skel-line.medium { width: 80%; }
+        @keyframes skeleton-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Trust Section */
+        .trust-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .trust-card {
+            text-align: center;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .trust-card-image {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .trust-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .trust-card-content {
+            padding: 24px 32px 40px;
+        }
+        
+        .trust-card h4 {
+            margin-bottom: 12px;
+        }
+        
+        .trust-card p {
+            opacity: 0.9;
+            font-size: 15px;
+            font-weight: 700;
+        }
+        
+        /* Social Proof Stats */
+        .social-proof-stats {
+            background: var(--accent);
+            color: var(--white);
+            border-radius: 20px;
+            padding: 40px 32px;
+            text-align: center;
+            margin-top: 48px;
+        }
+        
+        .social-proof-stats .stat-number {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: clamp(48px, 8vw, 72px);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        
+        .social-proof-stats .stat-label {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        
+        .testimonial-card {
+            padding: 32px;
+        }
+        
+        .testimonial-quote {
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 24px;
+            font-style: italic;
+            color: var(--text);
+        }
+        
+        .testimonial-quote::before {
+            content: '"';
+            font-size: 48px;
+            color: var(--accent);
+            line-height: 1;
+            display: block;
+            margin-bottom: -16px;
+            opacity: 0.5;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .testimonial-info h5 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .testimonial-info p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        /* FAQ Section */
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background: var(--bg-pampas);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            width: 100%;
+            padding: 24px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 44px;
+            transition: color 0.3s;
+        }
+        
+        .faq-question:hover {
+            color: var(--accent);
+        }
+        
+        .faq-question::after {
+            content: '+';
+            font-family: 'Courier Prime', monospace;
+            font-size: 24px;
+            color: var(--accent);
+            transition: transform 0.3s;
+        }
+        
+        .faq-item.active .faq-question::after {
+            transform: rotate(45deg);
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 300px;
+        }
+        
+        .faq-answer p {
+            padding: 0 24px 24px;
+            color: var(--text);
+            opacity: 0.95;
+            line-height: 1.8;
+            font-weight: 700;
+        }
+        
+        /* Final CTA */
+        .final-cta {
+            text-align: center;
+            padding: 120px 0;
+        }
+        
+        .final-cta h2 {
+            margin-bottom: 24px;
+        }
+        
+        .final-cta p {
+            max-width: 600px;
+            margin: 0 auto 32px;
+            font-size: 18px;
+            opacity: 0.95;
+            font-weight: 700;
+        }
+        
+        .final-cta .btn {
+            height: 56px;
+            padding: 0 48px;
+            font-size: 18px;
+        }
+        
+        .contact-info {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-info a {
+            color: var(--text);
+            text-decoration: none;
+            margin: 0 16px;
+            padding: 12px 0;
+            display: inline-block;
+            transition: color 0.3s;
+            min-height: 44px;
+        }
+        
+        .contact-info a:hover,
+        .contact-info a:focus {
+            color: var(--accent);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--text);
+            color: var(--bg-off);
+            padding: 48px 0;
+            text-align: center;
+        }
+        
+        footer .logo {
+            color: var(--white);
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        
+        footer p {
+            font-size: 14px;
+            opacity: 0.8;
+            font-weight: 700;
+        }
+        
+        /* Tablet */
+        @media (min-width: 768px) {
+            .nav-desktop {
+                display: flex;
+                align-items: center;
+            }
+            
+            .nav-mobile {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: none;
+            }
+            
+            .pain-points-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .trust-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Desktop */
+        @media (min-width: 1024px) {
+            .testimonials-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* About instructor responsive */
+        @media (max-width: 767px) {
+            #about .glass-card {
+                grid-template-columns: 1fr !important;
+            }
+            #about .glass-card > div:last-child {
+                order: -1;
+            }
+        }
+
+        /* User auth button in nav */
+        .nav-user-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 24px;
+            padding: 6px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1.5px solid var(--bg-off);
+            background: var(--white);
+            white-space: nowrap;
+        }
+        .nav-user-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .nav-user-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .nav-user-btn img { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; }
+        .mobile-menu .nav-user-btn { margin-left: 0; margin-top: 12px; width: 100%; justify-content: center; }
+
+        /* Notification badge */
+        .nav-cta-btn {
+            background: transparent; color: var(--accent) !important;
+            border: 1.5px solid var(--accent); box-shadow: none;
+        }
+        .nav-cta-btn:hover { background: var(--accent); color: var(--white) !important; }
+        .nav-cta-btn::after { display: none; }
+
+        .nav-user-btn, .hamburger { position: relative; }
+        .notif-badge {
+            position: absolute; top: -4px; right: -4px;
+            min-width: 18px; height: 18px; padding: 0 5px;
+            border-radius: 9px; background: #E53935; color: #fff;
+            font-size: 11px; font-weight: 700; line-height: 18px;
+            text-align: center; display: none; z-index: 2;
+            box-shadow: 0 1px 4px rgba(229,57,53,0.4);
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .notif-badge.show { display: block; }
+
+        /* Disable generic glass-card hover lift on workshop cards (parallax handles transform) */
+        .workshop-card.glass-card:hover {
+            transform: none;
+        }
+
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .workshop-card {
+                will-change: auto;
+            }
+        }
+
+        /* Fallback for no backdrop-filter */
+        @supports not (backdrop-filter: blur(20px)) {
+            .glass-card {
+                background: rgba(255, 255, 255, 0.85);
+            }
+            
+            header {
+                background: rgba(250, 249, 247, 0.95);
+            }
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Video
+        ============================================= */
+        .sec-video { padding: 60px 0; background: var(--bg-cream); }
+        .sec-video .video-wrap {
+            max-width: 360px; margin: 0 auto; border-radius: 24px; overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12); aspect-ratio: 9/16; background: #1a1a1a;
+        }
+        .sec-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .sec-video .video-caption {
+            text-align: center; margin-top: 16px; font-size: 14px; color: var(--text-light);
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Image Chain
+        ============================================= */
+        .sec-image-chain { padding: 80px 0; background: var(--bg-cream); }
+        .sec-image-chain .chain-title {
+            text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 48px; color: var(--text);
+        }
+        .sec-image-chain .chain-list { position: relative; max-width: 600px; margin: 0 auto; }
+        .sec-image-chain .chain-card {
+            position: relative; width: 280px; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10); margin-bottom: 40px;
+            transition: transform 0.3s, box-shadow 0.3s; background: #fff;
+        }
+        .sec-image-chain .chain-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+        .sec-image-chain .chain-card:nth-child(odd) { margin-left: 0; }
+        .sec-image-chain .chain-card:nth-child(even) { margin-left: auto; }
+        .sec-image-chain .chain-card img { width: 100%; display: block; }
+        .sec-image-chain .chain-card .chain-label {
+            padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--text);
+        }
+        .sec-image-chain .chain-svg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Mindset Shift
+        ============================================= */
+        .sec-mindset-shift { padding: 80px 0; background: var(--bg-cream); text-align: center; }
+        .sec-mindset-shift .shift-before {
+            font-size: 2.2rem; font-weight: 700; color: var(--text-light);
+            text-decoration: line-through; text-decoration-color: var(--accent);
+            text-decoration-thickness: 3px; margin-bottom: 12px;
+        }
+        .sec-mindset-shift .shift-after {
+            font-size: 2.8rem; font-weight: 800; color: var(--accent); margin-bottom: 16px;
+        }
+        .sec-mindset-shift .shift-desc {
+            font-size: 1.1rem; color: var(--text-light); max-width: 520px; margin: 0 auto; line-height: 1.7;
+        }
+        @media (max-width: 640px) {
+            .sec-mindset-shift .shift-before { font-size: 1.5rem; }
+            .sec-mindset-shift .shift-after { font-size: 1.8rem; }
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Learning Outcomes
+        ============================================= */
+        .sec-learning-outcomes { padding: 80px 0; background: var(--bg-cream); }
+        .sec-learning-outcomes .lo-title {
+            text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 40px; color: var(--text);
+        }
+        .sec-learning-outcomes .lo-list { max-width: 640px; margin: 0 auto; }
+        .sec-learning-outcomes .lo-item {
+            display: flex; align-items: flex-start; gap: 16px; padding: 20px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .sec-learning-outcomes .lo-num {
+            flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+            background: var(--accent); color: #fff; font-weight: 700; font-size: 15px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sec-learning-outcomes .lo-item-title { font-weight: 700; font-size: 1.05rem; color: var(--text); }
+        .sec-learning-outcomes .lo-item-desc { font-size: 0.9rem; color: var(--text-light); margin-top: 4px; }
+        .sec-learning-outcomes .lo-tools {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 32px;
+        }
+        .sec-learning-outcomes .lo-tool-chip {
+            padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            background: rgba(217,119,87,0.1); color: var(--accent); border: 1px solid rgba(217,119,87,0.2);
+        }
+        .sec-learning-outcomes .lo-demo-box {
+            max-width: 480px; margin: 32px auto 0; padding: 20px 24px; border-radius: 14px;
+            background: rgba(217,119,87,0.06); border-top: 3px solid var(--accent);
+            text-align: center; font-weight: 600; font-size: 1rem; color: var(--text);
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Audience Fit
+        ============================================= */
+        .sec-audience-fit { padding: 80px 0; background: var(--bg-cream); }
+        .sec-audience-fit .af-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 720px; margin: 0 auto;
+        }
+        .sec-audience-fit .af-card {
+            padding: 28px; border-radius: 16px; background: #fff;
+            border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .sec-audience-fit .af-card-yes { border-left: 4px solid #2e7d32; }
+        .sec-audience-fit .af-card-no { border-left: 4px solid #c62828; }
+        .sec-audience-fit .af-card-title {
+            font-weight: 700; font-size: 1rem; margin-bottom: 16px; color: var(--text);
+        }
+        .sec-audience-fit .af-list { list-style: none; padding: 0; }
+        .sec-audience-fit .af-list li {
+            padding: 6px 0; font-size: 0.95rem; color: var(--text); display: flex; align-items: center; gap: 8px;
+        }
+        .sec-audience-fit .af-list li::before { font-weight: 700; flex-shrink: 0; }
+        .sec-audience-fit .af-card-yes .af-list li::before { content: '→'; color: #2e7d32; }
+        .sec-audience-fit .af-card-no .af-list li::before { content: '✕'; color: #c62828; }
+        @media (max-width: 640px) { .sec-audience-fit .af-grid { grid-template-columns: 1fr; } }
+
+        /* =============================================
+           NEW SECTION TYPES — Logistics Card
+        ============================================= */
+        .sec-logistics-card { padding: 80px 0; background: var(--bg-cream); }
+        .sec-logistics-card .lc-card {
+            max-width: 560px; margin: 0 auto; background: #fff; border-radius: 20px;
+            border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
+        }
+        .sec-logistics-card .lc-rows { display: flex; flex-direction: column; }
+        .sec-logistics-card .lc-row {
+            display: flex; align-items: center; gap: 16px; padding: 18px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .sec-logistics-card .lc-row:last-child { border-bottom: none; }
+        .sec-logistics-card .lc-icon {
+            flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+            background: rgba(217,119,87,0.1); color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sec-logistics-card .lc-label { flex-shrink: 0; width: 56px; font-size: 0.88rem; font-weight: 600; color: var(--text-light); }
+        .sec-logistics-card .lc-val { flex: 1; text-align: right; font-size: 1.05rem; font-weight: 600; color: var(--text); }
+        .sec-logistics-card .lc-capacity { padding: 18px 24px; border-top: 1px solid rgba(0,0,0,0.05); }
+        .sec-logistics-card .lc-cap-bar { display: flex; gap: 5px; margin-bottom: 8px; }
+        .sec-logistics-card .lc-cap-rect {
+            flex: 1; height: 8px; border-radius: 4px; background: rgba(0,0,0,0.06); transition: background 0.3s;
+        }
+        .sec-logistics-card .lc-cap-rect.filled { background: var(--accent); }
+        .sec-logistics-card .lc-cap-text { text-align: center; font-size: 0.85rem; color: var(--text-light); }
+        .sec-logistics-card .lc-cap-text span { color: var(--accent); font-weight: 700; }
+        .sec-logistics-card .lc-cta {
+            display: flex; justify-content: center; padding: 18px 24px; border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .sec-logistics-card .lc-cta .btn { width: 100%; text-align: center; }
+
+        /* =============================================
+           NEW SECTION TYPES — Transformation
+        ============================================= */
+        .sec-transformation { padding: 80px 0; background: var(--bg-cream); }
+        .sec-transformation .tf-title {
+            text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 40px; color: var(--text);
+        }
+        .sec-transformation .tf-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 0 auto;
+        }
+        .sec-transformation .tf-card {
+            background: #fff; border-radius: 16px; padding: 28px; border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .sec-transformation .tf-theme {
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent);
+            margin-bottom: 16px; text-transform: uppercase;
+        }
+        .sec-transformation .tf-before {
+            font-size: 0.9rem; color: var(--text-light); padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent); margin-bottom: 12px;
+        }
+        .sec-transformation .tf-before-label, .sec-transformation .tf-after-label {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        .sec-transformation .tf-after { font-size: 0.9rem; color: var(--text); font-weight: 600; }
+        @media (max-width: 768px) { .sec-transformation .tf-grid { grid-template-columns: 1fr; } }
+
+        .sec-countdown { padding: 60px 0; text-align: center; }
+        .sec-countdown .countdown-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+        .sec-countdown .countdown-unit { background: var(--bg-pampas); border: 1px solid var(--bg-off); border-radius: 12px; padding: 16px 14px; min-width: 64px; }
+        .sec-countdown .countdown-unit .value { font-size: 1.75rem; font-weight: 700; color: var(--accent); display: block; }
+        .sec-countdown .countdown-unit .label { font-size: 11px; color: var(--text-light); text-transform: uppercase; }
+        .sec-countdown .countdown-code-wrap { margin-bottom: 20px; }
+        .sec-countdown .countdown-code-label { font-size: 13px; color: var(--text-light); margin-bottom: 6px; }
+        .sec-countdown .countdown-code { display: inline-block; padding: 12px 24px; background: rgba(217,119,87,0.1); border: 2px solid var(--accent); border-radius: 10px; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); }
+        .sec-countdown .countdown-cta { margin-top: 8px; }
+
+        /* =============================================
+           NEW SECTION TYPES — Link List
+        ============================================= */
+        .sec-link-list { padding: 60px 0; background: var(--bg-cream); }
+        .sec-link-list .ll-title { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 32px; color: var(--text); }
+        .sec-link-list .ll-list { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .sec-link-list .ll-card {
+            display: flex; align-items: center; justify-content: space-between; padding: 16px 20px;
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.06); text-decoration: none; color: var(--text);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .sec-link-list .ll-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .sec-link-list .ll-card-body { flex: 1; }
+        .sec-link-list .ll-card-label { font-weight: 600; font-size: 1rem; }
+        .sec-link-list .ll-card-desc { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
+        .sec-link-list .ll-badge {
+            font-size: 0.7rem; font-weight: 700; background: var(--accent); color: #fff;
+            padding: 2px 8px; border-radius: 20px; margin-left: 12px; white-space: nowrap;
+        }
+        .sec-link-list .ll-chevron { margin-left: 12px; color: var(--text-light); font-size: 1.2rem; }
+
+        /* =============================================
+           NEW SECTION TYPES — Tools Grid
+        ============================================= */
+        .sec-tools-grid { padding: 60px 0; background: var(--bg-cream); }
+        .sec-tools-grid .tg-title { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 32px; color: var(--text); }
+        .sec-tools-grid .tg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto; }
+        .sec-tools-grid .tg-card {
+            background: #fff; border-radius: 14px; padding: 24px; border: 1px solid rgba(0,0,0,0.06);
+            text-decoration: none; color: var(--text); display: flex; flex-direction: column; gap: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .sec-tools-grid .tg-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .sec-tools-grid .tg-logo { width: 48px; height: 48px; object-fit: contain; border-radius: 10px; }
+        .sec-tools-grid .tg-name { font-weight: 700; font-size: 1rem; }
+        .sec-tools-grid .tg-desc { font-size: 0.85rem; color: var(--text-light); }
+        .sec-tools-grid .tg-badge {
+            display: inline-block; font-size: 0.7rem; font-weight: 700; background: var(--accent); color: #fff;
+            padding: 2px 8px; border-radius: 20px; align-self: flex-start;
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Section Divider
+        ============================================= */
+        .sec-section-divider { padding: 40px 0; }
+        .sec-section-divider .sd-wrap { display: flex; align-items: center; gap: 16px; max-width: 800px; margin: 0 auto; }
+        .sec-section-divider .sd-line { flex: 1; height: 1px; background: rgba(0,0,0,0.12); }
+        .sec-section-divider .sd-label { text-align: center; white-space: nowrap; }
+        .sec-section-divider .sd-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+        .sec-section-divider .sd-subtitle { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
+
+        /* =============================================
+           NEW SECTION TYPES — Lead Magnet
+        ============================================= */
+        .sec-lead-magnet { padding: 60px 0; background: var(--bg-cream); text-align: center; }
+        .sec-lead-magnet .lm-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+        .sec-lead-magnet .lm-desc { font-size: 1rem; color: var(--text-light); margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .sec-lead-magnet .lm-img { max-width: 280px; border-radius: 14px; margin: 0 auto 24px; display: block; }
+        .sec-lead-magnet .lm-trigger {
+            display: inline-block; padding: 14px 36px; background: var(--accent); color: #fff; border: none;
+            border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+        }
+        .sec-lead-magnet .lm-trigger:hover { opacity: 0.85; }
+        .sec-lead-magnet .lm-modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        .sec-lead-magnet .lm-modal-overlay.active { display: flex; }
+        .sec-lead-magnet .lm-modal {
+            background: #fff; border-radius: 18px; padding: 36px; max-width: 420px; width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .sec-lead-magnet .lm-modal h3 { margin-bottom: 16px; font-size: 1.3rem; }
+        .sec-lead-magnet .lm-modal input {
+            width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 10px;
+            margin-bottom: 12px; font-size: 0.95rem;
+        }
+        .sec-lead-magnet .lm-modal button.lm-submit {
+            width: 100%; padding: 14px; background: var(--accent); color: #fff; border: none;
+            border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer;
+        }
+        .sec-lead-magnet .lm-modal .lm-close {
+            position: absolute; top: 12px; right: 16px; font-size: 1.5rem; cursor: pointer;
+            background: none; border: none; color: var(--text-light);
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Origin Story
+        ============================================= */
+        .sec-origin-story { padding: 80px 0; background: var(--bg-cream); }
+        .sec-origin-story .os-title { text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+        .sec-origin-story .os-intro { text-align: center; font-size: 1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px; }
+        .sec-origin-story .os-timeline { position: relative; max-width: 600px; margin: 0 auto; padding-left: 32px; }
+        .sec-origin-story .os-timeline::before {
+            content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--accent); opacity: 0.3;
+        }
+        .sec-origin-story .os-step { position: relative; margin-bottom: 32px; }
+        .sec-origin-story .os-dot {
+            position: absolute; left: -28px; top: 4px; width: 14px; height: 14px;
+            background: var(--accent); border-radius: 50%; border: 3px solid var(--bg-cream);
+        }
+        .sec-origin-story .os-step-title { font-weight: 700; font-size: 1.1rem; color: var(--text); margin-bottom: 6px; }
+        .sec-origin-story .os-step-desc { font-size: 0.95rem; color: var(--text-light); line-height: 1.6; }
+
+        /* =============================================
+           NEW SECTION TYPES — Tools Tags
+        ============================================= */
+        .sec-tools-tags { padding: 60px 0; background: var(--bg-cream); }
+        .sec-tools-tags .tt-title { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+        .sec-tools-tags .tt-desc { text-align: center; font-size: 1rem; color: var(--text-light); max-width: 600px; margin: 0 auto 28px; }
+        .sec-tools-tags .tt-cloud { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 700px; margin: 0 auto 28px; }
+        .sec-tools-tags .tt-tag {
+            padding: 8px 18px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 30px;
+            font-size: 0.9rem; font-weight: 600; color: var(--text);
+        }
+        .sec-tools-tags .tt-callout {
+            max-width: 600px; margin: 0 auto; padding: 20px 24px; background: var(--accent);
+            color: #fff; border-radius: 14px; font-size: 0.95rem; font-weight: 600; text-align: center;
+        }
+
+        /* =============================================
+           NEW SECTION TYPES — Photo Block
+        ============================================= */
+        .sec-photo-block { padding: 40px 0; }
+        .sec-photo-block .pb-img { display: block; max-width: 800px; width: 100%; margin: 0 auto; border-radius: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        .sec-photo-block .pb-caption { text-align: center; font-size: 0.9rem; color: var(--text-light); margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <!-- Skip navigation link for accessibility -->
+    <a href="#main-content" class="skip-link">跳至主要內容</a>
+    
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <a href="linktree.html" class="logo">AI<span>FLOW</span>TIME</a>
+                
+                <!-- Desktop Navigation -->
+                <nav class="nav-desktop">
+                    <a href="#pain-points">點解學AI</a>
+                    <a href="#workshops">工作坊</a>
+                    <a href="#about">講師</a>
+                    <a href="#faq">常見問題</a>
+                    <a href="#workshops" class="btn btn-shimmer nav-cta-btn" style="height: 44px; padding: 0 24px; font-size: 14px; min-width: auto;">瀏覽所有工作坊</a>
+                    <a href="/profile" class="nav-user-btn" id="desktopUserBtn">
+                        <span class="notif-badge" id="desktopNotifBadge"></span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span>Sign In</span>
+                    </a>
+                </nav>
+                
+                <!-- Mobile Navigation -->
+                <div class="nav-mobile">
+                    <button class="hamburger" aria-label="開啟選單" aria-expanded="false" onclick="toggleMobileMenu()">
+                        <span class="notif-badge" id="hamburgerNotifBadge"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                        <span class="bar"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <nav class="mobile-menu" id="mobileMenu" aria-hidden="true">
+            <a href="#pain-points" onclick="closeMobileMenu()">點解學AI</a>
+            <a href="#workshops" onclick="closeMobileMenu()">工作坊</a>
+            <a href="#about" onclick="closeMobileMenu()">講師</a>
+            <a href="#faq" onclick="closeMobileMenu()">常見問題</a>
+            <a href="#workshops" class="btn btn-shimmer" onclick="closeMobileMenu()">瀏覽所有工作坊</a>
+            <a href="/profile" class="nav-user-btn" id="mobileUserBtn" onclick="closeMobileMenu()">
+                <span class="notif-badge" id="mobileNotifBadge"></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Sign In</span>
+            </a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+    <!-- Hero Section -->
+    <section class="hero" data-section-id="hero_default" data-section-type="hero">
+        <div class="container">
+            <div class="hero-gif-wrap" style="text-align: center; margin-bottom: 24px;">
+                <img src="Capy Yawn.gif" alt="Capy" class="hero-gif" loading="eager" decoding="async">
+            </div>
+            <div class="hero-content">
+                <h1>把 AI 變成你的時間槓桿</h1>
+                <p class="hero-subtitle" style="font-size:clamp(16px, 2.2vw, 20px); color:var(--text); font-weight:500; line-height:1.7; max-width:560px; margin:0 auto 40px;">學會建立<span style="color:var(--accent); font-weight:800; font-size:1.15em;">可複製的工作系統</span>，每週多出 <span style="color:var(--accent); font-weight:800; font-size:1.15em;">5–10 小時</span>，從混亂走向<span style="color:var(--accent); font-weight:800; font-size:1.15em;">掌控</span>。</p>
+                <div class="hero-cta">
+                    <a href="#workshops" class="btn btn-shimmer">立即預留名額</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pain Points Section -->
+    <section id="pain-points" data-section-id="pain-points_default" data-section-type="pain-points">
+        <div class="container">
+            <div class="section-header">
+                <h2>你的生活可以變成這樣。</h2>
+            </div>
+            <div class="pain-points-grid">
+                <div class="pain-point-card fade-in">
+                    <h4>忙到沒時間，現在終於能喘口氣。</h4>
+                    <p>寫文案、回訊息、做圖、記帳——以前全部自己來。現在讓 AI 處理重複性工作，每天省下 2–3 小時，終於能把精力放在真正重要的事上。</p>
+                </div>
+                <div class="pain-point-card fade-in">
+                    <h4>想到就能做到，不必再等別人幫忙。</h4>
+                    <p>想做好看的社群圖、寫吸引人的文案、架一個 landing page——以前要會設計、會寫、會寫程式才做得到。現在 AI 幫你補足技能缺口，一個人也能把想法變成成品。</p>
+                </div>
+                <div class="pain-point-card fade-in">
+                    <h4>不是 AI 不行，是之前沒人教你怎麼用。</h4>
+                    <p>試過 AI 但覺得結果不像樣？學會怎麼跟 AI 溝通之後，你會發現同一個工具，能交出完全不同等級的成果。</p>
+                </div>
+            </div>
+            <p class="jacob-quote" style="text-align: center; font-size: clamp(16px, 2vw, 18px); font-weight: 600; color: var(--text); line-height: 1.6; margin-top: 32px; margin-bottom: 0; max-width: 640px; margin-left: auto; margin-right: auto;">Jacob 就是這樣靠AI，加速自己學習、整理，又可以拍片，仲由唔識coding 到整到好靚嘅landing page ，仲可以接到job！</p>
+            <div style="text-align: center; margin-top: 24px;">
+                <div class="insight-box">
+                    <p>AI不是未來，而是現在。學懂與AI協作，是未來3年能否轉營的關鍵。</p>
+                </div>
+            </div>
+            
+            <!-- AI Data: Collapsible -->
+            <div class="data-expand-wrap" style="margin-top: 48px; text-align: center;">
+                <button class="data-expand-btn" onclick="toggleDataSection(this)">
+                    <span class="data-expand-icon">📊</span>
+                    <span>香港 AI 應用率與全球比較 — 查看數據</span>
+                    <span class="data-expand-arrow">▼</span>
+                </button>
+                <div class="data-expand-body" id="dataExpandBody">
+                    <div style="background: var(--bg-pampas); border-radius: 20px; padding: 32px; margin-bottom: 24px;">
+                        <h4 style="margin-bottom: 24px; font-size: 18px; text-align: left;">世界各地AI普及率比較 (2025下半年)</h4>
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">美國</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 28.3%; background: linear-gradient(90deg, #E8A88C, #D97757); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">28.3%</div></div></div>
+                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">台灣</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 28.4%; background: linear-gradient(90deg, #E8A88C, #D97757); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">28.4%</div></div></div>
+                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 600; font-size: 14px; color: var(--accent);">香港</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 26.4%; background: linear-gradient(90deg, #D97757, #C45A3A); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">26.4%</div></div></div>
+                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">日本</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 19.1%; background: linear-gradient(90deg, #F5C4B0, #E8A88C); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">19.1%</div></div></div>
+                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">全球平均</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 16.3%; background: linear-gradient(90deg, #F5C4B0, #E8A88C); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">16.3%</div></div></div>
+                        </div>
+                        <p style="margin-top: 14px; font-size: 12px; color: var(--text-light); text-align: center;">數據來源：Microsoft AI Economy Institute, 2025</p>
+                    </div>
+                    <div class="data-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: var(--bg-pampas); border-radius: 14px; padding: 20px; text-align: center;">
+                            <div style="font-size: 36px; font-weight: 700; color: var(--accent);">55%</div>
+                            <div style="font-size: 13px; color: var(--text); margin-top: 4px;">香港中小企已使用或計劃使用AI</div>
+                        </div>
+                        <div style="background: var(--bg-pampas); border-radius: 14px; padding: 20px; text-align: center;">
+                            <div style="font-size: 36px; font-weight: 700; color: var(--accent);">88%</div>
+                            <div style="font-size: 13px; color: var(--text); margin-top: 4px;">香港企業員工已在工作中使用AI</div>
+                        </div>
+                        <div style="background: var(--bg-pampas); border-radius: 14px; padding: 20px; text-align: center;">
+                            <div style="font-size: 36px; font-weight: 700; color: var(--accent);">22%</div>
+                            <div style="font-size: 13px; color: var(--text); margin-top: 4px;">香港員工每日使用AI（落後亞太29%）</div>
+                        </div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); color: white; border-radius: 14px; padding: 20px; text-align: center;">
+                        <p style="font-size: 15px; line-height: 1.7; margin: 0;"><strong>關鍵洞察：</strong>香港雖有88%企業員工接觸過AI，但僅22%每日使用。在30個全球市場中，香港AI準備度排名最末。這正是你需要的起跑優勢——現在學懂AI，就能超越同儕。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" data-section-id="how-it-works_default" data-section-type="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>報名流程</h2>
+                <p style="color:var(--text-light); font-size:16px; font-weight:500; margin-top:8px;">從瀏覽到入座，只需幾個簡單步驟。</p>
+            </div>
+            <div class="hiw-timeline">
+                <div class="hiw-step fade-in">
+                    <div class="hiw-step-num">1</div>
+                    <div class="hiw-step-body">
+                        <h4>瀏覽工作坊詳情</h4>
+                        <p>查看工作坊內容、日期和費用，選擇適合你的課程。</p>
+                    </div>
+                </div>
+                <div class="hiw-step fade-in">
+                    <div class="hiw-step-num">2</div>
+                    <div class="hiw-step-body">
+                        <h4>登入 Google 帳號報名</h4>
+                        <p>用 Google 帳號登入後再報名，即享<span style="color:var(--accent); font-weight:700;"> 會員專屬 95 折優惠</span>。<br><span style="font-size:0.9em; color:var(--text-light);">（不登入亦可以訪客身份報名，但不享折扣。）</span></p>
+                    </div>
+                </div>
+                <div class="hiw-step fade-in">
+                    <div class="hiw-step-num">3</div>
+                    <div class="hiw-step-body">
+                        <h4>填寫個人資料並報名</h4>
+                        <p>按「立即報名」，填寫姓名、電話等基本資料。</p>
+                    </div>
+                </div>
+                <div class="hiw-step fade-in">
+                    <div class="hiw-step-num">4</div>
+                    <div class="hiw-step-body">
+                        <h4>以 PayMe 或 FPS 付款</h4>
+                        <p>選擇你偏好的付款方式，完成付款後上傳付款截圖。</p>
+                    </div>
+                </div>
+                <div class="hiw-step fade-in">
+                    <div class="hiw-step-num">5</div>
+                    <div class="hiw-step-body">
+                        <h4>我們極速審核</h4>
+                        <p>收到截圖後，我們會盡快確認你的報名。</p>
+                    </div>
+                </div>
+                <div class="hiw-step fade-in">
+                    <div class="hiw-step-num">6</div>
+                    <div class="hiw-step-body">
+                        <h4>收到確認，準備上課</h4>
+                        <p>你會收到 WhatsApp 確認訊息。如已登入 Google 帳號，個人檔案內會出現專屬 QR Code，上課時出示即可。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section id="trust" data-section-id="trust_default" data-section-type="trust">
+        <div class="container">
+            <div class="section-header">
+                <h2>點解揀AIFLOWTIME？</h2>
+            </div>
+            <div class="trust-grid">
+                <div class="glass-card trust-card fade-in">
+                    <div class="trust-card-image">
+                        <img src="小班教學，逐個跟進.gif" alt="小班教學，逐個跟進" loading="lazy" class="trust-card-gif" data-src="小班教學，逐個跟進.gif">
+                    </div>
+                    <div class="trust-card-content">
+                        <h4>小班教學，逐個跟進。</h4>
+                        <p>我們刻意控制人數，不做大班。每位學員的問題都會在課堂上被即場回應和解決，不是聽完就算。</p>
+                    </div>
+                </div>
+                <div class="glass-card trust-card fade-in">
+                    <div class="trust-card-image">
+                        <img src="不只教工具，教你用 AI 的思維.gif" alt="不只教工具，教你用 AI 的思維" loading="lazy" class="trust-card-gif" data-src="不只教工具，教你用 AI 的思維.gif">
+                    </div>
+                    <div class="trust-card-content">
+                        <h4>不只教工具，教你用 AI 的思維。</h4>
+                        <p>我們從思維方式開始，讓你學會自己判斷什麼時候用什麼工具、怎麼用。學到的不是操作步驟，而是一套可以持續進化的 AI 思維。</p>
+                    </div>
+                </div>
+                <div class="glass-card trust-card fade-in">
+                    <div class="trust-card-image">
+                        <img src="導師每天都在用 AI 做實事.gif" alt="導師每天都在用 AI 做實事" loading="lazy" class="trust-card-gif" data-src="導師每天都在用 AI 做實事.gif">
+                    </div>
+                    <div class="trust-card-content">
+                        <h4>導師每天都在用 AI 做實事。</h4>
+                        <p>AIFLOWTIME 創辦人本身是香港 AI 創作者，擁有超過 34,000 位追蹤者，並與多間 AI 公司有實際合作經驗。你學到的不是課本內容，是真正用過、驗證過的方法。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section id="testimonials" data-section-id="testimonials_default" data-section-type="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>學員怎麼說</h2>
+            </div>
+            <div class="testimonial-card fade-in">
+                <div class="testimonial-quote">"</div>
+                <blockquote class="testimonial-text">
+                    好多謝Jacob 咁用心解答我無論係AI定係自媒體上嘅問題。你好明白到我喺自媒體經營上嘅難處，仲同我講應該出啲咩內容先至會多人睇，同埋點樣玩IG咁。呢啲內容遠遠超過AI 知識，你仲分享埋少少design嘅技巧。真心感覺到你係研究咗自媒體好耐先至有而家嘅成績，亦都好感謝你可以咁真誠大方地share你嘅經驗俾我~<br><br>當然consultation過程都有講AI，原來AI指令都要畫公仔畫出腸好仔細咁講佢先會明白我講咩。你都有好細緻咁樣講AI嘅合適指令同埋適合我嘅AI工作流應該係點。<br><br>超推薦Jacob嘅consultation 俾有用AI但未用得好流暢同埋係自媒體有卡點嘅朋友🙏🏻😍
+                </blockquote>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">H</div>
+                    <div>
+                        <div class="testimonial-name">Heidi</div>
+                        <div class="testimonial-role">1-on-1 諮詢客戶</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workshops Section -->
+    <section id="workshops" data-section-id="workshops_default" data-section-type="workshops">
+        <div class="container">
+            <div class="section-header">
+                <h2>工作坊一覽</h2>
+                <div style="max-width:640px; margin:20px auto 0; background:rgba(217,119,87,0.05); border:1.5px solid rgba(217,119,87,0.14); border-radius:16px; padding:28px 32px; text-align:center;">
+                    <p style="font-size:clamp(17px, 2.2vw, 20px); color:var(--text); font-weight:700; line-height:1.7; margin:0 0 14px;">零基礎也能上手。學會用 AI 的思維，<br>不管你的背景是什麼，這裡都能開始。</p>
+                    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:20px; background:var(--white); border:1px solid rgba(0,0,0,0.06); font-size:13px; font-weight:700; color:var(--accent-text);">
+                        <span style="font-size:15px;">✦</span> 不需要任何技術背景
+                    </div>
+                </div>
+            </div>
+            <div class="workshops-grid" id="workshopsGrid">
+                <div class="workshop-skeleton">
+                    <div class="skel-img"></div>
+                    <div class="skel-body">
+                        <div class="skel-line short"></div>
+                        <div class="skel-line medium"></div>
+                        <div class="skel-line"></div>
+                        <div class="skel-line medium"></div>
+                    </div>
+                </div>
+                <div class="workshop-skeleton">
+                    <div class="skel-img"></div>
+                    <div class="skel-body">
+                        <div class="skel-line short"></div>
+                        <div class="skel-line medium"></div>
+                        <div class="skel-line"></div>
+                        <div class="skel-line medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Instructor Section -->
+    <section id="about" data-section-id="about_default" data-section-type="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>關於講師</h2>
+            </div>
+            <div class="glass-card fade-in" style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 48px 32px;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100;">
+                    <!-- Photo + stats side by side on large, stacked on mobile -->
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 40px; width: 100%;">
+                        <!-- Photo -->
+                        <div style="flex-shrink: 0; text-align: center;">
+                            <a href="about-jacob.html">
+                                <img src="About_Jacob.jpg" alt="Jacob - 香港 AI 自動化導師" style="width: 240px; height: 240px; object-fit: cover; border-radius: 24px; border: 2px solid var(--accent); cursor: pointer; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" loading="lazy" decoding="async">
+                            </a>
+                            <div style="margin-top: 16px;">
+                                <a href="/about-jacob" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 12px; background: var(--accent); color: var(--white); font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(217,119,87,0.25);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px rgba(217,119,87,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(217,119,87,0.25)'">了解更多關於 Jacob <span style="font-size:16px;">→</span></a>
+                            </div>
+                        </div>
+                        
+                        <!-- Info -->
+                        <div style="flex: 1; min-width: 280px;">
+                            <h3 style="font-size: 28px; font-weight: 700; margin-bottom: 4px;">Jacob</h3>
+                            <p style="font-size: 18px; color: var(--accent); margin-bottom: 20px;">AIFLOWTIME 創辦人</p>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                                <span style="padding: 6px 16px; border-radius: 20px; font-size: 14px; background: rgba(217, 119, 87, 0.1); color: var(--accent);">KIMI 品牌合作</span>
+                                <span style="padding: 6px 16px; border-radius: 20px; font-size: 14px; background: rgba(217, 119, 87, 0.1); color: var(--accent);">Higgsfield 品牌合作</span>
+                            </div>
+                            
+                            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 16px;">Jacob 相信 AI 不應該讓人感到技術複雜。</p>
+                            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 16px;">它本來就是為了打破門檻而存在，讓普通人也能完成幾年前只屬於專家的事情。</p>
+                            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 16px;">他幫助人們從混亂走向清晰，從嘗試走向系統。</p>
+                            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 16px;">與其單純教授工具，他更專注於訓練思考 —— 因為 AI 不是魔法，真正決定結果的，是你的思維深度與提問方式。</p>
+                            <p style="font-size: 16px; line-height: 1.7; opacity: 0.9; margin-bottom: 20px;">在他的框架下，AI 不只是工具，而是提升思考質量、重塑工作方式，並逐步奪回時間主導權的槓桿。</p>
+                            
+                            <div style="padding: 12px 16px; border-radius: 12px; background: var(--bg-pampas); border: 1px solid rgba(217, 119, 87, 0.2); display: inline-block; margin-bottom: 20px;">
+                                <p style="color: var(--text-light); font-size: 14px; margin: 0;">每日用 AI 創作內容、教學、經營生意</p>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" data-section-id="faq_default" data-section-type="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2>常見問題</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">需要編程背景嗎？</button>
+                    <div class="faq-answer">
+                        <p>完全不需要！我們的課程專為零技術背景的香港在職人士設計。你不需要懂寫程式，只需要會用電腦和願意學習的心。我們會從基礎概念開始，循序漸進帶你掌握AI工具。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">課程是線上還是實體？</button>
+                    <div class="faq-answer">
+                        <p>我們提供線上及實體兩種模式。線上課程讓你可以在家舒適學習；實體課程主要於太子區舉行，確切場地會於報名確認後通知。報名時可以選擇你偏好的模式。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">學完真的有幫助嗎？</button>
+                    <div class="faq-answer">
+                        <p>我們的課程內容全部取材自香港真實職場場景，學員普遍反映學完後能立即應用於工作。根據學員回饋，平均每人每週可節省5-10小時的重複性工作時間。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">可以退款嗎？</button>
+                    <div class="faq-answer">
+                        <p>報名後不設退款。我們建議你先參加免費的AI認知工作坊，了解課程風格是否適合自己，滿意後再報讀其他付費課程。</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">如何付款？</button>
+                    <div class="faq-answer">
+                        <p>我們目前接受PayMe及轉數快（FPS）付款。報名後會收到詳細付款指引。</p>
+                    </div>
+                </div>
+
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">需要準備咩？</button>
+                    <div class="faq-answer">
+                        <p>你只需要：一部可以上網嘅電腦、你日常工作嘅流程描述（越詳細越好）、以及一顆開放學習嘅心。導師會提供所有需要嘅工具同資源。</p>
+                    </div>
+                </div>
+
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">會唔會教到我用邊啲工具？</button>
+                    <div class="faq-answer">
+                        <p>會！導師會根據你嘅需求同預算，推薦最適合你嘅 AI 工具。可能包括：ChatGPT、Claude、Notion AI 等等。重點係教你點樣組合唔同工具，打造最適合你嘅自動化系統。</p>
+                    </div>
+                </div>
+
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">工作坊幾長時間？</button>
+                    <div class="faq-answer">
+                        <p>工作坊約 1.5 至 3 小時不等（視乎課程），包含理論講解、現場示範、實作練習。你會得到完整嘅學習資源，可以跟住步驟慢慢實踐。</p>
+                    </div>
+                </div>
+
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">完成後會有支援嗎？</button>
+                    <div class="faq-answer">
+                        <p>會！完成工作坊後，你會得到 7 天使用指引，以及可以加入專屬社群，持續獲得支援和更新。</p>
+                    </div>
+                </div>
+
+                <div class="faq-item fade-in">
+                    <button class="faq-question" onclick="toggleFaq(this)">適合邊類人參加？</button>
+                    <div class="faq-answer">
+                        <p>適合 AI 初學者、斜槓族、自由工作者、小生意經營者、以及任何想用 AI 提升工作效率的人。不需要技術背景。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Waitlist Form Section -->
+    <section id="waitlist" data-section-id="waitlist_default" data-section-type="waitlist">
+        <div class="container">
+            <div class="section-header">
+                <h2>加入等候名單</h2>
+                <p style="color: var(--text-light); max-width: 500px; margin: 0 auto;">暫時未決定？留低你嘅資料，我哋會第一時間通知你開班詳情。</p>
+            </div>
+            <div style="max-width: 560px; margin: 0 auto;">
+                <form id="workshopForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">姓名 *</label>
+                        <input type="text" name="name" required placeholder="請輸入你的姓名" style="width: 100%; padding: 12px 16px; border: 1px solid var(--bg-off); border-radius: 12px; font-size: 16px; font-family: inherit; background: var(--white); transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--bg-off)'">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">Email *</label>
+                        <input type="email" name="email" required placeholder="請輸入你的 Email" style="width: 100%; padding: 12px 16px; border: 1px solid var(--bg-off); border-radius: 12px; font-size: 16px; font-family: inherit; background: var(--white); transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--bg-off)'">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">WhatsApp *</label>
+                        <input type="tel" name="whatsapp" required placeholder="請輸入你的 WhatsApp 號碼" style="width: 100%; padding: 12px 16px; border: 1px solid var(--bg-off); border-radius: 12px; font-size: 16px; font-family: inherit; background: var(--white); transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--bg-off)'">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">你選擇的工作坊/活動 *</label>
+                        <select name="workshopEvent" required style="width: 100%; padding: 12px 16px; border: 1px solid var(--bg-off); border-radius: 12px; font-size: 16px; font-family: inherit; background: var(--white); transition: border-color 0.3s; appearance: auto;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--bg-off)'">
+                            <option value="">請選擇</option>
+                            <option value="Workshop A - AI 原住民養成班">Workshop A - AI 原住民養成班</option>
+                            <option value="Workshop B - 時間回購術">Workshop B - 時間回購術</option>
+                            <option value="Workshop C - 下一級視覺">Workshop C - 下一級視覺</option>
+                            <option value="Workshop D - AI × 自我突破">Workshop D - AI × 自我突破</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">你最想解決的痛點 *</label>
+                        <select name="painPoint" id="painPointSelect" required style="width: 100%; padding: 12px 16px; border: 1px solid var(--bg-off); border-radius: 12px; font-size: 16px; font-family: inherit; background: var(--white); transition: border-color 0.3s; appearance: auto;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--bg-off)'" onchange="document.getElementById('painPointOtherContainer').style.display = this.value==='其他' ? 'block' : 'none'">
+                            <option value="">請選擇</option>
+                            <option value="工具太多不知道用哪個">工具太多不知道用哪個</option>
+                            <option value="不知道何時該用 AI">不知道何時該用 AI</option>
+                            <option value="每次輸出都不滿意">每次輸出都不滿意</option>
+                            <option value="沒有固定使用習慣">沒有固定使用習慣</option>
+                            <option value="其他">其他</option>
+                        </select>
+                        <div id="painPointOtherContainer" style="display: none; margin-top: 12px;">
+                            <label style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">請說明其他痛點 *</label>
+                            <input type="text" name="painPointOther" id="painPointOther" placeholder="請描述你最想解決的痛點" style="width: 100%; padding: 12px 16px; border: 1px solid var(--bg-off); border-radius: 12px; font-size: 16px; font-family: inherit; background: var(--white); transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--bg-off)'">
+                        </div>
+                    </div>
+                    <button type="submit" id="workshopSubmitBtn" class="btn" style="width: 100%; margin-top: 8px;">
+                        提交
+                    </button>
+                    <div id="formSuccess" style="display: none; padding: 16px; background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 12px; color: #2E7D32; text-align: center;">
+                        提交成功！我們會盡快聯絡你。
+                    </div>
+                    <div id="formError" style="display: none; padding: 16px; background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.3); border-radius: 12px; color: #C62828; text-align: center;">
+                        提交失敗，請稍後再試。
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section id="register" class="final-cta" data-section-id="final-cta_default" data-section-type="final-cta">
+        <div class="container">
+            <h2>唔使同人比，自己學好AI，慢慢黎。</h2>
+            <p>無論你想提升效率、增加競爭力，還是為職涯轉型鋪路，AIFLOWTIME都能為你提供最適合的學習路徑</p>
+            <a href="#workshops" class="btn btn-shimmer">瀏覽所有工作坊</a>
+            <div class="contact-info">
+                <a href="https://wa.me/85262880186">WhatsApp查詢</a>
+                <a href="https://instagram.com/aiflowtime">Instagram @aiflowtime</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== HIDDEN TEMPLATES FOR NEW SECTION TYPES ==================== -->
+
+    <!-- Template: Video -->
+    <section class="sec-video" data-section-id="_tpl_video" data-section-type="video" style="display:none;">
+        <div class="container">
+            <div class="video-wrap">
+                <video class="tpl-video-el" autoplay muted loop playsinline></video>
+            </div>
+            <div class="video-caption tpl-video-caption"></div>
+        </div>
+    </section>
+
+    <!-- Template: Image Chain -->
+    <section class="sec-image-chain" data-section-id="_tpl_image-chain" data-section-type="image-chain" style="display:none;">
+        <div class="container">
+            <h2 class="chain-title section-header"><span></span></h2>
+            <div class="chain-list">
+                <svg class="chain-svg" preserveAspectRatio="none"></svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Template: Mindset Shift -->
+    <section class="sec-mindset-shift" data-section-id="_tpl_mindset-shift" data-section-type="mindset-shift" style="display:none;">
+        <div class="container">
+            <div class="shift-before"></div>
+            <div class="shift-after"></div>
+            <div class="shift-desc"></div>
+        </div>
+    </section>
+
+    <!-- Template: Learning Outcomes -->
+    <section class="sec-learning-outcomes" data-section-id="_tpl_learning-outcomes" data-section-type="learning-outcomes" style="display:none;">
+        <div class="container">
+            <h2 class="lo-title section-header"><span></span></h2>
+            <div class="lo-list"></div>
+            <div class="lo-tools"></div>
+            <div class="lo-demo-box"></div>
+        </div>
+    </section>
+
+    <!-- Template: Audience Fit -->
+    <section class="sec-audience-fit" data-section-id="_tpl_audience-fit" data-section-type="audience-fit" style="display:none;">
+        <div class="container">
+            <div class="af-grid">
+                <div class="af-card af-card-yes">
+                    <div class="af-card-title af-for-title"></div>
+                    <ul class="af-list af-for-list"></ul>
+                </div>
+                <div class="af-card af-card-no">
+                    <div class="af-card-title af-notfor-title"></div>
+                    <ul class="af-list af-notfor-list"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Template: Logistics Card -->
+    <section class="sec-logistics-card" data-section-id="_tpl_logistics-card" data-section-type="logistics-card" style="display:none;">
+        <div class="container">
+            <div class="lc-card">
+                <div class="lc-rows">
+                    <div class="lc-row"><div class="lc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="lc-label">課時</div><div class="lc-val lc-duration">--</div></div>
+                    <div class="lc-row"><div class="lc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="lc-label">日期</div><div class="lc-val lc-date">--</div></div>
+                    <div class="lc-row"><div class="lc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="lc-label">時間</div><div class="lc-val lc-time">--</div></div>
+                    <div class="lc-row"><div class="lc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="lc-label">費用</div><div class="lc-val lc-price">--</div></div>
+                    <div class="lc-row"><div class="lc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="lc-label">地點</div><div class="lc-val lc-mode">--</div></div>
+                </div>
+                <div class="lc-capacity" style="display:none;"></div>
+                <div class="lc-cta"><a href="#" class="btn btn-shimmer lc-cta-btn">立即報名</a></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Template: Transformation -->
+    <section class="sec-transformation" data-section-id="_tpl_transformation" data-section-type="transformation" style="display:none;">
+        <div class="container">
+            <h2 class="tf-title section-header"><span></span></h2>
+            <div class="tf-grid"></div>
+        </div>
+    </section>
+
+    <!-- Template: Countdown -->
+    <section class="sec-countdown" data-section-id="_tpl_countdown" data-section-type="countdown" style="display:none;">
+        <div class="container">
+            <div class="section-header"><h2 class="cd-title">專屬折扣碼</h2></div>
+            <div class="countdown-grid">
+                <div class="countdown-unit"><span class="value cd-days">--</span><span class="label">天</span></div>
+                <div class="countdown-unit"><span class="value cd-hours">--</span><span class="label">時</span></div>
+                <div class="countdown-unit"><span class="value cd-mins">--</span><span class="label">分</span></div>
+                <div class="countdown-unit"><span class="value cd-secs">--</span><span class="label">秒</span></div>
+            </div>
+            <div class="countdown-code-wrap">
+                <div class="countdown-code-label">你的折扣碼</div>
+                <div class="countdown-code cd-code">—</div>
+            </div>
+            <a href="/workshop-payment" class="btn btn-shimmer countdown-cta cd-cta">Claim the discount</a>
+        </div>
+    </section>
+
+    <!-- Template: Link List -->
+    <section class="sec-link-list" data-section-id="_tpl_link-list" data-section-type="link-list" style="display:none;">
+        <div class="container">
+            <h2 class="ll-title section-header"></h2>
+            <div class="ll-list"></div>
+        </div>
+    </section>
+
+    <!-- Template: Tools Grid -->
+    <section class="sec-tools-grid" data-section-id="_tpl_tools-grid" data-section-type="tools-grid" style="display:none;">
+        <div class="container">
+            <h2 class="tg-title section-header"></h2>
+            <div class="tg-grid"></div>
+        </div>
+    </section>
+
+    <!-- Template: Section Divider -->
+    <section class="sec-section-divider" data-section-id="_tpl_section-divider" data-section-type="section-divider" style="display:none;">
+        <div class="container">
+            <div class="sd-wrap">
+                <div class="sd-line"></div>
+                <div class="sd-label">
+                    <div class="sd-title"></div>
+                    <div class="sd-subtitle"></div>
+                </div>
+                <div class="sd-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Template: Lead Magnet -->
+    <section class="sec-lead-magnet" data-section-id="_tpl_lead-magnet" data-section-type="lead-magnet" style="display:none;">
+        <div class="container">
+            <h2 class="lm-title"></h2>
+            <p class="lm-desc"></p>
+            <img class="lm-img" src="" alt="" style="display:none;">
+            <button class="lm-trigger"></button>
+            <div class="lm-modal-overlay">
+                <div class="lm-modal" style="position:relative;">
+                    <button class="lm-close">&times;</button>
+                    <h3 class="lm-modal-title"></h3>
+                    <div class="lm-form-fields"></div>
+                    <button class="lm-submit"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Template: Origin Story -->
+    <section class="sec-origin-story" data-section-id="_tpl_origin-story" data-section-type="origin-story" style="display:none;">
+        <div class="container">
+            <h2 class="os-title section-header"></h2>
+            <p class="os-intro"></p>
+            <div class="os-timeline"></div>
+        </div>
+    </section>
+
+    <!-- Template: Tools Tags -->
+    <section class="sec-tools-tags" data-section-id="_tpl_tools-tags" data-section-type="tools-tags" style="display:none;">
+        <div class="container">
+            <h2 class="tt-title section-header"></h2>
+            <p class="tt-desc"></p>
+            <div class="tt-cloud"></div>
+            <div class="tt-callout" style="display:none;"></div>
+        </div>
+    </section>
+
+    <!-- Template: Photo Block -->
+    <section class="sec-photo-block" data-section-id="_tpl_photo-block" data-section-type="photo-block" style="display:none;">
+        <div class="container">
+            <img class="pb-img" src="" alt="">
+            <p class="pb-caption"></p>
+        </div>
+    </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <a href="linktree.html" class="logo">AI<span>FLOW</span>TIME</a>
+            <p>© 2026 AIFLOWTIME. 助你從零起步，成為 AI 原住民。</p>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK (compat) for Firestore reads + Auth -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase auto-init via hosting reserved URL
+        (function() {
+            var script = document.createElement('script');
+            script.src = '/__/firebase/init.js';
+            script.onload = function() { initWorkshopPage(); };
+            script.onerror = function() {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp({ projectId: 'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com' });
+                }
+                initWorkshopPage();
+            };
+            document.head.appendChild(script);
+        })();
+
+        function initWorkshopPage() {
+            loadWorkshops();
+            applyLayoutConfig();
+            // Listen for auth state to update nav buttons
+            firebase.auth().onAuthStateChanged(function(user) {
+                var desktopBtn = document.getElementById('desktopUserBtn');
+                var mobileBtn = document.getElementById('mobileUserBtn');
+                if (user) {
+                    // Load user profile name
+                    firebase.firestore().collection('users').doc(user.uid).get().then(function(doc) {
+                        var displayName = user.displayName || 'User';
+                        var avatarHtml = '';
+                        if (doc.exists && doc.data().name) displayName = doc.data().name;
+                        if (doc.exists && doc.data().profilePicUrl) {
+                            avatarHtml = '<img src="' + doc.data().profilePicUrl + '" alt="">';
+                        } else if (user.photoURL) {
+                            avatarHtml = '<img src="' + user.photoURL + '" alt="">';
+                        } else {
+                            avatarHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                        }
+                        var firstName = displayName.split(' ')[0];
+                        if (firstName.length > 8) firstName = firstName.substring(0, 8) + '…';
+                        var html = avatarHtml + '<span>Hi, ' + firstName + '!</span>';
+                        if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + html;
+                        if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + html;
+                        checkNotifications(user.uid);
+                    }).catch(function() {
+                        var name = (user.displayName || 'User').split(' ')[0];
+                        var img = user.photoURL ? '<img src="' + user.photoURL + '" alt="">' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                        var html = img + '<span>Hi, ' + name + '!</span>';
+                        if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + html;
+                        if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + html;
+                        checkNotifications(user.uid);
+                    });
+                } else {
+                    var signInHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Sign In</span>';
+                    if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + signInHtml;
+                    if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + signInHtml;
+                    updateNotifBadges(0);
+                }
+            });
+        }
+
+        function checkNotifications(uid) {
+            firebase.firestore().collection('registrations')
+                .where('userId', '==', uid)
+                .where('status', '==', 'confirmed')
+                .get().then(function(snap) {
+                    var count = 0;
+                    var now = new Date();
+                    snap.forEach(function(doc) {
+                        var r = doc.data();
+                        if (!r.attendanceToken) return;
+                        // Check if workshop is upcoming
+                        if (r.workshopDate) {
+                            try {
+                                var parts = r.workshopDate.match(/\d+/g);
+                                if (parts && parts.length >= 3) {
+                                    var wsDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                                    wsDate.setHours(23, 59, 59);
+                                    if (wsDate >= now) count++;
+                                }
+                            } catch(e) { count++; }
+                        } else {
+                            count++;
+                        }
+                    });
+                    updateNotifBadges(count);
+                }).catch(function() {
+                    updateNotifBadges(0);
+                });
+        }
+
+        function updateNotifBadges(count) {
+            var ids = ['desktopNotifBadge', 'hamburgerNotifBadge', 'mobileNotifBadge'];
+            ids.forEach(function(id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                if (count > 0) {
+                    el.textContent = count;
+                    el.classList.add('show');
+                } else {
+                    el.classList.remove('show');
+                }
+            });
+        }
+
+        function getCtaColorHex(colorId) {
+            var map = { accent: '#D97757', dark: '#3A3A3A', green: '#4CAF50', blue: '#2196F3', red: '#E53935', purple: '#9C27B0', grey: '#9E9E9E' };
+            return map[colorId] || map.accent;
+        }
+
+        function buildCapacityBar(capacity, enrolled) {
+            capacity = capacity || 0;
+            enrolled = enrolled || 0;
+            if (capacity <= 0) return '';
+
+            var remaining = Math.max(0, capacity - enrolled);
+
+            // Always show the bar with exact numbers
+            var totalRects = capacity <= 10 ? capacity : 10;
+            var seatsPerRect = capacity <= 10 ? 1 : capacity / 10;
+            var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
+
+            var html = '<div class="capacity-bar">';
+            for (var i = 0; i < totalRects; i++) {
+                html += '<div class="capacity-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
+            }
+            html += '</div>';
+
+            if (remaining <= 0) {
+                html += '<div class="capacity-text" style="color:var(--accent-text);font-weight:700;">已滿</div>';
+            } else {
+                html += '<div class="capacity-text">尚餘 ' + remaining + ' / ' + capacity + ' 個名額</div>';
+            }
+            return html;
+        }
+
+        function buildDiamondRating(difficulty) {
+            var level = difficulty || 1;
+            var html = '<div class="workshop-diamonds">';
+            for (var i = 1; i <= 6; i++) {
+                html += '<span class="diamond ' + (i <= level ? 'filled' : 'empty') + '">◆</span>';
+            }
+            var label, labelClass;
+            if (level <= 2) { label = '入門'; labelClass = 'dl-beginner'; }
+            else if (level <= 4) { label = '進階'; labelClass = 'dl-intermediate'; }
+            else { label = '高階'; labelClass = 'dl-advanced'; }
+            html += '<span class="difficulty-label ' + labelClass + '">' + label + '</span>';
+            html += '</div>';
+            return html;
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        function fixStorageUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+            var match = url.match(/\/o\/([^?]+)/);
+            if (match) {
+                var storagePath = decodeURIComponent(match[1]);
+                return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(storagePath);
+            }
+            if (url.startsWith('http://') || url.startsWith('https://')) return url;
+            return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(url);
+        }
+
+        function renderWorkshopCard(doc) {
+            var d = doc.data();
+            var id = doc.id;
+
+            // Image area
+            var imageHtml = '';
+            if (d.imageUrl) {
+                imageHtml = '<img src="' + escHtml(fixStorageUrl(d.imageUrl)) + '" alt="' + escHtml(d.title || '') + '" loading="lazy">';
+            } else {
+                imageHtml = '<div class="image-placeholder"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>';
+            }
+
+            // Details list
+            var detailsHtml = '';
+            if (d.details && d.details.length) {
+                detailsHtml = '<ul>';
+                d.details.forEach(function(item) {
+                    detailsHtml += '<li>' + escHtml(item) + '</li>';
+                });
+                detailsHtml += '</ul>';
+            }
+
+            // Build info tags
+            var svgClock = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+            var svgCalendar = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+            var svgPrice = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+
+            var tagsHtml = '';
+            if (d.duration) tagsHtml += '<span class="workshop-info-tag">' + svgClock + ' ' + escHtml(d.duration) + '</span>';
+            if (d.price) {
+                var priceContent = svgPrice + ' ';
+                if (d.originalPrice) {
+                    priceContent += '<span style="text-decoration:line-through;color:var(--text-light);font-weight:500;margin-right:6px;font-size:12px;">' + escHtml(d.originalPrice) + '</span>';
+                }
+                priceContent += escHtml(d.price);
+                tagsHtml += '<span class="workshop-info-tag tag-price">' + priceContent + '</span>';
+            }
+            // Course type badge + session count
+            var isContinuous = d.courseType === 'continuous' && d.rounds && d.rounds.length;
+            if (isContinuous) {
+                var sessPerRound = (d.rounds[0].sessions || []).length;
+                tagsHtml += '<span class="workshop-info-tag" style="background:rgba(217,119,87,0.12);color:var(--accent);font-weight:700;">連續課程</span>';
+                tagsHtml += '<span class="workshop-info-tag">課堂數量：' + sessPerRound + '堂 × ' + d.rounds.length + '期</span>';
+            } else {
+                tagsHtml += '<span class="workshop-info-tag">課堂數量：1堂</span>';
+            }
+
+            // Helper: mode pill HTML for a session
+            function _modePill(mode) {
+                var m = mode || 'offline';
+                var label = m === 'online' ? '線上' : m === 'both' ? '實體＋線上' : '實體';
+                return '<span class="date-mode-pill">' + label + '</span>';
+            }
+
+            // Helper: per-date capacity bar
+            function _dateCapBar(cap, enrolled) {
+                cap = cap || 0; enrolled = enrolled || 0;
+                if (cap <= 0) return '';
+                var rem = Math.max(0, cap - enrolled);
+                var totalRects = cap <= 10 ? cap : 10;
+                var seatsPerRect = cap <= 10 ? 1 : cap / 10;
+                var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
+                var h = '<div class="date-capacity-wrap"><div class="capacity-bar">';
+                for (var ci = 0; ci < totalRects; ci++) h += '<div class="capacity-rect' + (ci < filledRects ? ' filled' : '') + '"></div>';
+                h += '</div>';
+                if (rem <= 0) h += '<div class="capacity-text" style="color:var(--accent-text);font-weight:700;">已滿</div>';
+                else h += '<div class="capacity-text">尚餘 ' + rem + ' / ' + cap + ' 個名額</div>';
+                h += '</div>';
+                return h;
+            }
+
+            // Date/time display with inline mode pill + per-date capacity
+            if (isContinuous) {
+                var sortedRounds = d.rounds.slice().sort(function(a, b) {
+                    var aDates = (a.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); });
+                    var bDates = (b.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); });
+                    var aMin = aDates.sort()[0] || '';
+                    var bMin = bDates.sort()[0] || '';
+                    return aMin < bMin ? -1 : aMin > bMin ? 1 : 0;
+                });
+                sortedRounds.forEach(function(round) {
+                    var roundSessions = (round.sessions || []).filter(function(s) { return s.visible !== false; });
+                    if (!roundSessions.length) return;
+                    var roundMode = roundSessions.length ? (roundSessions[0].mode || d.mode || 'offline') : (d.mode || 'offline');
+                    tagsHtml += '<span class="workshop-info-tag" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.5;width:100%;">' + svgCalendar + ' <strong style="font-size:12px;">' + escHtml(round.label || '') + '</strong>';
+                    roundSessions.forEach(function(s) {
+                        var line = '';
+                        if (s.label) line += s.label + '：';
+                        line += s.date || '';
+                        if (s.time) line += ' ' + s.time;
+                        var sMode = s.mode || d.mode || 'offline';
+                        if (line) tagsHtml += '<span style="font-size:12px;opacity:0.8;padding-left:2px;">' + escHtml(line) + ' ' + _modePill(sMode) + '</span>';
+                    });
+                    tagsHtml += _dateCapBar(round.capacity, round.enrolled);
+                    tagsHtml += '</span>';
+                });
+            } else if (d.sessions && d.sessions.length) {
+                var visibleSessions = d.sessions.filter(function(s) { return s.visible !== false; });
+                var sessionsSorted = visibleSessions.slice().sort(function(a, b) {
+                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    if (da !== db2) return da < db2 ? -1 : 1;
+                    var ta = (a.time || '').replace(/[^0-9:]/g, '');
+                    var tb = (b.time || '').replace(/[^0-9:]/g, '');
+                    return ta < tb ? -1 : ta > tb ? 1 : 0;
+                });
+                var isMultiDate = sessionsSorted.length > 1;
+                for (var si = 0; si < sessionsSorted.length; si++) {
+                    var sess = sessionsSorted[si];
+                    var sessStr = '';
+                    if (sess.label) sessStr += escHtml(sess.label) + '：';
+                    sessStr += escHtml(sess.date || '');
+                    if (sess.time) sessStr += ' ' + escHtml(sess.time);
+                    var sMode = sess.mode || d.mode || 'offline';
+                    if (sessStr) {
+                        tagsHtml += '<span class="workshop-info-tag" style="' + (isMultiDate ? 'display:flex;flex-direction:column;align-items:flex-start;width:100%;' : '') + '">' + svgCalendar + ' ' + sessStr + ' ' + _modePill(sMode);
+                        if (isMultiDate) {
+                            var sCap = sess.capacity !== undefined ? sess.capacity : (d.capacity || 0);
+                            var sEnr = sess.enrolled || 0;
+                            tagsHtml += _dateCapBar(sCap, sEnr);
+                        }
+                        tagsHtml += '</span>';
+                    }
+                }
+            } else if (d.date) {
+                var singleMode = d.mode || 'offline';
+                var dateTimeStr = escHtml(d.date) + (d.time ? ' ' + escHtml(d.time) : '');
+                tagsHtml += '<span class="workshop-info-tag">' + svgCalendar + ' ' + dateTimeStr + ' ' + _modePill(singleMode) + '</span>';
+            }
+
+            // Category pill
+            var categoryHtml = d.category ? '<span class="workshop-category">' + escHtml(d.category) + '</span>' : '';
+
+            // Diamond difficulty rating
+            var diamondHtml = buildDiamondRating(d.difficulty);
+
+            // Subtitle
+            var subtitleHtml = d.subtitle ? '<p class="workshop-subtitle">' + escHtml(d.subtitle) + '</p>' : '';
+
+            // Takeaway + Suitable For
+            var metaHtml = '';
+            if (d.takeaway) metaHtml += '<p class="workshop-meta-line"><span class="workshop-meta-label">你會帶走：</span>' + escHtml(d.takeaway) + '</p>';
+            if (d.suitableFor) metaHtml += '<p class="workshop-meta-line"><span class="workshop-meta-label">適合：</span>' + escHtml(d.suitableFor) + '</p>';
+
+            var card = document.createElement('div');
+            card.className = 'glass-card workshop-card fade-in';
+            card.innerHTML =
+                '<div class="workshop-card-image">' +
+                    '<span class="workshop-number">' + escHtml(d.workshopNumber || '') + '</span>' +
+                    imageHtml +
+                '</div>' +
+                '<div class="workshop-card-body">' +
+                    categoryHtml +
+                    '<h4>' + escHtml(d.title || '') + '</h4>' +
+                    subtitleHtml +
+                    diamondHtml +
+                    '<p class="workshop-desc">' + escHtml(d.description || '') + '</p>' +
+                    metaHtml +
+                    '<div style="text-align:left;margin-bottom:8px;">' +
+                        '<button class="details-toggle-link" onclick="toggleDetails(this)">查看詳情 <span class="arrow">▾</span></button>' +
+                        '<div class="workshop-details" style="display:none;">' + detailsHtml + '</div>' +
+                    '</div>' +
+                    '<div class="workshop-card-footer">' +
+                        '<div class="workshop-info-tags">' + tagsHtml + '</div>' +
+                        ((!isContinuous && !(d.sessions && d.sessions.length > 1)) ? buildCapacityBar(d.capacity, d.enrolled) : '') +
+                    '</div>' +
+                    '<div class="workshop-card-actions">' +
+                        '<a href="' + escHtml(d.ctaLink || '#workshops') + '" class="btn" style="background:' + getCtaColorHex(d.ctaColor) + ';color:#fff;">' + escHtml(d.ctaText || '了解更多') + '</a>' +
+                    '</div>' +
+                '</div>';
+
+            return card;
+        }
+
+        function loadWorkshops() {
+            var db = firebase.firestore();
+            var grid = document.getElementById('workshopsGrid');
+
+            // Real-time listener: updates instantly when workshop data changes
+            db.collection('workshops')
+              .where('visible', '==', true)
+              .orderBy('order', 'asc')
+              .onSnapshot(function(snapshot) {
+                  grid.innerHTML = '';
+                  if (snapshot.empty) {
+                      grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料即將更新，請稍候。</p>';
+                      return;
+                  }
+                  snapshot.forEach(function(doc) {
+                      var d = doc.data();
+                      if (d.archived) return; // Skip archived workshops
+                      grid.appendChild(renderWorkshopCard(doc));
+                  });
+                  // Re-init scroll animations for new cards
+                  initScrollAnimations();
+                  initWorkshopParallax();
+              }, function(err) {
+                  console.error('Error loading workshops:', err);
+                  grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料載入失敗，請重新整理頁面。</p>';
+              });
+        }
+    </script>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
+            
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            hamburger.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.setAttribute('aria-hidden', isExpanded);
+        }
+        
+        function closeMobileMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+        }
+        
+        // Workshop details toggle
+        function toggleDetails(button) {
+            const details = button.nextElementSibling;
+            const isVisible = details.style.display === 'block';
+            
+            if (isVisible) {
+                details.style.display = 'none';
+                button.innerHTML = '查看詳情 <span class="arrow">▾</span>';
+                button.classList.remove('open');
+            } else {
+                details.style.display = 'block';
+                button.innerHTML = '收起 <span class="arrow">▾</span>';
+                button.classList.add('open');
+            }
+        }
+        
+        // FAQ accordion
+        function toggleDataSection(btn) {
+            var body = document.getElementById('dataExpandBody');
+            btn.classList.toggle('open');
+            body.classList.toggle('open');
+        }
+
+        function toggleFaq(button) {
+            const faqItem = button.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Open clicked item if it wasn't active
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+        
+        // Scroll animations
+        function initScrollAnimations() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            fadeElements.forEach(el => observer.observe(el));
+        }
+        
+        // Force trust-section GIFs to loop continuously (restart animation so they keep playing)
+        (function() {
+            var gifs = document.querySelectorAll('.trust-card-gif');
+            if (!gifs.length) return;
+            setInterval(function() {
+                gifs.forEach(function(img) {
+                    var base = img.getAttribute('data-src') || img.src.split('?')[0];
+                    if (base) img.src = base + '?t=' + Date.now();
+                });
+            }, 8000);
+        })();
+        
+        // Waitlist form submission
+        (function() {
+            var workshopForm = document.getElementById('workshopForm');
+            var submitButton = document.getElementById('workshopSubmitBtn');
+            if (!workshopForm || !submitButton) return;
+            var isSubmitting = false;
+
+            workshopForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (isSubmitting) return;
+                isSubmitting = true;
+                submitButton.disabled = true;
+                submitButton.textContent = '提交中...';
+                submitButton.style.opacity = '0.6';
+
+                var formData = new FormData(e.target);
+                var painPointValue = formData.get('painPoint') || '';
+                var painPointOtherValue = formData.get('painPointOther') || '';
+                var finalPainPoint = painPointValue === '其他' ? painPointOtherValue : painPointValue;
+
+                var data = {
+                    name: formData.get('name'),
+                    email: formData.get('email'),
+                    whatsapp: formData.get('whatsapp') || '',
+                    workshopEvent: formData.get('workshopEvent') || '',
+                    painPoint: finalPainPoint,
+                    painPointOther: painPointValue === '其他' ? painPointOtherValue : '',
+                    timestamp: new Date().toISOString(),
+                    source: 'workshop-waitlist',
+                    page: 'AI 工作坊（新版）'
+                };
+
+                var googleScriptURL = 'https://script.google.com/macros/s/AKfycbxE8KP5ohNSbHIFOWxl-JoWgu9_my8N8ofkTEXaeU0b7QB6K-s3qx4KE-5bOz7Qj4_miQ/exec';
+
+                try {
+                    await fetch(googleScriptURL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    document.getElementById('formSuccess').style.display = 'block';
+                    document.getElementById('formError').style.display = 'none';
+                    e.target.reset();
+                    document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    setTimeout(function() {
+                        isSubmitting = false;
+                        submitButton.disabled = false;
+                        submitButton.textContent = '提交';
+                        submitButton.style.opacity = '1';
+                    }, 3000);
+                } catch (err) {
+                    isSubmitting = false;
+                    submitButton.disabled = false;
+                    submitButton.textContent = '提交';
+                    submitButton.style.opacity = '1';
+                    document.getElementById('formError').style.display = 'block';
+                    document.getElementById('formSuccess').style.display = 'none';
+                }
+            });
+        })();
+
+        // Workshop card parallax – subtle floating effect on scroll
+        function initWorkshopParallax() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const cards = document.querySelectorAll('.workshop-card');
+            if (!cards.length) return;
+
+            // Alternate parallax speeds for depth variety
+            const speeds = [0.035, 0.055, 0.04, 0.06, 0.035];
+            const maxOffset = 18; // px cap
+
+            function applyParallax() {
+                const viewportCenter = window.innerHeight / 2;
+                cards.forEach((card, i) => {
+                    const rect = card.getBoundingClientRect();
+                    const cardCenter = rect.top + rect.height / 2;
+                    const distance = cardCenter - viewportCenter;
+                    const speed = speeds[i % speeds.length];
+                    let offset = distance * speed;
+                    // Clamp
+                    offset = Math.max(-maxOffset, Math.min(maxOffset, offset));
+                    card.style.transform = 'translateY(' + offset + 'px)';
+                });
+            }
+
+            // Throttle via rAF
+            let ticking = false;
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        applyParallax();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            applyParallax(); // initial position
+        }
+
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initScrollAnimations();
+                initWorkshopParallax();
+            });
+        } else {
+            initScrollAnimations();
+            initWorkshopParallax();
+        }
+
+        // ============================================================
+        // LAYOUT CONFIG LOADER
+        // ============================================================
+        var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
+
+        function applyLayoutConfig() {
+            if (_isPreviewMode) {
+                window.addEventListener('message', function(e) {
+                    if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
+                        applySections(e.data.sections);
+                    }
+                });
+                return;
+            }
+
+            var db = firebase.firestore();
+            db.collection('pageLayouts').doc('workshop-main').get().then(function(doc) {
+                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                console.log('[Layout] Loaded workshop-main layout from Firestore (' + doc.data().sections.length + ' sections)');
+                applySections(doc.data().sections);
+            }).catch(function(err) {
+                console.log('[Layout] No layout config found for workshop-main.', err);
+            });
+        }
+
+        function applySections(rawSections) {
+            var sections = rawSections.slice().sort(function(a, b) {
+                return (a.order || 0) - (b.order || 0);
+            });
+            var main = document.getElementById('main-content');
+            if (!main) return;
+
+            var existingEls = {};
+            main.querySelectorAll('[data-section-id]').forEach(function(el) {
+                existingEls[el.getAttribute('data-section-id')] = el;
+            });
+
+            var allIds = sections.map(function(s) { return s.id; });
+            Object.keys(existingEls).forEach(function(id) {
+                if (allIds.indexOf(id) === -1) {
+                    existingEls[id].style.display = 'none';
+                }
+            });
+
+            sections.forEach(function(sec) {
+                var el = existingEls[sec.id];
+
+                if (!el && sec.visible !== false) {
+                    var template = main.querySelector('[data-section-type="' + sec.type + '"]');
+                    if (template) {
+                        el = template.cloneNode(true);
+                        el.setAttribute('data-section-id', sec.id);
+                        main.appendChild(el);
+                    }
+                }
+
+                if (!el) { console.warn('[Layout] No template found for section:', sec.type, sec.id); return; }
+
+                if (sec.visible === false) {
+                    el.style.display = 'none';
+                    return;
+                }
+                el.style.display = '';
+
+                main.appendChild(el);
+
+                if (sec.content) applyContentToSection(el, sec.type, sec.content);
+            });
+        }
+
+        function _escHtml(str) { return escHtml(str); }
+
+        function _loadLogisticsCard(el, workshopId, ctaText, ctaLink) {
+            var db = firebase.firestore();
+            db.collection('workshops').doc(workshopId).onSnapshot(function(snap) {
+                if (!snap.exists) return;
+                var d = snap.data();
+                var durEl = el.querySelector('.lc-duration');
+                if (durEl) durEl.textContent = d.duration || '--';
+                var dateEl = el.querySelector('.lc-date');
+                var timeEl = el.querySelector('.lc-time');
+                if (d.courseType === 'continuous' && d.rounds && d.rounds.length) {
+                    var dateHtml = '', timeHtml = '';
+                    var lcSortedRounds = d.rounds.slice().sort(function(a, b) {
+                        var aDates = (a.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
+                        var bDates = (b.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
+                        var aMin = aDates[0] || '', bMin = bDates[0] || '';
+                        return aMin > bMin ? -1 : aMin < bMin ? 1 : 0;
+                    });
+                    lcSortedRounds.forEach(function(round) {
+                        var visSess = (round.sessions || []).filter(function(s) { return s.visible !== false; });
+                        if (!visSess.length) return;
+                        dateHtml += '<div style="margin-bottom:6px;"><strong style="font-size:12px;opacity:.7;">' + escHtml(round.label || '') + '</strong></div>';
+                        timeHtml += '<div style="margin-bottom:6px;">&nbsp;</div>';
+                        visSess.forEach(function(s) {
+                            dateHtml += '<div>' + (s.label ? '<small style="opacity:.6">' + escHtml(s.label) + '</small> ' : '') + escHtml(s.date || '待定') + '</div>';
+                            timeHtml += '<div>' + (s.label ? '<small style="opacity:.6">' + escHtml(s.label) + '</small> ' : '') + escHtml(s.time || '待定') + '</div>';
+                        });
+                    });
+                    if (dateEl) dateEl.innerHTML = dateHtml;
+                    if (timeEl) timeEl.innerHTML = timeHtml;
+                } else if (d.sessions && d.sessions.length) {
+                    var sorted = d.sessions.filter(function(s) { return s.visible !== false; }).slice().sort(function(a, b) {
+                        var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                        var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                        return da > db2 ? -1 : da < db2 ? 1 : 0;
+                    });
+                    if (dateEl) dateEl.innerHTML = sorted.map(function(s) { return '<div>' + (s.label ? '<small style="opacity:.6">' + escHtml(s.label) + '</small> ' : '') + escHtml(s.date || '待定') + '</div>'; }).join('');
+                    if (timeEl) timeEl.innerHTML = sorted.map(function(s) { return '<div>' + (s.label ? '<small style="opacity:.6">' + escHtml(s.label) + '</small> ' : '') + escHtml(s.time || '待定') + '</div>'; }).join('');
+                } else {
+                    if (dateEl) dateEl.textContent = d.date || '待定';
+                    if (timeEl) timeEl.textContent = d.time || '待定';
+                }
+                var priceEl = el.querySelector('.lc-price');
+                if (priceEl) priceEl.textContent = d.price || (d.priceHkd ? 'HKD ' + d.priceHkd : '--');
+                var modeEl = el.querySelector('.lc-mode');
+                if (modeEl) {
+                    var m = d.mode === 'online' ? '線上' : d.mode === 'both' ? '實體 + 線上' : '實體';
+                    if (d.location && d.mode !== 'online') m += ' · ' + d.location;
+                    modeEl.textContent = m;
+                }
+                var cap = d.capacity || 0, enrolled = d.enrolled || 0;
+                var capContainer = el.querySelector('.lc-capacity');
+                if (capContainer && cap > 0) {
+                    var total = cap <= 10 ? cap : 10;
+                    var spr = cap <= 10 ? 1 : cap / 10;
+                    var filled = Math.min(total, Math.ceil(enrolled / spr));
+                    var h = '<div class="lc-cap-bar">';
+                    for (var j = 0; j < total; j++) h += '<div class="lc-cap-rect' + (j < filled ? ' filled' : '') + '"></div>';
+                    h += '</div><div class="lc-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
+                    capContainer.innerHTML = h;
+                    capContainer.style.display = '';
+                }
+                var ctaBtn = el.querySelector('.lc-cta-btn');
+                if (ctaBtn) {
+                    if (ctaText) ctaBtn.textContent = ctaText;
+                    var link = ctaLink || '/workshop-payment?id=' + workshopId;
+                    ctaBtn.href = link;
+                }
+            });
+        }
+
+        function applyContentToSection(el, type, c) {
+            var h2 = el.querySelector('.section-header h2');
+
+            switch (type) {
+                case 'hero':
+                    var h1 = el.querySelector('h1');
+                    if (h1 && c.title) h1.textContent = c.title;
+                    var sub = el.querySelector('.hero-subtitle');
+                    if (sub && c.subtitle) sub.textContent = c.subtitle;
+                    var cta = el.querySelector('.hero-cta .btn');
+                    if (cta && c.ctaText) cta.textContent = c.ctaText;
+                    if (cta && c.ctaLink) cta.href = c.ctaLink;
+                    var gif = el.querySelector('.hero-gif');
+                    if (gif && c.gifUrl) { gif.src = c.gifUrl; gif.setAttribute('data-src', c.gifUrl); }
+                    break;
+
+                case 'pain-points':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (c.cards) {
+                        var cards = el.querySelectorAll('.pain-point-card');
+                        c.cards.forEach(function(card, i) {
+                            if (cards[i]) {
+                                var ct = cards[i].querySelector('h4');
+                                var cp = cards[i].querySelector('p');
+                                if (ct && card.title) ct.textContent = card.title;
+                                if (cp && card.description) cp.textContent = card.description;
+                            }
+                        });
+                    }
+                    var insight = el.querySelector('.insight-box p');
+                    if (insight && c.insightQuote) insight.textContent = c.insightQuote;
+                    break;
+
+                case 'how-it-works':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    var hiwSub = el.querySelector('.section-header p');
+                    if (hiwSub && c.subtitle !== undefined) hiwSub.textContent = c.subtitle || '';
+                    if (c.steps) {
+                        var steps = el.querySelectorAll('.hiw-step');
+                        c.steps.forEach(function(step, i) {
+                            if (steps[i]) {
+                                var st = steps[i].querySelector('h4');
+                                var sp = steps[i].querySelector('p');
+                                if (st && step.title) st.textContent = step.title;
+                                if (sp && step.description) sp.textContent = step.description;
+                            }
+                        });
+                    }
+                    break;
+
+                case 'trust':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (c.cards) {
+                        var tcards = el.querySelectorAll('.trust-card');
+                        c.cards.forEach(function(card, i) {
+                            if (tcards[i]) {
+                                var tt = tcards[i].querySelector('h4');
+                                var tp = tcards[i].querySelector('p');
+                                if (tt && card.title) tt.textContent = card.title;
+                                if (tp && card.description) tp.textContent = card.description;
+                                if (card.gifUrl) {
+                                    var img = tcards[i].querySelector('img');
+                                    if (img) { img.src = card.gifUrl; img.alt = card.title || ''; }
+                                }
+                            }
+                        });
+                    }
+                    break;
+
+                case 'testimonials':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (c.items && c.items.length) {
+                        var tContainer = el.querySelector('.container');
+                        if (tContainer) {
+                            var existingCards = tContainer.querySelectorAll('.testimonial-card');
+                            var templateCard = existingCards[0];
+                            for (var ti = existingCards.length - 1; ti > 0; ti--) existingCards[ti].remove();
+                            c.items.forEach(function(item, idx) {
+                                var card;
+                                if (idx === 0 && templateCard) {
+                                    card = templateCard;
+                                } else if (templateCard) {
+                                    card = templateCard.cloneNode(true);
+                                    tContainer.appendChild(card);
+                                } else { return; }
+                                var tText = card.querySelector('.testimonial-text');
+                                if (tText && item.quote) tText.textContent = item.quote;
+                                var tName = card.querySelector('.testimonial-name');
+                                if (tName && item.name) tName.textContent = item.name;
+                                var tRole = card.querySelector('.testimonial-role');
+                                if (tRole && item.role) tRole.textContent = item.role;
+                                var tAvatar = card.querySelector('.testimonial-avatar');
+                                if (tAvatar && item.avatarLetter) tAvatar.textContent = item.avatarLetter;
+                            });
+                        }
+                    }
+                    break;
+
+                case 'workshops':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    var wsSubBox = el.querySelector('.section-header > div');
+                    if (wsSubBox) {
+                        var wsSubP = wsSubBox.querySelector('p');
+                        if (wsSubP && c.subtitle !== undefined) wsSubP.textContent = c.subtitle;
+                        var wsBadge = wsSubBox.querySelector('div');
+                        if (wsBadge && c.badgeText !== undefined) wsBadge.innerHTML = '<span style="font-size:15px;">✦</span> ' + _escHtml(c.badgeText || '');
+                    }
+                    break;
+
+                case 'about':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    var aboutCard = el.querySelector('.glass-card');
+                    if (aboutCard) {
+                        var aboutImg = aboutCard.querySelector('img');
+                        if (aboutImg && c.photoUrl) { aboutImg.src = c.photoUrl; }
+                        var aboutLinks = aboutCard.querySelectorAll('a[href*="about"]');
+                        var aboutImgLink = aboutLinks.length > 0 ? aboutLinks[0] : null;
+                        var aboutBtnLink = aboutLinks.length > 1 ? aboutLinks[1] : aboutLinks[0];
+                        if (aboutImgLink && aboutImgLink.querySelector('img')) {
+                            if (c.linkUrl) aboutImgLink.href = c.linkUrl;
+                        }
+                        if (aboutBtnLink && !aboutBtnLink.querySelector('img')) {
+                            if (c.linkUrl) aboutBtnLink.href = c.linkUrl;
+                            if (c.linkText) aboutBtnLink.innerHTML = _escHtml(c.linkText);
+                        }
+                        var aboutH3 = aboutCard.querySelector('h3');
+                        if (aboutH3 && c.name) aboutH3.textContent = c.name;
+                        var aboutRole = aboutH3 ? aboutH3.nextElementSibling : null;
+                        if (aboutRole && aboutRole.tagName === 'P' && c.role) aboutRole.textContent = c.role;
+                        var badgeWrap = aboutCard.querySelector('div[style*="flex-wrap: wrap"][style*="gap: 8px"]');
+                        if (badgeWrap && c.badges !== undefined) {
+                            var badgeArr = (c.badges || '').split(',').map(function(b) { return b.trim(); }).filter(Boolean);
+                            badgeWrap.innerHTML = '';
+                            badgeArr.forEach(function(b) {
+                                var span = document.createElement('span');
+                                span.style.cssText = 'padding:6px 16px;border-radius:20px;font-size:14px;background:rgba(217,119,87,0.1);color:var(--accent);';
+                                span.textContent = b;
+                                badgeWrap.appendChild(span);
+                            });
+                        }
+                        var infDiv = aboutCard.querySelector('div[style*="flex: 1"]');
+                        if (infDiv && c.bio !== undefined) {
+                            var bioPs = infDiv.querySelectorAll('p[style*="line-height: 1.7"]');
+                            var bioLines = (c.bio || '').split('\n').filter(Boolean);
+                            bioPs.forEach(function(p, i) {
+                                if (bioLines[i] !== undefined) p.textContent = bioLines[i];
+                                else p.textContent = '';
+                            });
+                        }
+                        var tagBox = aboutCard.querySelector('div[style*="border-radius: 12px"][style*="background: var(--bg-pampas)"]');
+                        if (tagBox && c.tagline !== undefined) {
+                            var tagP = tagBox.querySelector('p');
+                            if (tagP) tagP.textContent = c.tagline;
+                        }
+                    }
+                    break;
+
+                case 'countdown':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    var ctaEl = el.querySelector('.cd-cta');
+                    if (ctaEl) {
+                        if (c.ctaText) ctaEl.textContent = c.ctaText;
+                        var link = c.ctaLink || '/workshop-payment';
+                        ctaEl.href = link;
+                    }
+                    if (c.discountCodeId) {
+                        firebase.firestore().collection('discountCodes').doc(c.discountCodeId).get().then(function(doc) {
+                            if (!doc.exists) return;
+                            var d = doc.data();
+                            var codeEl = el.querySelector('.cd-code');
+                            if (codeEl) codeEl.textContent = d.code || '—';
+                            if (ctaEl && d.code && ctaEl.href.indexOf('workshop-payment') !== -1) {
+                                ctaEl.href = ctaEl.href + (ctaEl.href.indexOf('?') !== -1 ? '&' : '?') + 'promo=' + encodeURIComponent(d.code);
+                            }
+                            var expiresAt = d.expiresAt;
+                            if (expiresAt && (expiresAt.toDate || expiresAt.seconds)) {
+                                var end = expiresAt.toDate ? expiresAt.toDate() : new Date(expiresAt.seconds * 1000);
+                                var daysEl = el.querySelector('.cd-days');
+                                var hoursEl = el.querySelector('.cd-hours');
+                                var minsEl = el.querySelector('.cd-mins');
+                                var secsEl = el.querySelector('.cd-secs');
+                                var grid = el.querySelector('.countdown-grid');
+                                function tick() {
+                                    var now = new Date();
+                                    if (now >= end) {
+                                        if (daysEl) daysEl.textContent = '0';
+                                        if (hoursEl) hoursEl.textContent = '00';
+                                        if (minsEl) minsEl.textContent = '00';
+                                        if (secsEl) secsEl.textContent = '00';
+                                        if (grid) grid.style.display = 'none';
+                                        return;
+                                    }
+                                    var diff = end - now;
+                                    if (daysEl) daysEl.textContent = String(Math.floor(diff / 86400000));
+                                    if (hoursEl) hoursEl.textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+                                    if (minsEl) minsEl.textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                                    if (secsEl) secsEl.textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+                                    setTimeout(tick, 1000);
+                                }
+                                tick();
+                            }
+                        });
+                    }
+                    break;
+
+                case 'faq':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (c.items) {
+                        var faqItems = el.querySelectorAll('.faq-item');
+                        c.items.forEach(function(item, i) {
+                            if (faqItems[i]) {
+                                var fq = faqItems[i].querySelector('.faq-question');
+                                var fa = faqItems[i].querySelector('.faq-answer p');
+                                if (fq && item.question) fq.textContent = item.question;
+                                if (fa && item.answer) fa.textContent = item.answer;
+                            }
+                        });
+                    }
+                    break;
+
+                case 'waitlist':
+                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    var wlSub = el.querySelector('.section-header p');
+                    if (wlSub && c.subtitle !== undefined) wlSub.textContent = c.subtitle || '';
+                    break;
+
+                case 'final-cta':
+                    var ctaH2 = el.querySelector('h2');
+                    if (ctaH2 && c.title) ctaH2.textContent = c.title;
+                    var ctaP = el.querySelector('p');
+                    if (ctaP && c.subtitle) ctaP.textContent = c.subtitle;
+                    var ctaBtn = el.querySelector('.btn');
+                    if (ctaBtn && c.ctaText) ctaBtn.textContent = c.ctaText;
+                    if (ctaBtn && c.ctaLink) ctaBtn.href = c.ctaLink;
+                    var contactLinks = el.querySelectorAll('.contact-info a');
+                    if (contactLinks.length >= 1 && c.whatsappUrl) contactLinks[0].href = c.whatsappUrl;
+                    if (contactLinks.length >= 2 && c.instagramUrl) contactLinks[1].href = c.instagramUrl;
+                    break;
+
+                case 'video':
+                    var vid = el.querySelector('.tpl-video-el');
+                    if (vid && c.videoUrl) { vid.src = c.videoUrl; }
+                    if (vid && c.posterUrl) { vid.poster = c.posterUrl; }
+                    var vcap = el.querySelector('.tpl-video-caption');
+                    if (vcap) vcap.textContent = c.caption || '';
+                    break;
+
+                case 'image-chain':
+                    var chainTitle = el.querySelector('.chain-title span');
+                    if (chainTitle && c.sectionTitle) chainTitle.textContent = c.sectionTitle;
+                    if (c.cards) {
+                        var chainList = el.querySelector('.chain-list');
+                        if (chainList) {
+                            var svgEl = chainList.querySelector('.chain-svg');
+                            chainList.querySelectorAll('.chain-card').forEach(function(cc) { cc.remove(); });
+                            c.cards.forEach(function(card) {
+                                var div = document.createElement('div');
+                                div.className = 'chain-card';
+                                div.innerHTML = '<img src="' + _escHtml(card.imageUrl || '') + '" alt="' + _escHtml(card.alt || '') + '" loading="lazy">' +
+                                    '<div class="chain-label">' + _escHtml(card.label || '') + '</div>';
+                                chainList.appendChild(div);
+                            });
+                            if (svgEl) chainList.insertBefore(svgEl, chainList.firstChild);
+                        }
+                    }
+                    break;
+
+                case 'mindset-shift':
+                    var shBefore = el.querySelector('.shift-before');
+                    var shAfter = el.querySelector('.shift-after');
+                    var shDesc = el.querySelector('.shift-desc');
+                    if (shBefore && c.beforeText) shBefore.textContent = c.beforeText;
+                    if (shAfter && c.afterText) shAfter.textContent = c.afterText;
+                    if (shDesc) shDesc.textContent = c.description || '';
+                    break;
+
+                case 'learning-outcomes':
+                    var loTitle = el.querySelector('.lo-title span');
+                    if (loTitle && c.sectionTitle) loTitle.textContent = c.sectionTitle;
+                    if (c.items) {
+                        var loList = el.querySelector('.lo-list');
+                        if (loList) {
+                            loList.innerHTML = '';
+                            c.items.forEach(function(item, idx) {
+                                var div = document.createElement('div');
+                                div.className = 'lo-item';
+                                div.innerHTML = '<div class="lo-num">' + (idx + 1) + '</div>' +
+                                    '<div><div class="lo-item-title">' + _escHtml(item.title || '') + '</div>' +
+                                    '<div class="lo-item-desc">' + _escHtml(item.description || '') + '</div></div>';
+                                loList.appendChild(div);
+                            });
+                        }
+                    }
+                    var loTools = el.querySelector('.lo-tools');
+                    if (loTools && c.tools) {
+                        loTools.innerHTML = '';
+                        c.tools.forEach(function(t) {
+                            var chip = document.createElement('span');
+                            chip.className = 'lo-tool-chip';
+                            chip.textContent = t.name || '';
+                            loTools.appendChild(chip);
+                        });
+                    }
+                    var loDemo = el.querySelector('.lo-demo-box');
+                    if (loDemo) loDemo.textContent = c.demoText || '';
+                    if (loDemo) loDemo.style.display = c.demoText ? '' : 'none';
+                    break;
+
+                case 'audience-fit':
+                    var afForTitle = el.querySelector('.af-for-title');
+                    if (afForTitle && c.forTitle) afForTitle.textContent = c.forTitle;
+                    var afNotForTitle = el.querySelector('.af-notfor-title');
+                    if (afNotForTitle && c.notForTitle) afNotForTitle.textContent = c.notForTitle;
+                    var afForList = el.querySelector('.af-for-list');
+                    if (afForList && c.forItems) {
+                        afForList.innerHTML = '';
+                        c.forItems.forEach(function(item) {
+                            var li = document.createElement('li');
+                            li.textContent = item.text || '';
+                            afForList.appendChild(li);
+                        });
+                    }
+                    var afNotForList = el.querySelector('.af-notfor-list');
+                    if (afNotForList && c.notForItems) {
+                        afNotForList.innerHTML = '';
+                        c.notForItems.forEach(function(item) {
+                            var li = document.createElement('li');
+                            li.textContent = item.text || '';
+                            afNotForList.appendChild(li);
+                        });
+                    }
+                    break;
+
+                case 'logistics-card':
+                    if (c.workshopId) {
+                        _loadLogisticsCard(el, c.workshopId, c.ctaText, c.ctaLink);
+                    }
+                    break;
+
+                case 'transformation':
+                    var tfTitle = el.querySelector('.tf-title span');
+                    if (tfTitle && c.sectionTitle) tfTitle.textContent = c.sectionTitle;
+                    if (c.cards) {
+                        var tfGrid = el.querySelector('.tf-grid');
+                        if (tfGrid) {
+                            tfGrid.innerHTML = '';
+                            c.cards.forEach(function(card) {
+                                var div = document.createElement('div');
+                                div.className = 'tf-card';
+                                div.innerHTML =
+                                    '<div class="tf-theme">' + _escHtml(card.theme || '') + '</div>' +
+                                    '<div class="tf-before-label">之前</div>' +
+                                    '<div class="tf-before">' + _escHtml(card.beforeText || '') + '</div>' +
+                                    '<div class="tf-after-label">之後</div>' +
+                                    '<div class="tf-after">' + _escHtml(card.afterText || '') + '</div>';
+                                tfGrid.appendChild(div);
+                            });
+                        }
+                    }
+                    break;
+
+                case 'link-list':
+                    var llTitle = el.querySelector('.ll-title');
+                    if (llTitle) llTitle.textContent = c.sectionTitle || '';
+                    var llList = el.querySelector('.ll-list');
+                    if (llList && c.links) {
+                        llList.innerHTML = '';
+                        c.links.forEach(function(lnk) {
+                            var a = document.createElement('a');
+                            a.className = 'll-card';
+                            a.href = lnk.url || '#';
+                            a.target = '_blank';
+                            a.rel = 'noopener';
+                            var body = '<div class="ll-card-body"><div class="ll-card-label">' + _escHtml(lnk.label || '') + '</div>';
+                            if (lnk.description) body += '<div class="ll-card-desc">' + _escHtml(lnk.description) + '</div>';
+                            body += '</div>';
+                            if (lnk.badgeText) body += '<span class="ll-badge">' + _escHtml(lnk.badgeText) + '</span>';
+                            body += '<span class="ll-chevron">›</span>';
+                            a.innerHTML = body;
+                            llList.appendChild(a);
+                        });
+                    }
+                    break;
+
+                case 'tools-grid':
+                    var tgTitle = el.querySelector('.tg-title');
+                    if (tgTitle) tgTitle.textContent = c.sectionTitle || '';
+                    var tgGrid = el.querySelector('.tg-grid');
+                    if (tgGrid && c.tools) {
+                        tgGrid.innerHTML = '';
+                        c.tools.forEach(function(tool) {
+                            var a = document.createElement('a');
+                            a.className = 'tg-card';
+                            a.href = tool.url || '#';
+                            a.target = '_blank';
+                            a.rel = 'noopener';
+                            var inner = '';
+                            if (tool.logoUrl) inner += '<img class="tg-logo" src="' + _escHtml(tool.logoUrl) + '" alt="">';
+                            inner += '<div class="tg-name">' + _escHtml(tool.name || '') + '</div>';
+                            if (tool.description) inner += '<div class="tg-desc">' + _escHtml(tool.description) + '</div>';
+                            if (tool.badgeText) inner += '<span class="tg-badge">' + _escHtml(tool.badgeText) + '</span>';
+                            a.innerHTML = inner;
+                            tgGrid.appendChild(a);
+                        });
+                    }
+                    break;
+
+                case 'section-divider':
+                    var sdTitle = el.querySelector('.sd-title');
+                    if (sdTitle) sdTitle.textContent = c.title || '';
+                    var sdSub = el.querySelector('.sd-subtitle');
+                    if (sdSub) {
+                        sdSub.textContent = c.subtitle || '';
+                        sdSub.style.display = c.subtitle ? '' : 'none';
+                    }
+                    break;
+
+                case 'lead-magnet':
+                    var lmTitle = el.querySelector('.lm-title');
+                    if (lmTitle) lmTitle.textContent = c.title || '';
+                    var lmDesc = el.querySelector('.lm-desc');
+                    if (lmDesc) lmDesc.textContent = c.description || '';
+                    var lmImg = el.querySelector('.lm-img');
+                    if (lmImg) {
+                        if (c.imageUrl) { lmImg.src = c.imageUrl; lmImg.style.display = ''; }
+                        else { lmImg.style.display = 'none'; }
+                    }
+                    var lmTrigger = el.querySelector('.lm-trigger');
+                    if (lmTrigger) lmTrigger.textContent = c.triggerText || '立即領取';
+                    var lmModalTitle = el.querySelector('.lm-modal-title');
+                    if (lmModalTitle) lmModalTitle.textContent = c.title || '';
+                    var lmSubmit = el.querySelector('.lm-submit');
+                    if (lmSubmit) lmSubmit.textContent = c.submitText || '提交';
+                    var lmFields = el.querySelector('.lm-form-fields');
+                    if (lmFields && c.formFields) {
+                        lmFields.innerHTML = '';
+                        c.formFields.forEach(function(f) {
+                            var inp = document.createElement('input');
+                            inp.type = f.type || 'text';
+                            inp.placeholder = f.label || '';
+                            lmFields.appendChild(inp);
+                        });
+                    }
+                    var lmOverlay = el.querySelector('.lm-modal-overlay');
+                    if (lmTrigger && lmOverlay) {
+                        lmTrigger.onclick = function() { lmOverlay.classList.add('active'); };
+                        var lmClose = el.querySelector('.lm-close');
+                        if (lmClose) lmClose.onclick = function() { lmOverlay.classList.remove('active'); };
+                        lmOverlay.onclick = function(e) { if (e.target === lmOverlay) lmOverlay.classList.remove('active'); };
+                    }
+                    break;
+
+                case 'origin-story':
+                    var osTitle = el.querySelector('.os-title');
+                    if (osTitle) osTitle.textContent = c.sectionTitle || '';
+                    var osIntro = el.querySelector('.os-intro');
+                    if (osIntro) {
+                        osIntro.textContent = c.introText || '';
+                        osIntro.style.display = c.introText ? '' : 'none';
+                    }
+                    var osTl = el.querySelector('.os-timeline');
+                    if (osTl && c.steps) {
+                        osTl.innerHTML = '';
+                        c.steps.forEach(function(step) {
+                            var div = document.createElement('div');
+                            div.className = 'os-step';
+                            div.innerHTML = '<div class="os-dot"></div>' +
+                                '<div class="os-step-title">' + _escHtml(step.title || '') + '</div>' +
+                                '<div class="os-step-desc">' + _escHtml(step.description || '') + '</div>';
+                            osTl.appendChild(div);
+                        });
+                    }
+                    break;
+
+                case 'tools-tags':
+                    var ttTitle = el.querySelector('.tt-title');
+                    if (ttTitle) ttTitle.textContent = c.sectionTitle || '';
+                    var ttDesc = el.querySelector('.tt-desc');
+                    if (ttDesc) {
+                        ttDesc.textContent = c.description || '';
+                        ttDesc.style.display = c.description ? '' : 'none';
+                    }
+                    var ttCloud = el.querySelector('.tt-cloud');
+                    if (ttCloud && c.tags) {
+                        ttCloud.innerHTML = '';
+                        c.tags.forEach(function(tag) {
+                            var span = document.createElement('span');
+                            span.className = 'tt-tag';
+                            span.textContent = tag.name || '';
+                            ttCloud.appendChild(span);
+                        });
+                    }
+                    var ttCallout = el.querySelector('.tt-callout');
+                    if (ttCallout) {
+                        if (c.calloutText) { ttCallout.textContent = c.calloutText; ttCallout.style.display = ''; }
+                        else { ttCallout.style.display = 'none'; }
+                    }
+                    break;
+
+                case 'photo-block':
+                    var pbImg = el.querySelector('.pb-img');
+                    if (pbImg) {
+                        pbImg.src = c.imageUrl || '';
+                        pbImg.alt = c.alt || '';
+                    }
+                    var pbCap = el.querySelector('.pb-caption');
+                    if (pbCap) {
+                        pbCap.textContent = c.caption || '';
+                        pbCap.style.display = c.caption ? '' : 'none';
+                    }
+                    break;
+            }
+        }
+
+        // Lock pinch/double-tap zoom on mobile browsers
+        (function lockPageZoom() {
+            var lastTouchEnd = 0;
+            document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+            document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+            document.addEventListener('gestureend', function(e) { e.preventDefault(); }, { passive: false });
+            document.addEventListener('touchmove', function(e) {
+                if (e.touches && e.touches.length > 1) e.preventDefault();
+            }, { passive: false });
+            document.addEventListener('touchend', function(e) {
+                var now = Date.now();
+                if (now - lastTouchEnd <= 300) e.preventDefault();
+                lastTouchEnd = now;
+            }, { passive: false });
+        })();
+    </script>
+</body>
+</html>

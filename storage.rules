@@ -1,0 +1,42 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Workshop images: public read; write only for authorised CMS admins
+    match /workshop-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Layout editor images: public read; write only for authorised CMS admins
+    match /layout-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Profile pictures: public read; authenticated user can write own
+    match /profile-pictures/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Payment screenshots:
+    //   - Read: download URLs include access tokens so they are not guessable.
+    //     We allow reads so getDownloadURL() works for both guests and logged-in users.
+    //   - Write: anyone can upload (guests + authenticated), max 5MB, must be an image
+    match /payment-screenshots/{regId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

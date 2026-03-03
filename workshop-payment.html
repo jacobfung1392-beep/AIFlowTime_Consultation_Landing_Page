@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>工作坊付款 | AIFLOWTIME</title>
+    <meta name="description" content="AIFLOWTIME 工作坊報名付款頁面">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream:#FAF9F7; --bg-off:#E8E4DF; --bg-pampas:#F4F3EE;
+            --accent:#D97757; --accent-text:#C45A3A; --accent-dark:#C56A4B;
+            --text:#3B3B3B; --text-light:#7A7A7A; --white:#FFFFFF;
+            --glass-bg:rgba(255,255,255,0.25); --glass-border:rgba(255,255,255,0.4); --shadow:rgba(0,0,0,0.1);
+            --green:#2E7D32; --green-bg:rgba(76,175,80,0.15); --red:#C62828;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;overflow-x:hidden;}
+        body{font-family:'Noto Sans TC',sans-serif;background:var(--bg-cream);color:var(--text);line-height:1.7;font-size:16px;font-weight:400;min-height:100vh;overflow-x:hidden;}
+
+        .pay-header{position:sticky;top:0;z-index:100;background:rgba(250,249,247,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06);padding:16px 24px;}
+        .pay-header-inner{display:flex;justify-content:space-between;align-items:center;max-width:720px;margin:0 auto;}
+        .pay-logo{font-size:1.15rem;font-weight:700;color:var(--text);text-decoration:none;}
+        .pay-logo span{color:var(--accent);}
+        .pay-back{display:inline-flex;align-items:center;gap:6px;color:var(--text-light);text-decoration:none;font-size:14px;font-weight:600;transition:color 0.3s;}
+        .pay-back:hover{color:var(--accent);}
+
+        .container{max-width:720px;margin:0 auto;padding:32px 24px 80px;}
+
+        .glass-card{background:var(--glass-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid var(--glass-border);border-radius:20px;padding:32px;box-shadow:0 8px 32px var(--shadow);}
+
+        .page-title{font-size:clamp(24px,4vw,32px);font-weight:700;margin-bottom:8px;}
+        .page-subtitle{font-size:15px;color:var(--text-light);font-weight:500;margin-bottom:32px;}
+
+        /* Workshop info */
+        .ws-info-card{margin-bottom:28px;}
+        .ws-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;margin-bottom:12px;}
+        .ws-badge.beginner{background:rgba(76,175,80,0.15);color:#2E7D32;}
+        .ws-badge.intermediate{background:rgba(191,64,0,0.15);color:#BF4000;}
+        .ws-badge.advanced{background:rgba(198,40,40,0.15);color:#C62828;}
+        .ws-title{font-size:clamp(22px,3vw,28px);font-weight:700;margin-bottom:8px;}
+        .ws-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:20px;}
+        @media(max-width:480px){.ws-detail-grid{grid-template-columns:1fr;}}
+        .ws-detail-item{display:flex;flex-direction:column;gap:2px;}
+        .ws-detail-label{font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;}
+        .ws-detail-value{font-size:16px;font-weight:700;color:var(--text);}
+        .ws-detail-value.price{color:var(--accent-text);font-size:20px;}
+        .price-original{text-decoration:line-through;color:var(--text-light);font-size:14px;font-weight:500;margin-right:8px;}
+        .price-discount-badge{display:inline-block;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;}
+
+        /* Discount code input */
+        .dc-apply-wrap{margin-top:16px;padding:16px;border-radius:12px;background:var(--bg-pampas);border:1.5px dashed var(--bg-off);}
+        .dc-apply-row{display:flex;gap:8px;align-items:center;}
+        .dc-apply-input{flex:1;padding:10px 14px;border:1.5px solid var(--bg-off);border-radius:10px;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;background:var(--white);color:var(--text);outline:none;transition:border-color 0.2s;}
+        .dc-apply-input:focus{border-color:var(--accent);}
+        .dc-apply-btn{padding:10px 20px;border:none;border-radius:10px;background:var(--accent);color:var(--white);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+        .dc-apply-btn:hover{opacity:0.9;transform:translateY(-1px);}
+        .dc-apply-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+        .dc-msg{font-size:13px;font-weight:600;margin-top:8px;min-height:18px;}
+        .dc-msg.success{color:var(--green);}
+        .dc-msg.error{color:var(--red);}
+        .dc-applied-tag{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);color:var(--green);font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;margin-top:4px;}
+        .dc-applied-tag button{background:none;border:none;color:var(--green);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
+
+        .ws-desc{font-size:14px;color:var(--text-light);font-weight:500;line-height:1.7;margin-bottom:16px;}
+
+        .capacity-bar{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;}
+        .capacity-rect{width:100%;aspect-ratio:3/4;max-width:24px;border-radius:6px;background:#D1D5DB;transition:background 0.3s ease;}
+        .capacity-rect.filled{background:var(--accent);}
+        .capacity-text{font-size:13px;color:var(--text-light);font-weight:600;}
+
+        .divider{height:1px;background:var(--bg-off);margin:28px 0;}
+
+        .section-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+        .section-desc{font-size:14px;color:var(--text-light);font-weight:500;margin-bottom:20px;}
+        .section-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:8px;vertical-align:middle;}
+        .section-badge.required{background:rgba(217,119,87,0.12);color:var(--accent-text);}
+        .section-badge.optional{background:rgba(0,0,0,0.05);color:var(--text-light);}
+
+        /* Login to apply */
+        .login-cta-box{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:14px;background:rgba(217,119,87,0.06);border:1px solid rgba(217,119,87,0.15);margin-bottom:20px;flex-wrap:wrap;}
+        .login-cta-box .google-btn{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 20px;background:var(--white);color:var(--text);border:1.5px solid var(--bg-off);border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.06);white-space:nowrap;flex-shrink:0;}
+        .login-cta-box .google-btn:hover{box-shadow:0 4px 16px rgba(0,0,0,0.1);transform:translateY(-1px);border-color:var(--accent);}
+        .login-cta-box .google-btn svg{width:18px;height:18px;}
+        .login-cta-text{font-size:13px;color:var(--text);font-weight:500;line-height:1.5;}
+        .login-cta-text strong{color:var(--accent-text);}
+
+        /* Form */
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;min-width:0;}
+        .info-form-card{overflow:hidden;}
+        @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+        .form-grid.full{grid-template-columns:1fr;}
+        .field{display:flex;flex-direction:column;gap:4px;}
+        .field label{font-size:13px;font-weight:700;color:var(--text-light);}
+        .field label .req{color:var(--accent);margin-left:2px;}
+        .field input,.field select,.field textarea{height:44px;padding:0 14px;border:1.5px solid var(--bg-off);border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:15px;background:var(--white);color:var(--text);transition:border-color 0.3s;font-weight:500;width:100%;min-width:0;box-sizing:border-box;}
+        .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
+        .field textarea{height:auto;min-height:72px;padding:12px 14px;resize:vertical;}
+        .checkbox-group{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+        .checkbox-group label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;padding:8px 12px;border-radius:10px;border:1.5px solid var(--bg-off);transition:all 0.2s;background:var(--white);}
+        .checkbox-group label:hover{border-color:var(--accent);}
+        .checkbox-group label.checked{border-color:var(--accent);background:rgba(217,119,87,0.05);}
+        .checkbox-group input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+
+        /* Duplicate registration banner */
+        .duplicate-banner{display:none;align-items:flex-start;gap:14px;background:#FFF3E0;border:1.5px solid #FFB74D;border-radius:14px;padding:20px 24px;margin-bottom:24px;}
+        .duplicate-banner-icon{font-size:28px;flex-shrink:0;}
+        .duplicate-banner-text strong{font-size:16px;color:var(--text);display:block;margin-bottom:4px;}
+        .duplicate-banner-text p{font-size:14px;color:var(--text-light);margin:0;line-height:1.5;}
+
+        .btn{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 32px;background:var(--accent);color:var(--white);text-decoration:none;border-radius:12px;font-weight:700;font-size:16px;transition:all 0.3s ease;border:none;cursor:pointer;min-width:200px;}
+        .btn:hover{background:var(--accent-dark);transform:translateY(-1px);}
+        .btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+
+        /* T&C */
+        .tc-wrap{display:flex;align-items:flex-start;gap:10px;margin-bottom:20px;padding:14px 16px;border-radius:12px;background:rgba(217,119,87,0.04);border:1px solid rgba(217,119,87,0.12);}
+        .tc-wrap input[type="checkbox"]{width:20px;height:20px;accent-color:var(--accent);flex-shrink:0;margin-top:2px;cursor:pointer;}
+        .tc-wrap label{font-size:14px;font-weight:500;color:var(--text);cursor:pointer;line-height:1.5;}
+        .tc-wrap label a{color:var(--accent);font-weight:700;text-decoration:none;}
+
+        /* Payment buttons */
+        .pay-methods{display:flex;flex-direction:column;gap:14px;}
+        .pay-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:56px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;cursor:pointer;transition:all 0.3s ease;border:none;}
+        .pay-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.12);}
+        .pay-btn:active{transform:translateY(0);}
+        .pay-btn.disabled{opacity:0.35;pointer-events:none;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+        .pay-btn svg{height:20px;width:20px;}
+        .pay-btn-payme{background:#DB0011;color:var(--white);}
+        .pay-btn-payme:hover{background:#C0000F;}
+        .pay-btn-fps{background:var(--white);color:var(--text);border:2px solid var(--bg-off);}
+        .pay-btn-fps:hover{border-color:var(--accent);}
+        .pay-btn-fps .fps-badge{display:inline-flex;align-items:center;justify-content:center;background:#6B3FA0;color:var(--white);font-size:11px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:0.5px;}
+
+        /* Screenshot upload */
+        /* Upload loading overlay */
+        .upload-overlay{position:fixed;inset:0;z-index:2000;background:rgba(250,249,247,0.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+        .upload-overlay.active{display:flex;}
+        .upload-spinner{width:44px;height:44px;border:4px solid var(--bg-off);border-top-color:var(--accent);border-radius:50%;animation:uploadSpin 0.8s linear infinite;}
+        @keyframes uploadSpin{to{transform:rotate(360deg);}}
+        .upload-overlay-text{font-size:15px;font-weight:700;color:var(--text);text-align:center;line-height:1.6;}
+        .upload-overlay-sub{font-size:13px;font-weight:500;color:var(--text-light);}
+        /* FPS Modal */
+        .fps-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+        .fps-overlay.open{display:flex;}
+        .fps-modal{background:var(--white);border-radius:20px;padding:32px 28px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;position:relative;animation:fpsSlideIn 0.3s ease;}
+        @keyframes fpsSlideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+        .fps-modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;background:var(--bg-pampas);border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-light);transition:all 0.2s;}
+        .fps-modal-close:hover{background:var(--bg-off);color:var(--text);}
+        .fps-modal h3{font-size:18px;font-weight:700;margin-bottom:6px;}
+        .fps-modal .fps-amount{font-size:28px;font-weight:700;color:var(--accent-text);margin:12px 0 4px;}
+        .fps-modal .fps-discount-note{font-size:13px;color:var(--green);font-weight:600;margin-bottom:16px;}
+        .fps-modal .fps-qr{width:220px;height:220px;border-radius:12px;border:2px solid var(--bg-off);object-fit:contain;margin:0 auto 16px;}
+        .fps-modal .fps-instructions{font-size:13px;color:var(--text-light);line-height:1.7;font-weight:500;text-align:left;margin-bottom:16px;padding:12px 16px;background:var(--bg-pampas);border-radius:12px;}
+        .fps-modal .fps-instructions ol{padding-left:18px;margin:8px 0 0;}
+        .fps-modal .fps-instructions li{margin-bottom:4px;}
+        .fps-modal .fps-done-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 28px;background:var(--accent);color:var(--white);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans TC',sans-serif;}
+        .fps-modal .fps-done-btn:hover{background:var(--accent-dark);transform:translateY(-1px);}
+
+        .screenshot-section{margin-top:28px;}
+        .screenshot-upload-area{border:2px dashed var(--bg-off);border-radius:14px;padding:28px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;}
+        .screenshot-upload-area:hover{border-color:var(--accent);background:rgba(217,119,87,0.03);}
+        .screenshot-upload-area.has-file{border-style:solid;border-color:var(--green);}
+        .screenshot-upload-area .upload-icon{font-size:32px;color:var(--bg-off);}
+        .screenshot-upload-area .upload-text{font-size:14px;color:var(--text-light);font-weight:600;}
+        .screenshot-upload-area .upload-text strong{color:var(--accent);}
+        .screenshot-upload-area input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+        .screenshot-upload-area.disabled{opacity:0.35;pointer-events:none;cursor:not-allowed;}
+        .screenshot-upload-area img{max-width:100%;max-height:200px;border-radius:10px;object-fit:contain;}
+        .screenshot-progress{margin-top:8px;height:4px;background:var(--bg-off);border-radius:4px;overflow:hidden;display:none;}
+        .screenshot-progress-bar{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width 0.3s;}
+        .screenshot-success{display:none;margin-top:12px;padding:12px 16px;background:var(--green-bg);border-radius:10px;font-size:14px;font-weight:600;color:var(--green);text-align:center;}
+
+        /* Terms & Conditions scrollable box */
+        .tc-box{max-height:180px;overflow-y:auto;padding:16px 18px;border:1px solid var(--bg-off);border-radius:12px;background:rgba(0,0,0,0.015);margin-bottom:16px;font-size:12.5px;color:var(--text-light);line-height:1.8;font-weight:400;}
+        .tc-box::-webkit-scrollbar{width:5px;}
+        .tc-box::-webkit-scrollbar-thumb{background:var(--bg-off);border-radius:3px;}
+        .tc-box h4{font-size:13px;font-weight:700;color:var(--text);margin:10px 0 4px;line-height:1.5;}
+        .tc-box h4:first-child{margin-top:0;}
+        .tc-box p{margin:4px 0 6px;line-height:1.7;}
+        .tc-box ul{margin:2px 0 6px 16px;}
+        .tc-box li{margin-bottom:2px;}
+
+        .skeleton{animation:skeleton-pulse 1.5s ease infinite;}
+        .skel-line{height:16px;border-radius:8px;background:var(--bg-off);margin-bottom:10px;}
+        .skel-line.w60{width:60%;}.skel-line.w80{width:80%;}.skel-line.w40{width:40%;}.skel-line.h28{height:28px;}
+        @keyframes skeleton-pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+        .sold-out-banner{text-align:center;padding:20px;background:rgba(198,40,40,0.08);border-radius:12px;border:1px solid rgba(198,40,40,0.15);}
+        .sold-out-banner p{font-size:16px;font-weight:700;color:#C62828;}
+
+        /* Round selector */
+        .round-selector{display:flex;flex-direction:column;gap:10px;}
+        .round-option{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1.5px solid var(--bg-off);border-radius:12px;cursor:pointer;transition:all 0.2s;background:var(--white);}
+        .round-option:hover{border-color:var(--accent);}
+        .round-option.selected{border-color:var(--accent);background:rgba(217,119,87,0.05);box-shadow:0 0 0 2px rgba(217,119,87,0.15);}
+        .round-option.sold-out{opacity:0.5;cursor:not-allowed;}
+        .round-radio{width:20px;height:20px;border:2px solid var(--bg-off);border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+        .round-option.selected .round-radio{border-color:var(--accent);}
+        .round-option.selected .round-radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--accent);}
+        .round-option-body{flex:1;min-width:0;}
+        .round-option-label{font-size:15px;font-weight:700;margin-bottom:4px;}
+        .round-option-dates{font-size:12px;color:var(--text-light);line-height:1.6;}
+        .round-option-seats{font-size:11px;font-weight:600;margin-top:6px;}
+        .round-option-seats.available{color:var(--green);}
+        .round-option-seats.full{color:var(--red);}
+        .continuous-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(217,119,87,0.1);color:var(--accent);margin-bottom:8px;}
+
+        /* Capacity-full popup */
+        .cap-full-overlay{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+        .cap-full-overlay.open{display:flex;}
+        .cap-full-modal{background:var(--white);border-radius:20px;padding:36px 28px 28px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;position:relative;animation:fpsSlideIn 0.3s ease;}
+        .cap-full-modal .cap-full-icon{font-size:48px;margin-bottom:12px;}
+        .cap-full-modal h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;}
+        .cap-full-modal p{font-size:14px;color:var(--text-light);line-height:1.7;font-weight:500;margin-bottom:20px;}
+        .cap-full-modal .cap-full-btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 28px;background:var(--accent);color:var(--white);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.3s;font-family:'Noto Sans TC',sans-serif;}
+        .cap-full-modal .cap-full-btn:hover{background:var(--accent-dark);transform:translateY(-1px);}
+        .cap-full-modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;background:var(--bg-pampas);border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-light);transition:all 0.2s;}
+        .cap-full-modal-close:hover{background:var(--bg-off);color:var(--text);}
+
+        .toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+        .toast{padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;color:var(--white);box-shadow:0 4px 16px rgba(0,0,0,0.15);animation:toast-in 0.3s ease;max-width:360px;}
+        .toast.success{background:var(--green);}
+        .toast.error{background:var(--red);}
+        @keyframes toast-in{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    </style>
+</head>
+<body>
+
+<header class="pay-header">
+    <div class="pay-header-inner">
+        <a href="/ai-beginner-workshop" class="pay-logo">AI<span>FLOW</span>TIME</a>
+        <a href="/ai-beginner-workshop" class="pay-back">← 返回工作坊一覽</a>
+    </div>
+</header>
+
+<div class="container">
+    <div id="loadingState">
+        <div class="glass-card">
+            <div class="skeleton skel-line w40 h28"></div><div style="height:12px"></div>
+            <div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div>
+            <div style="height:20px"></div><div class="skeleton skel-line w80"></div><div class="skeleton skel-line w60"></div>
+        </div>
+    </div>
+
+    <div id="paymentContent" style="display:none;">
+        <h1 class="page-title">工作坊報名</h1>
+        <p class="page-subtitle">確認工作坊詳情，填寫個人資料，然後選擇付款方式完成報名。</p>
+
+        <!-- Workshop Details -->
+        <div class="glass-card ws-info-card">
+            <span id="wsBadge" class="ws-badge"></span>
+            <div id="wsNumber" style="font-family:'Courier Prime',monospace;font-size:13px;color:var(--text-light);font-weight:700;margin-bottom:4px;"></div>
+            <h2 id="wsTitle" class="ws-title"></h2>
+            <p id="wsDesc" class="ws-desc"></p>
+            <div class="ws-detail-grid">
+                <div class="ws-detail-item" id="wsSessionsWrap"><span class="ws-detail-label">日期與時間</span><div id="wsSessions" class="ws-detail-value">待定</div></div>
+                <div class="ws-detail-item"><span class="ws-detail-label">時長</span><span id="wsDuration" class="ws-detail-value"></span></div>
+                <div class="ws-detail-item"><span class="ws-detail-label">費用</span><span id="wsPrice" class="ws-detail-value price"></span></div>
+                <div class="ws-detail-item"><span class="ws-detail-label">名額狀態</span><span id="wsSeatsText" class="ws-detail-value"></span></div>
+            </div>
+            <div id="wsCapacityBar"></div>
+
+            <!-- Round / date selector -->
+            <div id="roundSelectorWrap" style="display:none;margin-top:16px;">
+                <p id="roundSelectorLabel" style="font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:10px;">選擇期數</p>
+                <div id="roundSelector" class="round-selector"></div>
+            </div>
+
+            <!-- Discount Code -->
+            <div class="dc-apply-wrap" id="dcWrap" style="display:none;">
+                <div class="dc-apply-row">
+                    <input type="text" id="dcInput" class="dc-apply-input" placeholder="輸入折扣碼" maxlength="30" autocomplete="off">
+                    <button type="button" id="dcBtn" class="dc-apply-btn" onclick="applyDiscountCode()">套用</button>
+                </div>
+                <div id="dcMsg" class="dc-msg"></div>
+            </div>
+        </div>
+
+        <!-- Personal Info -->
+        <div id="personalInfoSection">
+            <div class="divider"></div>
+            <h3 class="section-title">個人資料 <span class="section-badge required">必填</span></h3>
+            <p class="section-desc">請填寫以下資料以完成報名程序。</p>
+
+            <!-- Login CTA -->
+            <div class="login-cta-box" id="loginCtaBox">
+                <button class="google-btn" onclick="loginToApply()">
+                    <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Log in to apply
+                </button>
+                <span class="login-cta-text">登入帳號即享 <strong>95折優惠</strong>，並自動填寫個人資料</span>
+            </div>
+
+            <div class="glass-card info-form-card" id="infoFormCard">
+                <div class="form-grid">
+                    <div class="field"><label>姓名 <span class="req">*</span></label><input type="text" id="infoName" placeholder="請輸入你的姓名" required></div>
+                    <div class="field"><label>年齡組別 <span class="req">*</span></label>
+                        <select id="infoAge" required>
+                            <option value="">請選擇</option>
+                            <option value="18-24">18 - 24 歲</option>
+                            <option value="25-34">25 - 34 歲</option>
+                            <option value="35-44">35 - 44 歲</option>
+                            <option value="45-54">45 - 54 歲</option>
+                            <option value="55+">55 歲或以上</option>
+                            <option value="prefer-not-to-say">不願透露</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>WhatsApp 電話號碼 <span class="req">*</span></label><input type="tel" id="infoPhone" placeholder="e.g. 9123 4567" required></div>
+                    <div class="field"><label>職業類型 <span class="req">*</span></label>
+                        <select id="infoJob" required>
+                            <option value="">請選擇</option>
+                            <option value="office">辦公室 / 文職</option>
+                            <option value="creative">創意 / 設計 / 媒體</option>
+                            <option value="tech">科技 / IT</option>
+                            <option value="education">教育 / 培訓</option>
+                            <option value="sales">銷售 / 市場營銷</option>
+                            <option value="finance">金融 / 會計</option>
+                            <option value="freelance">自由工作者 / 斜槓族</option>
+                            <option value="business">創業者 / 老闆</option>
+                            <option value="student">學生</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--bg-off);">
+                    <p style="font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:14px;">以下為選填問題 <span class="section-badge optional">選填</span></p>
+                    <div class="field" style="margin-bottom:16px;">
+                        <label>你報名的原因是什麼？（可多選）</label>
+                        <div class="checkbox-group" id="reasonsGroup">
+                            <label><input type="checkbox" value="提升工作效率">提升工作效率</label>
+                            <label><input type="checkbox" value="學習新技能">學習新技能</label>
+                            <label><input type="checkbox" value="想了解 AI 可以怎樣幫到我">想了解 AI 可以怎樣幫到我</label>
+                            <label><input type="checkbox" value="為轉行 / 轉型做準備">為轉行 / 轉型做準備</label>
+                            <label><input type="checkbox" value="朋友推薦">朋友推薦</label>
+                            <label><input type="checkbox" value="純粹好奇">純粹好奇</label>
+                            <label><input type="checkbox" value="其他" id="reasonOtherCb">其他</label>
+                            <input type="text" id="reasonOtherText" placeholder="請填寫你的原因..." style="display:none;margin-top:4px;margin-left:28px;height:40px;padding:0 12px;border:1.5px solid var(--bg-off);border-radius:10px;font-size:14px;font-weight:500;width:calc(100% - 28px);box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div class="form-grid full" style="margin-bottom:16px;">
+                        <div class="field"><label>你最近在使用 AI 時遇到什麼問題？</label><textarea id="infoAiProblem" placeholder="例如：AI 的回答總是很空泛、不知道用哪個工具、試過但覺得沒用..." rows="3"></textarea></div>
+                    </div>
+                    <div class="form-grid full">
+                        <div class="field"><label>你期望堂課如何幫到你？</label><textarea id="infoExpectation" placeholder="例如：學會一個每天都用得到的 AI 流程、了解哪些工具最適合我..." rows="3"></textarea></div>
+                    </div>
+                </div>
+
+                <div style="margin-top:24px;text-align:center;">
+                    <button class="btn" id="confirmInfoBtn" onclick="confirmPersonalInfo()">確認個人資料</button>
+                    <p id="infoError" style="color:#C62828;font-size:13px;font-weight:600;margin-top:10px;display:none;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Section (hidden until info confirmed) -->
+        <div id="paymentMethods" style="display:none;">
+            <div class="divider"></div>
+            <h3 class="section-title">選擇付款方式</h3>
+            <p class="section-desc">完成付款後，請在下方上傳付款截圖以確認報名。</p>
+
+            <div class="tc-box">
+                <h4>一、報名與付款</h4>
+                <ul>
+                    <li>報名人請填寫真實及完整個人資料（姓名、電郵、WhatsApp 號碼），以便我們聯絡及確認安排。</li>
+                    <li>付款方式以報名頁面顯示為準。完成付款後，請於指定區域上傳付款截圖，以便我們核實。</li>
+                    <li>我們將於收到付款證明後 24 小時內透過電郵或 WhatsApp 確認報名狀態。</li>
+                    <li>如有任何技術或付款問題，歡迎主動聯絡我們，我們會協助跟進。</li>
+                </ul>
+
+                <h4>二、退款與更改安排</h4>
+                <p>如因個人原因未能出席：</p>
+                <ul>
+                    <li>工作坊開始前 7 天通知，可申請全額退款。</li>
+                    <li>工作坊開始前 48 小時通知，可申請轉讓名額一次。</li>
+                    <li>開始前 48 小時內或缺席，恕未能退款或更改。</li>
+                </ul>
+                <p>如因主辦方原因取消或延期，將安排全額退款或改期選項。</p>
+                <p>我們理解大家時間安排可能會有變動，因此盡量提供合理彈性，同時確保課程安排順暢。</p>
+
+                <h4>三、工作坊安排</h4>
+                <ul>
+                    <li>日期、時間及形式以報名頁面資料為準。</li>
+                    <li>如因不可抗力因素需作調整，我們將提前通知參加者。</li>
+                    <li>參加者請自備所需設備（如手提電腦、手機等）。</li>
+                    <li>為確保課程完整體驗，請準時出席；遲到將不設個別補課。</li>
+                </ul>
+
+                <h4>四、教材與內容使用</h4>
+                <ul>
+                    <li>工作坊所提供之教材、簡報及資源，均屬 AIFLOWTIME 擁有。</li>
+                    <li>為保障課程品質及所有參加者之學習體驗，未經同意請勿錄影或錄音。</li>
+                    <li>課程內容可供個人學習及應用，但不得複製、轉售或作商業用途。</li>
+                    <li>我們歡迎你實踐所學，但請尊重創作與知識產權。</li>
+                </ul>
+
+                <h4>五、個人資料</h4>
+                <ul>
+                    <li>所提供資料僅用於報名確認、課程通知及相關行政用途。</li>
+                    <li>我們不會出售或向第三方披露你的個人資料。</li>
+                    <li>提交報名即表示你同意我們按上述用途處理資料。</li>
+                </ul>
+
+                <h4>六、課程內容與責任說明</h4>
+                <p>本工作坊分享的是 AI 工具實務應用經驗、方法與案例示範。實際成果會因個人背景、行業類型、執行程度及外部環境而有所不同。</p>
+                <p>我們鼓勵參加者根據自身情況作出判斷與調整，並將所學靈活應用於實際工作中。</p>
+                <p>如你在實踐過程中遇到問題，歡迎與我們聯絡交流。</p>
+
+                <h4>七、其他</h4>
+                <ul>
+                    <li>AIFLOWTIME 保留因應實際需要調整條款之權利，更新後將於本頁面公佈。</li>
+                    <li>如有任何查詢，歡迎透過 <a href="https://wa.me/85262880186" target="_blank" style="color:var(--accent);font-weight:600;">WhatsApp</a> 聯絡我們。</li>
+                </ul>
+            </div>
+
+            <div class="tc-wrap">
+                <input type="checkbox" id="tcCheck" onchange="updatePayBtnState()">
+                <label for="tcCheck">我已閱讀並同意以上<strong>條款及細則</strong>和工作坊資訊，並了解完成付款後需上傳付款截圖以確認報名。</label>
+            </div>
+
+            <div class="pay-methods">
+                <a href="https://payme.hsbc/d9f73d0c5d884582aef5c50128cd163a" target="_blank" rel="noopener" class="pay-btn pay-btn-payme disabled" id="paymeBtn" onclick="return checkPayGate(this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    PayMe 付款
+                </a>
+                <button class="pay-btn pay-btn-fps disabled" id="fpsBtn" onclick="openFpsModal()" type="button">
+                    <span class="fps-badge">FPS</span>轉數快付款
+                </button>
+            </div>
+
+            <!-- Screenshot Upload -->
+            <div class="screenshot-section">
+                <div class="divider"></div>
+                <h3 class="section-title">上傳付款截圖</h3>
+                <p class="section-desc">完成付款後，請上傳付款成功的截圖，方便我們更快確認你的報名。</p>
+                <div class="screenshot-upload-area disabled" id="screenshotArea">
+                    <span class="upload-icon">📸</span>
+                    <span class="upload-text">點擊上傳付款截圖，或拖放圖片到此處</span>
+                    <input type="file" id="screenshotFile" accept="image/*" onchange="handleScreenshotUpload(this)">
+                </div>
+                <div class="screenshot-progress" id="ssProgress"><div class="screenshot-progress-bar" id="ssProgressBar"></div></div>
+                <div class="screenshot-success" id="ssSuccess">✓ 付款截圖已上傳成功！我們會盡快確認你的報名。</div>
+            </div>
+
+        </div>
+
+        <!-- Sold out -->
+        <div id="soldOutState" style="display:none;">
+            <div class="divider"></div>
+            <div class="sold-out-banner"><p>此工作坊名額已滿，請返回工作坊一覽查看其他工作坊。</p></div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Upload Loading Overlay -->
+<div class="upload-overlay" id="uploadOverlay">
+    <div class="upload-spinner"></div>
+    <div class="upload-overlay-text">正在上傳付款截圖<br>請勿離開此頁面</div>
+    <div class="upload-overlay-sub">上傳完成後將自動關閉</div>
+</div>
+
+<!-- FPS QR Code Modal -->
+<div class="fps-overlay" id="fpsOverlay" onclick="if(event.target===this)closeFpsModal()">
+    <div class="fps-modal">
+        <button class="fps-modal-close" onclick="closeFpsModal()" type="button">✕</button>
+        <h3>轉數快 (FPS) 付款</h3>
+        <div class="fps-amount" id="fpsAmount"></div>
+        <div class="fps-discount-note" id="fpsDiscountNote" style="display:none;"></div>
+        <img src="/FPS.JPG" alt="FPS QR Code" class="fps-qr">
+        <div class="fps-instructions">
+            <strong>付款步驟：</strong>
+            <ol>
+                <li>打開你的銀行 App 或電子錢包</li>
+                <li>掃描上方 QR Code</li>
+                <li>輸入上方顯示的金額並確認付款</li>
+                <li>付款完成後，截圖付款確認頁面</li>
+                <li>關閉此視窗，在下方上傳付款截圖</li>
+            </ol>
+        </div>
+        <button class="fps-done-btn" onclick="closeFpsModal()" type="button">已完成付款，上傳截圖</button>
+    </div>
+</div>
+
+<!-- Capacity Full Popup -->
+<div class="cap-full-overlay" id="capFullOverlay" onclick="if(event.target===this)closeCapFullPopup()">
+    <div class="cap-full-modal">
+        <button class="cap-full-modal-close" onclick="closeCapFullPopup()" type="button">✕</button>
+        <div class="cap-full-icon">🚫</div>
+        <h3 id="capFullTitle">此日期名額已滿</h3>
+        <p id="capFullMsg">很抱歉，你所選擇的日期名額已經額滿。請選擇其他日期，或返回工作坊一覽查看其他工作坊。</p>
+        <button class="cap-full-btn" onclick="closeCapFullPopup()" type="button">知道了</button>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+
+<script>
+var db, auth, storage, functions;
+var _wsData = null;     // Workshop data from Firestore
+var _wsId = '';
+var _selectedRound = null;
+var _pendingRoundRestore = null;
+var _currentUser = null;
+var _userProfile = null;
+var _isLoggedIn = false;
+var _authResolved = false; // True once onAuthStateChanged fires at least once
+var _registrationId = null;  // Created after confirm
+var _existingRegistration = null; // Existing non-cancelled registration for this user+workshop
+var _verifiedPrice = null; // Server-verified price from Cloud Function
+
+(function() {
+    var s = document.createElement('script');
+    s.src = '/__/firebase/init.js';
+    s.onload = function() { initPayment(); };
+    s.onerror = function() {
+        if (!firebase.apps.length) firebase.initializeApp({ projectId:'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com', storageBucket:'aiflowtime-hk.appspot.com' });
+        initPayment();
+    };
+    document.head.appendChild(s);
+})();
+
+function getWorkshopId() {
+    return new URLSearchParams(window.location.search).get('id') || 'workshop-0';
+}
+
+function _sortSessionsList(sessions) {
+    if (!sessions || !sessions.length) return [];
+    return sessions.slice().sort(function(a, b) {
+        var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+        var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+        if (da !== db2) return da < db2 ? -1 : 1;
+        var ta = (a.time || '').replace(/[^0-9:]/g, '');
+        var tb = (b.time || '').replace(/[^0-9:]/g, '');
+        return ta < tb ? -1 : ta > tb ? 1 : 0;
+    });
+}
+
+function _renderSessionLines(el, sessions) {
+    if (sessions && sessions.length) {
+        var sorted = _sortSessionsList(sessions).filter(function(s) { return s.visible !== false; });
+        var lines = sorted.map(function(s) {
+            var txt = '';
+            if (s.label) txt += s.label + '：';
+            txt += s.date || '';
+            if (s.time) txt += ' ' + s.time;
+            return txt;
+        }).filter(function(t) { return t; });
+        el.innerHTML = lines.join('<br>');
+    } else {
+        var d = _wsData || {};
+        var fallback = (d.date || '待定') + (d.time ? ' ' + d.time : '');
+        el.textContent = fallback;
+    }
+}
+
+function _renderRoundSelector(rounds) {
+    var container = document.getElementById('roundSelector');
+    var html = '';
+    rounds.forEach(function(r) {
+        var rem = Math.max(0, (r.capacity || 0) - (r.enrolled || 0));
+        var isFull = rem <= 0 && (r.capacity || 0) > 0;
+        var isSelected = _selectedRound && _selectedRound.id === r.id;
+        html += '<div class="round-option' + (isSelected ? ' selected' : '') + (isFull ? ' sold-out' : '') + '" data-round-id="' + r.id + '" onclick="' + (isFull ? '' : 'selectRoundById(\'' + r.id + '\')') + '">';
+        html += '<div class="round-radio"></div>';
+        html += '<div class="round-option-body">';
+        html += '<div class="round-option-label">' + (r.label || r.id) + '</div>';
+        var sorted = _sortSessionsList(r.sessions || []);
+        var dateLines = sorted.map(function(s) {
+            var t = '';
+            if (s.label) t += s.label + '：';
+            t += s.date || '';
+            if (s.time) t += ' ' + s.time;
+            return t;
+        }).filter(Boolean);
+        html += '<div class="round-option-dates">' + dateLines.join('<br>') + '</div>';
+        html += '<div class="round-option-seats ' + (isFull ? 'full' : 'available') + '">' + (isFull ? '已滿' : '剩餘 ' + rem + ' 個名額') + '</div>';
+        html += '</div></div>';
+    });
+    container.innerHTML = html;
+}
+
+function _selectRound(round) {
+    _selectedRound = round;
+}
+
+function _buildVirtualRoundsFromSessions(d) {
+    var allSorted = _sortSessionsList(d.sessions || []);
+    var globalCap = (d.capacity || 0);
+    var sessionEnrolled = d._sessionEnrolled || {};
+    var rounds = [];
+    allSorted.forEach(function(s, i) {
+        if (s.visible === false) return;
+        var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
+        var sid = 'session_' + i;
+        rounds.push({
+            id: sid,
+            label: dateLabel,
+            capacity: s.capacity !== undefined ? s.capacity : globalCap,
+            enrolled: sessionEnrolled[sid] || 0,
+            sessions: [s]
+        });
+    });
+    return rounds;
+}
+
+function selectRoundById(roundId) {
+    var rounds = null;
+    if (_wsData && _wsData.courseType === 'continuous' && _wsData.rounds) {
+        rounds = _wsData.rounds;
+    } else if (_wsData && _wsData._virtualRounds) {
+        rounds = _wsData._virtualRounds;
+    }
+    if (!rounds) return;
+    var round = rounds.find(function(r) { return r.id === roundId; });
+    if (!round) return;
+    _selectRound(round);
+    _renderRoundSelector(rounds);
+    var sessEl = document.getElementById('wsSessions');
+    _renderSessionLines(sessEl, round.sessions || []);
+    var rem = Math.max(0, (round.capacity || 0) - (round.enrolled || 0));
+    document.getElementById('wsSeatsText').textContent = rem > 0 ? ('已有 ' + (round.enrolled || 0) + '/' + (round.capacity || 0) + ' 人報名') : '已滿';
+    document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(round.capacity, round.enrolled);
+    if (rem <= 0 && (round.capacity || 0) > 0) {
+        if (!_existingRegistration) {
+            document.getElementById('personalInfoSection').style.display = 'none';
+            document.getElementById('paymentMethods').style.display = 'none';
+            document.getElementById('soldOutState').style.display = 'block';
+        }
+    } else {
+        if (!_existingRegistration) {
+            document.getElementById('personalInfoSection').style.display = '';
+        }
+        document.getElementById('soldOutState').style.display = 'none';
+    }
+}
+
+function buildCapacityBar(capacity, enrolled) {
+    if (!capacity || capacity <= 0) return '';
+    var totalRects = capacity <= 10 ? capacity : 10;
+    var seatsPerRect = capacity <= 10 ? 1 : capacity / 10;
+    var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
+    var remaining = Math.max(0, capacity - enrolled);
+    var html = '<div class="capacity-bar">';
+    for (var i = 0; i < totalRects; i++) html += '<div class="capacity-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
+    html += '</div><div class="capacity-text">已有 ' + enrolled + '/' + capacity + ' 人報名</div>';
+    return html;
+}
+
+function initPayment() {
+    db = firebase.firestore();
+    auth = firebase.auth();
+    storage = firebase.storage();
+    functions = firebase.app().functions('asia-east2');
+    _wsId = getWorkshopId();
+
+    // Checkbox group visual + "Other" text field toggle
+    document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            this.closest('label').classList.toggle('checked', this.checked);
+            if (this.id === 'reasonOtherCb') {
+                var otherInput = document.getElementById('reasonOtherText');
+                otherInput.style.display = this.checked ? '' : 'none';
+                if (!this.checked) otherInput.value = '';
+            }
+        });
+    });
+
+    // Listen for auth state
+    auth.onAuthStateChanged(function(user) {
+        _currentUser = user;
+        _isLoggedIn = !!user;
+        _authResolved = true;
+        if (user) {
+            // Load profile and auto-fill
+            db.collection('users').doc(user.uid).get().then(function(doc) {
+                if (doc.exists) {
+                    _userProfile = doc.data();
+                    autoFillFromProfile(_userProfile);
+                } else {
+                    // First time user — let them continue on the payment page
+                    // Set empty profile so discount logic still applies
+                    _userProfile = {};
+                }
+                // Re-fetch price with auth token now available for discount
+                if (_wsData) updatePriceDisplay();
+                // Hide login CTA
+                document.getElementById('loginCtaBox').style.display = 'none';
+                // Check for existing non-cancelled registration
+                checkDuplicateRegistration(user.uid);
+            });
+        } else {
+            _userProfile = null;
+            document.getElementById('loginCtaBox').style.display = 'flex';
+            // Re-fetch price as guest (no discount)
+            if (_wsData) updatePriceDisplay();
+        }
+    });
+
+    // Real-time listener: updates instantly when workshop data changes
+    db.collection('workshops').doc(_wsId).onSnapshot(function(doc) {
+        if (!doc.exists) {
+            var notFoundDiv = document.getElementById('loadingState');
+            notFoundDiv.textContent = '';
+            var nfCard = document.createElement('div');
+            nfCard.className = 'glass-card';
+            nfCard.style.cssText = 'text-align:center;padding:48px 24px;';
+            var nfP = document.createElement('p');
+            nfP.style.cssText = 'color:var(--text-light);font-weight:600;';
+            nfP.textContent = '找不到此工作坊資料。';
+            var nfA = document.createElement('a');
+            nfA.href = '/ai-beginner-workshop';
+            nfA.style.cssText = 'color:var(--accent);font-weight:700;margin-top:12px;display:inline-block;';
+            nfA.textContent = '返回工作坊一覽';
+            nfCard.appendChild(nfP);
+            nfCard.appendChild(nfA);
+            notFoundDiv.appendChild(nfCard);
+            return;
+        }
+        _wsData = doc.data();
+        var d = _wsData;
+        document.getElementById('wsBadge').textContent = d.levelBadge || '';
+        document.getElementById('wsBadge').className = 'ws-badge ' + (d.levelType || 'beginner');
+        document.getElementById('wsNumber').textContent = d.workshopNumber || '';
+        document.getElementById('wsTitle').textContent = d.title || '';
+
+        var isContinuous = d.courseType === 'continuous' && d.rounds && d.rounds.length;
+        var isSingleMultiDate = !isContinuous && d.sessions && d.sessions.length > 1;
+        var roundSelWrap = document.getElementById('roundSelectorWrap');
+        var sessEl = document.getElementById('wsSessions');
+
+        if (isContinuous) {
+            document.getElementById('roundSelectorLabel').textContent = '選擇期數';
+            roundSelWrap.style.display = '';
+            _renderRoundSelector(d.rounds);
+            if (!_selectedRound) _selectRound(d.rounds[0]);
+            var sr = _selectedRound;
+            var roundSessions = sr ? (sr.sessions || []) : [];
+            _renderSessionLines(sessEl, roundSessions);
+            var remaining = Math.max(0, (sr ? sr.capacity || 0 : 0) - (sr ? sr.enrolled || 0 : 0));
+            document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (sr.enrolled || 0) + '/' + (sr.capacity || 0) + ' 人報名') : '已滿';
+            document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(sr.capacity, sr.enrolled);
+        } else if (isSingleMultiDate) {
+            document.getElementById('roundSelectorLabel').textContent = '選擇日期';
+            roundSelWrap.style.display = '';
+            var virtualRounds = _buildVirtualRoundsFromSessions(d);
+            d._virtualRounds = virtualRounds;
+            _renderRoundSelector(virtualRounds);
+            if (!_selectedRound) _selectRound(virtualRounds[0]);
+            var sr = _selectedRound;
+            _renderSessionLines(sessEl, sr ? (sr.sessions || []) : []);
+            var remaining = Math.max(0, (sr ? sr.capacity || 0 : 0) - (sr ? sr.enrolled || 0 : 0));
+            document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (sr.enrolled || 0) + '/' + (sr.capacity || 0) + ' 人報名') : '已滿';
+            document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(sr.capacity, sr.enrolled);
+        } else {
+            roundSelWrap.style.display = 'none';
+            _selectedRound = null;
+            _renderSessionLines(sessEl, d.sessions);
+            var remaining = Math.max(0, (d.capacity || 0) - (d.enrolled || 0));
+            document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (d.enrolled || 0) + '/' + (d.capacity || 0) + ' 人報名') : '已滿';
+            document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(d.capacity, d.enrolled);
+        }
+        document.getElementById('wsDuration').textContent = d.duration || '';
+        document.getElementById('wsDesc').textContent = d.description || '';
+
+        updatePriceDisplay();
+
+        tryApplyPromoFromUrl();
+
+        var capCheck = isContinuous || isSingleMultiDate ? ((_selectedRound || {}).capacity || 0) : (d.capacity || 0);
+        if (remaining <= 0 && capCheck > 0) {
+            if (!_existingRegistration) {
+                document.getElementById('personalInfoSection').style.display = 'none';
+                document.getElementById('paymentMethods').style.display = 'none';
+                document.getElementById('soldOutState').style.display = 'block';
+            }
+        } else {
+            if (!_existingRegistration) {
+                document.getElementById('personalInfoSection').style.display = '';
+            }
+            document.getElementById('soldOutState').style.display = 'none';
+        }
+
+        // Restore round/date if auth resolved before onSnapshot
+        _tryRestoreRound();
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('paymentContent').style.display = 'block';
+    }, function(err) {
+        var errDiv = document.getElementById('loadingState');
+        errDiv.textContent = '';
+        var card = document.createElement('div');
+        card.className = 'glass-card';
+        card.style.cssText = 'text-align:center;padding:48px 24px;';
+        var p = document.createElement('p');
+        p.style.cssText = 'color:#C62828;font-weight:600;';
+        p.textContent = '載入失敗：' + err.message;
+        card.appendChild(p);
+        errDiv.appendChild(card);
+    });
+
+    // Real-time listener for per-session enrollment counts (single multi-date)
+    db.collection('registrations')
+        .where('workshopId', '==', _wsId)
+        .where('status', 'in', ['pending', 'confirmed'])
+        .onSnapshot(function(snap) {
+            if (!_wsData || _wsData.courseType === 'continuous') return;
+            if (!_wsData.sessions || _wsData.sessions.length <= 1) return;
+            var sorted = _sortSessionsList(_wsData.sessions);
+            var counts = {};
+            sorted.forEach(function(s, i) { counts['session_' + i] = 0; });
+            snap.forEach(function(doc) {
+                var r = doc.data();
+                if (r.selectedRound && counts.hasOwnProperty(r.selectedRound)) {
+                    counts[r.selectedRound]++;
+                }
+            });
+            _wsData._sessionEnrolled = counts;
+            var virtualRounds = _buildVirtualRoundsFromSessions(_wsData);
+            _wsData._virtualRounds = virtualRounds;
+            // Update selected round enrolled count
+            if (_selectedRound && _selectedRound.id) {
+                var updated = virtualRounds.find(function(vr) { return vr.id === _selectedRound.id; });
+                if (updated) _selectedRound = updated;
+            }
+            _renderRoundSelector(virtualRounds);
+            if (_selectedRound) {
+                var rem = Math.max(0, (_selectedRound.capacity || 0) - (_selectedRound.enrolled || 0));
+                document.getElementById('wsSeatsText').textContent = rem > 0 ? ('已有 ' + (_selectedRound.enrolled || 0) + '/' + (_selectedRound.capacity || 0) + ' 人報名') : '已滿';
+                document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(_selectedRound.capacity, _selectedRound.enrolled);
+            }
+        });
+}
+
+// ============================================================
+// PRICE DISPLAY (with discount)
+// ============================================================
+var _appliedDiscountCode = null;
+
+function updatePriceDisplay() {
+    if (!_wsData) return;
+    var priceStr = _wsData.price || '免費';
+    var priceEl = document.getElementById('wsPrice');
+
+    // Show discount code input if workshop has discount codes (global or legacy), or if URL has promo= (e.g. from countdown page)
+    var dcWrap = document.getElementById('dcWrap');
+    var hasLegacyCodes = _wsData.discountCodes && _wsData.discountCodes.length > 0;
+    var hasGlobalCodes = _wsData.appliedDiscountIds && _wsData.appliedDiscountIds.length > 0;
+    var hasPromoInUrl = new URLSearchParams(window.location.search).get('promo');
+    if (hasLegacyCodes || hasGlobalCodes || hasPromoInUrl) {
+        dcWrap.style.display = '';
+    }
+
+    if (!_authResolved) {
+        priceEl.textContent = priceStr;
+        return;
+    }
+
+    var promoCode = _appliedDiscountCode || '';
+    if (functions && _wsId) {
+        var getPrice = functions.httpsCallable('getWorkshopPrice');
+        getPrice({ workshopId: _wsId, promoCode: promoCode }).then(function(result) {
+            _verifiedPrice = result.data;
+            renderPriceEl(priceEl, result.data);
+        }).catch(function(err) {
+            console.warn('getWorkshopPrice fallback:', err.message);
+            priceEl.textContent = priceStr;
+        });
+    } else {
+        priceEl.textContent = priceStr;
+    }
+}
+
+function renderPriceEl(priceEl, data) {
+    priceEl.textContent = '';
+    if (data.discountApplied || data.promoApplied) {
+        var origSpan = document.createElement('span');
+        origSpan.className = 'price-original';
+        origSpan.textContent = data.originalPrice;
+        priceEl.appendChild(origSpan);
+        priceEl.appendChild(document.createTextNode(data.discounted));
+
+        if (data.discountApplied) {
+            var badgeSpan = document.createElement('span');
+            badgeSpan.className = 'price-discount-badge';
+            badgeSpan.textContent = '會員 95折';
+            priceEl.appendChild(badgeSpan);
+        }
+        if (data.promoApplied) {
+            var promoBadge = document.createElement('span');
+            promoBadge.className = 'price-discount-badge';
+            promoBadge.style.background = 'rgba(33,150,243,0.1)';
+            promoBadge.style.color = '#1565C0';
+            promoBadge.textContent = '折扣碼 ' + (data.promoLabel || '');
+            priceEl.appendChild(promoBadge);
+        }
+    } else {
+        priceEl.textContent = data.price;
+    }
+}
+
+function applyDiscountCode() {
+    var input = document.getElementById('dcInput');
+    var btn = document.getElementById('dcBtn');
+    var msg = document.getElementById('dcMsg');
+    var code = input.value.trim().toUpperCase();
+
+    if (!code) {
+        msg.className = 'dc-msg error';
+        msg.textContent = '請輸入折扣碼';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '驗證中...';
+    msg.className = 'dc-msg';
+    msg.textContent = '';
+
+    var getPrice = functions.httpsCallable('getWorkshopPrice');
+    getPrice({ workshopId: _wsId, promoCode: code }).then(function(result) {
+        btn.disabled = false;
+        btn.textContent = '套用';
+        if (result.data.promoApplied) {
+            _appliedDiscountCode = code;
+            _verifiedPrice = result.data;
+            renderPriceEl(document.getElementById('wsPrice'), result.data);
+            msg.className = 'dc-msg success';
+            msg.innerHTML = '✅ 折扣碼已套用！' +
+                '<span class="dc-applied-tag">' + code +
+                '<button type="button" onclick="removeDiscountCode()" title="移除">×</button></span>';
+            input.disabled = true;
+            btn.style.display = 'none';
+            updateFpsAmount();
+        } else if (result.data.promoError) {
+            msg.className = 'dc-msg error';
+            msg.textContent = result.data.promoError;
+        } else {
+            msg.className = 'dc-msg error';
+            msg.textContent = '❌ 折扣碼無效';
+        }
+    }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = '套用';
+        msg.className = 'dc-msg error';
+        msg.textContent = '驗證失敗，請稍後再試';
+    });
+}
+
+function removeDiscountCode() {
+    _appliedDiscountCode = null;
+    var input = document.getElementById('dcInput');
+    var btn = document.getElementById('dcBtn');
+    var msg = document.getElementById('dcMsg');
+    input.disabled = false;
+    input.value = '';
+    btn.style.display = '';
+    msg.className = 'dc-msg';
+    msg.textContent = '';
+    updatePriceDisplay();
+}
+
+function tryApplyPromoFromUrl() {
+    var promo = new URLSearchParams(window.location.search).get('promo');
+    if (!promo || _appliedDiscountCode) return;
+    var input = document.getElementById('dcInput');
+    var dcWrap = document.getElementById('dcWrap');
+    if (!input || !dcWrap || dcWrap.style.display === 'none') return;
+    input.value = decodeURIComponent(promo).trim().toUpperCase();
+    if (input.value) setTimeout(function() { applyDiscountCode(); }, 300);
+}
+
+function loginToApply() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    auth.signInWithPopup(provider).catch(function(err) {
+        showToast('登入失敗：' + err.message, 'error');
+    });
+}
+
+// ============================================================
+// AUTO-FILL FROM PROFILE
+// ============================================================
+function autoFillFromProfile(profile) {
+    if (!profile) return;
+    if (profile.name) document.getElementById('infoName').value = profile.name;
+    if (profile.ageGroup) document.getElementById('infoAge').value = profile.ageGroup;
+    if (profile.phone) document.getElementById('infoPhone').value = profile.phone;
+    if (profile.jobType) document.getElementById('infoJob').value = profile.jobType;
+    if (profile.aiProblem) document.getElementById('infoAiProblem').value = profile.aiProblem;
+    if (profile.expectation) document.getElementById('infoExpectation').value = profile.expectation;
+    if (profile.reasons && profile.reasons.length) {
+        profile.reasons.forEach(function(reason) {
+            if (reason === '其他' || reason.indexOf('其他：') === 0) {
+                var cb = document.getElementById('reasonOtherCb');
+                cb.checked = true; cb.closest('label').classList.add('checked');
+                var otherInput = document.getElementById('reasonOtherText');
+                otherInput.style.display = '';
+                if (reason.indexOf('其他：') === 0) otherInput.value = reason.substring(3);
+            } else {
+                document.querySelectorAll('#reasonsGroup input[type="checkbox"]').forEach(function(cb) {
+                    if (cb.value === reason) { cb.checked = true; cb.closest('label').classList.add('checked'); }
+                });
+            }
+        });
+    }
+}
+
+// ============================================================
+// DUPLICATE REGISTRATION CHECK
+// ============================================================
+function checkDuplicateRegistration(uid) {
+    db.collection('registrations')
+        .where('userId', '==', uid)
+        .where('workshopId', '==', _wsId)
+        .get()
+        .then(function(snap) {
+            var activeReg = null;
+            snap.forEach(function(doc) {
+                var r = doc.data();
+                if (r.status !== 'cancelled') activeReg = { id: doc.id, data: r };
+            });
+            if (activeReg) {
+                _existingRegistration = activeReg;
+                _registrationId = activeReg.id;
+                showDuplicateBanner(activeReg.data);
+            }
+        });
+}
+
+function showDuplicateBanner(reg) {
+    var hasScreenshot = reg.paymentScreenshotUrl && reg.paymentScreenshotUrl.length > 0;
+    var statusText = reg.status === 'confirmed' ? '已確認付款' : (hasScreenshot ? '待確認' : '待付款');
+    var banner = document.getElementById('duplicateBanner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'duplicateBanner';
+        banner.className = 'duplicate-banner';
+        var paymentContent = document.getElementById('paymentContent');
+        if (paymentContent) paymentContent.insertBefore(banner, paymentContent.firstChild);
+    }
+
+    if (reg.status === 'confirmed' || hasScreenshot) {
+        // Confirmed or awaiting confirmation — show banner, hide form & payment
+        banner.textContent = '';
+        var iconDiv1 = document.createElement('div');
+        iconDiv1.className = 'duplicate-banner-icon';
+        iconDiv1.textContent = '⚠️';
+        var textDiv1 = document.createElement('div');
+        textDiv1.className = 'duplicate-banner-text';
+        var strong1 = document.createElement('strong');
+        strong1.textContent = '你已報名此工作坊';
+        var p1 = document.createElement('p');
+        p1.textContent = '你的報名狀態為「' + statusText + '」。如需取消報名或重新報名，請透過 ';
+        var waLink1 = document.createElement('a');
+        waLink1.href = 'https://wa.me/85262880186';
+        waLink1.target = '_blank';
+        waLink1.style.cssText = 'color:var(--accent);font-weight:700;';
+        waLink1.textContent = 'WhatsApp';
+        p1.appendChild(waLink1);
+        p1.appendChild(document.createTextNode(' 聯絡我們。'));
+        textDiv1.appendChild(strong1);
+        textDiv1.appendChild(p1);
+        banner.appendChild(iconDiv1);
+        banner.appendChild(textDiv1);
+        banner.style.display = 'flex';
+        document.getElementById('personalInfoSection').style.display = 'none';
+        var pm = document.getElementById('paymentMethods');
+        if (pm) pm.style.display = 'none';
+    } else {
+        // No screenshot yet — show personal info (editable) + payment section
+        banner.textContent = '';
+        var iconDiv2 = document.createElement('div');
+        iconDiv2.className = 'duplicate-banner-icon';
+        iconDiv2.textContent = '💳';
+        var textDiv2 = document.createElement('div');
+        textDiv2.className = 'duplicate-banner-text';
+        var strong2 = document.createElement('strong');
+        strong2.textContent = '你的報名尚未完成';
+        var p2 = document.createElement('p');
+        p2.textContent = '你可以更新個人資料，然後完成付款並上傳付款截圖以確認報名。如需取消報名，請透過 ';
+        var waLink2 = document.createElement('a');
+        waLink2.href = 'https://wa.me/85262880186';
+        waLink2.target = '_blank';
+        waLink2.style.cssText = 'color:var(--accent);font-weight:700;';
+        waLink2.textContent = 'WhatsApp';
+        p2.appendChild(waLink2);
+        p2.appendChild(document.createTextNode(' 聯絡我們。'));
+        textDiv2.appendChild(strong2);
+        textDiv2.appendChild(p2);
+        banner.appendChild(iconDiv2);
+        banner.appendChild(textDiv2);
+        banner.style.display = 'flex';
+        // Keep personal info visible so user can update, and show payment section
+        document.getElementById('personalInfoSection').style.display = '';
+        // Pre-fill from existing registration data
+        prefillFromRegistration(reg);
+        var pm = document.getElementById('paymentMethods');
+        if (pm) pm.style.display = 'block';
+    }
+}
+
+function prefillFromRegistration(reg) {
+    if (!reg) return;
+    if (reg.name) document.getElementById('infoName').value = reg.name;
+    if (reg.ageGroup) document.getElementById('infoAge').value = reg.ageGroup;
+    if (reg.phone) document.getElementById('infoPhone').value = reg.phone;
+    if (reg.jobType) document.getElementById('infoJob').value = reg.jobType;
+    if (reg.aiProblem) document.getElementById('infoAiProblem').value = reg.aiProblem;
+    if (reg.expectation) document.getElementById('infoExpectation').value = reg.expectation;
+    if (reg.reasons && reg.reasons.length) {
+        reg.reasons.forEach(function(reason) {
+            if (reason === '其他' || reason.indexOf('其他：') === 0) {
+                var cb = document.getElementById('reasonOtherCb');
+                cb.checked = true; cb.closest('label').classList.add('checked');
+                var otherInput = document.getElementById('reasonOtherText');
+                otherInput.style.display = '';
+                if (reason.indexOf('其他：') === 0) otherInput.value = reason.substring(3);
+            } else {
+                document.querySelectorAll('#reasonsGroup input[type="checkbox"]').forEach(function(cb) {
+                    if (cb.value === reason) { cb.checked = true; cb.closest('label').classList.add('checked'); }
+                });
+            }
+        });
+    }
+    // Restore previously selected round/date
+    if (reg.selectedRound) {
+        _pendingRoundRestore = reg.selectedRound;
+        _tryRestoreRound();
+    }
+}
+
+function _tryRestoreRound() {
+    if (!_pendingRoundRestore) return;
+    if (!_wsData) return;
+    var rounds = null;
+    if (_wsData.courseType === 'continuous' && _wsData.rounds) {
+        rounds = _wsData.rounds;
+    } else if (_wsData._virtualRounds) {
+        rounds = _wsData._virtualRounds;
+    }
+    if (rounds) {
+        var match = rounds.find(function(r) { return r.id === _pendingRoundRestore; });
+        if (match) {
+            selectRoundById(_pendingRoundRestore);
+            _pendingRoundRestore = null;
+        }
+    }
+}
+
+// ============================================================
+// CONFIRM PERSONAL INFO
+// ============================================================
+function confirmPersonalInfo() {
+    var name = document.getElementById('infoName').value.trim();
+    var age = document.getElementById('infoAge').value;
+    var phone = document.getElementById('infoPhone').value.trim();
+    var job = document.getElementById('infoJob').value;
+
+    if (!name) { showInfoError('請輸入你的姓名。'); return; }
+    if (!age) { showInfoError('請選擇年齡組別。'); return; }
+    if (!phone) { showInfoError('請輸入你的 WhatsApp 電話號碼。'); return; }
+    if (!job) { showInfoError('請選擇你的職業類型。'); return; }
+
+    if (_isCapacityFull()) { showCapFullPopup(); return; }
+
+    createRegistration(name, age, phone, job);
+
+    // Grey out button until fields change again
+    var btn = document.getElementById('confirmInfoBtn');
+    btn.disabled = true;
+    btn.style.opacity = '0.45';
+    btn.style.cursor = 'not-allowed';
+    btn.textContent = '已確認 ✓';
+
+    document.getElementById('paymentMethods').style.display = 'block';
+    document.getElementById('paymentMethods').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// Re-enable confirm button when any personal info field changes
+(function() {
+    function enableConfirmBtn() {
+        var btn = document.getElementById('confirmInfoBtn');
+        if (btn && btn.disabled) {
+            btn.disabled = false;
+            btn.style.opacity = '';
+            btn.style.cursor = '';
+            btn.textContent = '確認個人資料';
+        }
+    }
+    // Attach after DOM ready
+    var fields = ['infoName', 'infoAge', 'infoPhone', 'infoJob', 'infoAiProblem', 'infoExpectation'];
+    fields.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', enableConfirmBtn);
+            el.addEventListener('change', enableConfirmBtn);
+        }
+    });
+    // Also re-enable when checkboxes change
+    document.querySelectorAll('#reasonsGroup input[type="checkbox"]').forEach(function(cb) {
+        cb.addEventListener('change', enableConfirmBtn);
+    });
+})();
+
+function createRegistration(name, age, phone, job) {
+    var reasons = [];
+    document.querySelectorAll('#reasonsGroup input[type="checkbox"]:checked').forEach(function(cb) {
+        if (cb.id === 'reasonOtherCb') {
+            var otherText = document.getElementById('reasonOtherText').value.trim();
+            reasons.push(otherText ? '其他：' + otherText : '其他');
+        } else {
+            reasons.push(cb.value);
+        }
+    });
+
+    var pricePaid = _wsData ? (_wsData.price || '免費') : '免費';
+    var discountApplied = false;
+    var promoCode = _appliedDiscountCode || '';
+    if (_verifiedPrice) {
+        pricePaid = _verifiedPrice.discounted;
+        discountApplied = _verifiedPrice.discountApplied || false;
+    }
+
+    // Derive date/time from selected round or workshop
+    var regDate = _wsData ? (_wsData.date || '') : '';
+    var regTime = _wsData ? (_wsData.time || '') : '';
+    var roundId = '';
+    var roundLabel = '';
+    var allSessionDates = [];
+    if (_selectedRound) {
+        roundId = _selectedRound.id || '';
+        roundLabel = _selectedRound.label || '';
+        var sortedSess = (_selectedRound.sessions && _selectedRound.sessions.length) ? _sortSessionsList(_selectedRound.sessions) : [];
+        if (sortedSess.length) {
+            regDate = sortedSess[0].date || regDate;
+            regTime = sortedSess[0].time || regTime;
+            sortedSess.forEach(function(s) {
+                if (s.visible !== false) allSessionDates.push({ date: s.date || '', time: s.time || '', label: s.label || '' });
+            });
+        }
+    }
+
+    if (_registrationId) {
+        var updateData = {
+            name: name,
+            ageGroup: age,
+            phone: phone,
+            jobType: job,
+            reasons: reasons,
+            aiProblem: document.getElementById('infoAiProblem').value.trim(),
+            expectation: document.getElementById('infoExpectation').value.trim(),
+            workshopTitle: _wsData ? _wsData.title : '',
+            workshopDate: regDate,
+            workshopTime: regTime,
+            allSessionDates: allSessionDates,
+            workshopDescription: _wsData ? (_wsData.description || '') : '',
+            selectedRound: roundId,
+            selectedRoundLabel: roundLabel,
+            pricePaid: pricePaid,
+            discountApplied: discountApplied,
+            promoCode: promoCode,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        db.collection('registrations').doc(_registrationId).update(updateData).then(function() {
+            _existingRegistration = { id: _registrationId, data: updateData };
+        }).catch(function(err) {
+            console.error('Registration update error:', err);
+        });
+    } else {
+        var createData = {
+            workshopId: _wsId,
+            workshopTitle: _wsData ? _wsData.title : '',
+            workshopDate: regDate,
+            workshopTime: regTime,
+            allSessionDates: allSessionDates,
+            workshopDescription: _wsData ? (_wsData.description || '') : '',
+            selectedRound: roundId,
+            selectedRoundLabel: roundLabel,
+            userId: _currentUser ? _currentUser.uid : null,
+            userEmail: _currentUser ? _currentUser.email : null,
+            name: name,
+            ageGroup: age,
+            phone: phone,
+            jobType: job,
+            reasons: reasons,
+            aiProblem: document.getElementById('infoAiProblem').value.trim(),
+            expectation: document.getElementById('infoExpectation').value.trim(),
+            pricePaid: pricePaid,
+            discountApplied: discountApplied,
+            promoCode: promoCode,
+            status: 'pending',
+            paymentScreenshotUrl: '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        db.collection('registrations').add(createData).then(function(docRef) {
+            _registrationId = docRef.id;
+            _existingRegistration = { id: docRef.id, data: createData };
+        }).catch(function(err) {
+            console.error('Registration save error:', err);
+        });
+    }
+
+    // Silently sync personal info to user profile so they don't have to fill it again
+    if (_currentUser) {
+        db.collection('users').doc(_currentUser.uid).set({
+            name: name,
+            ageGroup: age,
+            phone: phone,
+            jobType: job,
+            reasons: reasons,
+            aiProblem: document.getElementById('infoAiProblem').value.trim(),
+            expectation: document.getElementById('infoExpectation').value.trim(),
+            email: _currentUser.email,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function(err) {
+            console.error('Profile sync error:', err);
+        });
+    }
+}
+
+function showInfoError(msg) {
+    var el = document.getElementById('infoError');
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+// ============================================================
+// CAPACITY-FULL CHECK & POPUP
+// ============================================================
+function _isCapacityFull() {
+    if (!_wsData) return false;
+    if (_existingRegistration) return false;
+    var cap = 0, enrolled = 0;
+    if (_selectedRound) {
+        cap = _selectedRound.capacity || 0;
+        enrolled = _selectedRound.enrolled || 0;
+    } else {
+        cap = _wsData.capacity || 0;
+        enrolled = _wsData.enrolled || 0;
+    }
+    return cap > 0 && enrolled >= cap;
+}
+
+function showCapFullPopup() {
+    var hasRounds = !!_selectedRound;
+    var titleEl = document.getElementById('capFullTitle');
+    var msgEl = document.getElementById('capFullMsg');
+    if (hasRounds) {
+        titleEl.textContent = '此日期名額已滿';
+        msgEl.textContent = '很抱歉，你所選擇的日期名額已經額滿。請選擇其他日期，或返回工作坊一覽查看其他工作坊。';
+    } else {
+        titleEl.textContent = '此工作坊名額已滿';
+        msgEl.textContent = '很抱歉，此工作坊的名額已經額滿。請返回工作坊一覽查看其他工作坊。';
+    }
+    document.getElementById('capFullOverlay').classList.add('open');
+}
+
+function closeCapFullPopup() {
+    document.getElementById('capFullOverlay').classList.remove('open');
+}
+
+// ============================================================
+// T&C + PAYMENT GATES
+// ============================================================
+function updatePayBtnState() {
+    var checked = document.getElementById('tcCheck').checked;
+    document.getElementById('paymeBtn').classList.toggle('disabled', !checked);
+    document.getElementById('fpsBtn').classList.toggle('disabled', !checked);
+    var ssArea = document.getElementById('screenshotArea');
+    if (ssArea) ssArea.classList.toggle('disabled', !checked);
+}
+
+function checkPayGate(el) {
+    if (el.classList.contains('disabled')) return false;
+    if (_isCapacityFull()) { showCapFullPopup(); return false; }
+    return true;
+}
+
+function updateFpsAmount() {}
+
+function openFpsModal() {
+    if (!checkPayGate(document.getElementById('fpsBtn'))) return;
+
+    var amountText = '免費';
+    var discountNote = '';
+    if (_verifiedPrice) {
+        amountText = _verifiedPrice.discounted;
+        var notes = [];
+        if (_verifiedPrice.discountApplied) notes.push('會員 95 折優惠');
+        if (_verifiedPrice.promoApplied) notes.push('折扣碼 ' + (_verifiedPrice.promoLabel || ''));
+        if (notes.length) discountNote = '已套用' + notes.join(' + ') + '（原價 ' + _verifiedPrice.originalPrice + '）';
+    } else if (_wsData) {
+        var priceStr = _wsData.price || '免費';
+        if (priceStr !== '免費' && priceStr !== '') {
+            amountText = priceStr;
+        }
+    }
+
+    document.getElementById('fpsAmount').textContent = amountText;
+    var noteEl = document.getElementById('fpsDiscountNote');
+    if (discountNote) {
+        noteEl.textContent = discountNote;
+        noteEl.style.display = 'block';
+    } else {
+        noteEl.style.display = 'none';
+    }
+
+    document.getElementById('fpsOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeFpsModal() {
+    document.getElementById('fpsOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    // Scroll to screenshot upload section
+    var ssSection = document.querySelector('.screenshot-section');
+    if (ssSection) ssSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ============================================================
+// SCREENSHOT UPLOAD
+// ============================================================
+function handleScreenshotUpload(input) {
+    var file = input.files[0];
+    if (!file) return;
+
+    if (_isCapacityFull()) { showCapFullPopup(); input.value = ''; return; }
+
+    // Client-side file validation
+    var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
+    if (!file.type || !file.type.startsWith('image/')) {
+        showToast('請上傳圖片檔案（JPG、PNG、GIF 等）。', 'error');
+        input.value = '';
+        return;
+    }
+    var maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showToast('檔案大小不能超過 5MB，請壓縮後再上傳。', 'error');
+        input.value = '';
+        return;
+    }
+
+    if (!storage) {
+        showToast('上傳功能未能載入，請重新整理頁面再試。', 'error');
+        console.error('Firebase Storage not initialised');
+        return;
+    }
+
+    var regId = _registrationId || ('guest_' + Date.now());
+    var ext = file.name.split('.').pop();
+    var path = 'payment-screenshots/' + regId + '/screenshot_' + Date.now() + '.' + ext;
+
+    var progressWrap = document.getElementById('ssProgress');
+    var progressBar = document.getElementById('ssProgressBar');
+    var uploadOverlay = document.getElementById('uploadOverlay');
+    progressWrap.style.display = 'block';
+    progressBar.style.width = '0%';
+    if (uploadOverlay) uploadOverlay.classList.add('active');
+
+    try {
+        var ref = storage.ref(path);
+        var task = ref.put(file);
+
+        task.on('state_changed',
+            function(snap) { progressBar.style.width = (snap.bytesTransferred / snap.totalBytes * 100) + '%'; },
+            function(err) {
+                console.error('Screenshot upload error:', err.code, err.message, err.serverResponse);
+                showToast('上傳失敗：' + err.message, 'error');
+                progressWrap.style.display = 'none';
+                if (uploadOverlay) uploadOverlay.classList.remove('active');
+            },
+            function() {
+                task.snapshot.ref.getDownloadURL().then(function(url) {
+                    // Update area with preview (safe DOM construction)
+                    var area = document.getElementById('screenshotArea');
+                    area.classList.add('has-file');
+                    area.textContent = '';
+                    var previewImg = document.createElement('img');
+                    previewImg.src = url;
+                    previewImg.alt = 'Payment screenshot';
+                    var fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.id = 'screenshotFile';
+                    fileInput.accept = 'image/*';
+                    fileInput.onchange = function() { handleScreenshotUpload(this); };
+                    area.appendChild(previewImg);
+                    area.appendChild(fileInput);
+                    progressWrap.style.display = 'none';
+                    document.getElementById('ssSuccess').style.display = 'block';
+
+                    // Update registration if exists
+                    if (_registrationId) {
+                        db.collection('registrations').doc(_registrationId).update({ paymentScreenshotUrl: url }).then(function() {
+                            // Increment enrolled count via Cloud Function (server-side validation)
+                            if (_wsId && functions) {
+                                var confirmUpload = functions.httpsCallable('confirmPaymentUpload');
+                                confirmUpload({ registrationId: _registrationId, workshopId: _wsId }).catch(function(err) {
+                                    console.warn('confirmPaymentUpload error:', err.message);
+                                });
+                            }
+                        });
+                    }
+                    if (uploadOverlay) uploadOverlay.classList.remove('active');
+                    showToast('付款截圖已上傳');
+                }).catch(function(err) {
+                    console.error('getDownloadURL error:', err);
+                    showToast('上傳成功但無法取得連結，請重試。', 'error');
+                    progressWrap.style.display = 'none';
+                    if (uploadOverlay) uploadOverlay.classList.remove('active');
+                });
+            }
+        );
+    } catch(err) {
+        console.error('Screenshot upload exception:', err);
+        showToast('上傳失敗：' + err.message, 'error');
+        progressWrap.style.display = 'none';
+    }
+}
+
+// ============================================================
+// HTML ESCAPING (XSS prevention)
+// ============================================================
+function escHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(message, type) {
+    type = type || 'success';
+    var container = document.getElementById('toastContainer');
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 3500);
+}
+
+// Lock pinch/double-tap zoom on mobile browsers
+(function lockPageZoom() {
+    var lastTouchEnd = 0;
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturechange', function(e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gestureend', function(e) { e.preventDefault(); }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+        if (e.touches && e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', function(e) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) e.preventDefault();
+        lastTouchEnd = now;
+    }, { passive: false });
+})();
+</script>
+</body>
+</html>

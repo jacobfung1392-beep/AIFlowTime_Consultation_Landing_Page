@@ -515,32 +515,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/shared-utils.js"></script>
     <script>
-        firebase.initializeApp({
-            projectId: 'aiflowtime-hk',
-            apiKey: 'AIzaSyDummyKeyForClientSide',
-            authDomain: 'aiflowtime-hk.firebaseapp.com'
-        });
-
-        function toggleMobileMenu() {
-            var hamburger = document.querySelector('.hamburger');
-            var mobileMenu = document.getElementById('mobileMenu');
-            var isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
-            hamburger.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            hamburger.setAttribute('aria-expanded', !isExpanded);
-            mobileMenu.setAttribute('aria-hidden', isExpanded);
-        }
-
-        function closeMobileMenu() {
-            var hamburger = document.querySelector('.hamburger');
-            var mobileMenu = document.getElementById('mobileMenu');
-            hamburger.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            hamburger.setAttribute('aria-expanded', 'false');
-            mobileMenu.setAttribute('aria-hidden', 'true');
-        }
-
         function checkNotifications(uid) {
             firebase.firestore().collection('registrations')
                 .where('userId', '==', uid)
@@ -577,40 +554,42 @@
             });
         }
 
-        firebase.auth().onAuthStateChanged(function(user) {
-            var desktopBtn = document.getElementById('desktopUserBtn');
-            var mobileBtn = document.getElementById('mobileUserBtn');
-            if (user) {
-                firebase.firestore().collection('users').doc(user.uid).get().then(function(doc) {
-                    var displayName = user.displayName || 'User';
-                    var avatarHtml = '';
-                    if (doc.exists && doc.data().name) displayName = doc.data().name;
-                    if (doc.exists && doc.data().profilePicUrl) {
-                        avatarHtml = '<img src="' + doc.data().profilePicUrl + '" alt="">';
-                    } else if (user.photoURL) {
-                        avatarHtml = '<img src="' + user.photoURL + '" alt="">';
-                    } else {
-                        avatarHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-                    }
-                    var firstName = displayName.split(' ')[0];
-                    if (firstName.length > 8) firstName = firstName.substring(0, 8) + '…';
-                    var html = avatarHtml + '<span>Hi, ' + firstName + '!</span>';
-                    if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + html;
-                    if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + html;
-                    checkNotifications(user.uid);
-                }).catch(function() {
-                    var name = (user.displayName || 'User').split(' ')[0];
-                    var img = user.photoURL ? '<img src="' + user.photoURL + '" alt="">' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-                    var html = img + '<span>Hi, ' + name + '!</span>';
-                    if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + html;
-                    if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + html;
-                    checkNotifications(user.uid);
-                });
-            } else {
-                var signInHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Sign In</span>';
-                if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + signInHtml;
-                if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + signInHtml;
-            }
+        initFirebase(function() {
+            firebase.auth().onAuthStateChanged(function(user) {
+                var desktopBtn = document.getElementById('desktopUserBtn');
+                var mobileBtn = document.getElementById('mobileUserBtn');
+                if (user) {
+                    firebase.firestore().collection('users').doc(user.uid).get().then(function(doc) {
+                        var displayName = user.displayName || 'User';
+                        var avatarHtml = '';
+                        if (doc.exists && doc.data().name) displayName = doc.data().name;
+                        if (doc.exists && doc.data().profilePicUrl) {
+                            avatarHtml = '<img src="' + doc.data().profilePicUrl + '" alt="">';
+                        } else if (user.photoURL) {
+                            avatarHtml = '<img src="' + user.photoURL + '" alt="">';
+                        } else {
+                            avatarHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                        }
+                        var firstName = displayName.split(' ')[0];
+                        if (firstName.length > 8) firstName = firstName.substring(0, 8) + '…';
+                        var html = avatarHtml + '<span>Hi, ' + firstName + '!</span>';
+                        if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + html;
+                        if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + html;
+                        checkNotifications(user.uid);
+                    }).catch(function() {
+                        var name = (user.displayName || 'User').split(' ')[0];
+                        var img = user.photoURL ? '<img src="' + user.photoURL + '" alt="">' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+                        var html = img + '<span>Hi, ' + name + '!</span>';
+                        if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + html;
+                        if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + html;
+                        checkNotifications(user.uid);
+                    });
+                } else {
+                    var signInHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Sign In</span>';
+                    if (desktopBtn) desktopBtn.innerHTML = '<span class="notif-badge" id="desktopNotifBadge"></span>' + signInHtml;
+                    if (mobileBtn) mobileBtn.innerHTML = '<span class="notif-badge" id="mobileNotifBadge"></span>' + signInHtml;
+                }
+            });
         });
     </script>
 

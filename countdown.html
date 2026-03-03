@@ -417,100 +417,96 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/shared-utils.js"></script>
     <script>
-        (function() {
-            var script = document.createElement('script');
-            script.src = '/__/firebase/init.js';
-            script.onload = function() {
-                if (!window.firebase || !firebase.apps.length) return;
-                var db = firebase.firestore();
-                var countdownSection = document.getElementById('countdown-block');
+        initFirebase(function() {
+            var db = firebase.firestore();
+            var countdownSection = document.getElementById('countdown-block');
 
-                function applySections(rawSections) {
-                    if (!rawSections || !rawSections.length) return;
-                    var sections = rawSections.slice().sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
-                    var countdownSec = sections.find(function(s) { return s.type === 'countdown' && s.visible !== false; });
-                    if (!countdownSec || !countdownSec.content) return;
-                    var c = countdownSec.content;
-                    var discountCodeId = c.discountCodeId;
-                    if (!discountCodeId) return;
-                    db.collection('discountCodes').doc(discountCodeId).get().then(function(doc) {
-                        if (!doc.exists) return;
-                        var d = doc.data();
-                        var codeEl = document.getElementById('cd-code');
-                        var ctaEl = document.getElementById('cd-cta');
-                        if (codeEl) codeEl.textContent = d.code || '—';
-                        if (ctaEl) {
-                            if (c.ctaText) ctaEl.textContent = c.ctaText;
-                            var link = c.ctaLink || '/workshop-payment';
-                            if (link.indexOf('workshop-payment') !== -1 && d.code) {
-                                link += (link.indexOf('?') !== -1 ? '&' : '?') + 'promo=' + encodeURIComponent(d.code);
-                            }
-                            ctaEl.href = link;
+            function applySections(rawSections) {
+                if (!rawSections || !rawSections.length) return;
+                var sections = rawSections.slice().sort(function(a, b) { return (a.order || 0) - (b.order || 0); });
+                var countdownSec = sections.find(function(s) { return s.type === 'countdown' && s.visible !== false; });
+                if (!countdownSec || !countdownSec.content) return;
+                var c = countdownSec.content;
+                var discountCodeId = c.discountCodeId;
+                if (!discountCodeId) return;
+                db.collection('discountCodes').doc(discountCodeId).get().then(function(doc) {
+                    if (!doc.exists) return;
+                    var d = doc.data();
+                    var codeEl = document.getElementById('cd-code');
+                    var ctaEl = document.getElementById('cd-cta');
+                    if (codeEl) codeEl.textContent = d.code || '—';
+                    if (ctaEl) {
+                        if (c.ctaText) ctaEl.textContent = c.ctaText;
+                        var link = c.ctaLink || '/workshop-payment';
+                        if (link.indexOf('workshop-payment') !== -1 && d.code) {
+                            link += (link.indexOf('?') !== -1 ? '&' : '?') + 'promo=' + encodeURIComponent(d.code);
                         }
-                        var expiresAt = d.expiresAt;
-                        if (expiresAt && (expiresAt.toDate || expiresAt.seconds)) {
-                            var end = expiresAt.toDate ? expiresAt.toDate() : new Date(expiresAt.seconds * 1000);
-                            runCountdown(end, countdownSection);
-                        } else {
-                            document.getElementById('cd-days').textContent = '—';
-                            document.getElementById('cd-hours').textContent = '—';
-                            document.getElementById('cd-mins').textContent = '—';
-                            document.getElementById('cd-secs').textContent = '—';
-                        }
-                        if (c.sectionTitle) {
-                            var titleEl = countdownSection.querySelector('.section-title');
-                            if (titleEl) titleEl.textContent = c.sectionTitle;
-                        }
-                    });
-                }
-
-                function runCountdown(endDate, sectionEl) {
-                    var daysEl = document.getElementById('cd-days');
-                    var hoursEl = document.getElementById('cd-hours');
-                    var minsEl = document.getElementById('cd-mins');
-                    var secsEl = document.getElementById('cd-secs');
-                    var grid = sectionEl.querySelector('.countdown-grid');
-                    var codeWrap = sectionEl.querySelector('.countdown-code-wrap');
-                    var cta = document.getElementById('cd-cta');
-
-                    function tick() {
-                        var now = new Date();
-                        if (now >= endDate) {
-                            daysEl.textContent = '0';
-                            hoursEl.textContent = '00';
-                            minsEl.textContent = '00';
-                            secsEl.textContent = '00';
-                            if (grid) grid.style.display = 'none';
-                            var expired = document.createElement('div');
-                            expired.className = 'countdown-expired';
-                            expired.textContent = '此優惠已到期。';
-                            if (codeWrap && codeWrap.parentNode) codeWrap.parentNode.insertBefore(expired, codeWrap.nextSibling);
-                            if (cta) cta.style.display = 'none';
-                            return;
-                        }
-                        var diff = endDate - now;
-                        var d = Math.floor(diff / 86400000);
-                        var h = Math.floor((diff % 86400000) / 3600000);
-                        var m = Math.floor((diff % 3600000) / 60000);
-                        var s = Math.floor((diff % 60000) / 1000);
-                        daysEl.textContent = String(d);
-                        hoursEl.textContent = String(h).padStart(2, '0');
-                        minsEl.textContent = String(m).padStart(2, '0');
-                        secsEl.textContent = String(s).padStart(2, '0');
-                        setTimeout(tick, 1000);
+                        ctaEl.href = link;
                     }
-                    tick();
-                }
-
-                db.collection('pageLayouts').doc('countdown').get().then(function(doc) {
-                    if (doc.exists && doc.data().sections && doc.data().sections.length) {
-                        applySections(doc.data().sections);
+                    var expiresAt = d.expiresAt;
+                    if (expiresAt && (expiresAt.toDate || expiresAt.seconds)) {
+                        var end = expiresAt.toDate ? expiresAt.toDate() : new Date(expiresAt.seconds * 1000);
+                        runCountdown(end, countdownSection);
+                    } else {
+                        document.getElementById('cd-days').textContent = '—';
+                        document.getElementById('cd-hours').textContent = '—';
+                        document.getElementById('cd-mins').textContent = '—';
+                        document.getElementById('cd-secs').textContent = '—';
                     }
-                }).catch(function() {});
-            };
-            document.head.appendChild(script);
-        })();
+                    if (c.sectionTitle) {
+                        var titleEl = countdownSection.querySelector('.section-title');
+                        if (titleEl) titleEl.textContent = c.sectionTitle;
+                    }
+                });
+            }
+
+            function runCountdown(endDate, sectionEl) {
+                var daysEl = document.getElementById('cd-days');
+                var hoursEl = document.getElementById('cd-hours');
+                var minsEl = document.getElementById('cd-mins');
+                var secsEl = document.getElementById('cd-secs');
+                var grid = sectionEl.querySelector('.countdown-grid');
+                var codeWrap = sectionEl.querySelector('.countdown-code-wrap');
+                var cta = document.getElementById('cd-cta');
+
+                function tick() {
+                    var now = new Date();
+                    if (now >= endDate) {
+                        daysEl.textContent = '0';
+                        hoursEl.textContent = '00';
+                        minsEl.textContent = '00';
+                        secsEl.textContent = '00';
+                        if (grid) grid.style.display = 'none';
+                        var expired = document.createElement('div');
+                        expired.className = 'countdown-expired';
+                        expired.textContent = '此優惠已到期。';
+                        if (codeWrap && codeWrap.parentNode) codeWrap.parentNode.insertBefore(expired, codeWrap.nextSibling);
+                        if (cta) cta.style.display = 'none';
+                        return;
+                    }
+                    var diff = endDate - now;
+                    var d = Math.floor(diff / 86400000);
+                    var h = Math.floor((diff % 86400000) / 3600000);
+                    var m = Math.floor((diff % 3600000) / 60000);
+                    var s = Math.floor((diff % 60000) / 1000);
+                    daysEl.textContent = String(d);
+                    hoursEl.textContent = String(h).padStart(2, '0');
+                    minsEl.textContent = String(m).padStart(2, '0');
+                    secsEl.textContent = String(s).padStart(2, '0');
+                    setTimeout(tick, 1000);
+                }
+                tick();
+            }
+
+            db.collection('pageLayouts').doc('countdown').get().then(function(doc) {
+                if (doc.exists && doc.data().sections && doc.data().sections.length) {
+                    applySections(doc.data().sections);
+                }
+            }).catch(function() {});
+        });
     </script>
 </body>
 </html>

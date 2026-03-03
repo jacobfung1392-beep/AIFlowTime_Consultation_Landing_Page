@@ -2374,17 +2374,15 @@
     <!-- Firebase SDK for layout loading -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/shared-utils.js"></script>
 
     <!-- Layout Engine (Preview + Public) -->
     <script>
     (function() {
         var _isPreview = new URLSearchParams(window.location.search).has('preview');
 
-        function _escHtml(s) {
-            var d = document.createElement('div');
-            d.textContent = s || '';
-            return d.innerHTML;
-        }
+        function _escHtml(s) { return escHtml(s); }
 
         function applySections(sections) {
             var allSecs = document.querySelectorAll('[data-section-id]');
@@ -2494,20 +2492,15 @@
                 applySections(e.data.sections);
             });
         } else {
-            try { firebase.app(); } catch(e) {
-                firebase.initializeApp({
-                    projectId: 'aiflowtime-hk',
-                    apiKey: 'AIzaSyDummy',
-                    authDomain: 'aiflowtime-hk.firebaseapp.com'
+            initFirebase(function() {
+                var db = firebase.firestore();
+                db.collection('pageLayouts').doc('linktree').get().then(function(doc) {
+                    if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                    console.log('[Layout] Loaded linktree layout from Firestore');
+                    applySections(doc.data().sections);
+                }).catch(function(err) {
+                    console.log('[Layout] No layout config found for linktree.', err);
                 });
-            }
-            var db = firebase.firestore();
-            db.collection('pageLayouts').doc('linktree').get().then(function(doc) {
-                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
-                console.log('[Layout] Loaded linktree layout from Firestore');
-                applySections(doc.data().sections);
-            }).catch(function(err) {
-                console.log('[Layout] No layout config found for linktree.', err);
             });
         }
     })();

@@ -797,6 +797,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<script src="/js/shared-utils.js"></script>
 
 <script>
 /* ================================================================
@@ -842,30 +844,16 @@ var TYPE_LABELS_ZH = { quotation:'報價單', invoice:'發票', receipt:'收據'
 /* ================================================================
    FIREBASE INIT & AUTH
    ================================================================ */
-(function() {
-    var script = document.createElement('script');
-    script.src = '/__/firebase/init.js';
-    script.onload = function() { initBizApp(); };
-    script.onerror = function() {
-        if (!firebase.apps.length) {
-            firebase.initializeApp({ projectId:'aiflowtime-hk', apiKey:'AIzaSyDummy_replace_with_real_key', authDomain:'aiflowtime-hk.firebaseapp.com', storageBucket:'aiflowtime-hk.appspot.com' });
-        }
-        initBizApp();
-    };
-    document.head.appendChild(script);
-})();
-
-function initBizApp() {
-    var config = firebase.app().options;
-    try { _bizApp = firebase.app('bizCms'); } catch(e) { _bizApp = firebase.initializeApp(config, 'bizCms'); }
-    db = _bizApp.firestore();
-    auth = _bizApp.auth();
+initFirebase(function(app) {
+    _bizApp = app;
+    db = app.firestore();
+    auth = app.auth();
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
         auth.onAuthStateChanged(function(user) {
             if (user) { verifyAdmin(user); } else { showLogin(); }
         });
     });
-}
+}, { appName: 'bizCms' });
 
 function verifyAdmin(user) {
     db.collection('registrations').where('status','==','confirmed').limit(1).get()

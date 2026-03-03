@@ -1519,6 +1519,8 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<script src="/js/shared-utils.js"></script>
 
 <script>
 // =============================================
@@ -1596,45 +1598,12 @@
 // =============================================
 // SCROLL REVEAL
 // =============================================
-(function() {
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-            if (e.isIntersecting) {
-                e.target.classList.add('visible');
-                observer.unobserve(e.target);
-            }
-        });
-    }, { threshold: 0.12 });
-
-    document.querySelectorAll('.reveal').forEach(function(el) {
-        observer.observe(el);
-    });
-})();
+initScrollReveal('.reveal', { threshold: 0.12 });
 
 // =============================================
 // FAQ TOGGLE
 // =============================================
-// =============================================
-// MOBILE MENU
-// =============================================
-function toggleMobileMenu() {
-    var btn = document.querySelector('.hamburger');
-    var menu = document.getElementById('mobileMenu');
-    var isOpen = menu.classList.contains('active');
-    btn.classList.toggle('active');
-    menu.classList.toggle('active');
-    btn.setAttribute('aria-expanded', !isOpen);
-    menu.setAttribute('aria-hidden', isOpen);
-}
-
-function closeMobileMenu() {
-    var btn = document.querySelector('.hamburger');
-    var menu = document.getElementById('mobileMenu');
-    btn.classList.remove('active');
-    menu.classList.remove('active');
-    btn.setAttribute('aria-expanded', 'false');
-    menu.setAttribute('aria-hidden', 'true');
-}
+// toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
 // =============================================
 // FAQ TOGGLE
@@ -1649,16 +1618,8 @@ function toggleFaq(el) {
 // =============================================
 // FIREBASE — Load Workshop C data (real-time)
 // =============================================
-(function() {
+initFirebase(function(app) {
     try {
-        var app = firebase.apps.length
-            ? firebase.apps[0]
-            : firebase.initializeApp({
-                apiKey: "AIzaSyD_Z4HCZF1HBv3eqBdJbm_Cl-aZH7vmn4A",
-                authDomain: "aiflowtime-hk.firebaseapp.com",
-                projectId: "aiflowtime-hk"
-            });
-
         var db = firebase.firestore(app);
 
         db.collection('workshops').doc('workshop-c').onSnapshot(function(snap) {
@@ -1734,16 +1695,10 @@ function toggleFaq(el) {
             var enrolled = d.enrolled || 0;
             var capContainer = document.getElementById('wscCapacity');
             if (cap > 0) {
-                var totalRects = cap <= 10 ? cap : 10;
-                var seatsPerRect = cap <= 10 ? 1 : cap / 10;
-                var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
-                var html = '<div class="wsc-cap-bar">';
-                for (var j = 0; j < totalRects; j++) {
-                    html += '<div class="wsc-cap-rect' + (j < filledRects ? ' filled' : '') + '"></div>';
-                }
-                html += '</div>';
-                html += '<div class="wsc-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
-                capContainer.innerHTML = html;
+                capContainer.innerHTML = buildCapacityBar(cap, enrolled, {
+                    barClass: 'wsc-cap-bar', rectClass: 'wsc-cap-rect',
+                    textClass: 'wsc-cap-text', format: 'enrolled', spanWrap: true
+                });
                 capContainer.style.display = '';
             } else {
                 capContainer.style.display = 'none';
@@ -1766,7 +1721,7 @@ function toggleFaq(el) {
     } catch(e) {
         console.error('Firebase init error:', e);
     }
-})();
+});
 </script>
 
 </body>

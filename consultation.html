@@ -524,18 +524,9 @@
 
     </div><!-- end .page-content -->
 
+    <script src="/js/shared-utils.js"></script>
     <script>
-        // Mobile menu
-        function toggleMobileMenu() {
-            var hamburger = document.querySelector('.hamburger');
-            var menu = document.getElementById('mobileMenu');
-            hamburger.classList.toggle('active');
-            menu.classList.toggle('active');
-        }
-        function closeMobileMenu() {
-            document.querySelector('.hamburger').classList.remove('active');
-            document.getElementById('mobileMenu').classList.remove('active');
-        }
+        // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
         // FAQ toggle
         function toggleFAQ(el) {

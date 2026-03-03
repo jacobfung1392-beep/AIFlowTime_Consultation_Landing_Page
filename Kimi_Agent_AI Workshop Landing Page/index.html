@@ -828,10 +828,7 @@
          SCRIPTS
     ============================================= -->
     <script>
-    function closeMobileMenu() {
-        document.querySelector('.hamburger').classList.remove('active');
-        document.getElementById('mobileMenu').classList.remove('active');
-    }
+    // closeMobileMenu loaded from /js/shared-utils.js
 
     // Scroll reveal
     var observer = new IntersectionObserver(function(entries) {
@@ -856,53 +853,42 @@
     <!-- Firebase SDK (compat) for real-time workshop data -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/shared-utils.js"></script>
     <script>
-    (function() {
-        var script = document.createElement('script');
-        script.src = '/__/firebase/init.js';
-        script.onload = function() { loadWorkshop0Data(); };
-        script.onerror = function() {
-            if (!firebase.apps.length) {
-                firebase.initializeApp({ projectId: 'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com' });
-            }
-            loadWorkshop0Data();
-        };
-        document.head.appendChild(script);
+    initFirebase(function() {
+        var db = firebase.firestore();
+        db.collection('workshops').doc('workshop-0').onSnapshot(function(doc) {
+            if (!doc.exists) return;
+            var d = doc.data();
 
-        function loadWorkshop0Data() {
-            var db = firebase.firestore();
-            db.collection('workshops').doc('workshop-0').onSnapshot(function(doc) {
-                if (!doc.exists) return;
-                var d = doc.data();
+            document.getElementById('lDuration').textContent = d.duration || '待定';
+            document.getElementById('lDate').textContent = d.date || '待定';
+            document.getElementById('lTime').textContent = d.time || '待定';
+            document.getElementById('lPrice').textContent = d.price || '待定';
 
-                document.getElementById('lDuration').textContent = d.duration || '待定';
-                document.getElementById('lDate').textContent = d.date || '待定';
-                document.getElementById('lTime').textContent = d.time || '待定';
-                document.getElementById('lPrice').textContent = d.price || '待定';
-
-                var cap = d.capacity || 0;
-                var enrolled = d.enrolled || 0;
-                var container = document.getElementById('logisticsCapacity');
-                if (cap > 0) {
-                    var totalRects = cap <= 10 ? cap : 10;
-                    var seatsPerRect = cap <= 10 ? 1 : cap / 10;
-                    var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
-                    var html = '<div class="ws0-cap-bar">';
-                    for (var i = 0; i < totalRects; i++) {
-                        html += '<div class="ws0-cap-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
-                    }
-                    html += '</div>';
-                    html += '<div class="ws0-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
-                    container.innerHTML = html;
-                    container.style.display = '';
-                } else {
-                    container.style.display = 'none';
+            var cap = d.capacity || 0;
+            var enrolled = d.enrolled || 0;
+            var container = document.getElementById('logisticsCapacity');
+            if (cap > 0) {
+                var totalRects = cap <= 10 ? cap : 10;
+                var seatsPerRect = cap <= 10 ? 1 : cap / 10;
+                var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
+                var html = '<div class="ws0-cap-bar">';
+                for (var i = 0; i < totalRects; i++) {
+                    html += '<div class="ws0-cap-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
                 }
-            }, function(err) {
-                console.warn('Workshop 0 snapshot error:', err);
-            });
-        }
-    })();
+                html += '</div>';
+                html += '<div class="ws0-cap-text">已有 <span>' + enrolled + '/' + cap + '</span> 人報名</div>';
+                container.innerHTML = html;
+                container.style.display = '';
+            } else {
+                container.style.display = 'none';
+            }
+        }, function(err) {
+            console.warn('Workshop 0 snapshot error:', err);
+        });
+    });
     </script>
 
     <!-- Background "0" Glassmorphism Animation -->

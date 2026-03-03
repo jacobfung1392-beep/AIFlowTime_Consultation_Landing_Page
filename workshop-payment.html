@@ -506,46 +506,31 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<script src="/js/shared-utils.js"></script>
 
 <script>
 var db, auth, storage, functions;
-var _wsData = null;     // Workshop data from Firestore
+var _wsData = null;
 var _wsId = '';
 var _selectedRound = null;
 var _pendingRoundRestore = null;
 var _currentUser = null;
 var _userProfile = null;
 var _isLoggedIn = false;
-var _authResolved = false; // True once onAuthStateChanged fires at least once
-var _registrationId = null;  // Created after confirm
-var _existingRegistration = null; // Existing non-cancelled registration for this user+workshop
-var _verifiedPrice = null; // Server-verified price from Cloud Function
+var _authResolved = false;
+var _registrationId = null;
+var _existingRegistration = null;
+var _verifiedPrice = null;
 
-(function() {
-    var s = document.createElement('script');
-    s.src = '/__/firebase/init.js';
-    s.onload = function() { initPayment(); };
-    s.onerror = function() {
-        if (!firebase.apps.length) firebase.initializeApp({ projectId:'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com', storageBucket:'aiflowtime-hk.appspot.com' });
-        initPayment();
-    };
-    document.head.appendChild(s);
-})();
+initFirebase(function() { initPayment(); });
 
 function getWorkshopId() {
     return new URLSearchParams(window.location.search).get('id') || 'workshop-0';
 }
 
 function _sortSessionsList(sessions) {
-    if (!sessions || !sessions.length) return [];
-    return sessions.slice().sort(function(a, b) {
-        var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-        var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-        if (da !== db2) return da < db2 ? -1 : 1;
-        var ta = (a.time || '').replace(/[^0-9:]/g, '');
-        var tb = (b.time || '').replace(/[^0-9:]/g, '');
-        return ta < tb ? -1 : ta > tb ? 1 : 0;
-    });
+    return sortSessionsList(sessions);
 }
 
 function _renderSessionLines(el, sessions) {
@@ -647,17 +632,12 @@ function selectRoundById(roundId) {
     }
 }
 
-function buildCapacityBar(capacity, enrolled) {
-    if (!capacity || capacity <= 0) return '';
-    var totalRects = capacity <= 10 ? capacity : 10;
-    var seatsPerRect = capacity <= 10 ? 1 : capacity / 10;
-    var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
-    var remaining = Math.max(0, capacity - enrolled);
-    var html = '<div class="capacity-bar">';
-    for (var i = 0; i < totalRects; i++) html += '<div class="capacity-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
-    html += '</div><div class="capacity-text">已有 ' + enrolled + '/' + capacity + ' 人報名</div>';
-    return html;
-}
+// buildCapacityBar is loaded from /js/shared-utils.js
+// Wrap to preserve the 'enrolled' format used on this page
+var _origBuildCapacityBar = buildCapacityBar;
+buildCapacityBar = function(capacity, enrolled, opts) {
+    return _origBuildCapacityBar(capacity, enrolled, Object.assign({ format: 'enrolled' }, opts || {}));
+};
 
 function initPayment() {
     db = firebase.firestore();
@@ -1530,14 +1510,7 @@ function handleScreenshotUpload(input) {
 }
 
 // ============================================================
-// HTML ESCAPING (XSS prevention)
-// ============================================================
-function escHtml(str) {
-    if (!str) return '';
-    var div = document.createElement('div');
-    div.textContent = String(str);
-    return div.innerHTML;
-}
+// escHtml loaded from /js/shared-utils.js
 
 // ============================================================
 // TOAST

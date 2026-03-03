@@ -575,6 +575,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<script src="/js/shared-utils.js"></script>
 
 <script>
 // ============================================================
@@ -1095,32 +1097,11 @@ var MAX_HISTORY = 50;
 // ============================================================
 // FIREBASE INIT
 // ============================================================
-(function() {
-    var script = document.createElement('script');
-    script.src = '/__/firebase/init.js';
-    script.onload = function() { initApp(); };
-    script.onerror = function() {
-        if (!firebase.apps.length) {
-            firebase.initializeApp({
-                projectId: 'aiflowtime-hk',
-                apiKey: 'AIzaSyDummy_replace_with_real_key',
-                authDomain: 'aiflowtime-hk.firebaseapp.com',
-                storageBucket: 'aiflowtime-hk.appspot.com'
-            });
-        }
-        initApp();
-    };
-    document.head.appendChild(script);
-})();
-
-function initApp() {
-    var config = firebase.app().options;
-    try { _cmsApp = firebase.app('cms'); } catch(e) {
-        _cmsApp = firebase.initializeApp(config, 'cms');
-    }
-    db = _cmsApp.firestore();
-    auth = _cmsApp.auth();
-    storage = _cmsApp.storage();
+initFirebase(function(app) {
+    _cmsApp = app;
+    db = app.firestore();
+    auth = app.auth();
+    storage = app.storage();
 
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
         auth.onAuthStateChanged(function(user) {
@@ -1131,7 +1112,7 @@ function initApp() {
             }
         });
     });
-}
+}, { appName: 'cms' });
 
 function verifyAdminAccess(user) {
     db.collection('registrations')
@@ -1438,11 +1419,6 @@ function renderSectionList() {
 
         list.appendChild(row);
     });
-}
-
-function escHtml(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ============================================================

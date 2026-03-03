@@ -2259,20 +2259,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/shared-utils.js"></script>
     <script>
-        // Firebase auto-init via hosting reserved URL
-        (function() {
-            var script = document.createElement('script');
-            script.src = '/__/firebase/init.js';
-            script.onload = function() { initWorkshopPage(); };
-            script.onerror = function() {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp({ projectId: 'aiflowtime-hk', apiKey:'AIzaSyDummy', authDomain:'aiflowtime-hk.firebaseapp.com' });
-                }
-                initWorkshopPage();
-            };
-            document.head.appendChild(script);
-        })();
+        initFirebase(function() { initWorkshopPage(); });
 
         function initWorkshopPage() {
             loadWorkshops();
@@ -2361,70 +2351,8 @@
             });
         }
 
-        function getCtaColorHex(colorId) {
-            var map = { accent: '#D97757', dark: '#3A3A3A', green: '#4CAF50', blue: '#2196F3', red: '#E53935', purple: '#9C27B0', grey: '#9E9E9E' };
-            return map[colorId] || map.accent;
-        }
-
-        function buildCapacityBar(capacity, enrolled) {
-            capacity = capacity || 0;
-            enrolled = enrolled || 0;
-            if (capacity <= 0) return '';
-
-            var remaining = Math.max(0, capacity - enrolled);
-
-            // Always show the bar with exact numbers
-            var totalRects = capacity <= 10 ? capacity : 10;
-            var seatsPerRect = capacity <= 10 ? 1 : capacity / 10;
-            var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
-
-            var html = '<div class="capacity-bar">';
-            for (var i = 0; i < totalRects; i++) {
-                html += '<div class="capacity-rect' + (i < filledRects ? ' filled' : '') + '"></div>';
-            }
-            html += '</div>';
-
-            if (remaining <= 0) {
-                html += '<div class="capacity-text" style="color:var(--accent-text);font-weight:700;">已滿</div>';
-            } else {
-                html += '<div class="capacity-text">尚餘 ' + remaining + ' / ' + capacity + ' 個名額</div>';
-            }
-            return html;
-        }
-
-        function buildDiamondRating(difficulty) {
-            var level = difficulty || 1;
-            var html = '<div class="workshop-diamonds">';
-            for (var i = 1; i <= 6; i++) {
-                html += '<span class="diamond ' + (i <= level ? 'filled' : 'empty') + '">◆</span>';
-            }
-            var label, labelClass;
-            if (level <= 2) { label = '入門'; labelClass = 'dl-beginner'; }
-            else if (level <= 4) { label = '進階'; labelClass = 'dl-intermediate'; }
-            else { label = '高階'; labelClass = 'dl-advanced'; }
-            html += '<span class="difficulty-label ' + labelClass + '">' + label + '</span>';
-            html += '</div>';
-            return html;
-        }
-
-        function escHtml(str) {
-            if (!str) return '';
-            var div = document.createElement('div');
-            div.textContent = String(str);
-            return div.innerHTML;
-        }
-
-        function fixStorageUrl(url) {
-            if (!url) return '';
-            if (url.startsWith('blob:') || url.startsWith('data:')) return url;
-            var match = url.match(/\/o\/([^?]+)/);
-            if (match) {
-                var storagePath = decodeURIComponent(match[1]);
-                return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(storagePath);
-            }
-            if (url.startsWith('http://') || url.startsWith('https://')) return url;
-            return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(url);
-        }
+        // getCtaColorHex, buildCapacityBar, buildDiamondRating, escHtml, fixStorageUrl
+        // are now loaded from /js/shared-utils.js
 
         function renderWorkshopCard(doc) {
             var d = doc.data();
@@ -2482,19 +2410,7 @@
 
             // Helper: per-date capacity bar
             function _dateCapBar(cap, enrolled) {
-                cap = cap || 0; enrolled = enrolled || 0;
-                if (cap <= 0) return '';
-                var rem = Math.max(0, cap - enrolled);
-                var totalRects = cap <= 10 ? cap : 10;
-                var seatsPerRect = cap <= 10 ? 1 : cap / 10;
-                var filledRects = Math.min(totalRects, Math.ceil(enrolled / seatsPerRect));
-                var h = '<div class="date-capacity-wrap"><div class="capacity-bar">';
-                for (var ci = 0; ci < totalRects; ci++) h += '<div class="capacity-rect' + (ci < filledRects ? ' filled' : '') + '"></div>';
-                h += '</div>';
-                if (rem <= 0) h += '<div class="capacity-text" style="color:var(--accent-text);font-weight:700;">已滿</div>';
-                else h += '<div class="capacity-text">尚餘 ' + rem + ' / ' + cap + ' 個名額</div>';
-                h += '</div>';
-                return h;
+                return buildCapacityBar(cap, enrolled, { wrapClass: 'date-capacity-wrap' });
             }
 
             // Date/time display with inline mode pill + per-date capacity
@@ -2631,28 +2547,8 @@
 
     <!-- JavaScript -->
     <script>
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const hamburger = document.querySelector('.hamburger');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
-            
-            hamburger.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            hamburger.setAttribute('aria-expanded', !isExpanded);
-            mobileMenu.setAttribute('aria-hidden', isExpanded);
-        }
-        
-        function closeMobileMenu() {
-            const hamburger = document.querySelector('.hamburger');
-            const mobileMenu = document.getElementById('mobileMenu');
-            
-            hamburger.classList.remove('active');
-            mobileMenu.classList.remove('active');
-            hamburger.setAttribute('aria-expanded', 'false');
-            mobileMenu.setAttribute('aria-hidden', 'true');
-        }
-        
+        // toggleMobileMenu and closeMobileMenu are now loaded from /js/shared-utils.js
+
         // Workshop details toggle
         function toggleDetails(button) {
             const details = button.nextElementSibling;
@@ -2691,22 +2587,8 @@
             }
         }
         
-        // Scroll animations
         function initScrollAnimations() {
-            const fadeElements = document.querySelectorAll('.fade-in');
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            });
-            
+            initScrollReveal('.fade-in');
             fadeElements.forEach(el => observer.observe(el));
         }
         

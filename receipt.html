@@ -216,6 +216,9 @@
         var safeTitle = _safeText(ws.title ? (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + ws.title : reg.workshopTitle) || 'Workshop';
         var sessionLines = [];
         var safeRoundLabel = '';
+        function _addSessionItem(line, location) {
+            if (line) sessionLines.push({ line: line, location: location ? _safeText(location) : '' });
+        }
         // For continuous courses, show only the selected round's sessions
         if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
             var matchedRound = ws.rounds.find(function(r) { return r.id === reg.selectedRound; });
@@ -232,7 +235,8 @@
                     if (s.label) line += _safeText(s.label) + ': ';
                     line += _parseDateToEnglish(s.date);
                     if (s.time) line += ' | ' + _safeText(s.time);
-                    if (line) sessionLines.push(line);
+                    var loc = s.location || ws.location || '';
+                    _addSessionItem(line, loc);
                 }
             }
         }
@@ -253,7 +257,7 @@
                 if (s.label) line += _safeText(s.label) + ': ';
                 line += _parseDateToEnglish(s.date);
                 if (s.time) line += ' | ' + _safeText(s.time);
-                if (line) sessionLines.push(line);
+                _addSessionItem(line, s.location || ws.location);
                 safeRoundLabel = _safeText(reg.selectedRoundLabel || '');
             }
         }
@@ -272,7 +276,7 @@
                 if (s.label) line += _safeText(s.label) + ': ';
                 line += _parseDateToEnglish(s.date);
                 if (s.time) line += ' | ' + _safeText(s.time);
-                if (line) sessionLines.push(line);
+                _addSessionItem(line, s.location || ws.location);
             }
         }
         if (!sessionLines.length && reg.allSessionDates && reg.allSessionDates.length) {
@@ -281,30 +285,19 @@
                 if (sd.label) line += _safeText(sd.label) + ': ';
                 line += _parseDateToEnglish(sd.date);
                 if (sd.time) line += ' | ' + _safeText(sd.time);
-                if (line) sessionLines.push(line);
+                _addSessionItem(line, sd.location || ws.location);
             });
         }
         if (!sessionLines.length) {
             var fallbackDate = _parseDateToEnglish(ws.date || reg.workshopDate);
             var fallbackTime = _safeText(ws.time || reg.workshopTime);
             var fb = [fallbackDate, fallbackTime].filter(Boolean).join(' | ');
-            if (fb) sessionLines.push(fb);
+            if (fb) sessionLines.push({ line: fb, location: '' });
         }
         var safePricePaid = _safeText(reg.pricePaid) || 'N/A';
         var safePromo = _safeText(reg.promoCode);
-        var safeLocation = (function() {
-            var sessions = ws.sessions || [];
-            if (reg.selectedRound && reg.selectedRound.indexOf('session_') === 0 && sessions.length > 1) {
-                var idx = parseInt(reg.selectedRound.replace('session_', ''), 10);
-                if (idx >= 0 && idx < sessions.length && sessions[idx].location) return _safeText(sessions[idx].location);
-            }
-            if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
-                var mr = ws.rounds.find(function(r) { return r.id === reg.selectedRound; });
-                if (mr && mr.sessions && mr.sessions.length && mr.sessions[0].location) return _safeText(mr.sessions[0].location);
-            }
-            if (sessions.length === 1 && sessions[0].location) return _safeText(sessions[0].location);
-            return _safeText(ws.location);
-        })();
+        var safeLocation = '';
+        if (sessionLines.length === 1 && !sessionLines[0].location) safeLocation = _safeText(ws.location);
 
         // Header bar
         doc.setFillColor(217, 119, 87);
@@ -394,13 +387,22 @@
             doc.text(safeRoundLabel, margin + 4, y);
             y += 5;
         }
-        // Session lines may contain Chinese labels
+        // Session lines may contain Chinese labels; show location under each date when per-session
         if (sessionLines.length) {
             setCJK(9);
-            doc.setTextColor(120, 120, 120);
             for (var sl = 0; sl < sessionLines.length; sl++) {
-                doc.text(sessionLines[sl], margin + 4, y);
+                var item = sessionLines[sl];
+                var isObj = item && typeof item === 'object';
+                var lineText = isObj ? item.line : item;
+                var lineLoc = isObj ? (item.location || '') : '';
+                doc.setTextColor(120, 120, 120);
+                doc.text(lineText, margin + 4, y);
                 y += 4.5;
+                if (lineLoc) {
+                    doc.setTextColor(100, 100, 100);
+                    doc.text('  Location: ' + lineLoc, margin + 4, y);
+                    y += 4.5;
+                }
             }
             y += 0.5;
         }

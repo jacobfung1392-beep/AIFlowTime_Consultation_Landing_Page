@@ -477,9 +477,45 @@
             font-weight: 600;
             color: var(--text);
             text-align: right;
+            line-height: 1.5;
         }
-        .logistics-capacity {
+        .logistics-value .session-line {
+            display: block;
+            font-size: 0.95rem;
+        }
+        .logistics-value .session-label {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+        .logistics-session-block {
             padding: 20px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+        .logistics-session-block:last-child { border-bottom: none; }
+        .logistics-session-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .logistics-session-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .logistics-session-datetime {
+            flex: 1;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            text-align: right;
+        }
+        .logistics-session-cap {
+            margin-top: 12px;
+        }
+        .logistics-cta {
+            display: flex; justify-content: center; padding: 20px 28px;
             border-top: 1px solid var(--border);
         }
         .ws0-cap-bar { display: flex; gap: 6px; margin-bottom: 10px; }
@@ -495,7 +531,8 @@
             .logistics-row { padding: 16px 20px; gap: 12px; }
             .logistics-label { width: 50px; font-size: 12px; }
             .logistics-value { font-size: 15px; }
-            .logistics-capacity { padding: 16px 20px; }
+            .logistics-session-block { padding: 16px 20px; }
+            .logistics-session-datetime { font-size: 0.9rem; }
         }
 
         /* =============================================
@@ -576,7 +613,7 @@
             <h1 class="hero-title">
                 定義問題的深度，<br>決定了 AI 解決問題的<span class="accent">高度</span>。
             </h1>
-            <p class="hero-subtitle-en">2.5-HOUR AI EXPERIENCE WORKSHOP</p>
+            <p class="hero-subtitle-en">1,5-HOUR AI EXPERIENCE WORKSHOP</p>
             <p class="hero-tagline">
                 <strong>零基礎</strong> 也能學會 · 即場見效 · 帶走可用的方法
             </p>
@@ -771,20 +808,7 @@
                             <div class="logistics-label">課時</div>
                             <div class="logistics-value" id="lDuration">載入中...</div>
                         </div>
-                        <div class="logistics-row">
-                            <div class="logistics-icon">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            </div>
-                            <div class="logistics-label">日期</div>
-                            <div class="logistics-value" id="lDate">待定</div>
-                        </div>
-                        <div class="logistics-row">
-                            <div class="logistics-icon">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            </div>
-                            <div class="logistics-label">時間</div>
-                            <div class="logistics-value" id="lTime">待定</div>
-                        </div>
+                        <div id="lSessionsContainer"></div>
                         <div class="logistics-row">
                             <div class="logistics-icon">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -792,8 +816,17 @@
                             <div class="logistics-label">費用</div>
                             <div class="logistics-value" id="lPrice">待定</div>
                         </div>
+                        <div class="logistics-row">
+                            <div class="logistics-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </div>
+                            <div class="logistics-label">地點</div>
+                            <div class="logistics-value" id="lMode" style="font-size:14px;font-weight:500;color:var(--text-muted);">地點將於報名確認後通知</div>
+                        </div>
                     </div>
-                    <div class="logistics-capacity" id="logisticsCapacity"></div>
+                    <div class="logistics-cta">
+                        <a href="/workshop-payment?id=workshop-0" id="w0-cta-link" class="btn-primary" style="width:100%;justify-content:center;">立即報名 →</a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -987,6 +1020,16 @@
                 }
                 break;
 
+            case 'logistics-card':
+                var lLabel = el.querySelector('.section-label');
+                if (lLabel && c.sectionLabel) lLabel.textContent = c.sectionLabel;
+                var lTitle = el.querySelector('.section-title');
+                if (lTitle && c.sectionTitle) lTitle.innerHTML = c.sectionTitle;
+                var lCta = el.querySelector('.logistics-cta .btn-primary');
+                if (lCta && c.ctaText) lCta.textContent = c.ctaText;
+                if (lCta && c.ctaLink) lCta.href = c.ctaLink;
+                break;
+
             case 'final-cta':
                 var h2fc = el.querySelector('.section-title');
                 if (h2fc && c.title) h2fc.innerHTML = c.title;
@@ -1010,22 +1053,67 @@
             var d = doc.data();
 
             document.getElementById('lDuration').textContent = d.duration || '待定';
-            document.getElementById('lDate').textContent = d.date || '待定';
-            document.getElementById('lTime').textContent = d.time || '待定';
-            document.getElementById('lPrice').textContent = d.price || '待定';
 
-            var cap = d.capacity || 0;
-            var enrolled = d.enrolled || 0;
-            var container = document.getElementById('logisticsCapacity');
-            if (cap > 0) {
-                container.innerHTML = buildCapacityBar(cap, enrolled, {
-                    barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect',
-                    textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true
-                });
-                container.style.display = '';
-            } else {
-                container.style.display = 'none';
+            var sessionsContainer = document.getElementById('lSessionsContainer');
+            var globalCap = d.capacity || 0;
+
+            function renderSessionBlocks(sessions) {
+                var html = '';
+                for (var i = 0; i < sessions.length; i++) {
+                    var s = sessions[i];
+                    var lbl = s.label || '';
+                    var dt = (s.date || '待定') + (s.time ? '  ' + s.time : '');
+                    var cap = s.capacity !== undefined ? s.capacity : globalCap;
+                    var enrolled = s.enrolled || 0;
+                    html += '<div class="logistics-session-block">';
+                    html += '<div class="logistics-session-header">';
+                    html += '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>';
+                    if (lbl) html += '<div class="logistics-session-label">' + lbl + '</div>';
+                    html += '<div class="logistics-session-datetime">' + dt + '</div>';
+                    html += '</div>';
+                    if (cap > 0) {
+                        html += '<div class="logistics-session-cap">' + buildCapacityBar(cap, enrolled, {
+                            barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect',
+                            textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true
+                        }) + '</div>';
+                    }
+                    html += '</div>';
+                }
+                sessionsContainer.innerHTML = html;
             }
+
+            if (d.sessions && d.sessions.length) {
+                var sorted = d.sessions.filter(function(s) { return s.visible !== false; }).slice().sort(function(a, b) {
+                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+                    if (da !== db2) return da < db2 ? -1 : 1;
+                    var ta = (a.time || '').replace(/[^0-9:]/g, '');
+                    var tb = (b.time || '').replace(/[^0-9:]/g, '');
+                    return ta < tb ? -1 : ta > tb ? 1 : 0;
+                });
+                renderSessionBlocks(sorted);
+            } else {
+                var dt = (d.date || '即將公佈') + (d.time ? '  ' + d.time : '');
+                sessionsContainer.innerHTML = '<div class="logistics-session-block"><div class="logistics-session-header">' +
+                    '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
+                    '<div class="logistics-session-datetime">' + dt + '</div></div>' +
+                    (globalCap > 0 ? '<div class="logistics-session-cap">' + buildCapacityBar(globalCap, d.enrolled || 0, { barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect', textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true }) + '</div>' : '') +
+                    '</div>';
+            }
+
+            var priceEl = document.getElementById('lPrice');
+            if (d.price) priceEl.textContent = d.price;
+            else if (d.priceHkd) priceEl.textContent = 'HKD ' + d.priceHkd;
+            else priceEl.textContent = '待定';
+
+            var rawCta = (d.ctaLink || '').trim();
+            var isSelf = !rawCta || rawCta === '#' || rawCta === '#waitlist'
+                || rawCta === '/workshop-0'
+                || rawCta.indexOf('workshop-0') !== -1;
+            var ctaLink = isSelf ? '/workshop-payment?id=workshop-0' : rawCta;
+            var ctaEl = document.getElementById('w0-cta-link');
+            if (ctaEl) ctaEl.href = ctaLink;
+
         }, function(err) {
             console.warn('Workshop 0 snapshot error:', err);
         });

@@ -1832,21 +1832,16 @@ initFirebase(function(app) {
     auth = app.auth();
     storage = app.storage();
 
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
-        auth.onAuthStateChanged(function(user) {
-            if (user) {
-                verifyAdminAccess(user);
-            } else {
-                showLogin();
-            }
-        });
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            verifyAdminAccess(user);
+        } else {
+            showLogin();
+        }
     });
 }, { appName: 'cms' });
 
 function verifyAdminAccess(user) {
-    // Verify admin access by attempting a Firestore operation that only admins can perform.
-    // We try to read all registrations (non-admins can only read their own via userId filter).
-    // A broad query without a userId filter will be denied by Firestore rules for non-admins.
     db.collection('registrations')
         .where('status', '==', 'confirmed')
         .limit(1)
@@ -2891,13 +2886,6 @@ function loadAllWorkshops() {
                 listCurrent.appendChild(item);
                 hasCurrent = true;
             }
-            initDatePicker(item.querySelector('.date-picker-wrap'));
-            initTimePicker(item.querySelector('.time-picker-wrap'));
-            item.querySelectorAll('.session-row').forEach(function(row) { initSessionPickers(row); });
-            initCategoryPicker(item.querySelector('input[name="category"]').closest('.custom-select-wrap'));
-            initDurationPicker(item.querySelector('input[name="duration"]').closest('.custom-select-wrap'));
-            initCtaTextPicker(item.querySelector('input[name="ctaText"]').closest('.custom-select-wrap'));
-            _initWsFormDirtyTracking(item, doc.id);
         });
         if (!hasCurrent) listCurrent.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:40px 0;">尚未有任何工作坊。點擊上方「新增工作坊」開始建立。</p>';
         if (!hasArchived) listArchived.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:40px 0;">沒有已封存的工作坊。</p>';
@@ -2989,199 +2977,11 @@ function buildWorkshopItem(id, d) {
             '</div>' +
             '<span class="ws-item-toggle">+</span>' +
         '</div>' +
-        '<div class="ws-item-body">' +
-            '<form class="ws-form" onsubmit="return saveWorkshop(event, \'' + id + '\')">' +
+        '<div class="ws-item-body"></div>';
 
-                // ── Section 1: 基本資料 ──
-                '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📋</span> 基本資料</div></div>' +
-                '<div class="toggle-wrap">' +
-                    '<label class="toggle-switch"><input type="checkbox" name="visible"' + (d.visible ? ' checked' : '') + '><span class="toggle-slider"></span></label>' +
-                    '<span class="toggle-label">' + (d.visible ? '已上架' : '已下架') + '</span>' +
-                '</div>' +
-                '<div class="form-row">' +
-                    '<div class="form-group"><label>Workshop 編號</label><input type="text" name="workshopNumber" value="' + escHtml(d.workshopNumber || '') + '" placeholder="e.g. Workshop 0"></div>' +
-                    '<div class="form-group"><label>排列順序</label><input type="number" name="order" value="' + (d.order != null ? d.order : 0) + '"></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>工作坊標題</label><input type="text" name="title" value="' + escHtml(d.title || '') + '" placeholder="e.g. Change Your Mind"></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>副標題 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（卡片標題下方的一句話）</span></label><input type="text" name="subtitle" value="' + escHtml(d.subtitle || '') + '" placeholder="例：從「亂問」到「問得準」的思考升級。"></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>簡介</label><textarea name="description" rows="3" placeholder="工作坊簡介...">' + escHtml(d.description || '') + '</textarea></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>參加者注意事項 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅顯示於收據）</span></label><textarea name="notice" rows="3" placeholder="例：請自備手提電腦、請提早 10 分鐘到場...">' + escHtml(d.notice || '') + '</textarea></div>' +
-                '</div>' +
-
-                // ── Section 2: 分類與定價 ──
-                '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">💰</span> 分類與定價</div></div>' +
-                '<div class="form-row">' +
-                    '<div class="form-group"><label>類別</label>' +
-                        '<div class="custom-select-wrap">' +
-                            '<input type="text" name="category" value="' + escHtml(d.category || '') + '" class="custom-select-input" readonly placeholder="點擊選擇類別">' +
-                            '<div class="custom-select-dropdown cs-category-dd"></div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-group"><label>難度（◆ 鑽石評級）</label>' +
-                        '<div class="diamond-picker" data-value="' + (d.difficulty || 1) + '">' +
-                            buildDiamondPicker(d.difficulty || 1) +
-                        '</div>' +
-                        '<input type="hidden" name="difficulty" value="' + (d.difficulty || 1) + '">' +
-                    '</div>' +
-                '</div>' +
-                '<div class="form-row">' +
-                    '<div class="form-group"><label>課時</label>' +
-                        '<div class="custom-select-wrap">' +
-                            '<input type="text" name="duration" value="' + escHtml(d.duration || '') + '" class="custom-select-input" readonly placeholder="點擊選擇課時">' +
-                            '<div class="custom-select-dropdown cs-duration-dd"></div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-group"><label>費用</label>' +
-                        '<div class="input-prefix-group">' +
-                            '<span class="input-prefix">HKD</span>' +
-                            '<input type="text" name="price" value="' + escHtml(priceRaw) + '" placeholder="e.g. 500">' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-group"><label>原價（劃線價）</label>' +
-                        '<div class="input-prefix-group">' +
-                            '<span class="input-prefix">HKD</span>' +
-                            '<input type="text" name="originalPrice" value="' + escHtml(stripPricePrefix(d.originalPrice || '')) + '" placeholder="留空則不顯示">' +
-                        '</div>' +
-                        '<small style="color:#7A7A7A;font-size:11px;margin-top:2px;display:block;">如有填寫，工作坊卡片會以劃線方式顯示此金額</small>' +
-                    '</div>' +
-                '</div>' +
-
-                // ── Section 3: 時間與地點 ──
-                '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📅</span> 時間與地點</div></div>' +
-                '<input type="hidden" name="date" value="' + escHtml(d.date || '') + '">' +
-                '<input type="hidden" name="time" value="' + escHtml(d.time || '') + '">' +
-                '<input type="hidden" name="courseType" value="' + escHtml(d.courseType || 'single') + '">' +
-                '<div class="form-row full">' +
-                    '<div class="form-group">' +
-                        '<label>課程類型</label>' +
-                        '<div class="course-type-picker" data-value="' + escHtml(d.courseType || 'single') + '">' +
-                            '<button type="button" class="course-type-btn' + ((!d.courseType || d.courseType === 'single') ? ' active' : '') + '" data-type="single" onclick="pickCourseType(this)">單堂課程</button>' +
-                            '<button type="button" class="course-type-btn' + (d.courseType === 'continuous' ? ' active' : '') + '" data-type="continuous" onclick="pickCourseType(this)">連續課程</button>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="single-sessions-wrap" style="' + (d.courseType === 'continuous' ? 'display:none;' : '') + '">' +
-                    '<div class="form-row full">' +
-                        '<div class="form-group">' +
-                            '<label>課堂日期 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（多堂課程可新增多個課堂）</span></label>' +
-                            '<div class="sessions-list" data-ws-id="' + id + '">' +
-                                buildSessionsHtml(d.sessions || [], id, d.capacity || 0) +
-                            '</div>' +
-                            '<button type="button" class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="addSessionRow(this)">+ 新增課堂</button>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="rounds-wrap" style="' + (d.courseType === 'continuous' ? '' : 'display:none;') + '">' +
-                    '<div class="form-row full">' +
-                        '<div class="form-group">' +
-                            '<label>期數與課堂 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（每期包含多個課堂，學員選擇一期報名）</span></label>' +
-                            '<div class="rounds-editor">' +
-                                buildRoundsHtml(d.rounds || []) +
-                            '</div>' +
-                            '<button type="button" class="btn btn-sm btn-outline" style="margin-top:12px;" onclick="addRound(this)">+ 新增期數</button>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<input type="hidden" name="mode" value="' + escHtml(d.mode || 'offline') + '">' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>Zoom 連結 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（適用於線上課堂）</span></label><input type="text" name="zoomLink" value="' + escHtml(d.zoomLink || '') + '" placeholder="例：https://zoom.us/j/1234567890"></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>上課地點 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅用於 WhatsApp 訊息及個人檔案）</span></label><input type="text" name="location" value="' + escHtml(d.location || '') + '" placeholder="例：觀塘 ABC 大廈 12 樓 1201 室"></div>' +
-                '</div>' +
-
-                // ── Section 4: 卡片內容 ──
-                '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">✏️</span> 卡片內容</div></div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>你會帶走</label><input type="text" name="takeaway" value="' + escHtml(d.takeaway || '') + '" placeholder="例：你的提問框架＋專家級 Prompt 結構＋可直接套用的範例"></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group"><label>適合對象</label><input type="text" name="suitableFor" value="' + escHtml(d.suitableFor || '') + '" placeholder="例：問過很多次但總覺得 AI 答得空、越問越亂的人"></div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group">' +
-                        '<label>封面圖片</label>' +
-                        '<div class="image-upload-area' + (d.imageUrl ? ' has-image' : '') + '" onclick="this.querySelector(\'input\').click()">' +
-                            (d.imageUrl ? '<img src="' + fixStorageUrl(d.imageUrl) + '" alt="cover">' : '<span class="upload-icon">&#x1F5BC;</span><span class="upload-text">點擊或拖放上傳圖片</span>') +
-                            '<input type="file" accept="image/*" onchange="handleImageUpload(this, \'' + id + '\')">' +
-                        '</div>' +
-                        '<div class="upload-progress"><div class="upload-progress-bar"></div></div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group">' +
-                        '<label>詳情列表（查看詳情展開的內容）</label>' +
-                        '<div class="details-editor">' + detailsHtml + '</div>' +
-                        '<button type="button" class="detail-add" onclick="addDetailRow(this)">+ 新增項目</button>' +
-                    '</div>' +
-                '</div>' +
-
-                // ── Section 5: 名額與折扣 ──
-                '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">🎟️</span> 名額與折扣</div></div>' +
-                '<div class="single-capacity-wrap" style="' + (d.courseType === 'continuous' || (d.sessions && d.sessions.length > 1) ? 'display:none;' : '') + '">' +
-                    '<div class="form-row">' +
-                        '<div class="form-group"><label>最大名額</label><input type="number" name="capacity" value="' + (d.capacity || 0) + '" min="0" oninput="updateCapacityPreview(this)"></div>' +
-                        '<div class="form-group"><label>已報名人數 <span style="font-size:11px;color:var(--text-light);font-weight:500;">(自動更新)</span></label><input type="number" name="enrolled" value="' + (d.enrolled || 0) + '" min="0" oninput="updateCapacityPreview(this)"></div>' +
-                    '</div>' +
-                    '<div class="capacity-bar-preview-wrap">' + capBarHtml + '</div>' +
-                '</div>' +
-                '<p class="continuous-cap-note" style="font-size:12px;color:var(--text-light);font-weight:500;margin-bottom:12px;' + (d.courseType === 'continuous' ? '' : 'display:none;') + '">連續課程的名額在每個期數中分別設定。</p>' +
-                '<p class="multidate-cap-note" style="font-size:12px;color:var(--text-light);font-weight:500;margin-bottom:12px;' + (d.courseType !== 'continuous' && d.sessions && d.sessions.length > 1 ? '' : 'display:none;') + '">每個日期有獨立名額設定（在上方課堂日期中調整）。</p>' +
-                '<div class="form-row full">' +
-                    '<div class="form-group">' +
-                        '<label>已套用折扣碼 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（從「折扣碼」分頁管理，此處選擇套用）</span></label>' +
-                        '<select name="discountCodeSelect" class="dc-ws-select" onchange="addDcToWorkshop(this)" style="padding:10px 14px;border:1.5px solid var(--bg-off);border-radius:10px;font-size:14px;background:var(--white);">' +
-                            '<option value="">— 選擇折扣碼 —</option>' +
-                        '</select>' +
-                        '<div class="dc-ws-chip-list" data-field="appliedDiscountIds">' + buildAppliedDcChips(d.appliedDiscountIds || []) + '</div>' +
-                    '</div>' +
-                '</div>' +
-
-                // ── Section 6: 按鈕設定 ──
-                '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">🔘</span> 按鈕設定</div></div>' +
-                '<div class="form-row">' +
-                    '<div class="form-group"><label>按鈕文字</label>' +
-                        '<div class="custom-select-wrap">' +
-                            '<input type="text" name="ctaText" value="' + escHtml(d.ctaText || '') + '" class="custom-select-input" readonly placeholder="點擊選擇按鈕文字">' +
-                            '<div class="custom-select-dropdown cs-cta-dd"></div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-group"><label>按鈕顏色</label>' +
-                        '<div class="color-picker-wrap">' +
-                            buildCtaColorOptions(d.ctaColor || 'accent') +
-                            '<input type="hidden" name="ctaColor" value="' + escHtml(d.ctaColor || 'accent') + '">' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="form-row">' +
-                    '<div class="form-group" style="flex:1;"><label>按鈕連結</label><input type="text" name="ctaLink" value="' + escHtml(d.ctaLink || '') + '" placeholder="https://..." style="width:100%;"></div>' +
-                '</div>' +
-
-                '<div class="form-actions">' +
-                    '<button type="submit" class="btn">儲存變更</button>' +
-                    (d.archived
-                        ? '<button type="button" class="btn btn-sm" style="background:#43A047;color:#fff;" onclick="unarchiveWorkshop(\'' + id + '\')">取消封存</button>'
-                        : '<button type="button" class="btn btn-sm" style="background:#E65100;color:#fff;" onclick="archiveWorkshop(\'' + id + '\')">封存工作坊</button>'
-                    ) +
-                    '<button type="button" class="btn btn-danger btn-sm" onclick="deleteWorkshop(\'' + id + '\')">刪除工作坊</button>' +
-                '</div>' +
-            '</form>' +
-        '</div>';
-
-    // Toggle label update
-    var toggleInput = el.querySelector('.ws-form input[name="visible"]');
-    if (toggleInput) {
-        toggleInput.addEventListener('change', function() {
-            this.closest('.toggle-wrap').querySelector('.toggle-label').textContent = this.checked ? '已上架' : '已下架';
-        });
-    }
+    el._wsData = d;
+    el._wsId = id;
+    el._bodyRendered = false;
 
     // Drag handle
     var handle = el.querySelector('.ws-drag-handle');
@@ -3200,6 +3000,211 @@ function buildWorkshopItem(id, d) {
     }
 
     return el;
+}
+
+function _renderWsBody(item) {
+    if (item._bodyRendered) return;
+    item._bodyRendered = true;
+    var id = item._wsId;
+    var d = item._wsData;
+    if (!id || !d) return;
+
+    var priceRaw = stripPricePrefix(d.price || '');
+    var detailsHtml = '';
+    if (d.details && d.details.length) {
+        d.details.forEach(function(dt) {
+            detailsHtml += '<div class="detail-row"><input type="text" value="' + escHtml(dt) + '" class="detail-input"><button type="button" class="detail-remove" onclick="removeDetailRow(this)">×</button></div>';
+        });
+    }
+    var capBarHtml = buildCapacityBarPreview(d.capacity || 0, d.enrolled || 0);
+
+    var body = item.querySelector('.ws-item-body');
+    body.innerHTML =
+        '<form class="ws-form" onsubmit="return saveWorkshop(event, \'' + id + '\')">' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📋</span> 基本資料</div></div>' +
+            '<div class="toggle-wrap">' +
+                '<label class="toggle-switch"><input type="checkbox" name="visible"' + (d.visible ? ' checked' : '') + '><span class="toggle-slider"></span></label>' +
+                '<span class="toggle-label">' + (d.visible ? '已上架' : '已下架') + '</span>' +
+            '</div>' +
+            '<div class="form-row">' +
+                '<div class="form-group"><label>Workshop 編號</label><input type="text" name="workshopNumber" value="' + escHtml(d.workshopNumber || '') + '" placeholder="e.g. Workshop 0"></div>' +
+                '<div class="form-group"><label>排列順序</label><input type="number" name="order" value="' + (d.order != null ? d.order : 0) + '"></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>工作坊標題</label><input type="text" name="title" value="' + escHtml(d.title || '') + '" placeholder="e.g. Change Your Mind"></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>副標題 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（卡片標題下方的一句話）</span></label><input type="text" name="subtitle" value="' + escHtml(d.subtitle || '') + '" placeholder="例：從「亂問」到「問得準」的思考升級。"></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>簡介</label><textarea name="description" rows="3" placeholder="工作坊簡介...">' + escHtml(d.description || '') + '</textarea></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>參加者注意事項 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅顯示於收據）</span></label><textarea name="notice" rows="3" placeholder="例：請自備手提電腦、請提早 10 分鐘到場...">' + escHtml(d.notice || '') + '</textarea></div>' +
+            '</div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">💰</span> 分類與定價</div></div>' +
+            '<div class="form-row">' +
+                '<div class="form-group"><label>類別</label>' +
+                    '<div class="custom-select-wrap">' +
+                        '<input type="text" name="category" value="' + escHtml(d.category || '') + '" class="custom-select-input" readonly placeholder="點擊選擇類別">' +
+                        '<div class="custom-select-dropdown cs-category-dd"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-group"><label>難度（◆ 鑽石評級）</label>' +
+                    '<div class="diamond-picker" data-value="' + (d.difficulty || 1) + '">' +
+                        buildDiamondPicker(d.difficulty || 1) +
+                    '</div>' +
+                    '<input type="hidden" name="difficulty" value="' + (d.difficulty || 1) + '">' +
+                '</div>' +
+            '</div>' +
+            '<div class="form-row">' +
+                '<div class="form-group"><label>課時</label>' +
+                    '<div class="custom-select-wrap">' +
+                        '<input type="text" name="duration" value="' + escHtml(d.duration || '') + '" class="custom-select-input" readonly placeholder="點擊選擇課時">' +
+                        '<div class="custom-select-dropdown cs-duration-dd"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-group"><label>費用</label>' +
+                    '<div class="input-prefix-group">' +
+                        '<span class="input-prefix">HKD</span>' +
+                        '<input type="text" name="price" value="' + escHtml(priceRaw) + '" placeholder="e.g. 500">' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-group"><label>原價（劃線價）</label>' +
+                    '<div class="input-prefix-group">' +
+                        '<span class="input-prefix">HKD</span>' +
+                        '<input type="text" name="originalPrice" value="' + escHtml(stripPricePrefix(d.originalPrice || '')) + '" placeholder="留空則不顯示">' +
+                    '</div>' +
+                    '<small style="color:#7A7A7A;font-size:11px;margin-top:2px;display:block;">如有填寫，工作坊卡片會以劃線方式顯示此金額</small>' +
+                '</div>' +
+            '</div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📅</span> 時間與地點</div></div>' +
+            '<input type="hidden" name="date" value="' + escHtml(d.date || '') + '">' +
+            '<input type="hidden" name="time" value="' + escHtml(d.time || '') + '">' +
+            '<input type="hidden" name="courseType" value="' + escHtml(d.courseType || 'single') + '">' +
+            '<div class="form-row full">' +
+                '<div class="form-group">' +
+                    '<label>課程類型</label>' +
+                    '<div class="course-type-picker" data-value="' + escHtml(d.courseType || 'single') + '">' +
+                        '<button type="button" class="course-type-btn' + ((!d.courseType || d.courseType === 'single') ? ' active' : '') + '" data-type="single" onclick="pickCourseType(this)">單堂課程</button>' +
+                        '<button type="button" class="course-type-btn' + (d.courseType === 'continuous' ? ' active' : '') + '" data-type="continuous" onclick="pickCourseType(this)">連續課程</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="single-sessions-wrap" style="' + (d.courseType === 'continuous' ? 'display:none;' : '') + '">' +
+                '<div class="form-row full">' +
+                    '<div class="form-group">' +
+                        '<label>課堂日期 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（多堂課程可新增多個課堂）</span></label>' +
+                        '<div class="sessions-list" data-ws-id="' + id + '">' +
+                            buildSessionsHtml(d.sessions || [], id, d.capacity || 0) +
+                        '</div>' +
+                        '<button type="button" class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="addSessionRow(this)">+ 新增課堂</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="rounds-wrap" style="' + (d.courseType === 'continuous' ? '' : 'display:none;') + '">' +
+                '<div class="form-row full">' +
+                    '<div class="form-group">' +
+                        '<label>期數與課堂 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（每期包含多個課堂，學員選擇一期報名）</span></label>' +
+                        '<div class="rounds-editor">' +
+                            buildRoundsHtml(d.rounds || []) +
+                        '</div>' +
+                        '<button type="button" class="btn btn-sm btn-outline" style="margin-top:12px;" onclick="addRound(this)">+ 新增期數</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<input type="hidden" name="mode" value="' + escHtml(d.mode || 'offline') + '">' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>Zoom 連結 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（適用於線上課堂）</span></label><input type="text" name="zoomLink" value="' + escHtml(d.zoomLink || '') + '" placeholder="例：https://zoom.us/j/1234567890"></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>上課地點 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅用於 WhatsApp 訊息及個人檔案）</span></label><input type="text" name="location" value="' + escHtml(d.location || '') + '" placeholder="例：觀塘 ABC 大廈 12 樓 1201 室"></div>' +
+            '</div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">✏️</span> 卡片內容</div></div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>你會帶走</label><input type="text" name="takeaway" value="' + escHtml(d.takeaway || '') + '" placeholder="例：你的提問框架＋專家級 Prompt 結構＋可直接套用的範例"></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group"><label>適合對象</label><input type="text" name="suitableFor" value="' + escHtml(d.suitableFor || '') + '" placeholder="例：問過很多次但總覺得 AI 答得空、越問越亂的人"></div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group">' +
+                    '<label>封面圖片</label>' +
+                    '<div class="image-upload-area' + (d.imageUrl ? ' has-image' : '') + '" onclick="this.querySelector(\'input\').click()">' +
+                        (d.imageUrl ? '<img src="' + fixStorageUrl(d.imageUrl) + '" alt="cover">' : '<span class="upload-icon">&#x1F5BC;</span><span class="upload-text">點擊或拖放上傳圖片</span>') +
+                        '<input type="file" accept="image/*" onchange="handleImageUpload(this, \'' + id + '\')">' +
+                    '</div>' +
+                    '<div class="upload-progress"><div class="upload-progress-bar"></div></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="form-row full">' +
+                '<div class="form-group">' +
+                    '<label>詳情列表（查看詳情展開的內容）</label>' +
+                    '<div class="details-editor">' + detailsHtml + '</div>' +
+                    '<button type="button" class="detail-add" onclick="addDetailRow(this)">+ 新增項目</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">🎟️</span> 名額與折扣</div></div>' +
+            '<div class="single-capacity-wrap" style="' + (d.courseType === 'continuous' || (d.sessions && d.sessions.length > 1) ? 'display:none;' : '') + '">' +
+                '<div class="form-row">' +
+                    '<div class="form-group"><label>最大名額</label><input type="number" name="capacity" value="' + (d.capacity || 0) + '" min="0" oninput="updateCapacityPreview(this)"></div>' +
+                    '<div class="form-group"><label>已報名人數 <span style="font-size:11px;color:var(--text-light);font-weight:500;">(自動更新)</span></label><input type="number" name="enrolled" value="' + (d.enrolled || 0) + '" min="0" oninput="updateCapacityPreview(this)"></div>' +
+                '</div>' +
+                '<div class="capacity-bar-preview-wrap">' + capBarHtml + '</div>' +
+            '</div>' +
+            '<p class="continuous-cap-note" style="font-size:12px;color:var(--text-light);font-weight:500;margin-bottom:12px;' + (d.courseType === 'continuous' ? '' : 'display:none;') + '">連續課程的名額在每個期數中分別設定。</p>' +
+            '<p class="multidate-cap-note" style="font-size:12px;color:var(--text-light);font-weight:500;margin-bottom:12px;' + (d.courseType !== 'continuous' && d.sessions && d.sessions.length > 1 ? '' : 'display:none;') + '">每個日期有獨立名額設定（在上方課堂日期中調整）。</p>' +
+            '<div class="form-row full">' +
+                '<div class="form-group">' +
+                    '<label>已套用折扣碼 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（從「折扣碼」分頁管理，此處選擇套用）</span></label>' +
+                    '<select name="discountCodeSelect" class="dc-ws-select" onchange="addDcToWorkshop(this)" style="padding:10px 14px;border:1.5px solid var(--bg-off);border-radius:10px;font-size:14px;background:var(--white);">' +
+                        '<option value="">— 選擇折扣碼 —</option>' +
+                    '</select>' +
+                    '<div class="dc-ws-chip-list" data-field="appliedDiscountIds">' + buildAppliedDcChips(d.appliedDiscountIds || []) + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">🔘</span> 按鈕設定</div></div>' +
+            '<div class="form-row">' +
+                '<div class="form-group"><label>按鈕文字</label>' +
+                    '<div class="custom-select-wrap">' +
+                        '<input type="text" name="ctaText" value="' + escHtml(d.ctaText || '') + '" class="custom-select-input" readonly placeholder="點擊選擇按鈕文字">' +
+                        '<div class="custom-select-dropdown cs-cta-dd"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-group"><label>按鈕顏色</label>' +
+                    '<div class="color-picker-wrap">' +
+                        buildCtaColorOptions(d.ctaColor || 'accent') +
+                        '<input type="hidden" name="ctaColor" value="' + escHtml(d.ctaColor || 'accent') + '">' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="form-row">' +
+                '<div class="form-group" style="flex:1;"><label>按鈕連結</label><input type="text" name="ctaLink" value="' + escHtml(d.ctaLink || '') + '" placeholder="https://..." style="width:100%;"></div>' +
+            '</div>' +
+            '<div class="form-actions">' +
+                '<button type="submit" class="btn">儲存變更</button>' +
+                (d.archived
+                    ? '<button type="button" class="btn btn-sm" style="background:#43A047;color:#fff;" onclick="unarchiveWorkshop(\'' + id + '\')">取消封存</button>'
+                    : '<button type="button" class="btn btn-sm" style="background:#E65100;color:#fff;" onclick="archiveWorkshop(\'' + id + '\')">封存工作坊</button>'
+                ) +
+                '<button type="button" class="btn btn-danger btn-sm" onclick="deleteWorkshop(\'' + id + '\')">刪除工作坊</button>' +
+            '</div>' +
+        '</form>';
+
+    var toggleInput = item.querySelector('.ws-form input[name="visible"]');
+    if (toggleInput) {
+        toggleInput.addEventListener('change', function() {
+            this.closest('.toggle-wrap').querySelector('.toggle-label').textContent = this.checked ? '已上架' : '已下架';
+        });
+    }
+
+    initDatePicker(item.querySelector('.date-picker-wrap'));
+    initTimePicker(item.querySelector('.time-picker-wrap'));
+    item.querySelectorAll('.session-row').forEach(function(row) { initSessionPickers(row); });
+    initCategoryPicker(item.querySelector('input[name="category"]').closest('.custom-select-wrap'));
+    initDurationPicker(item.querySelector('input[name="duration"]').closest('.custom-select-wrap'));
+    initCtaTextPicker(item.querySelector('input[name="ctaText"]').closest('.custom-select-wrap'));
+    _initWsFormDirtyTracking(item, id);
 }
 
 // ============================================================
@@ -3338,12 +3343,12 @@ function toggleWsItem(header) {
             if (otherHeader && otherHeader._stickyCleanup) { otherHeader._stickyCleanup(); otherHeader._stickyCleanup = null; }
         }
     });
+    _renderWsBody(item);
     item.classList.add('open');
     _initStickyHeaderWatch(item);
-    // Populate discount code dropdown for this card
     refreshAllDcDropdowns();
-    // Snapshot the form values when opening
-    if (form) item._formSnapshot = snapshotFormValues(form);
+    var renderedForm = item.querySelector('.ws-form');
+    if (renderedForm) item._formSnapshot = snapshotFormValues(renderedForm);
 }
 
 function _initStickyHeaderWatch(item, headerSel) {
@@ -3784,11 +3789,11 @@ function buildSessionsHtml(sessions, wsId, globalCap) {
     for (var i = 0; i < sorted.length; i++) {
         var s = sorted[i];
         var vis = s.visible !== false;
-        var sessionLabel = s.label || ('第' + (i + 1) + '堂');
+        var sessionLabel = s.label || ('第' + (i + 1) + '期');
         html += '<div class="session-row' + (vis ? '' : ' session-hidden') + '">' +
             '<div class="session-top">' +
                 _sessionVisToggle(vis) +
-                '<input type="text" class="session-label-input" value="' + escHtml(sessionLabel) + '" placeholder="例：第一堂">' +
+                '<input type="text" class="session-label-input" value="' + escHtml(sessionLabel) + '" placeholder="例：第一期">' +
                 '<div class="date-picker-wrap session-date-wrap"><input type="text" name="date" class="date-picker-input session-date-input" value="' + escHtml(s.date || '') + '" placeholder="點擊選擇日期" readonly><div class="calendar-dropdown"></div></div>' +
                 '<div class="time-picker-wrap session-time-wrap"><input type="text" name="time" class="time-picker-input session-time-input" value="' + escHtml(s.time || '') + '" placeholder="點擊選擇時間" readonly><div class="time-dropdown"></div></div>' +
                 '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
@@ -3804,14 +3809,14 @@ function buildSessionsHtml(sessions, wsId, globalCap) {
 function addSessionRow(btn) {
     var list = btn.previousElementSibling;
     var existingCount = list.querySelectorAll('.session-row').length;
-    var autoLabel = '第' + (existingCount + 1) + '堂';
+    var autoLabel = '第' + (existingCount + 1) + '期';
     var form = btn.closest('.ws-form');
     var globalCap = form ? (parseInt((form.querySelector('[name="capacity"]') || {}).value) || 0) : 0;
     var row = document.createElement('div');
     row.className = 'session-row';
     row.innerHTML = '<div class="session-top">' +
         _sessionVisToggle(true) +
-        '<input type="text" class="session-label-input" value="' + autoLabel + '" placeholder="例：第一堂">' +
+        '<input type="text" class="session-label-input" value="' + autoLabel + '" placeholder="例：第一期">' +
         '<div class="date-picker-wrap session-date-wrap"><input type="text" name="date" class="date-picker-input session-date-input" value="" placeholder="點擊選擇日期" readonly><div class="calendar-dropdown"></div></div>' +
         '<div class="time-picker-wrap session-time-wrap"><input type="text" name="time" class="time-picker-input session-time-input" value="" placeholder="點擊選擇時間" readonly><div class="time-dropdown"></div></div>' +
         '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
@@ -4284,10 +4289,9 @@ function saveWorkshop(event, workshopId) {
         // Update header capacity bar
         var headerCap = item.querySelector('.ws-header-capacity');
         if (headerCap) headerCap.innerHTML = buildMiniCapacityContent(data.capacity, data.enrolled);
-        // Re-snapshot so collapse guard knows it's saved
         item._formSnapshot = snapshotFormValues(form);
+        if (item._wsData) Object.keys(data).forEach(function(k) { item._wsData[k] = data[k]; });
         _markWsSaved(workshopId);
-        // Update local cache and refresh calendar immediately
         if (_allWorkshopsCache[workshopId]) {
             Object.keys(data).forEach(function(k) { _allWorkshopsCache[workshopId][k] = data[k]; });
         } else {
@@ -4350,6 +4354,7 @@ function createNewWorkshop() {
             x.classList.remove('open');
         });
         var item = buildWorkshopItem(newDoc.id, data);
+        _renderWsBody(item);
         item.classList.add('open');
         if (list.firstChild) {
             list.insertBefore(item, list.firstChild);
@@ -4357,15 +4362,7 @@ function createNewWorkshop() {
             list.innerHTML = '';
             list.appendChild(item);
         }
-        initDatePicker(item.querySelector('.date-picker-wrap'));
-        initTimePicker(item.querySelector('.time-picker-wrap'));
-        item.querySelectorAll('.session-row').forEach(function(row) { initSessionPickers(row); });
-        initCategoryPicker(item.querySelector('input[name="category"]').closest('.custom-select-wrap'));
-        initDurationPicker(item.querySelector('input[name="duration"]').closest('.custom-select-wrap'));
-        initCtaTextPicker(item.querySelector('input[name="ctaText"]').closest('.custom-select-wrap'));
         refreshAllDcDropdowns();
-        _initWsFormDirtyTracking(item, newDoc.id);
-        // Snapshot right after creation so collapse guard works
         var newForm = item.querySelector('.ws-form');
         if (newForm) item._formSnapshot = snapshotFormValues(newForm);
         item.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -5221,15 +5218,7 @@ function filterMembers() {
 // ============================================================
 // WHATSAPP TEMPLATES
 // ============================================================
-var _E = (function() {
-    var e = {};
-    var d = document.createElement('div');
-    d.innerHTML = '&#x1F4CC;|&#x1F4C5;|&#x1F550;|&#x1F4BB;|&#x1F3E2;|&#x1F4CD;|&#x1F517;|&#x1F4C4;';
-    var parts = d.textContent.split('|');
-    e.pin = parts[0]; e.cal = parts[1]; e.clock = parts[2]; e.laptop = parts[3];
-    e.office = parts[4]; e.loc = parts[5]; e.link = parts[6]; e.doc = parts[7];
-    return e;
-})();
+var _E = { pin: '📌', cal: '📅', clock: '🕐', laptop: '💻', office: '🏢', loc: '📍', link: '🔗', doc: '📄' };
 var DEFAULT_WA_TEMPLATES = {
     confirmed: 'Hi {name}！\n\n你已成功報名以下工作坊：\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n{mode}\n{location}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n\n如有任何問題，歡迎隨時聯絡我們！',
     pending: 'Hi {name}！\n\n我們已收到你的付款截圖，正在確認中。\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n\n確認後我們會再通知你。如有任何問題，歡迎隨時聯絡我們！'
@@ -5278,18 +5267,23 @@ function saveWsSettings() {
 
 function _fixWaEmoji(tpl) {
     if (!tpl) return tpl;
-    var R = String.fromCharCode(0xFFFD);
-    var rg = new RegExp(R + '\\s*', 'g');
-    return tpl
-        .replace(new RegExp(R + '\\s*' + '(工作坊)', 'g'), _E.pin + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(日期)', 'g'), _E.cal + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(時間)', 'g'), _E.clock + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(模式)', 'g'), _E.office + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(地點)', 'g'), _E.loc + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(費用)', 'g'), _E.pin + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(收據)', 'g'), _E.doc + ' $1')
-        .replace(new RegExp(R + '\\s*' + '(線上)', 'g'), _E.link + ' $1')
-        .replace(rg, '');
+    var map = [
+        ['工作坊', _E.pin],
+        ['日期', _E.cal],
+        ['時間', _E.clock],
+        ['模式', _E.laptop],
+        ['地點', _E.loc],
+        ['費用', _E.doc],
+        ['收據', _E.doc],
+        ['線上', _E.link]
+    ];
+    var result = tpl;
+    for (var i = 0; i < map.length; i++) {
+        var rx = new RegExp('\uFFFD+\\s*(' + map[i][0] + ')', 'g');
+        result = result.replace(rx, map[i][1] + ' $1');
+    }
+    result = result.replace(/\uFFFD+/g, '');
+    return result;
 }
 
 function _getWaTemplate(status) {
@@ -5385,7 +5379,7 @@ function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLi
         .replace(/\{zoomLink\}/g, wsZoomLink || '')
         .replace(/\{receiptLink\}/g, receiptLink);
 
-    return 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
+    return 'https://api.whatsapp.com/send?phone=' + num + '&text=' + encodeURIComponent(msg);
 }
 
 function openScreenshotModal(url) {

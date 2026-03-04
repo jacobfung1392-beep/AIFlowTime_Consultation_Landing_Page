@@ -799,8 +799,10 @@ var SECTION_TYPES = {
         icon: '📍',
         desc: '單一活動資訊卡 + 名額進度條',
         defaults: {
+            sectionLabel: 'WORKSHOP INFO',
+            sectionTitle: '工作坊資訊',
             workshopId: '',
-            ctaText: '立即報名',
+            ctaText: '立即報名 →',
             ctaLink: '/workshop-payment?id='
         }
     },
@@ -1122,14 +1124,12 @@ initFirebase(function(app) {
     auth = app.auth();
     storage = app.storage();
 
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
-        auth.onAuthStateChanged(function(user) {
-            if (user) {
-                verifyAdminAccess(user);
-            } else {
-                showLogin();
-            }
-        });
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            verifyAdminAccess(user);
+        } else {
+            showLogin();
+        }
     });
 }, { appName: 'cms' });
 
@@ -1914,9 +1914,10 @@ function renderEditForm() {
             break;
 
         case 'logistics-card':
+            html += '<div class="form-row">' + field('區塊標籤', 'sectionLabel', c.sectionLabel) + field('區塊標題', 'sectionTitle', c.sectionTitle) + '</div>';
             html += field('工作坊 ID (Firestore)', 'workshopId', c.workshopId);
             html += '<div class="form-row">' + field('CTA 文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
-            html += '<div style="padding:12px;background:var(--bg-pampas);border-radius:10px;font-size:13px;color:var(--text-light);margin-top:8px;">日期、時間、費用、名額等資料會從 Firestore 的 workshops 集合自動載入。</div>';
+            html += '<div style="padding:12px;background:var(--bg-pampas);border-radius:10px;font-size:13px;color:var(--text-light);margin-top:8px;">日期、時間、費用、地點、名額等資料會從 Firestore 的 workshops 集合自動載入。</div>';
             break;
 
         case 'transformation':

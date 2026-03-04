@@ -373,6 +373,108 @@ exports.storageProxy = onRequest(
 );
 
 /**
+ * Build WhatsApp share URL with correct emoji (server-side avoids browser encoding issues).
+ * Callable from client: { phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLink, wsLocation, regId, regStatus, fee, notice, template }
+ * Returns: { url } full wa.me URL.
+ */
+const E = { pin: "📌", cal: "📅", clock: "🕐", laptop: "💻", office: "🏢", loc: "📍", link: "🔗", doc: "📄" };
+const DEFAULT_CONFIRMED = `Hi {name}！
+
+你已成功報名以下工作坊：
+
+${E.pin} 工作坊：{workshopTitle}
+${E.cal} 日期：{date}
+${E.clock} 時間：{time}
+{mode}
+{location}
+
+${E.doc} 收據（直接開啟）：{receiptLink}
+
+如有任何問題，歡迎隨時聯絡我們！`;
+const DEFAULT_PENDING = `Hi {name}！
+
+我們已收到你的付款截圖，正在確認中。
+
+${E.pin} 工作坊：{workshopTitle}
+${E.cal} 日期：{date}
+${E.clock} 時間：{time}
+
+確認後我們會再通知你。如有任何問題，歡迎隨時聯絡我們！`;
+
+function fixWaEmoji(tpl) {
+  if (!tpl || typeof tpl !== "string") return tpl;
+  const R = "\uFFFD";
+  return tpl
+    .replace(new RegExp(R + "\\s*工作坊", "g"), E.pin + " 工作坊")
+    .replace(new RegExp(R + "\\s*日期", "g"), E.cal + " 日期")
+    .replace(new RegExp(R + "\\s*時間", "g"), E.clock + " 時間")
+    .replace(new RegExp(R + "\\s*模式", "g"), E.office + " 模式")
+    .replace(new RegExp(R + "\\s*地點", "g"), E.loc + " 地點")
+    .replace(new RegExp(R + "\\s*費用", "g"), E.pin + " 費用")
+    .replace(new RegExp(R + "\\s*收據", "g"), E.doc + " 收據")
+    .replace(new RegExp(R + "\\s*線上", "g"), E.link + " 線上")
+    .replace(new RegExp(R, "g"), "");
+}
+
+exports.buildWhatsAppUrl = onCall(
+  { region: REGION, cors: true, invoker: "public" },
+  async (request) => {
+    const data = request.data || {};
+    let phone = (data.phone || "").replace(/[\s\-()]/g, "");
+    if (phone.startsWith("+")) phone = phone.slice(1);
+    else if (/^\d{8}$/.test(phone)) phone = "852" + phone;
+    if (!phone) throw new HttpsError("invalid-argument", "phone is required");
+
+    const name = data.name || "";
+    const wsTitle = data.wsTitle || "";
+    const wsDate = data.wsDate || "";
+    const wsTime = data.wsTime || "";
+    const wsMode = data.wsMode || "offline";
+    const wsZoomLink = data.wsZoomLink || "";
+    const wsLocation = data.wsLocation || "";
+    const regId = data.regId || "";
+    const regStatus = data.regStatus || "pending";
+    const fee = data.fee || "";
+    const notice = data.notice || "";
+    const templateRaw = data.template || "";
+    const isConfirmed = regStatus === "confirmed";
+
+    let tpl = templateRaw ? fixWaEmoji(templateRaw) : (isConfirmed ? DEFAULT_CONFIRMED : DEFAULT_PENDING);
+    if (tpl.indexOf("\uFFFD") >= 0) tpl = isConfirmed ? DEFAULT_CONFIRMED : DEFAULT_PENDING;
+
+    let modeText = "";
+    if (wsMode === "online") modeText = E.laptop + " 模式：線上";
+    else if (wsMode === "both") modeText = E.laptop + " 模式：實體＋線上";
+    else modeText = E.office + " 模式：實體";
+
+    let locationText = "";
+    if (wsLocation && wsMode !== "online") locationText = E.loc + " 地點：" + wsLocation;
+    if (wsZoomLink && (wsMode === "online" || wsMode === "both")) {
+      locationText = (locationText ? locationText + "\n" : "") + E.link + " 線上連結：" + wsZoomLink;
+    }
+
+    const receiptLink = regId
+      ? "https://aiflowtime-hk.web.app/receipt?id=" + regId
+      : "https://aiflowtime-hk.web.app/profile";
+
+    let msg = tpl
+      .replace(/\{name\}/g, name)
+      .replace(/\{workshopTitle\}/g, wsTitle)
+      .replace(/\{date\}/g, wsDate)
+      .replace(/\{time\}/g, wsTime)
+      .replace(/\{mode\}/g, modeText)
+      .replace(/\{location\}/g, locationText)
+      .replace(/\{fee\}/g, fee)
+      .replace(/\{notice\}/g, notice)
+      .replace(/\{zoomLink\}/g, wsZoomLink)
+      .replace(/\{receiptLink\}/g, receiptLink);
+
+    const url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(msg);
+    return { url };
+  }
+);
+
+/**
  * Scheduled: every 5 minutes, mark pending reservations past expiresAt as expired.
  */
 exports.releaseExpiredReservations = onSchedule(

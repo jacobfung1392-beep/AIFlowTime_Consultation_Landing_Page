@@ -1757,6 +1757,16 @@ function applyContentToSection(el, type, c) {
             if (h2faq && c.sectionTitle) h2faq.textContent = c.sectionTitle;
             break;
 
+        case 'logistics-card':
+            var lLabel = el.querySelector('.section-label');
+            if (lLabel && c.sectionLabel) lLabel.textContent = c.sectionLabel;
+            var lTitle = el.querySelector('.section-title');
+            if (lTitle && c.sectionTitle) lTitle.innerHTML = c.sectionTitle;
+            var lCta = el.querySelector('.wsc-logistics-cta .btn-primary');
+            if (lCta && c.ctaText) lCta.textContent = c.ctaText;
+            if (lCta && c.ctaLink) lCta.href = c.ctaLink;
+            break;
+
         case 'final-cta':
             var title = el.querySelector('.final-cta-title');
             if (title && c.title) title.innerHTML = c.title;

@@ -848,10 +848,8 @@ initFirebase(function(app) {
     _bizApp = app;
     db = app.firestore();
     auth = app.auth();
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
-        auth.onAuthStateChanged(function(user) {
-            if (user) { verifyAdmin(user); } else { showLogin(); }
-        });
+    auth.onAuthStateChanged(function(user) {
+        if (user) { verifyAdmin(user); } else { showLogin(); }
     });
 }, { appName: 'bizCms' });
 

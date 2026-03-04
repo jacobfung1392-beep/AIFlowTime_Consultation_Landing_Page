@@ -292,7 +292,19 @@
         }
         var safePricePaid = _safeText(reg.pricePaid) || 'N/A';
         var safePromo = _safeText(reg.promoCode);
-        var safeLocation = _safeText(ws.location);
+        var safeLocation = (function() {
+            var sessions = ws.sessions || [];
+            if (reg.selectedRound && reg.selectedRound.indexOf('session_') === 0 && sessions.length > 1) {
+                var idx = parseInt(reg.selectedRound.replace('session_', ''), 10);
+                if (idx >= 0 && idx < sessions.length && sessions[idx].location) return _safeText(sessions[idx].location);
+            }
+            if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
+                var mr = ws.rounds.find(function(r) { return r.id === reg.selectedRound; });
+                if (mr && mr.sessions && mr.sessions.length && mr.sessions[0].location) return _safeText(mr.sessions[0].location);
+            }
+            if (sessions.length === 1 && sessions[0].location) return _safeText(sessions[0].location);
+            return _safeText(ws.location);
+        })();
 
         // Header bar
         doc.setFillColor(217, 119, 87);

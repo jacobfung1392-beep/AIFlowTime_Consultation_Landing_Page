@@ -155,6 +155,12 @@
             align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;
         }
         .ws-header-dup:hover { border-color: var(--accent); color: var(--accent); background: rgba(217,119,87,0.06); }
+
+        .ws-save-status { display: flex; align-items: center; gap: 5px; flex-shrink: 0; font-size: 11px; font-weight: 600; white-space: nowrap; transition: opacity 0.25s; }
+        .ws-save-status .save-icon { width: 16px; height: 16px; flex-shrink: 0; }
+        .ws-save-status.saved { color: var(--accent); }
+        .ws-save-status.unsaved { color: #C62828; }
+
         .header-vis-toggle { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .header-vis-toggle .toggle-switch { width: 44px; height: 24px; }
         .header-vis-toggle .toggle-slider::before { width: 18px; height: 18px; transform: translateX(0); }
@@ -444,8 +450,8 @@
 
         /* Sessions editor */
         .sessions-list { display: flex; flex-direction: column; gap: 10px; }
-        .session-row { background: var(--bg-off); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .session-top { display: flex; gap: 8px; align-items: center; }
+        .session-row { background: var(--bg-off); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .session-top { display: flex; gap: 8px; align-items: center; padding-right: 32px; }
         .session-top input { flex: 1; min-width: 0; }
         .session-top .session-label-input { max-width: 100px; flex: 0 0 auto; }
         .session-top .session-date-wrap { flex: 1; max-width: 200px; }
@@ -454,10 +460,14 @@
         .session-bottom-label { font-size: 11px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
         .session-mode-pills { display: flex; gap: 4px; }
         .session-mode-pill { padding: 4px 12px; font-size: 11px; font-weight: 600; border: 1.5px solid var(--bg-off); border-radius: 20px; background: var(--white); color: var(--text-light); cursor: pointer; transition: all 0.18s; line-height: 1.3; }
+        .session-location-row { display: flex; align-items: center; gap: 6px; }
+        .session-location-row .session-loc-icon { font-size: 12px; flex-shrink: 0; }
+        .session-location-input { flex: 1; padding: 5px 10px; border: 1.5px solid var(--bg-off); border-radius: 8px; font-size: 12px; font-weight: 500; background: var(--white); color: var(--text); min-width: 0; }
+        .session-location-input:focus { border-color: var(--accent); outline: none; }
         .session-mode-pill:hover { border-color: var(--accent); color: var(--accent); }
         .session-mode-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .session-remove { width: 28px; height: 28px; border: none; background: var(--red-bg); color: var(--red); border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; }
-        .session-remove:hover { background: var(--red); color: var(--white); }
+        .session-remove { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border: none; background: var(--red-bg); color: var(--red); border-radius: 7px; cursor: pointer; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; z-index: 2; line-height: 1; }
+        .session-remove:hover { background: var(--red); color: var(--white); transform: scale(1.1); }
         .session-vis-wrap { display: flex; align-items: center; gap: 6px; }
         .session-vis-toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
         .session-vis-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
@@ -835,6 +845,21 @@
             display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
             background: rgba(217,119,87,0.1); color: var(--accent); border: 1px solid rgba(217,119,87,0.2);
         }
+        .pm-round-btn {
+            display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; background: rgba(217,119,87,0.1); color: var(--accent);
+            border: 1px solid rgba(217,119,87,0.2); cursor: pointer; transition: all 0.2s; position: relative;
+        }
+        .pm-round-btn:hover { background: rgba(217,119,87,0.18); border-color: var(--accent); }
+        .pm-round-btn .pm-round-arrow { font-size: 10px; transition: transform 0.2s; }
+        .pm-round-btn.open .pm-round-arrow { transform: rotate(180deg); }
+        .pm-round-picker { position: fixed; min-width: 240px; background: var(--white); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); border: 1px solid rgba(0,0,0,0.08); z-index: 1100; overflow: hidden; max-height: 260px; overflow-y: auto; }
+        .pm-round-option { padding: 10px 14px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.15s; color: var(--text); }
+        .pm-round-option:hover { background: rgba(217,119,87,0.06); }
+        .pm-round-option.active { background: rgba(217,119,87,0.1); color: var(--accent); font-weight: 700; }
+        .pm-round-option .pm-opt-check { width: 16px; text-align: center; font-size: 11px; flex-shrink: 0; }
+        .pm-round-option .pm-opt-label { flex: 1; }
+        .pm-round-option .pm-opt-meta { font-size: 10px; color: var(--text-light); white-space: nowrap; }
         .pm-text-answer {
             background: var(--bg); border-radius: 10px; padding: 12px 14px;
             font-size: 13px; color: var(--text); line-height: 1.6; font-weight: 500;
@@ -1016,6 +1041,10 @@
         }
         .attend-session-pill:hover { border-color: var(--accent); color: var(--accent); }
         .attend-session-pill.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .attend-session-info {
+            padding: 7px 16px; border-radius: 18px; background: rgba(217,119,87,0.08);
+            color: var(--accent); font-size: 13px; font-weight: 600;
+        }
 
         .attend-ws-selector {
             background: var(--white); border-radius: 16px; padding: 24px 28px;
@@ -1142,6 +1171,22 @@
         .attend-student-tag.absent { background: rgba(0,0,0,0.04); color: var(--text-light); }
         .attend-student-tag.present::before { content: '✓ '; }
         .attend-student-time { font-size: 11px; color: var(--text-light); font-weight: 500; margin-top: 1px; }
+        .attend-student { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+        .attend-student:hover { border-color: rgba(217,119,87,0.3); }
+        .attend-dropdown {
+            position: fixed; z-index: 9999; background: var(--white);
+            border: 1px solid var(--glass-border); border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 4px 0; min-width: 150px;
+        }
+        .attend-dropdown-item {
+            padding: 9px 16px; font-size: 13px; font-weight: 600;
+            cursor: pointer; white-space: nowrap; transition: background 0.15s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .attend-dropdown-item:hover { background: rgba(0,0,0,0.04); }
+        .attend-dropdown-item.opt-checkin { color: var(--green); }
+        .attend-dropdown-item.opt-undo { color: #C62828; }
+        .attend-dropdown-item .attend-dd-icon { font-size: 14px; }
 
         @media (max-width: 900px) {
             .attend-layout { grid-template-columns: 1fr; }
@@ -1249,6 +1294,8 @@
             .header-vis-toggle .toggle-slider::before { width: 14px; height: 14px; }
             .header-vis-toggle .toggle-switch input:checked + .toggle-slider::before { transform: translateX(16px); }
             .ws-header-dup { width: 28px; height: 28px; }
+            .ws-save-status .save-label { display: none; }
+            .ws-save-status .save-icon { width: 14px; height: 14px; }
             .ws-item-toggle { font-size: 18px; }
 
             /* Form body — clip overflow and reduce padding */
@@ -1257,7 +1304,7 @@
             .ws-form input, .ws-form textarea, .ws-form select { font-size: 14px; max-width: 100%; }
 
             /* Session rows — stack on mobile */
-            .session-top { flex-wrap: wrap; gap: 6px; }
+            .session-top { flex-wrap: wrap; gap: 6px; padding-right: 32px; }
             .session-vis-wrap { flex: 0 0 auto; }
             .session-top .session-label-input { max-width: none; flex: 1 1 calc(100% - 100px); }
             .session-top .session-date-wrap { max-width: none; flex: 1 1 calc(50% - 6px); }
@@ -2621,7 +2668,7 @@ function _buildCalendarEvents() {
                         wsId: wsId, label: label, color: color,
                         time: s.time || '', sessionLabel: s.label || '',
                         roundLabel: round.label || '',
-                        location: ws.location || '', mode: s.mode || ws.mode || 'offline',
+                        location: s.location || ws.location || '', mode: s.mode || ws.mode || 'offline',
                         capacity: round.capacity || 0, enrolled: round.enrolled || 0,
                         isContinuous: true, courseType: '連續課程'
                     });
@@ -2637,7 +2684,7 @@ function _buildCalendarEvents() {
                     wsId: wsId, label: label, color: color,
                     time: s.time || '', sessionLabel: s.label || '',
                     roundLabel: '',
-                    location: ws.location || '', mode: s.mode || ws.mode || 'offline',
+                    location: s.location || ws.location || '', mode: s.mode || ws.mode || 'offline',
                     capacity: isMultiDate ? (s.capacity !== undefined ? s.capacity : (ws.capacity || 0)) : (ws.capacity || 0),
                     enrolled: isMultiDate ? (s.enrolled || 0) : (ws.enrolled || 0),
                     isContinuous: false, courseType: '單堂課程'
@@ -2850,6 +2897,7 @@ function loadAllWorkshops() {
             initCategoryPicker(item.querySelector('input[name="category"]').closest('.custom-select-wrap'));
             initDurationPicker(item.querySelector('input[name="duration"]').closest('.custom-select-wrap'));
             initCtaTextPicker(item.querySelector('input[name="ctaText"]').closest('.custom-select-wrap'));
+            _initWsFormDirtyTracking(item, doc.id);
         });
         if (!hasCurrent) listCurrent.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:40px 0;">尚未有任何工作坊。點擊上方「新增工作坊」開始建立。</p>';
         if (!hasArchived) listArchived.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:40px 0;">沒有已封存的工作坊。</p>';
@@ -2932,6 +2980,10 @@ function buildWorkshopItem(id, d) {
             '<button class="ws-header-dup" onclick="event.stopPropagation(); duplicateWorkshop(\'' + id + '\')" title="複製工作坊">' +
                 '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
             '</button>' +
+            '<div class="ws-save-status saved" data-ws-id="' + id + '">' +
+                _cloudSavedSvg() +
+                '<span class="save-label">All changes saved.</span>' +
+            '</div>' +
             '<div class="header-vis-toggle" onclick="event.stopPropagation()">' +
                 '<label class="toggle-switch"><input type="checkbox"' + (d.visible ? ' checked' : '') + ' onchange="updateVisibility(\'' + id + '\', this.checked, this)"><span class="toggle-slider"></span></label>' +
             '</div>' +
@@ -3680,6 +3732,13 @@ function _sessionModePills(mode) {
     '</div>';
 }
 
+function _sessionLocationRow(location) {
+    return '<div class="session-location-row">' +
+        '<span class="session-loc-icon">📍</span>' +
+        '<input type="text" class="session-location-input" value="' + escHtml(location || '') + '" placeholder="上課地點（留空則用工作坊預設地點）">' +
+    '</div>';
+}
+
 function pickSessionMode(btn) {
     var pills = btn.closest('.session-mode-pills');
     pills.querySelectorAll('.session-mode-pill').forEach(function(b) { b.classList.remove('active'); });
@@ -3735,6 +3794,7 @@ function buildSessionsHtml(sessions, wsId, globalCap) {
                 '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
             '</div>' +
             _sessionModePills(s.mode) +
+            _sessionLocationRow(s.location) +
             (isMulti ? _sessionCapRow(s, globalCap) : '') +
         '</div>';
     }
@@ -3755,7 +3815,7 @@ function addSessionRow(btn) {
         '<div class="date-picker-wrap session-date-wrap"><input type="text" name="date" class="date-picker-input session-date-input" value="" placeholder="點擊選擇日期" readonly><div class="calendar-dropdown"></div></div>' +
         '<div class="time-picker-wrap session-time-wrap"><input type="text" name="time" class="time-picker-input session-time-input" value="" placeholder="點擊選擇時間" readonly><div class="time-dropdown"></div></div>' +
         '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
-    '</div>' + _sessionModePills('offline') + _sessionCapRow({ capacity: globalCap, enrolled: 0 }, globalCap);
+    '</div>' + _sessionModePills('offline') + _sessionLocationRow('') + _sessionCapRow({ capacity: globalCap, enrolled: 0 }, globalCap);
     list.appendChild(row);
     initSessionPickers(row);
     _syncSessionCapVisibility(form);
@@ -3763,6 +3823,7 @@ function addSessionRow(btn) {
 }
 
 function removeSessionRow(btn) {
+    if (!confirm('確定要刪除此課堂？')) return;
     var form = btn.closest('.ws-form');
     btn.closest('.session-row').remove();
     if (form) _syncSessionCapVisibility(form);
@@ -3816,12 +3877,14 @@ function collectSessions(form) {
         var modePills = row.querySelector('.session-mode-pills');
         var capInput = row.querySelector('.session-cap-input');
         var visCb = row.querySelector('.session-vis-cb');
+        var locInput = row.querySelector('.session-location-input');
         var date = dateInput ? dateInput.value.trim() : '';
         var time = timeInput ? timeInput.value.trim() : '';
         var mode = modePills ? (modePills.dataset.value || 'offline') : 'offline';
         var visible = visCb ? visCb.checked : true;
+        var location = locInput ? locInput.value.trim() : '';
         if (label || date || time) {
-            var s = { label: label, date: date, time: time, mode: mode, visible: visible };
+            var s = { label: label, date: date, time: time, mode: mode, visible: visible, location: location };
             if (capInput) s.capacity = parseInt(capInput.value) || 0;
             sessions.push(s);
         }
@@ -3872,8 +3935,10 @@ function buildRoundsHtml(rounds) {
     if (!rounds || !rounds.length) return '';
     var sorted = rounds.slice().sort(function(a, b) {
         var da = _earliestDateKey(a);
-        var db = _earliestDateKey(b);
-        return da > db ? -1 : da < db ? 1 : 0;
+        var db2 = _earliestDateKey(b);
+        if (da && !db2) return -1;
+        if (!da && db2) return 1;
+        return da < db2 ? -1 : da > db2 ? 1 : 0;
     });
     var html = '';
     for (var i = 0; i < sorted.length; i++) {
@@ -3897,7 +3962,7 @@ function buildSingleRoundHtml(r) {
         '</div>' +
         '<div class="round-label-tag">名額：' + (r.capacity || 0) + ' · 已報名：' + (r.enrolled || 0) + '</div>' +
         '<div class="round-sessions sessions-list">';
-    var sessions = r.sessions || [];
+    var sessions = sortSessions(r.sessions || []);
     for (var j = 0; j < sessions.length; j++) {
         var s = sessions[j];
         var vis = s.visible !== false;
@@ -3911,6 +3976,7 @@ function buildSingleRoundHtml(r) {
                 '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
             '</div>' +
             _sessionModePills(s.mode) +
+            _sessionLocationRow(s.location) +
         '</div>';
     }
     html += '</div>' +
@@ -3948,7 +4014,7 @@ function addRoundSession(btn) {
         '<div class="date-picker-wrap session-date-wrap"><input type="text" name="date" class="date-picker-input session-date-input" value="" placeholder="點擊選擇日期" readonly><div class="calendar-dropdown"></div></div>' +
         '<div class="time-picker-wrap session-time-wrap"><input type="text" name="time" class="time-picker-input session-time-input" value="" placeholder="點擊選擇時間" readonly><div class="time-dropdown"></div></div>' +
         '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
-    '</div>' + _sessionModePills('offline');
+    '</div>' + _sessionModePills('offline') + _sessionLocationRow('');
     list.appendChild(row);
     initSessionPickers(row);
     row.querySelector('.session-label-input').focus();
@@ -3973,9 +4039,18 @@ function collectRounds(form) {
             var mode = mp ? (mp.dataset.value || 'offline') : 'offline';
             var visCb = row.querySelector('.session-vis-cb');
             var visible = visCb ? visCb.checked : true;
-            if (sl || sd.trim() || st.trim()) sessions.push({ label: sl, date: sd.trim(), time: st.trim(), mode: mode, visible: visible });
+            var locInput = row.querySelector('.session-location-input');
+            var location = locInput ? locInput.value.trim() : '';
+            if (sl || sd.trim() || st.trim()) sessions.push({ label: sl, date: sd.trim(), time: st.trim(), mode: mode, visible: visible, location: location });
         });
         rounds.push({ id: rid, label: label, capacity: capacity, enrolled: 0, sessions: sortSessions(sessions) });
+    });
+    rounds.sort(function(a, b) {
+        var da = _earliestDateKey(a);
+        var db2 = _earliestDateKey(b);
+        if (da && !db2) return -1;
+        if (!da && db2) return 1;
+        return da < db2 ? -1 : da > db2 ? 1 : 0;
     });
     return rounds;
 }
@@ -4041,6 +4116,41 @@ function handleImageUpload(input, workshopId) {
 }
 
 // ============================================================
+// ============================================================
+// SAVE STATUS INDICATOR
+// ============================================================
+function _cloudSavedSvg() {
+    return '<svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>';
+}
+function _cloudUnsavedSvg() {
+    return '<svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="4" y1="4" x2="20" y2="20"/></svg>';
+}
+
+function _markWsDirty(wsId) {
+    var el = document.querySelector('.ws-save-status[data-ws-id="' + wsId + '"]');
+    if (!el || el.classList.contains('unsaved')) return;
+    el.classList.remove('saved');
+    el.classList.add('unsaved');
+    el.innerHTML = _cloudUnsavedSvg() + '<span class="save-label">Changes unsaved.</span>';
+}
+
+function _markWsSaved(wsId) {
+    var el = document.querySelector('.ws-save-status[data-ws-id="' + wsId + '"]');
+    if (!el) return;
+    el.classList.remove('unsaved');
+    el.classList.add('saved');
+    el.innerHTML = _cloudSavedSvg() + '<span class="save-label">All changes saved.</span>';
+}
+
+function _initWsFormDirtyTracking(item, wsId) {
+    var form = item.querySelector('.ws-form');
+    if (!form) return;
+    function onDirty() { _markWsDirty(wsId); }
+    form.addEventListener('input', onDirty);
+    form.addEventListener('change', onDirty);
+}
+
+// ============================================================
 // SAVE WORKSHOP
 // ============================================================
 function saveWorkshop(event, workshopId) {
@@ -4098,7 +4208,8 @@ function saveWorkshop(event, workshopId) {
         data.rounds = collectRounds(form);
         // Preserve per-round enrolled counts from existing data
         var wsItem = form.closest('.ws-item');
-        var existingRounds = (wsItem && _allWorkshopsCache[wsItem.dataset.id] || {}).rounds || [];
+        var _cachedWsR = wsItem ? (_allWorkshopsCache[wsItem.dataset.id] || {}) : {};
+        var existingRounds = Array.isArray(_cachedWsR.rounds) ? _cachedWsR.rounds : [];
         var enrolledMap = {};
         existingRounds.forEach(function(er) { enrolledMap[er.id] = er.enrolled || 0; });
         data.rounds.forEach(function(r) { if (enrolledMap[r.id] !== undefined) r.enrolled = enrolledMap[r.id]; });
@@ -4119,7 +4230,8 @@ function saveWorkshop(event, workshopId) {
         if (data.sessions.length > 1) {
             // Multi-date single course: per-session capacity; preserve enrolled from existing data
             var wsItem = form.closest('.ws-item');
-            var existingSessions = (wsItem && _allWorkshopsCache[wsItem.dataset.id] || {}).sessions || [];
+            var _cachedWs = wsItem ? (_allWorkshopsCache[wsItem.dataset.id] || {}) : {};
+            var existingSessions = Array.isArray(_cachedWs.sessions) ? _cachedWs.sessions : [];
             var enrolledBySortKey = {};
             existingSessions.forEach(function(es, idx) {
                 enrolledBySortKey[idx] = es.enrolled || 0;
@@ -4153,7 +4265,10 @@ function saveWorkshop(event, workshopId) {
         data.time = '';
     }
 
+    showLoadingOverlay('正在儲存工作坊...');
+
     db.collection('workshops').doc(workshopId).update(data).then(function() {
+        hideLoadingOverlay();
         showToast('工作坊已儲存');
         btn.disabled = false;
         btn.textContent = '儲存變更';
@@ -4171,7 +4286,16 @@ function saveWorkshop(event, workshopId) {
         if (headerCap) headerCap.innerHTML = buildMiniCapacityContent(data.capacity, data.enrolled);
         // Re-snapshot so collapse guard knows it's saved
         item._formSnapshot = snapshotFormValues(form);
+        _markWsSaved(workshopId);
+        // Update local cache and refresh calendar immediately
+        if (_allWorkshopsCache[workshopId]) {
+            Object.keys(data).forEach(function(k) { _allWorkshopsCache[workshopId][k] = data[k]; });
+        } else {
+            _allWorkshopsCache[workshopId] = data;
+        }
+        renderCalendar();
     }).catch(function(err) {
+        hideLoadingOverlay();
         showToast('儲存失敗：' + err.message, 'error');
         btn.disabled = false;
         btn.textContent = '儲存變更';
@@ -4240,6 +4364,7 @@ function createNewWorkshop() {
         initDurationPicker(item.querySelector('input[name="duration"]').closest('.custom-select-wrap'));
         initCtaTextPicker(item.querySelector('input[name="ctaText"]').closest('.custom-select-wrap'));
         refreshAllDcDropdowns();
+        _initWsFormDirtyTracking(item, newDoc.id);
         // Snapshot right after creation so collapse guard works
         var newForm = item.querySelector('.ws-form');
         if (newForm) item._formSnapshot = snapshotFormValues(newForm);
@@ -4414,6 +4539,7 @@ function loadMembersData() {
 
         rebuildMembersData();
         renderCalendar();
+        _refreshAttendanceIfOpen();
     }, function(err) {
         document.getElementById('memberViewByWorkshop').innerHTML = '<div class="empty-state" style="color:var(--red);">載入失敗：' + err.message + '</div>';
     });
@@ -4439,6 +4565,7 @@ function loadMembersData() {
         });
         _membersDataReady.regs = true;
         rebuildMembersData();
+        _refreshAttendanceIfOpen();
     });
 }
 
@@ -4783,12 +4910,37 @@ function _buildApplicantCardHtml(r, wsId, wsTitle, ws) {
         h += '<img class="applicant-screenshot" src="' + _appSsUrl + '" alt="Screenshot" onclick="event.stopPropagation();openScreenshotModal(\'' + _appSsUrl + '\')">';
     }
     if (r.phone) {
-        h += '<a class="wa-send-btn" href="' + buildWhatsAppUrl(r.phone, r.name, wsTitle, r.workshopDate || ws.date, r.workshopTime || ws.time, ws.mode, ws.zoomLink, ws.location, r._id, r.status, r.pricePaid || ws.price || '', ws.notice || '') + '" target="_blank" rel="noopener" onclick="event.stopPropagation();" title="透過 WhatsApp 傳送詳情">' +
+        h += '<a class="wa-send-btn" href="#" onclick="event.stopPropagation();event.preventDefault();openWhatsApp(\'' + escHtml(r._id) + '\');" title="透過 WhatsApp 傳送詳情">' +
             '<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.603-1.148A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.19-.595-5.932-1.628l-.413-.248-2.856.712.747-2.73-.273-.433A9.77 9.77 0 012.182 12c0-5.422 4.396-9.818 9.818-9.818S21.818 6.578 21.818 12s-4.396 9.818-9.818 9.818z"/></svg>' +
             'WhatsApp 傳送詳情</a>';
     }
     h += '</div></div></div>';
     return h;
+}
+
+function _memberWsDateLine(ws) {
+    if (!ws) return '';
+    var isCont = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+    if (isCont) {
+        var parts = [];
+        ws.rounds.forEach(function(r) {
+            var label = r.label || '';
+            var dates = (r.sessions || []).filter(function(s) { return s.date; }).map(function(s) { return s.date; });
+            if (label && dates.length) parts.push(label + '：' + dates[0] + (dates.length > 1 ? ' ~ ' + dates[dates.length - 1] : ''));
+            else if (label) parts.push(label);
+            else if (dates.length) parts.push(dates[0] + (dates.length > 1 ? ' ~ ' + dates[dates.length - 1] : ''));
+        });
+        return parts.length ? escHtml(parts.join('  ·  ')) : '';
+    }
+    if (ws.sessions && ws.sessions.length > 1) {
+        var dates = ws.sessions.filter(function(s) { return s.date; }).map(function(s) {
+            return s.date + (s.time ? ' ' + s.time : '');
+        });
+        return dates.length ? escHtml(dates.join('  ·  ')) : '';
+    }
+    var single = ws.date || '';
+    if (ws.time) single += ' ' + ws.time;
+    return single ? escHtml(single) : '';
 }
 
 function renderByWorkshopView() {
@@ -4851,6 +5003,8 @@ function renderByWorkshopView() {
         html += '<div class="ws-applicants-header" onclick="toggleWsApplicantsCard(this)">';
         html += '<div style="flex:1;min-width:0;">';
         html += '<h4 style="margin:0;">' + escHtml(wsTitle) + '</h4>';
+        var _mDateLine = _memberWsDateLine(ws);
+        if (_mDateLine) html += '<div style="font-size:12px;color:var(--text-light);font-weight:500;margin-top:3px;">' + _mDateLine + '</div>';
         html += '<div class="ws-header-cap-wrap">' + capBarHtml + '</div>';
         html += '</div>';
         html += '<div class="ws-badge-group">';
@@ -4967,7 +5121,32 @@ function renderByWorkshopView() {
                 html += '</div>';
                 noSession.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
             }
+        } else if (ws.sessions && ws.sessions.length === 1) {
+            var s0 = ws.sessions[0];
+            var singleLabel = (s0.date || ws.date || '') + (s0.time || ws.time ? ' ' + (s0.time || ws.time) : '');
+            if (singleLabel.trim()) {
+                var modeStr = '';
+                if ((s0.mode || ws.mode) === 'online') modeStr = ' · 線上';
+                else if ((s0.mode || ws.mode) === 'both') modeStr = ' · 實體＋線上';
+                var singleCap = s0.capacity !== undefined ? s0.capacity : (ws.capacity || 0);
+                var singleEnr = s0.enrolled !== undefined ? s0.enrolled : (ws.enrolled || 0);
+                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(217,119,87,0.06);border-radius:10px;border-left:3px solid var(--accent);">';
+                html += '<strong style="font-size:14px;flex:1;">' + escHtml(singleLabel) + escHtml(modeStr) + '</strong>';
+                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + singleEnr + ' / ' + singleCap + ' 名額</span>';
+                html += '</div>';
+            }
+            regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
         } else {
+            var legacyDate = (ws.date || '') + (ws.time ? ' ' + ws.time : '');
+            if (legacyDate.trim()) {
+                var legacyMode = '';
+                if (ws.mode === 'online') legacyMode = ' · 線上';
+                else if (ws.mode === 'both') legacyMode = ' · 實體＋線上';
+                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(217,119,87,0.06);border-radius:10px;border-left:3px solid var(--accent);">';
+                html += '<strong style="font-size:14px;flex:1;">' + escHtml(legacyDate) + escHtml(legacyMode) + '</strong>';
+                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + (ws.enrolled || 0) + ' / ' + (ws.capacity || 0) + ' 名額</span>';
+                html += '</div>';
+            }
             regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
         }
         html += '</div></div></div>';
@@ -5042,9 +5221,18 @@ function filterMembers() {
 // ============================================================
 // WHATSAPP TEMPLATES
 // ============================================================
+var _E = (function() {
+    var e = {};
+    var d = document.createElement('div');
+    d.innerHTML = '&#x1F4CC;|&#x1F4C5;|&#x1F550;|&#x1F4BB;|&#x1F3E2;|&#x1F4CD;|&#x1F517;|&#x1F4C4;';
+    var parts = d.textContent.split('|');
+    e.pin = parts[0]; e.cal = parts[1]; e.clock = parts[2]; e.laptop = parts[3];
+    e.office = parts[4]; e.loc = parts[5]; e.link = parts[6]; e.doc = parts[7];
+    return e;
+})();
 var DEFAULT_WA_TEMPLATES = {
-    confirmed: 'Hi {name}！\n\n你已成功報名以下工作坊：\n\n📌 工作坊：{workshopTitle}\n📅 日期：{date}\n🕐 時間：{time}\n{mode}\n{location}\n\n📄 收據（直接開啟）：{receiptLink}\n\n如有任何問題，歡迎隨時聯絡我們！',
-    pending: 'Hi {name}！\n\n我們已收到你的付款截圖，正在確認中。\n\n📌 工作坊：{workshopTitle}\n📅 日期：{date}\n🕐 時間：{time}\n\n確認後我們會再通知你。如有任何問題，歡迎隨時聯絡我們！'
+    confirmed: 'Hi {name}！\n\n你已成功報名以下工作坊：\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n{mode}\n{location}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n\n如有任何問題，歡迎隨時聯絡我們！',
+    pending: 'Hi {name}！\n\n我們已收到你的付款截圖，正在確認中。\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n\n確認後我們會再通知你。如有任何問題，歡迎隨時聯絡我們！'
 };
 var _wsSettings = null;
 
@@ -5065,8 +5253,8 @@ function loadWsSettings() {
 
 function _populateSettingsUI() {
     var wt = (_wsSettings && _wsSettings.waTemplates) || {};
-    document.getElementById('stWaTplConfirmed').value = wt.confirmed || DEFAULT_WA_TEMPLATES.confirmed;
-    document.getElementById('stWaTplPending').value = wt.pending || DEFAULT_WA_TEMPLATES.pending;
+    document.getElementById('stWaTplConfirmed').value = _fixWaEmoji(wt.confirmed) || DEFAULT_WA_TEMPLATES.confirmed;
+    document.getElementById('stWaTplPending').value = _fixWaEmoji(wt.pending) || DEFAULT_WA_TEMPLATES.pending;
 }
 
 function saveWsSettings() {
@@ -5088,10 +5276,80 @@ function saveWsSettings() {
     });
 }
 
+function _fixWaEmoji(tpl) {
+    if (!tpl) return tpl;
+    var R = String.fromCharCode(0xFFFD);
+    var rg = new RegExp(R + '\\s*', 'g');
+    return tpl
+        .replace(new RegExp(R + '\\s*' + '(工作坊)', 'g'), _E.pin + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(日期)', 'g'), _E.cal + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(時間)', 'g'), _E.clock + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(模式)', 'g'), _E.office + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(地點)', 'g'), _E.loc + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(費用)', 'g'), _E.pin + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(收據)', 'g'), _E.doc + ' $1')
+        .replace(new RegExp(R + '\\s*' + '(線上)', 'g'), _E.link + ' $1')
+        .replace(rg, '');
+}
+
 function _getWaTemplate(status) {
     var wt = (_wsSettings && _wsSettings.waTemplates) || {};
-    if (status === 'confirmed') return wt.confirmed || DEFAULT_WA_TEMPLATES.confirmed;
-    return wt.pending || DEFAULT_WA_TEMPLATES.pending;
+    if (status === 'confirmed') return _fixWaEmoji(wt.confirmed) || DEFAULT_WA_TEMPLATES.confirmed;
+    return _fixWaEmoji(wt.pending) || DEFAULT_WA_TEMPLATES.pending;
+}
+
+function _resolveSessionLocation(ws, reg) {
+    if (!ws || !reg) return ws ? (ws.location || '') : '';
+    var sessions = ws.sessions || [];
+    if (reg.selectedRound && reg.selectedRound.indexOf('session_') === 0) {
+        var idx = parseInt(reg.selectedRound.replace('session_', ''));
+        if (sessions[idx] && sessions[idx].location) return sessions[idx].location;
+    }
+    if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < ws.rounds.length; ri++) {
+            if (ws.rounds[ri].id === reg.selectedRound) {
+                var rSess = ws.rounds[ri].sessions || [];
+                if (rSess.length && rSess[0].location) return rSess[0].location;
+                break;
+            }
+        }
+    }
+    if (sessions.length === 1 && sessions[0].location) return sessions[0].location;
+    return ws.location || '';
+}
+
+function _resolveRegDateTime(ws, reg) {
+    if (!ws || !reg) return { date: reg ? reg.workshopDate || '' : '', time: reg ? reg.workshopTime || '' : '' };
+    var sessions = ws.sessions || [];
+    if (reg.selectedRound && reg.selectedRound.indexOf('session_') === 0 && sessions.length > 1) {
+        var idx = parseInt(reg.selectedRound.replace('session_', ''));
+        if (idx >= 0 && idx < sessions.length) return { date: sessions[idx].date || '', time: sessions[idx].time || '' };
+    }
+    if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < ws.rounds.length; ri++) {
+            if (ws.rounds[ri].id === reg.selectedRound) {
+                var rSess = ws.rounds[ri].sessions || [];
+                if (rSess.length) {
+                    var dates = rSess.map(function(s) { return s.date || ''; }).filter(Boolean);
+                    var times = rSess.map(function(s) { return s.time || ''; }).filter(Boolean);
+                    return { date: dates.join(', '), time: times[0] || '' };
+                }
+                break;
+            }
+        }
+    }
+    return { date: reg.workshopDate || ws.date || '', time: reg.workshopTime || ws.time || '' };
+}
+
+function openWhatsApp(regId) {
+    var reg = _allRegistrations.find(function(r) { return r._id === regId; });
+    if (!reg) { showToast('找不到報名資料', 'error'); return; }
+    var ws = _allWorkshopsCache[reg.workshopId] || {};
+    var wsTitle = (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || '');
+    var waLoc = _resolveSessionLocation(ws, reg);
+    var dt = _resolveRegDateTime(ws, reg);
+    var url = buildWhatsAppUrl(reg.phone, reg.name, wsTitle, dt.date, dt.time, ws.mode, ws.zoomLink, waLoc, reg._id, reg.status, reg.pricePaid || ws.price || '', ws.notice || '');
+    window.open(url, '_blank', 'noopener');
 }
 
 function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLink, wsLocation, regId, regStatus, fee, notice) {
@@ -5103,14 +5361,14 @@ function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLi
     var tpl = _getWaTemplate(isConfirmed ? 'confirmed' : 'pending');
 
     var modeText = '';
-    if (wsMode === 'online') modeText = '💻 模式：線上';
-    else if (wsMode === 'both') modeText = '💻 模式：實體＋線上';
-    else modeText = '🏢 模式：實體';
+    if (wsMode === 'online') modeText = _E.laptop + ' 模式：線上';
+    else if (wsMode === 'both') modeText = _E.laptop + ' 模式：實體＋線上';
+    else modeText = _E.office + ' 模式：實體';
 
     var locationText = '';
-    if (wsLocation && wsMode !== 'online') locationText = '📍 地點：' + wsLocation;
+    if (wsLocation && wsMode !== 'online') locationText = _E.loc + ' 地點：' + wsLocation;
     if (wsZoomLink && (wsMode === 'online' || wsMode === 'both')) {
-        locationText = (locationText ? locationText + '\n' : '') + '🔗 線上連結：' + wsZoomLink;
+        locationText = (locationText ? locationText + '\n' : '') + _E.link + ' 線上連結：' + wsZoomLink;
     }
 
     var receiptLink = regId ? 'https://aiflowtime-hk.web.app/receipt?id=' + regId : 'https://aiflowtime-hk.web.app/profile';
@@ -5142,6 +5400,214 @@ function closeScreenshotModal() {
 // ============================================================
 // APPLICANT PROFILE MODAL
 // ============================================================
+function _buildPmRoundField(reg, regId) {
+    var wsId = reg.workshopId;
+    var ws = _allWorkshopsCache[wsId];
+    if (!ws) {
+        if (reg.selectedRoundLabel) return '<div class="pm-field"><div class="pm-label">期數</div><div class="pm-value"><span class="pm-chip">' + escHtml(reg.selectedRoundLabel) + '</span></div></div>';
+        return '';
+    }
+    var options = [];
+    var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+    if (isContinuous) {
+        ws.rounds.forEach(function(round) {
+            var dateParts = [];
+            (round.sessions || []).forEach(function(s) { if (s.date) dateParts.push(s.date); });
+            var meta = dateParts.length ? dateParts[0] + (dateParts.length > 1 ? ' ... ' + dateParts[dateParts.length - 1] : '') : '';
+            options.push({ value: round.id, label: round.label || round.id, meta: meta, capacity: round.capacity || 0, enrolled: round.enrolled || 0 });
+        });
+    } else if (ws.sessions && ws.sessions.length > 1) {
+        ws.sessions.forEach(function(s, i) {
+            var lbl = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
+            var cap = s.capacity !== undefined ? s.capacity : (ws.capacity || 0);
+            options.push({ value: 'session_' + i, label: lbl, meta: '', capacity: cap, enrolled: s.enrolled || 0 });
+        });
+    }
+    if (options.length < 2 && !reg.selectedRoundLabel) return '';
+    if (options.length < 2) return '<div class="pm-field"><div class="pm-label">期數</div><div class="pm-value"><span class="pm-chip">' + escHtml(reg.selectedRoundLabel) + '</span></div></div>';
+
+    var currentLabel = reg.selectedRoundLabel || '未指定';
+    return '<div class="pm-field"><div class="pm-label">期數</div><div class="pm-value">' +
+        '<span class="pm-round-btn" id="pmRoundBtn" onclick="togglePmRoundPicker(\'' + escHtml(regId) + '\')">' +
+            escHtml(currentLabel) + ' <span class="pm-round-arrow">▼</span>' +
+        '</span></div></div>';
+}
+
+var _pmRoundPickerOpen = false;
+function togglePmRoundPicker(regId) {
+    var btn = document.getElementById('pmRoundBtn');
+    if (!btn) return;
+    var existing = document.getElementById('pmRoundPicker');
+    if (existing) { existing.remove(); btn.classList.remove('open'); _pmRoundPickerOpen = false; return; }
+
+    db.collection('registrations').doc(regId).get().then(function(snap) {
+        if (!snap.exists) return;
+        var reg = snap.data();
+        var wsId = reg.workshopId;
+
+        function _showPicker(ws) {
+            var options = [];
+            var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+            if (isContinuous) {
+                ws.rounds.forEach(function(round) {
+                    var dateParts = [];
+                    (round.sessions || []).forEach(function(s) { if (s.date) dateParts.push(s.date); });
+                    var meta = dateParts.length ? dateParts[0] + (dateParts.length > 1 ? ' ... ' + dateParts[dateParts.length - 1] : '') : '';
+                    options.push({ value: round.id, label: round.label || round.id, meta: meta, capacity: round.capacity || 0, enrolled: round.enrolled || 0 });
+                });
+            } else if (ws.sessions && ws.sessions.length > 1) {
+                ws.sessions.forEach(function(s, i) {
+                    var lbl = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
+                    var cap = s.capacity !== undefined ? s.capacity : (ws.capacity || 0);
+                    options.push({ value: 'session_' + i, label: lbl, meta: '', capacity: cap, enrolled: s.enrolled || 0 });
+                });
+            }
+            if (options.length < 2) { showToast('此工作坊只有一個日期', 'error'); return; }
+
+            var pickerEl = document.createElement('div');
+            pickerEl.id = 'pmRoundPicker';
+            pickerEl.className = 'pm-round-picker';
+            var ph = '';
+            options.forEach(function(opt) {
+                var isActive = opt.value === reg.selectedRound;
+                ph += '<div class="pm-round-option' + (isActive ? ' active' : '') + '" onclick="reassignRound(\'' + escHtml(regId) + '\',\'' + escHtml(opt.value) + '\',\'' + escHtml(opt.label) + '\')">';
+                ph += '<span class="pm-opt-check">' + (isActive ? '✓' : '') + '</span>';
+                ph += '<span class="pm-opt-label">' + escHtml(opt.label) + (opt.meta ? '<br><span style="font-size:10px;color:var(--text-light);">' + escHtml(opt.meta) + '</span>' : '') + '</span>';
+                ph += '<span class="pm-opt-meta">' + opt.enrolled + '/' + opt.capacity + '</span>';
+                ph += '</div>';
+            });
+            pickerEl.innerHTML = ph;
+
+            document.body.appendChild(pickerEl);
+            btn.classList.add('open');
+            _pmRoundPickerOpen = true;
+
+            var rect = btn.getBoundingClientRect();
+            pickerEl.style.left = rect.left + 'px';
+            pickerEl.style.top = (rect.bottom + 6) + 'px';
+            if (rect.left + pickerEl.offsetWidth > window.innerWidth - 12) {
+                pickerEl.style.left = Math.max(12, window.innerWidth - pickerEl.offsetWidth - 12) + 'px';
+            }
+            if (rect.bottom + 6 + pickerEl.offsetHeight > window.innerHeight - 12) {
+                pickerEl.style.top = Math.max(12, rect.top - pickerEl.offsetHeight - 6) + 'px';
+            }
+
+            setTimeout(function() {
+                document.addEventListener('click', _closePmRoundPickerOutside, { once: true });
+            }, 0);
+        }
+
+        var ws = _allWorkshopsCache[wsId];
+        if (ws) {
+            _showPicker(ws);
+        } else {
+            db.collection('workshops').doc(wsId).get().then(function(wsSnap) {
+                if (!wsSnap.exists) { showToast('找不到工作坊資料', 'error'); return; }
+                _allWorkshopsCache[wsId] = wsSnap.data();
+                _showPicker(wsSnap.data());
+            });
+        }
+    });
+}
+
+function _closePmRoundPicker() {
+    var picker = document.getElementById('pmRoundPicker');
+    if (picker) picker.remove();
+    var btn = document.getElementById('pmRoundBtn');
+    if (btn) btn.classList.remove('open');
+    _pmRoundPickerOpen = false;
+}
+
+function _closePmRoundPickerOutside(e) {
+    var picker = document.getElementById('pmRoundPicker');
+    var btn = document.getElementById('pmRoundBtn');
+    if (picker && !picker.contains(e.target) && btn && !btn.contains(e.target)) {
+        _closePmRoundPicker();
+    } else if (_pmRoundPickerOpen) {
+        setTimeout(function() {
+            document.addEventListener('click', _closePmRoundPickerOutside, { once: true });
+        }, 0);
+    }
+}
+
+function reassignRound(regId, newRoundValue, newRoundLabel) {
+    _closePmRoundPicker();
+    var btn = document.getElementById('pmRoundBtn');
+
+    db.collection('registrations').doc(regId).get().then(function(snap) {
+        if (!snap.exists) { showToast('找不到報名資料', 'error'); return; }
+        var reg = snap.data();
+        var oldRound = reg.selectedRound || null;
+        if (oldRound === newRoundValue) return;
+
+        var wsId = reg.workshopId;
+        var ws = _allWorkshopsCache[wsId];
+        var batch = db.batch();
+        var regRef = db.collection('registrations').doc(regId);
+        batch.update(regRef, {
+            selectedRound: newRoundValue,
+            selectedRoundLabel: newRoundLabel,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        var isActive = reg.status === 'confirmed' || reg.status === 'pending';
+        if (isActive && ws) {
+            var wsRef = db.collection('workshops').doc(wsId);
+            var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+            if (isContinuous) {
+                var updates = {};
+                ws.rounds.forEach(function(round, ri) {
+                    if (round.id === oldRound) {
+                        updates['rounds.' + ri + '.enrolled'] = Math.max((round.enrolled || 0) - 1, 0);
+                    }
+                    if (round.id === newRoundValue) {
+                        updates['rounds.' + ri + '.enrolled'] = (round.enrolled || 0) + 1;
+                    }
+                });
+                if (Object.keys(updates).length) batch.update(wsRef, updates);
+            } else if (ws.sessions && ws.sessions.length > 1) {
+                var updates = {};
+                ws.sessions.forEach(function(s, si) {
+                    var sid = 'session_' + si;
+                    if (sid === oldRound) {
+                        updates['sessions.' + si + '.enrolled'] = Math.max((s.enrolled || 0) - 1, 0);
+                    }
+                    if (sid === newRoundValue) {
+                        updates['sessions.' + si + '.enrolled'] = (s.enrolled || 0) + 1;
+                    }
+                });
+                if (Object.keys(updates).length) batch.update(wsRef, updates);
+            }
+        }
+
+        return batch.commit().then(function() {
+            showToast('已更改至「' + newRoundLabel + '」');
+            if (btn) {
+                btn.childNodes[0].textContent = newRoundLabel + ' ';
+            }
+            if (ws) {
+                var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+                if (isContinuous) {
+                    ws.rounds.forEach(function(round) {
+                        if (round.id === oldRound) round.enrolled = Math.max((round.enrolled || 0) - 1, 0);
+                        if (round.id === newRoundValue) round.enrolled = (round.enrolled || 0) + 1;
+                    });
+                } else if (ws.sessions && ws.sessions.length > 1) {
+                    ws.sessions.forEach(function(s, si) {
+                        var sid = 'session_' + si;
+                        if (sid === oldRound) s.enrolled = Math.max((s.enrolled || 0) - 1, 0);
+                        if (sid === newRoundValue) s.enrolled = (s.enrolled || 0) + 1;
+                    });
+                }
+            }
+            rebuildMembersData();
+        });
+    }).catch(function(err) {
+        console.error('Reassign error:', err);
+        showToast('更改失敗：' + err.message, 'error');
+    });
+}
+
 function openApplicantProfile(regId) {
     db.collection('registrations').doc(regId).get().then(function(snap) {
         if (!snap.exists) { showToast('找不到報名資料', 'error'); return; }
@@ -5164,7 +5630,8 @@ function openApplicantProfile(regId) {
         html += '<div class="pm-field"><div class="pm-label">費用</div><div class="pm-value">' + escHtml(r.pricePaid || '—') + (r.discountApplied ? ' <span style="color:var(--green);font-size:11px;">折扣</span>' : '') + (r.promoCode ? ' <span style="font-size:11px;color:var(--text-light);">(' + escHtml(r.promoCode) + ')</span>' : '') + '</div></div>';
         html += '<div class="pm-field"><div class="pm-label">年齡</div><div class="pm-value">' + escHtml(r.ageGroup || '—') + '</div></div>';
         html += '<div class="pm-field"><div class="pm-label">職業</div><div class="pm-value">' + escHtml(r.jobType || '—') + '</div></div>';
-        if (r.selectedRoundLabel) html += '<div class="pm-field"><div class="pm-label">期數</div><div class="pm-value"><span class="pm-chip">' + escHtml(r.selectedRoundLabel) + '</span></div></div>';
+        var _pmRoundHtml = _buildPmRoundField(r, regId);
+        if (_pmRoundHtml) html += _pmRoundHtml;
         html += '</div>';
         if (r.createdAt) {
             var d = r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
@@ -5221,6 +5688,7 @@ function openApplicantProfile(regId) {
 }
 
 function closeApplicantProfile() {
+    _closePmRoundPicker();
     document.getElementById('profileModal').classList.remove('open');
 }
 
@@ -6862,13 +7330,34 @@ function getWsAllDates(ws) {
     var dates = [];
     var mainDate = parseDateChinese(ws.date);
     if (mainDate) dates.push(mainDate);
-    if (ws.sessions && ws.sessions.length) {
+    if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length) {
+        ws.rounds.forEach(function(round) {
+            (round.sessions || []).forEach(function(s) {
+                var d = parseDateChinese(s.date);
+                if (d) dates.push(d);
+            });
+        });
+    } else if (ws.sessions && ws.sessions.length) {
         ws.sessions.forEach(function(s) {
             var d = parseDateChinese(s.date);
             if (d) dates.push(d);
         });
     }
     return dates;
+}
+
+function _attendSessionLabel(session, fallbackIdx) {
+    var parts = [];
+    if (session.date) parts.push(session.date);
+    if (session.time) parts.push(session.time);
+    if (parts.length > 0) {
+        var modeStr = '';
+        if (session.mode === 'online') modeStr = ' 線上';
+        else if (session.mode === 'both') modeStr = ' 實體＋線上';
+        return parts.join(' ') + modeStr;
+    }
+    if (session.label) return session.label;
+    return '第' + (fallbackIdx + 1) + '堂';
 }
 
 function isWsToday(ws) {
@@ -6899,6 +7388,30 @@ function setAttendWsFilter(filter, btn) {
     renderAttendWsGrid();
 }
 
+function _attendWsCardDateMeta(ws) {
+    var isCont = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+    if (isCont) {
+        var firstSess = null;
+        for (var ri = 0; ri < ws.rounds.length && !firstSess; ri++) {
+            var rSessions = ws.rounds[ri].sessions || [];
+            for (var si = 0; si < rSessions.length; si++) {
+                if (rSessions[si].date) { firstSess = rSessions[si]; break; }
+            }
+        }
+        if (firstSess) return escHtml(firstSess.date + (firstSess.time ? ' ' + firstSess.time : '')) + ' 起';
+        return escHtml(ws.date || '日期待定');
+    }
+    if (ws.sessions && ws.sessions.length > 0) {
+        var visible = ws.sessions.filter(function(s) { return s.date; });
+        if (visible.length === 1) {
+            return escHtml(visible[0].date + (visible[0].time ? ' ' + visible[0].time : ''));
+        } else if (visible.length > 1) {
+            return escHtml(visible[0].date) + ' 等 ' + visible.length + ' 個日期';
+        }
+    }
+    return escHtml(ws.date || '日期待定') + (ws.time ? ' · ' + escHtml(ws.time) : '');
+}
+
 function renderAttendWsGrid() {
     var grid = document.getElementById('attendWsGrid');
     if (!grid) return;
@@ -6909,8 +7422,9 @@ function renderAttendWsGrid() {
         var ws = _allWorkshopsCache[id];
         if (ws.archived) return;
 
-        var sortDate = parseDateChinese(ws.date);
-        var hasDate = !!sortDate;
+        var allDates = getWsAllDates(ws);
+        var sortDate = allDates.length > 0 ? allDates.reduce(function(a, b) { return a < b ? a : b; }) : null;
+        var hasDate = allDates.length > 0;
         var today = isWsToday(ws);
         var upcoming = isWsUpcoming(ws);
         var completed = isWsCompleted(ws);
@@ -6956,7 +7470,12 @@ function renderAttendWsGrid() {
         var barColor = completed ? 'accent' : 'green';
 
         var sessionsInfo = '';
-        if (ws.sessions && ws.sessions.length > 0) {
+        var isCont = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+        if (isCont) {
+            var totalSess = 0;
+            ws.rounds.forEach(function(r) { totalSess += (r.sessions || []).length; });
+            sessionsInfo = ws.rounds.length + ' 期 · ' + totalSess + ' 堂課';
+        } else if (ws.sessions && ws.sessions.length > 0) {
             sessionsInfo = ws.sessions.length + ' 堂課';
         }
 
@@ -6986,7 +7505,7 @@ function renderAttendWsGrid() {
             '<div class="attend-ws-card-badge ' + c.badgeClass + '">' + c.badgeText + '</div>' +
             '<div class="attend-ws-card-number">' + escHtml(c.ws.workshopNumber || '') + '</div>' +
             '<div class="attend-ws-card-title">' + escHtml(c.ws.title || c.id) + '</div>' +
-            '<div class="attend-ws-card-meta">' + escHtml(c.ws.date || '日期待定') + (c.ws.time ? ' · ' + escHtml(c.ws.time) : '') + '</div>' +
+            '<div class="attend-ws-card-meta">' + _attendWsCardDateMeta(c.ws) + '</div>' +
             (c.sessionsInfo ? '<div class="attend-ws-card-sessions">' + escHtml(c.sessionsInfo) + '</div>' : '') +
             '<div class="attend-ws-card-bar">' +
                 '<div class="attend-ws-card-bar-label"><span>出席率</span><span>' + c.attended + '/' + c.confirmed + '</span></div>' +
@@ -7017,18 +7536,42 @@ function attendSelectWs(wsId, isCompleted) {
         completedSection.style.display = 'none';
     }
 
-    // Build session selector if multi-session
+    // Build session selector based on workshop type
     var ws = _allWorkshopsCache[wsId] || {};
     var sessionSel = document.getElementById('attendSessionSelector');
-    if (ws.sessions && ws.sessions.length > 0) {
+    var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+
+    if (isContinuous) {
+        var shtml = '<button class="attend-session-pill active" onclick="selectAttendSession(null,this)">全部課堂</button>';
+        ws.rounds.forEach(function(round, rIdx) {
+            var roundLabel = round.label || ('第' + (rIdx + 1) + '期');
+            (round.sessions || []).forEach(function(s, sIdx) {
+                var pillLabel = roundLabel + ' — ' + _attendSessionLabel(s, sIdx);
+                var pillKey = 'round_' + rIdx + '_session_' + sIdx;
+                shtml += '<button class="attend-session-pill" onclick="selectAttendSession(\'' + pillKey + '\',this)">' + escHtml(pillLabel) + '</button>';
+            });
+        });
+        sessionSel.innerHTML = shtml;
+        sessionSel.style.display = 'flex';
+    } else if (ws.sessions && ws.sessions.length > 0) {
         var shtml = '<button class="attend-session-pill active" onclick="selectAttendSession(null,this)">全部課堂</button>';
         ws.sessions.forEach(function(s, idx) {
-            shtml += '<button class="attend-session-pill" onclick="selectAttendSession(' + idx + ',this)">' + escHtml(s.label || ('第' + (idx+1) + '堂')) + '</button>';
+            shtml += '<button class="attend-session-pill" onclick="selectAttendSession(' + idx + ',this)">' + escHtml(_attendSessionLabel(s, idx)) + '</button>';
         });
         sessionSel.innerHTML = shtml;
         sessionSel.style.display = 'flex';
     } else {
-        sessionSel.style.display = 'none';
+        // Single-session: show date/time as info instead of generic selector
+        if (ws.date) {
+            var singleLabel = ws.date + (ws.time ? ' ' + ws.time : '');
+            var modeStr = '';
+            if (ws.mode === 'online') modeStr = ' 線上';
+            else if (ws.mode === 'both') modeStr = ' 實體＋線上';
+            sessionSel.innerHTML = '<div class="attend-session-info">' + escHtml(singleLabel + modeStr) + '</div>';
+            sessionSel.style.display = 'flex';
+        } else {
+            sessionSel.style.display = 'none';
+        }
     }
 
     loadAttendRoster(wsId);
@@ -7046,8 +7589,7 @@ function selectAttendSession(idx, btn) {
     _attendSelectedSession = idx;
     document.querySelectorAll('.attend-session-pill').forEach(function(c) { c.classList.remove('active'); });
     if (btn) btn.classList.add('active');
-    updateAttendSummary();
-    renderAttendRoster();
+    loadAttendRoster(_attendSelectedWs);
 }
 
 function _isSingleMultiDate(ws) {
@@ -7056,10 +7598,23 @@ function _isSingleMultiDate(ws) {
 
 function _getEffectiveRoster() {
     var ws = _allWorkshopsCache[_attendSelectedWs] || {};
-    if (_isSingleMultiDate(ws) && _attendSelectedSession !== null) {
-        var roundId = 'session_' + _attendSelectedSession;
-        return _attendRoster.filter(function(r) { return r.selectedRound === roundId; });
+    if (_attendSelectedSession === null) return _attendRoster;
+
+    var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+    if (isContinuous && typeof _attendSelectedSession === 'string' && _attendSelectedSession.indexOf('round_') === 0) {
+        var parts = _attendSelectedSession.split('_');
+        var roundIdx = parseInt(parts[1]);
+        var roundId = ws.rounds[roundIdx] ? ws.rounds[roundIdx].id : null;
+        if (roundId) {
+            return _attendRoster.filter(function(r) { return r.selectedRound === roundId; });
+        }
     }
+
+    if (_isSingleMultiDate(ws) && typeof _attendSelectedSession === 'number') {
+        var sessionRoundId = 'session_' + _attendSelectedSession;
+        return _attendRoster.filter(function(r) { return r.selectedRound === sessionRoundId; });
+    }
+
     return _attendRoster;
 }
 
@@ -7086,17 +7641,25 @@ function loadAttendRoster(wsId) {
     renderAttendRoster();
 }
 
+function _attendanceKey(sessionIdx) {
+    if (sessionIdx === null || sessionIdx === undefined) return null;
+    if (typeof sessionIdx === 'string') return sessionIdx;
+    return 'session-' + sessionIdx;
+}
+
 function getAttendedStatus(reg, sessionIdx) {
-    if (sessionIdx !== null && sessionIdx !== undefined) {
-        return reg.attendance && reg.attendance['session-' + sessionIdx] && reg.attendance['session-' + sessionIdx].attendedAt;
+    var key = _attendanceKey(sessionIdx);
+    if (key) {
+        return reg.attendance && reg.attendance[key] && reg.attendance[key].attendedAt;
     }
     return !!reg.attendedAt;
 }
 
 function getAttendedTime(reg, sessionIdx) {
-    if (sessionIdx !== null && sessionIdx !== undefined) {
-        if (reg.attendance && reg.attendance['session-' + sessionIdx]) {
-            return reg.attendance['session-' + sessionIdx].attendedAt;
+    var key = _attendanceKey(sessionIdx);
+    if (key) {
+        if (reg.attendance && reg.attendance[key]) {
+            return reg.attendance[key].attendedAt;
         }
         return null;
     }
@@ -7165,7 +7728,7 @@ function renderAttendRoster() {
             timeHtml = '<div class="attend-student-time">' + t.toLocaleTimeString('zh-Hant', { hour: '2-digit', minute: '2-digit' }) + '</div>';
         }
 
-        html += '<div class="attend-student' + checkedClass + '" data-reg-id="' + escHtml(r._id) + '">' +
+        html += '<div class="attend-student' + checkedClass + '" data-reg-id="' + escHtml(r._id) + '" onclick="toggleAttendDropdown(event,\'' + escHtml(r._id) + '\',' + (isChecked ? 'true' : 'false') + ')">' +
             '<div class="attend-student-avatar">' + escHtml(initial) + '</div>' +
             '<div class="attend-student-info">' +
                 '<div class="attend-student-name">' + escHtml(r.name || '—') + '</div>' +
@@ -7402,22 +7965,45 @@ function showAttendResult(type, title, message, reg) {
     if (scanLabel) scanLabel.textContent = '最後掃描：' + new Date().toLocaleTimeString('zh-Hant');
 }
 
+function _resolveAttendanceSessionInfo(ws) {
+    if (_attendSelectedSession === null) return { key: null, label: null };
+    var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+
+    if (isContinuous && typeof _attendSelectedSession === 'string' && _attendSelectedSession.indexOf('round_') === 0) {
+        var parts = _attendSelectedSession.split('_');
+        var rIdx = parseInt(parts[1]);
+        var sIdx = parseInt(parts[3]);
+        var round = ws.rounds[rIdx];
+        var sess = round && round.sessions ? round.sessions[sIdx] : null;
+        var roundLabel = round ? (round.label || ('第' + (rIdx + 1) + '期')) : '';
+        var sessLabel = sess ? _attendSessionLabel(sess, sIdx) : ('第' + (sIdx + 1) + '堂');
+        return { key: _attendSelectedSession, label: roundLabel + ' — ' + sessLabel };
+    }
+
+    if (typeof _attendSelectedSession === 'number' && ws.sessions && ws.sessions[_attendSelectedSession]) {
+        var s = ws.sessions[_attendSelectedSession];
+        return { key: 'session-' + _attendSelectedSession, label: _attendSessionLabel(s, _attendSelectedSession) };
+    }
+
+    return { key: null, label: null };
+}
+
 function confirmAttendance(regId) {
     var ws = _allWorkshopsCache[_attendSelectedWs] || {};
-    var isMultiSession = ws.sessions && ws.sessions.length > 0 && _attendSelectedSession !== null;
+    var sessInfo = _resolveAttendanceSessionInfo(ws);
+    var hasSession = !!sessInfo.key;
 
     var updateData = {};
-    if (isMultiSession) {
-        var sessionKey = 'attendance.session-' + _attendSelectedSession;
+    if (hasSession) {
+        var sessionKey = 'attendance.' + sessInfo.key;
         updateData[sessionKey + '.attendedAt'] = firebase.firestore.FieldValue.serverTimestamp();
-        updateData[sessionKey + '.label'] = ws.sessions[_attendSelectedSession].label || ('第' + (_attendSelectedSession + 1) + '堂');
+        updateData[sessionKey + '.label'] = sessInfo.label;
     } else {
         updateData.attendedAt = firebase.firestore.FieldValue.serverTimestamp();
     }
 
     db.collection('registrations').doc(regId).update(updateData).then(function() {
         showToast('簽到成功！');
-        // Update result card to show checked-in status
         var regData = null;
         for (var k = 0; k < _attendRoster.length; k++) { if (_attendRoster[k]._id === regId) { regData = _attendRoster[k]; break; } }
         if (!regData) { for (var k2 = 0; k2 < _allRegistrations.length; k2++) { if (_allRegistrations[k2]._id === regId) { regData = _allRegistrations[k2]; break; } } }
@@ -7426,9 +8012,9 @@ function confirmAttendance(regId) {
         var now = new Date();
         for (var i = 0; i < _attendRoster.length; i++) {
             if (_attendRoster[i]._id === regId) {
-                if (isMultiSession) {
+                if (hasSession) {
                     if (!_attendRoster[i].attendance) _attendRoster[i].attendance = {};
-                    _attendRoster[i].attendance['session-' + _attendSelectedSession] = { attendedAt: now, label: ws.sessions[_attendSelectedSession].label || '' };
+                    _attendRoster[i].attendance[sessInfo.key] = { attendedAt: now, label: sessInfo.label };
                 } else {
                     _attendRoster[i].attendedAt = now;
                 }
@@ -7437,9 +8023,9 @@ function confirmAttendance(regId) {
         }
         for (var j = 0; j < _allRegistrations.length; j++) {
             if (_allRegistrations[j]._id === regId) {
-                if (isMultiSession) {
+                if (hasSession) {
                     if (!_allRegistrations[j].attendance) _allRegistrations[j].attendance = {};
-                    _allRegistrations[j].attendance['session-' + _attendSelectedSession] = { attendedAt: now, label: ws.sessions[_attendSelectedSession].label || '' };
+                    _allRegistrations[j].attendance[sessInfo.key] = { attendedAt: now, label: sessInfo.label };
                 } else {
                     _allRegistrations[j].attendedAt = now;
                 }
@@ -7459,13 +8045,124 @@ function confirmAttendance(regId) {
     });
 }
 
+var _activeAttendDropdown = null;
+
+function toggleAttendDropdown(e, regId, isCheckedIn) {
+    e.stopPropagation();
+    closeAttendDropdown();
+
+    var row = e.currentTarget;
+    var rect = row.getBoundingClientRect();
+
+    var dropdown = document.createElement('div');
+    dropdown.className = 'attend-dropdown';
+
+    if (isCheckedIn) {
+        var undoItem = document.createElement('div');
+        undoItem.className = 'attend-dropdown-item opt-undo';
+        undoItem.innerHTML = '<span class="attend-dd-icon">✕</span> 取消簽到';
+        undoItem.onclick = function(ev) {
+            ev.stopPropagation();
+            closeAttendDropdown();
+            removeAttendance(regId);
+        };
+        dropdown.appendChild(undoItem);
+    } else {
+        var checkinItem = document.createElement('div');
+        checkinItem.className = 'attend-dropdown-item opt-checkin';
+        checkinItem.innerHTML = '<span class="attend-dd-icon">✓</span> 手動簽到';
+        checkinItem.onclick = function(ev) {
+            ev.stopPropagation();
+            closeAttendDropdown();
+            confirmAttendance(regId);
+        };
+        dropdown.appendChild(checkinItem);
+    }
+
+    var top = rect.bottom + 4;
+    var left = rect.right - 160;
+    if (left < 8) left = 8;
+    if (top + 50 > window.innerHeight) top = rect.top - 50;
+    dropdown.style.top = top + 'px';
+    dropdown.style.left = left + 'px';
+
+    document.body.appendChild(dropdown);
+    _activeAttendDropdown = dropdown;
+
+    setTimeout(function() {
+        document.addEventListener('click', _closeAttendDropdownOutside, { once: true });
+    }, 10);
+}
+
+function _closeAttendDropdownOutside() { closeAttendDropdown(); }
+
+function closeAttendDropdown() {
+    if (_activeAttendDropdown) {
+        _activeAttendDropdown.remove();
+        _activeAttendDropdown = null;
+    }
+}
+
+function removeAttendance(regId) {
+    var ws = _allWorkshopsCache[_attendSelectedWs] || {};
+    var sessInfo = _resolveAttendanceSessionInfo(ws);
+    var hasSession = !!sessInfo.key;
+
+    var updateData = {};
+    if (hasSession) {
+        updateData['attendance.' + sessInfo.key] = firebase.firestore.FieldValue.delete();
+    } else {
+        updateData.attendedAt = firebase.firestore.FieldValue.delete();
+    }
+
+    db.collection('registrations').doc(regId).update(updateData).then(function() {
+        showToast('已取消簽到');
+
+        for (var i = 0; i < _attendRoster.length; i++) {
+            if (_attendRoster[i]._id === regId) {
+                if (hasSession) {
+                    if (_attendRoster[i].attendance) delete _attendRoster[i].attendance[sessInfo.key];
+                } else {
+                    delete _attendRoster[i].attendedAt;
+                }
+                break;
+            }
+        }
+        for (var j = 0; j < _allRegistrations.length; j++) {
+            if (_allRegistrations[j]._id === regId) {
+                if (hasSession) {
+                    if (_allRegistrations[j].attendance) delete _allRegistrations[j].attendance[sessInfo.key];
+                } else {
+                    delete _allRegistrations[j].attendedAt;
+                }
+                break;
+            }
+        }
+
+        updateAttendSummary();
+        renderAttendRoster();
+    }).catch(function(err) {
+        showToast('取消簽到失敗：' + err.message, 'error');
+    });
+}
+
+function _refreshAttendanceIfOpen() {
+    var tab = document.getElementById('tabAttendance');
+    if (!tab || !tab.classList.contains('active')) return;
+    if (_attendSelectedWs) {
+        loadAttendRoster(_attendSelectedWs);
+    } else {
+        renderAttendWsGrid();
+    }
+}
+
 function loadAttendanceLog() {
-    if (Object.keys(_allWorkshopsCache).length > 0) {
+    loadMembersData();
+    if (_membersDataReady.regs && _membersDataReady.workshops) {
         loadAttendanceTab();
     } else {
-        loadMembersData();
         var checkInterval = setInterval(function() {
-            if (Object.keys(_allWorkshopsCache).length > 0) {
+            if (_membersDataReady.regs && _membersDataReady.workshops) {
                 clearInterval(checkInterval);
                 loadAttendanceTab();
             }

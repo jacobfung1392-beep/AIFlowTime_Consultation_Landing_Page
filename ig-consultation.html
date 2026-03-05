@@ -537,6 +537,9 @@
 
     </div><!-- end .page-content -->
 
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
     <script src="/js/shared-utils.js"></script>
     <script>
         // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
@@ -575,6 +578,19 @@
                 page: 'IG獲客諮詢表單'
             };
 
+            initFirebase(function(app) {
+                var db = app.firestore();
+                var fsData = Object.assign({}, formData, {
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'new'
+                });
+                db.collection('consultations').add(fsData).then(function() {
+                    console.log('Consultation saved to Firestore');
+                }).catch(function(err) {
+                    console.error('Firestore write failed:', err);
+                });
+            });
+
             var googleScriptURL = 'https://script.google.com/macros/s/AKfycbxE8KP5ohNSbHIFOWxl-JoWgu9_my8N8ofkTEXaeU0b7QB6K-s3qx4KE-5bOz7Qj4_miQ/exec';
 
             fetch(googleScriptURL, {
@@ -583,9 +599,9 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             }).then(function() {
-                console.log('Consultation form data sent successfully');
+                console.log('Consultation form data sent to Google Sheet');
             }).catch(function(error) {
-                console.error('Error sending consultation form data:', error);
+                console.error('Error sending to Google Sheet:', error);
             });
 
             var submissions = JSON.parse(localStorage.getItem('aiflowtime_consultations') || '[]');

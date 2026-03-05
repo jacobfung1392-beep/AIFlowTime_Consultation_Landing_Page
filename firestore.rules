@@ -139,5 +139,45 @@ service cloud.firestore {
           'jacobfung@aiflowtime.com'
         ];
     }
+
+    // QR feedback submissions: anyone can create; only jacobfung1392 can read (for display page)
+    match /qrSubmissions/{subId} {
+      allow create: if true;
+      allow read: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'jacobfung1392@gmail.com';
+      allow update, delete: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'jacobfung1392@gmail.com';
+    }
+
+    // QR form settings: public read (submit page shows titles); only jacobfung1392 can write
+    match /qrSettings/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'jacobfung1392@gmail.com';
+    }
+
+    // Consultation applications: anyone can create; admin read/write
+    match /consultations/{docId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Consultation settings: admin only
+    match /consultationSettings/{docId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
   }
 }

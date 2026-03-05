@@ -228,8 +228,7 @@
         .img-upload-zone.has-image { padding: 0; background: transparent; border-style: solid; border-color: var(--bg-off); }
         .img-upload-zone.has-image:hover { border-color: var(--accent); }
         .img-upload-zone .upload-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
-        .img-upload-zone .upload-placeholder .upload-icon-lg { font-size: 28px; color: var(--bg-off); }
-        .img-upload-zone .upload-placeholder .upload-hint { font-size: 13px; color: var(--text-light); font-weight: 500; }
+        .img-upload-zone .upload-placeholder .upload-hint { font-size: 14px; color: var(--text-light); font-weight: 600; }
         .img-upload-zone .upload-placeholder .upload-hint-sm { font-size: 11px; color: var(--text-light); opacity: 0.7; }
         .img-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
         .img-upload-zone .preview-wrap {
@@ -253,6 +252,14 @@
         }
         .img-upload-zone .preview-wrap .img-overlay .btn-remove {
             background: var(--red); color: var(--white);
+        }
+        .array-item-img-zone {
+            min-height: 80px;
+            max-height: 140px;
+        }
+        .array-item-img-zone .preview-wrap img {
+            max-height: 140px;
+            object-fit: cover;
         }
         .img-upload-progress {
             margin-top: 6px; height: 4px; background: var(--bg-off); border-radius: 4px;
@@ -279,6 +286,19 @@
         }
         .array-item .form-group { margin-bottom: 8px; }
         .array-item .form-group:last-child { margin-bottom: 0; }
+
+        .array-item-drag-handle {
+            position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+            width: 24px; height: 24px; cursor: grab; color: var(--text-light);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; flex-shrink: 0;
+        }
+        .array-item-drag-handle:hover { color: var(--accent); background: rgba(217,119,87,0.08); }
+        .array-item-drag-handle:active { cursor: grabbing; }
+        .array-item.sortable .remove-item { right: 8px; }
+        .array-item.sortable .form-group { padding-left: 36px; }
+        .array-item.sortable.dragging { opacity: 0.5; }
+        .array-item.sortable.drag-over { border-color: var(--accent); border-style: dashed; }
 
         .form-actions {
             margin-top: 20px; display: flex; gap: 10px;
@@ -826,8 +846,8 @@ var SECTION_TYPES = {
         defaults: {
             sectionTitle: '',
             links: [
-                { label: 'Link 1', url: '#', description: '', badgeText: '' },
-                { label: 'Link 2', url: '#', description: '', badgeText: '' }
+                { label: 'Link 1', url: '#', description: '', badgeText: '', imageUrl: '' },
+                { label: 'Link 2', url: '#', description: '', badgeText: '', imageUrl: '' }
             ]
         }
     },
@@ -972,6 +992,13 @@ var PAGE_REGISTRY = {
                 sectionTitle: '',
                 links: [
                     { label: 'Disco 🌍', url: 'https://labs.google/disco', description: '探索 Google 最新的 AI 網頁功能', badgeText: '' }
+                ]
+            }},
+            { id: 'lt-divider-management', type: 'section-divider', visible: true, content: { title: '管理', subtitle: '' } },
+            { id: 'lt-management', type: 'link-list', visible: true, content: {
+                sectionTitle: '',
+                links: [
+                    { label: '📱 QR 顯示頁', url: '/qr-display', description: '掃描 QR Code 提交的內容即時顯示（需登入）', badgeText: '', imageUrl: '' }
                 ]
             }},
             { id: 'lt-social', type: 'link-list', visible: true, content: {
@@ -1178,6 +1205,15 @@ function showDashboard(user) {
     }
     initPageSelector();
     loadLayout();
+    if (!window._layoutPreviewLiveBound) {
+        window._layoutPreviewLiveBound = true;
+        document.addEventListener('change', function(e) {
+            if (document.getElementById('editCard') && document.getElementById('editCard').contains(e.target)) schedulePreviewUpdate();
+        });
+        document.addEventListener('input', function(e) {
+            if (document.getElementById('editCard') && document.getElementById('editCard').contains(e.target)) schedulePreviewUpdate();
+        });
+    }
 }
 
 // ============================================================
@@ -1214,6 +1250,16 @@ function loadLayout() {
     db.collection('pageLayouts').doc(docId).get().then(function(doc) {
         if (doc.exists && doc.data().sections && doc.data().sections.length > 0) {
             layoutSections = doc.data().sections;
+            if (docId === 'linktree' && !layoutSections.some(function(s) { return s.id === 'lt-management'; })) {
+                var mgmt = [
+                    { id: 'lt-divider-management', type: 'section-divider', visible: true, content: { title: '管理', subtitle: '' } },
+                    { id: 'lt-management', type: 'link-list', visible: true, content: { sectionTitle: '', links: [{ label: '📱 QR 顯示頁', url: '/qr-display', description: '掃描 QR Code 提交的內容即時顯示（需登入）', badgeText: '', imageUrl: '' }] } }
+                ];
+                var idx = -1;
+                for (var i = 0; i < layoutSections.length; i++) { if (layoutSections[i].id === 'lt-coming-soon') { idx = i; break; } }
+                if (idx >= 0) layoutSections = layoutSections.slice(0, idx + 1).concat(mgmt).concat(layoutSections.slice(idx + 1));
+                else layoutSections = layoutSections.concat(mgmt);
+            }
         } else {
             layoutSections = buildFromDefaults();
         }
@@ -1328,6 +1374,19 @@ document.addEventListener('keydown', function(e) {
 // ============================================================
 // LIVE PREVIEW
 // ============================================================
+var _previewUpdateTimer = null;
+
+function schedulePreviewUpdate() {
+    clearTimeout(_previewUpdateTimer);
+    _previewUpdateTimer = setTimeout(function() {
+        var sec = getSelectedSection();
+        if (sec) {
+            commitCurrentEdit();
+            sendPreviewUpdate();
+        }
+    }, 300);
+}
+
 function sendPreviewUpdate() {
     var frame = document.getElementById('previewFrame');
     if (!frame || !frame.contentWindow) return;
@@ -1935,7 +1994,8 @@ function renderEditForm() {
                 { key: 'label', label: '標籤' },
                 { key: 'url', label: 'URL' },
                 { key: 'description', label: '描述' },
-                { key: 'badgeText', label: '徽章文字' }
+                { key: 'badgeText', label: '徽章文字' },
+                { key: 'imageUrl', label: '圖片 (選填，16:9 顯示於按鈕上方)', type: 'image' }
             ]);
             break;
 
@@ -2007,6 +2067,7 @@ function renderEditForm() {
         '</div>';
     card.innerHTML = html;
     if (sec.type === 'countdown') loadCountdownDcForm(card, sec);
+    if (sec.type === 'link-list') initLinksArrayDrag(card);
 }
 
 function loadCountdownDcForm(card, sec) {
@@ -2079,7 +2140,6 @@ function imageUploadField(label, fieldName, currentUrl) {
         '</div>';
     } else {
         html += '<div class="upload-placeholder">' +
-            '<span class="upload-icon-lg">&#x1F5BC;</span>' +
             '<span class="upload-hint">點擊或拖放上傳圖片</span>' +
             '<span class="upload-hint-sm">支援 JPG, PNG, WebP（最大 5MB）</span>' +
         '</div>';
@@ -2116,7 +2176,6 @@ function imgRemove(zone) {
     if (hidden) hidden.value = '';
     zone.classList.remove('has-image');
     zone.innerHTML = '<div class="upload-placeholder">' +
-        '<span class="upload-icon-lg">&#x1F5BC;</span>' +
         '<span class="upload-hint">點擊或拖放上傳圖片</span>' +
         '<span class="upload-hint-sm">支援 JPG, PNG, WebP（最大 5MB）</span>' +
     '</div>' +
@@ -2184,12 +2243,40 @@ function arrayEditor(arrayName, title, items, fieldDefs) {
 }
 
 function renderArrayItem(arrayName, item, fieldDefs, idx) {
-    var html = '<div class="array-item">';
+    var sortable = arrayName === 'links';
+    var dragHandleSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
+    var html = '<div class="array-item' + (sortable ? ' sortable' : '') + '" data-array-item-idx="' + idx + '">';
+    if (sortable) {
+        html += '<span class="array-item-drag-handle" draggable="true" title="拖拽以調整順序">' + dragHandleSvg + '</span>';
+    }
     html += '<button class="remove-item" onclick="removeArrayItem(this)" title="移除">✕</button>';
     fieldDefs.forEach(function(fd) {
         html += '<div class="form-group"><label>' + escHtml(fd.label) + '</label>';
         if (fd.type === 'textarea') {
             html += '<textarea data-afield="' + fd.key + '" onchange="setDirty(true)">' + escHtml(item[fd.key] || '') + '</textarea>';
+        } else if (fd.type === 'image') {
+            var cur = (item[fd.key] || '').trim();
+            var hasImg = !!cur;
+            var safeUrl = escHtml(cur);
+            html += '<div class="img-upload-zone array-item-img-zone' + (hasImg ? ' has-image' : '') + '" data-img-field="' + fd.key + '" ' +
+                'ondragover="imgDragOver(event, this)" ondragleave="imgDragLeave(event, this)" ' +
+                'ondrop="imgDrop(event, this)" onclick="imgZoneClick(this)">';
+            if (hasImg) {
+                html += '<div class="preview-wrap">' +
+                    '<img src="' + safeUrl + '" alt="preview">' +
+                    '<div class="img-overlay">' +
+                    '<button type="button" class="btn-change" onclick="event.stopPropagation(); imgZoneClick(this.closest(\'.img-upload-zone\'))">更換</button>' +
+                    '<button type="button" class="btn-remove" onclick="event.stopPropagation(); imgRemove(this.closest(\'.img-upload-zone\'))">移除</button>' +
+                    '</div></div>';
+            } else {
+                html += '<div class="upload-placeholder">' +
+                    '<span class="upload-hint">點擊或拖放上傳</span>' +
+                    '</div>';
+            }
+            html += '<input type="file" accept="image/jpeg,image/png,image/webp" onclick="event.stopPropagation()" onchange="imgFileSelected(this)">' +
+                '</div>' +
+                '<div class="img-upload-progress"><div class="bar"></div></div>' +
+                '<input type="hidden" data-afield="' + fd.key + '" data-field="' + fd.key + '" value="' + safeUrl + '">';
         } else {
             html += '<input type="text" data-afield="' + fd.key + '" value="' + escHtml(item[fd.key] || '') + '" onchange="setDirty(true)">';
         }
@@ -2212,6 +2299,59 @@ function addArrayItem(arrayName, btn) {
     var countEl = btn.closest('.array-group').querySelector('.array-group-title span');
     countEl.textContent = countEl.textContent.replace(/\(\d+\)/, '(' + container.children.length + ')');
     setDirty(true);
+    if (arrayName === 'links') initLinksArrayDrag(document.getElementById('editCard'));
+}
+
+function initLinksArrayDrag(card) {
+    if (!card) return;
+    var container = card.querySelector('[data-array-items="links"]');
+    if (!container) return;
+    var items = container.querySelectorAll('.array-item.sortable');
+    var draggedEl = null;
+
+    items.forEach(function(item) {
+        var handle = item.querySelector('.array-item-drag-handle');
+        if (!handle) return;
+
+        handle.addEventListener('dragstart', function(e) {
+            draggedEl = item;
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', '');
+            e.dataTransfer.setDragImage(item, 0, 0);
+        });
+
+        item.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (draggedEl && draggedEl !== item) item.classList.add('drag-over');
+        });
+
+        item.addEventListener('dragleave', function(e) {
+            if (!item.contains(e.relatedTarget)) item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', function(e) {
+            e.preventDefault();
+            item.classList.remove('drag-over');
+            if (!draggedEl || draggedEl === item) return;
+            var all = container.querySelectorAll('.array-item');
+            var fromIdx = Array.prototype.indexOf.call(all, draggedEl);
+            var toIdx = Array.prototype.indexOf.call(all, item);
+            if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+            if (toIdx > fromIdx) container.insertBefore(draggedEl, item.nextSibling);
+            else container.insertBefore(draggedEl, item);
+            setDirty(true);
+            commitCurrentEdit();
+            sendPreviewUpdate();
+        });
+
+        handle.addEventListener('dragend', function() {
+            item.classList.remove('dragging');
+            container.querySelectorAll('.array-item.drag-over').forEach(function(x) { x.classList.remove('drag-over'); });
+            draggedEl = null;
+        });
+    });
 }
 
 function removeArrayItem(btn) {

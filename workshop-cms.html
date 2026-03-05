@@ -646,11 +646,95 @@
         .toast.error { background: var(--red); }
         @keyframes toast-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Mega Tabs (top-level: Workshop / AI Consultation) */
+        .mega-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .mega-tab {
+            padding: 10px 28px; font-size: 16px; font-weight: 700; border-radius: 12px;
+            cursor: pointer; border: 2px solid var(--bg-off); background: var(--white);
+            color: var(--text-light); transition: all 0.2s; font-family: inherit;
+        }
+        .mega-tab:hover { border-color: var(--accent); color: var(--accent); }
+        .mega-tab.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .mega-section { display: none; }
+        .mega-section.active { display: block; }
+
         /* Tabs */
         .cms-tabs { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 2px solid var(--bg-off); }
         .cms-tab { padding: 12px 24px; font-size: 15px; font-weight: 700; color: var(--text-light); cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
         .cms-tab:hover { color: var(--text); }
         .cms-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Consultation sub-tabs */
+        .consult-tabs { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 2px solid var(--bg-off); }
+        .consult-tab { padding: 12px 24px; font-size: 15px; font-weight: 700; color: var(--text-light); cursor: pointer; border: none; background: none; font-family: inherit; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .consult-tab:hover { color: var(--text); }
+        .consult-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Consultation application cards */
+        .consult-app-card {
+            background: var(--white); border: 1px solid var(--bg-off); border-radius: 16px;
+            padding: 20px 24px; margin-bottom: 16px; transition: all 0.2s; cursor: pointer;
+        }
+        .consult-app-card:hover { box-shadow: 0 4px 20px var(--shadow); }
+        .consult-app-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+        .consult-app-name { font-size: 16px; font-weight: 700; color: var(--text); }
+        .consult-app-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
+        .consult-app-meta span { display: inline-flex; align-items: center; gap: 4px; }
+        .consult-app-fields { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bg-off); }
+        .consult-app-card.expanded .consult-app-fields { display: block; }
+        .consult-field { margin-bottom: 10px; }
+        .consult-field-label { font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 2px; }
+        .consult-field-value { font-size: 14px; color: var(--text); line-height: 1.5; }
+        .consult-status-badge {
+            display: inline-block; padding: 3px 12px; border-radius: 8px;
+            font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .consult-status-new { background: rgba(76,175,80,0.12); color: #2E7D32; }
+        .consult-status-contacted { background: rgba(33,150,243,0.12); color: #1565C0; }
+        .consult-status-completed { background: rgba(158,158,158,0.15); color: #616161; }
+        .consult-skill-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 6px;
+            font-size: 11px; font-weight: 700;
+        }
+        .consult-skill-beginner { background: rgba(76,175,80,0.12); color: #2E7D32; }
+        .consult-skill-intermediate { background: rgba(255,152,0,0.12); color: #E65100; }
+        .consult-skill-advanced { background: rgba(33,150,243,0.12); color: #1565C0; }
+        .consult-skill-expert { background: rgba(156,39,176,0.12); color: #7B1FA2; }
+        .consult-app-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+        .consult-filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center; }
+        .consult-filter-pill {
+            padding: 6px 16px; border-radius: 10px; font-size: 13px; font-weight: 700;
+            cursor: pointer; border: 1.5px solid var(--bg-off); background: var(--white);
+            color: var(--text-light); transition: all 0.2s; font-family: inherit;
+        }
+        .consult-filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+        .consult-filter-pill.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .consult-sort-btn {
+            margin-left: auto; padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: 1.5px solid var(--bg-off); background: var(--white);
+            color: var(--text-light); transition: all 0.2s; font-family: inherit;
+        }
+        .consult-sort-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .consult-search-input {
+            flex: 1; max-width: 400px; padding: 10px 16px; border: 2px solid var(--bg-off);
+            border-radius: 12px; font-family: inherit; font-size: 14px; color: var(--text);
+            background: var(--white); transition: border-color 0.2s;
+        }
+        .consult-search-input:focus { outline: none; border-color: var(--accent); }
+        .consult-kpi-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+        .consult-kpi { flex: 1; min-width: 120px; background: var(--white); border: 1px solid var(--bg-off); border-radius: 14px; padding: 16px 20px; text-align: center; }
+        .consult-kpi-num { font-size: 28px; font-weight: 700; color: var(--text); }
+        .consult-kpi-label { font-size: 12px; color: var(--text-light); font-weight: 600; margin-top: 4px; }
+        .consult-status-menu {
+            position: absolute; z-index: 50; background: var(--white); border: 1px solid var(--bg-off);
+            border-radius: 12px; box-shadow: 0 8px 24px var(--shadow); padding: 6px 0; min-width: 140px;
+        }
+        .consult-status-menu button {
+            display: block; width: 100%; text-align: left; padding: 8px 16px;
+            font-family: inherit; font-size: 13px; font-weight: 600; border: none;
+            background: none; cursor: pointer; color: var(--text); transition: background 0.15s;
+        }
+        .consult-status-menu button:hover { background: var(--bg-pampas); }
         .tab-content { display: none; padding: 0 24px; }
         .tab-content.active { display: block; }
 
@@ -1365,7 +1449,14 @@
     </header>
 
     <div class="container">
-        <!-- Tabs -->
+        <!-- Mega Tabs -->
+        <div class="mega-tabs">
+            <button class="mega-tab active" onclick="switchMegaTab('workshop')">Workshop</button>
+            <button class="mega-tab" onclick="switchMegaTab('consultation')">AI Consultation</button>
+        </div>
+
+        <!-- SECTION: Workshop -->
+        <div class="mega-section active" id="sectionWorkshop">
         <div class="cms-tabs">
             <button class="cms-tab active" onclick="switchTab('dashboard')">數據總覽</button>
             <button class="cms-tab" onclick="switchTab('workshops')">工作坊管理</button>
@@ -1770,6 +1861,66 @@
                 </div>
             </div>
         </div>
+
+        </div><!-- end #sectionWorkshop -->
+
+        <!-- SECTION: AI Consultation -->
+        <div class="mega-section" id="sectionConsultation">
+            <div class="consult-tabs">
+                <button class="consult-tab active" onclick="switchConsultTab('apps')">申請管理</button>
+                <button class="consult-tab" onclick="switchConsultTab('settings')">設定</button>
+            </div>
+
+            <!-- Consultation: Applications -->
+            <div class="tab-content active" id="tabConsultApps">
+                <div class="dashboard-header">
+                    <h1>AI 諮詢申請</h1>
+                </div>
+                <div class="consult-kpi-row">
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="cKpiTotal">0</div><div class="consult-kpi-label">總申請</div></div>
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="cKpiNew">0</div><div class="consult-kpi-label">新申請</div></div>
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="cKpiContacted">0</div><div class="consult-kpi-label">已聯絡</div></div>
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="cKpiCompleted">0</div><div class="consult-kpi-label">已完成</div></div>
+                </div>
+                <div class="consult-search-wrap">
+                    <input type="text" class="consult-search-input" id="consultSearchInput" placeholder="搜尋姓名、電話、IG…" oninput="renderConsultApps()">
+                </div>
+                <div class="consult-filter-bar" id="consultFilterBar">
+                    <button class="consult-filter-pill active" onclick="setConsultFilter('all',this)">全部</button>
+                    <button class="consult-filter-pill" onclick="setConsultFilter('new',this)">新申請</button>
+                    <button class="consult-filter-pill" onclick="setConsultFilter('contacted',this)">已聯絡</button>
+                    <button class="consult-filter-pill" onclick="setConsultFilter('completed',this)">已完成</button>
+                    <button class="consult-sort-btn" id="consultSortBtn" onclick="toggleConsultSortOrder()" title="按日期排序">日期：新→舊 ▼</button>
+                </div>
+                <div id="consultAppsList"></div>
+                <div id="consultEmptyState" style="display:none;text-align:center;padding:48px 24px;color:var(--text-light);font-size:15px;">尚未有諮詢申請</div>
+            </div>
+
+            <!-- Consultation: Settings -->
+            <div class="tab-content" id="tabConsultSettings">
+                <div class="dashboard-header">
+                    <h1>諮詢設定</h1>
+                    <button class="btn" onclick="saveConsultSettings()">儲存設定</button>
+                </div>
+                <div style="max-width:720px;">
+                    <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">WhatsApp 訊息模板</h3>
+                    <div style="padding:12px 16px;background:var(--bg-pampas);border-radius:10px;font-size:12px;color:var(--text-light);margin-bottom:16px;line-height:1.8;">
+                        可用變數 Available variables:<br>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{name}</code>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{phone}</code>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{igAccount}</code>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{aiGoal}</code>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{currentProblem}</code>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{startTiming}</code>
+                        <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{aiSkillLevel}</code>
+                    </div>
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label>新申請 — 首次聯絡諮詢申請者</label>
+                        <textarea id="stConsultWaTpl" rows="8" style="min-height:140px;font-family:monospace;font-size:13px;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div><!-- end #sectionConsultation -->
 
     </div>
 
@@ -4448,30 +4599,30 @@ function deleteWorkshop(workshopId) {
 // TABS
 // ============================================================
 function switchTab(tabId) {
-    document.querySelectorAll('.cms-tab').forEach(function(t) { t.classList.remove('active'); });
-    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelectorAll('#sectionWorkshop .cms-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('#sectionWorkshop .tab-content').forEach(function(c) { c.classList.remove('active'); });
 
     if (tabId === 'dashboard') {
-        document.querySelector('.cms-tab:nth-child(1)').classList.add('active');
+        document.querySelector('#sectionWorkshop .cms-tab:nth-child(1)').classList.add('active');
         document.getElementById('tabDashboard').classList.add('active');
         loadDashboardData();
     } else if (tabId === 'workshops') {
-        document.querySelector('.cms-tab:nth-child(2)').classList.add('active');
+        document.querySelector('#sectionWorkshop .cms-tab:nth-child(2)').classList.add('active');
         document.getElementById('tabWorkshops').classList.add('active');
     } else if (tabId === 'members') {
-        document.querySelector('.cms-tab:nth-child(3)').classList.add('active');
+        document.querySelector('#sectionWorkshop .cms-tab:nth-child(3)').classList.add('active');
         document.getElementById('tabMembers').classList.add('active');
         loadMembersData();
     } else if (tabId === 'attendance') {
-        document.querySelector('.cms-tab:nth-child(4)').classList.add('active');
+        document.querySelector('#sectionWorkshop .cms-tab:nth-child(4)').classList.add('active');
         document.getElementById('tabAttendance').classList.add('active');
         loadAttendanceLog();
     } else if (tabId === 'discounts') {
-        document.querySelector('.cms-tab:nth-child(5)').classList.add('active');
+        document.querySelector('#sectionWorkshop .cms-tab:nth-child(5)').classList.add('active');
         document.getElementById('tabDiscounts').classList.add('active');
         loadGlobalDiscountCodes();
     } else if (tabId === 'settings') {
-        document.querySelector('.cms-tab:nth-child(6)').classList.add('active');
+        document.querySelector('#sectionWorkshop .cms-tab:nth-child(6)').classList.add('active');
         document.getElementById('tabSettings').classList.add('active');
         loadWsSettings();
     }
@@ -8179,6 +8330,294 @@ function loadAttendanceLog() {
         lastTouchEnd = now;
     }, { passive: false });
 })();
+
+/* ================================================================
+   MEGA TAB SWITCHING (Workshop / AI Consultation)
+   ================================================================ */
+function switchMegaTab(section) {
+    document.querySelectorAll('.mega-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.mega-section').forEach(function(s) { s.classList.remove('active'); });
+    if (section === 'workshop') {
+        document.querySelector('.mega-tab:nth-child(1)').classList.add('active');
+        document.getElementById('sectionWorkshop').classList.add('active');
+    } else if (section === 'consultation') {
+        document.querySelector('.mega-tab:nth-child(2)').classList.add('active');
+        document.getElementById('sectionConsultation').classList.add('active');
+        if (!_consultDataLoaded) loadConsultData();
+    }
+}
+
+/* ================================================================
+   CONSULTATION TAB SWITCHING
+   ================================================================ */
+function switchConsultTab(tabId) {
+    document.querySelectorAll('.consult-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('#sectionConsultation .tab-content').forEach(function(c) { c.classList.remove('active'); });
+    if (tabId === 'apps') {
+        document.querySelector('.consult-tab:nth-child(1)').classList.add('active');
+        document.getElementById('tabConsultApps').classList.add('active');
+    } else if (tabId === 'settings') {
+        document.querySelector('.consult-tab:nth-child(2)').classList.add('active');
+        document.getElementById('tabConsultSettings').classList.add('active');
+        loadConsultSettings();
+    }
+}
+
+/* ================================================================
+   CONSULTATION DATA
+   ================================================================ */
+var _consultDataLoaded = false;
+var _consultApps = [];
+var _consultFilter = 'all';
+var _consultSortOrder = 'desc'; // 'desc' = newest first, 'asc' = oldest first
+var _consultSettings = null;
+var _unsubConsult = null;
+
+var DEFAULT_CONSULT_WA_TEMPLATE = '你好 {name}！\n\n感謝你提交 AI 諮詢申請 🙏\n\n我留意到你想解決的問題是：\n{currentProblem}\n\n你的目標：\n{aiGoal}\n\n我哋可以安排一個時間傾下，幫你搵到最適合嘅方案。\n\n你幾時方便？';
+
+function loadConsultData() {
+    _consultDataLoaded = true;
+    if (_unsubConsult) _unsubConsult();
+    _unsubConsult = db.collection('consultations')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot(function(snap) {
+            _consultApps = [];
+            snap.docs.forEach(function(doc) {
+                var d = doc.data();
+                d._id = doc.id;
+                _consultApps.push(d);
+            });
+            updateConsultKpis();
+            renderConsultApps();
+        }, function(err) {
+            console.error('consultations listener error', err);
+        });
+}
+
+function updateConsultKpis() {
+    var total = _consultApps.length;
+    var newCount = 0, contacted = 0, completed = 0;
+    _consultApps.forEach(function(a) {
+        if (a.status === 'new' || !a.status) newCount++;
+        else if (a.status === 'contacted') contacted++;
+        else if (a.status === 'completed') completed++;
+    });
+    document.getElementById('cKpiTotal').textContent = total;
+    document.getElementById('cKpiNew').textContent = newCount;
+    document.getElementById('cKpiContacted').textContent = contacted;
+    document.getElementById('cKpiCompleted').textContent = completed;
+}
+
+function setConsultFilter(filter, el) {
+    _consultFilter = filter;
+    document.querySelectorAll('#consultFilterBar .consult-filter-pill').forEach(function(p) { p.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    renderConsultApps();
+}
+
+function toggleConsultSortOrder() {
+    _consultSortOrder = _consultSortOrder === 'desc' ? 'asc' : 'desc';
+    var btn = document.getElementById('consultSortBtn');
+    if (btn) btn.textContent = _consultSortOrder === 'desc' ? '日期：新→舊 ▼' : '日期：舊→新 ▲';
+    renderConsultApps();
+}
+
+function renderConsultApps() {
+    var listEl = document.getElementById('consultAppsList');
+    var emptyEl = document.getElementById('consultEmptyState');
+    var search = (document.getElementById('consultSearchInput').value || '').trim().toLowerCase();
+    var filtered = _consultApps.filter(function(a) {
+        var status = a.status || 'new';
+        if (_consultFilter !== 'all' && status !== _consultFilter) return false;
+        if (search) {
+            var haystack = ((a.name || '') + ' ' + (a.phone || '') + ' ' + (a.igAccount || '') + ' ' + (a.email || '')).toLowerCase();
+            if (haystack.indexOf(search) === -1) return false;
+        }
+        return true;
+    });
+    filtered.sort(function(a, b) {
+        var getTime = function(x) {
+            if (x.createdAt && x.createdAt.toDate) return x.createdAt.toDate().getTime();
+            if (x.timestamp) return new Date(x.timestamp).getTime();
+            return 0;
+        };
+        var ta = getTime(a), tb = getTime(b);
+        return _consultSortOrder === 'desc' ? tb - ta : ta - tb;
+    });
+    if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        return;
+    }
+    emptyEl.style.display = 'none';
+    var html = '';
+    filtered.forEach(function(a) {
+        var status = a.status || 'new';
+        var statusLabel = status === 'new' ? '新申請' : status === 'contacted' ? '已聯絡' : '已完成';
+        var statusClass = 'consult-status-' + status;
+        var skillMap = { '從未接觸': 'beginner', '新手': 'beginner', '進階': 'intermediate', '專家': 'expert' };
+        var skillClass = 'consult-skill-' + (skillMap[a.aiSkillLevel] || 'beginner');
+        var createdAt = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate() : (a.timestamp ? new Date(a.timestamp) : null);
+        var timeStr = createdAt ? createdAt.toLocaleString('zh-Hant', { dateStyle: 'short', timeStyle: 'short' }) : (a.timestamp || '—');
+
+        html += '<div class="consult-app-card" id="cApp_' + a._id + '" onclick="toggleConsultExpand(this,event)">';
+        html += '<div class="consult-app-header">';
+        html += '<div><span class="consult-app-name">' + escHtml(a.name || '未知') + '</span>';
+        if (a.aiSkillLevel) html += ' <span class="consult-skill-badge ' + skillClass + '">' + escHtml(a.aiSkillLevel) + '</span>';
+        html += '</div>';
+        html += '<div style="position:relative;"><span class="consult-status-badge ' + statusClass + '" onclick="event.stopPropagation();toggleConsultStatusMenu(\'' + a._id + '\')">' + statusLabel + ' ▾</span>';
+        html += '<div class="consult-status-menu" id="cStatusMenu_' + a._id + '" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;">';
+        html += '<button onclick="event.stopPropagation();setConsultStatus(\'' + a._id + '\',\'new\')">新申請</button>';
+        html += '<button onclick="event.stopPropagation();setConsultStatus(\'' + a._id + '\',\'contacted\')">已聯絡</button>';
+        html += '<button onclick="event.stopPropagation();setConsultStatus(\'' + a._id + '\',\'completed\')">已完成</button>';
+        html += '</div></div>';
+        html += '</div>';
+
+        html += '<div class="consult-app-meta">';
+        if (a.phone) html += '<span>📞 ' + escHtml(a.phone) + '</span>';
+        if (a.igAccount) html += '<span>📷 @' + escHtml(a.igAccount) + '</span>';
+        if (a.email) html += '<span>✉ ' + escHtml(a.email) + '</span>';
+        html += '<span>🕐 ' + escHtml(timeStr) + '</span>';
+        html += '</div>';
+
+        if (a.currentProblem) {
+            html += '<div class="consult-field"><div class="consult-field-label">目前遇到的問題</div><div class="consult-field-value">' + escHtml(a.currentProblem) + '</div></div>';
+        }
+
+        html += '<div class="consult-app-actions">';
+        html += '<a class="wa-send-btn" href="#" onclick="event.stopPropagation();event.preventDefault();openConsultWhatsApp(\'' + a._id + '\');">';
+        html += '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="#fff" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path fill="#fff" d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.318A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.137 0-4.146-.587-5.863-1.606l-.41-.252-3.26.92.855-3.143-.268-.427A9.96 9.96 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>';
+        html += 'WhatsApp</a>';
+        html += '</div>';
+
+        html += '<div class="consult-app-fields">';
+        if (a.aiGoal) html += '<div class="consult-field"><div class="consult-field-label">90日AI目標</div><div class="consult-field-value">' + escHtml(a.aiGoal) + '</div></div>';
+        if (a.successOutcome) html += '<div class="consult-field"><div class="consult-field-label">成功指標</div><div class="consult-field-value">' + escHtml(a.successOutcome) + '</div></div>';
+        if (a.startTiming) html += '<div class="consult-field"><div class="consult-field-label">開始時間</div><div class="consult-field-value">' + escHtml(a.startTiming) + '</div></div>';
+        if (a.willingnessToPay) html += '<div class="consult-field"><div class="consult-field-label">付費意願</div><div class="consult-field-value">' + escHtml(a.willingnessToPay) + '</div></div>';
+        if (a.whyNow) html += '<div class="consult-field"><div class="consult-field-label">為什麼現在</div><div class="consult-field-value">' + escHtml(a.whyNow) + '</div></div>';
+        if (a.currentAITools && a.currentAITools.length) html += '<div class="consult-field"><div class="consult-field-label">使用中的AI工具</div><div class="consult-field-value">' + escHtml(a.currentAITools.join(', ')) + (a.currentAIToolsOtherText ? ' (' + escHtml(a.currentAIToolsOtherText) + ')' : '') + '</div></div>';
+        if (a.aiTopics && a.aiTopics.length) html += '<div class="consult-field"><div class="consult-field-label">感興趣的AI主題</div><div class="consult-field-value">' + escHtml(a.aiTopics.join(', ')) + (a.aiTopicsOtherText ? ' (' + escHtml(a.aiTopicsOtherText) + ')' : '') + '</div></div>';
+        if (a.workshopInterest) html += '<div class="consult-field"><div class="consult-field-label">工作坊興趣</div><div class="consult-field-value">' + escHtml(a.workshopInterest) + '</div></div>';
+        if (a.additionalInfo) html += '<div class="consult-field"><div class="consult-field-label">補充資料</div><div class="consult-field-value">' + escHtml(a.additionalInfo) + '</div></div>';
+        if (a.whatsappConsent) html += '<div class="consult-field"><div class="consult-field-label">WhatsApp 同意</div><div class="consult-field-value">' + escHtml(a.whatsappConsent) + '</div></div>';
+        html += '</div>';
+
+        html += '</div>';
+    });
+    listEl.innerHTML = html;
+}
+
+function toggleConsultExpand(card, e) {
+    if (e && (e.target.closest('.wa-send-btn') || e.target.closest('.consult-status-badge') || e.target.closest('.consult-status-menu'))) return;
+    card.classList.toggle('expanded');
+}
+
+function toggleConsultStatusMenu(docId) {
+    var menu = document.getElementById('cStatusMenu_' + docId);
+    if (!menu) return;
+    var isVisible = menu.style.display !== 'none';
+    document.querySelectorAll('.consult-status-menu').forEach(function(m) { m.style.display = 'none'; });
+    if (!isVisible) {
+        menu.style.display = 'block';
+        setTimeout(function() {
+            document.addEventListener('click', function handler() {
+                menu.style.display = 'none';
+                document.removeEventListener('click', handler);
+            }, { once: true });
+        }, 10);
+    }
+}
+
+function setConsultStatus(docId, status) {
+    document.querySelectorAll('.consult-status-menu').forEach(function(m) { m.style.display = 'none'; });
+    db.collection('consultations').doc(docId).update({ status: status }).catch(function(err) {
+        showToast('狀態更新失敗：' + err.message, 'error');
+    });
+}
+
+/* ================================================================
+   CONSULTATION WHATSAPP
+   ================================================================ */
+function openConsultWhatsApp(docId) {
+    var app = null;
+    for (var i = 0; i < _consultApps.length; i++) {
+        if (_consultApps[i]._id === docId) { app = _consultApps[i]; break; }
+    }
+    if (!app) return;
+
+    function send(template) {
+        var msg = template
+            .replace(/\{name\}/g, app.name || '')
+            .replace(/\{phone\}/g, app.phone || '')
+            .replace(/\{igAccount\}/g, app.igAccount || '')
+            .replace(/\{aiGoal\}/g, app.aiGoal || '')
+            .replace(/\{currentProblem\}/g, app.currentProblem || '')
+            .replace(/\{startTiming\}/g, app.startTiming || '')
+            .replace(/\{aiSkillLevel\}/g, app.aiSkillLevel || '');
+        var num = (app.phone || '').replace(/[\s\-()]/g, '');
+        if (num.startsWith('+')) num = num.substring(1);
+        else if (/^\d{8}$/.test(num)) num = '852' + num;
+        var url = 'https://api.whatsapp.com/send?phone=' + num + '&text=' + encodeURIComponent(msg);
+        window.open(url, '_blank');
+        if (app.status === 'new' || !app.status) {
+            db.collection('consultations').doc(docId).update({ status: 'contacted' }).catch(function() {});
+        }
+    }
+
+    if (_consultSettings && _consultSettings.waTemplates && _consultSettings.waTemplates.newApplication) {
+        send(_consultSettings.waTemplates.newApplication);
+    } else {
+        db.collection('consultationSettings').doc('config').get().then(function(doc) {
+            _consultSettings = doc.exists ? doc.data() : {};
+            var tpl = (_consultSettings.waTemplates && _consultSettings.waTemplates.newApplication) || DEFAULT_CONSULT_WA_TEMPLATE;
+            send(tpl);
+        }).catch(function() {
+            send(DEFAULT_CONSULT_WA_TEMPLATE);
+        });
+    }
+}
+
+/* ================================================================
+   CONSULTATION SETTINGS
+   ================================================================ */
+function loadConsultSettings() {
+    if (_consultSettings) {
+        _populateConsultSettingsUI();
+        return;
+    }
+    db.collection('consultationSettings').doc('config').get().then(function(doc) {
+        _consultSettings = doc.exists ? doc.data() : {};
+        if (!_consultSettings.waTemplates) _consultSettings.waTemplates = {};
+        _populateConsultSettingsUI();
+    }).catch(function() {
+        _consultSettings = { waTemplates: {} };
+        _populateConsultSettingsUI();
+    });
+}
+
+function _populateConsultSettingsUI() {
+    var wt = (_consultSettings && _consultSettings.waTemplates) || {};
+    document.getElementById('stConsultWaTpl').value = wt.newApplication || DEFAULT_CONSULT_WA_TEMPLATE;
+}
+
+function saveConsultSettings() {
+    showLoadingOverlay('儲存設定中...');
+    var data = {
+        waTemplates: {
+            newApplication: document.getElementById('stConsultWaTpl').value.trim() || DEFAULT_CONSULT_WA_TEMPLATE
+        },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    db.collection('consultationSettings').doc('config').set(data, { merge: true }).then(function() {
+        _consultSettings = Object.assign(_consultSettings || {}, data);
+        hideLoadingOverlay();
+        showToast('諮詢設定已儲存');
+    }).catch(function(err) {
+        hideLoadingOverlay();
+        showToast('儲存失敗：' + err.message, 'error');
+    });
+}
 </script>
 </body>
 </html>

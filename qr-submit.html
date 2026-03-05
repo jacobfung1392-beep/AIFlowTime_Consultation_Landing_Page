@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>提交內容 | AIFLOWTIME</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7;
+            --bg-off: #E8E4DF;
+            --accent: #D97757;
+            --accent-dark: #C56A4B;
+            --text: #3B3B3B;
+            --text-light: #7A7A7A;
+            --white: #FFFFFF;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+            font-weight: 400;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .header-inner {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 14px 24px;
+        }
+        .logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; }
+        .logo span { color: var(--accent); }
+        .main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+        .main h1 {
+            font-size: clamp(24px, 4vw, 32px);
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .main .lead {
+            color: var(--text-light);
+            font-size: 15px;
+            margin-bottom: 28px;
+        }
+        .blocks-container { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+        .block-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .block-row .block-input {
+            flex: 1;
+            min-height: 52px;
+            padding: 14px 18px;
+            border: 2px solid var(--bg-off);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text);
+            background: var(--white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .block-row .block-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.15);
+        }
+        .block-row .block-input::placeholder { color: var(--text-light); }
+        .block-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .block-row .btn-remove {
+            flex-shrink: 0;
+            width: 44px;
+            height: 52px;
+            border: 2px solid var(--bg-off);
+            border-radius: 12px;
+            background: var(--white);
+            color: var(--text-light);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .block-row .btn-remove:hover {
+            border-color: #C62828;
+            color: #C62828;
+            background: rgba(198, 40, 40, 0.06);
+        }
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: 2px dashed var(--bg-off);
+            border-radius: 12px;
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-add:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(217, 119, 87, 0.06);
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 28px;
+        }
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 52px;
+            padding: 0 32px;
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-submit:hover { background: var(--accent-dark); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 24px var(--shadow);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast.success { background: #2E7D32; color: var(--white); }
+        .toast.error { background: #C62828; color: var(--white); }
+        /* Confirm modal – same as workshop / QR display */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .confirm-overlay.show { display: flex; }
+        .confirm-modal {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 28px 32px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            border: 1px solid var(--glass-border);
+        }
+        .confirm-modal h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+        .confirm-modal p { font-size: 15px; color: var(--text-light); line-height: 1.6; margin-bottom: 24px; }
+        .confirm-actions { display: flex; gap: 12px; justify-content: flex-end; }
+        .confirm-actions .btn-cancel {
+            background: transparent;
+            color: var(--text-light);
+            border: 2px solid var(--bg-off);
+            height: 44px;
+            padding: 0 20px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .confirm-actions .btn-cancel:hover { border-color: var(--text-light); color: var(--text); }
+        .confirm-actions .btn-ok {
+            height: 44px;
+            padding: 0 20px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            background: var(--accent);
+            color: var(--white);
+        }
+        .confirm-actions .btn-ok:hover { background: var(--accent-dark); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="ai-beginner-workshop.html" class="logo">AIFlowTime <span>· 提交</span></a>
+        </div>
+    </header>
+    <main class="main">
+        <h1>新增內容區塊</h1>
+        <p class="lead" id="formLead">可新增多個文字區塊，填寫後按「提交」即可。提交結果會即時顯示於主畫面。每人掃描後只會看到自己的表單，不會看到其他人的畫面。</p>
+        <form id="form">
+            <div id="blocksContainer" class="blocks-container"></div>
+            <button type="button" class="btn-add" id="addBlockBtn">＋ 新增區塊</button>
+            <div class="actions">
+                <button type="submit" class="btn-submit" id="submitBtn">提交</button>
+            </div>
+        </form>
+    </main>
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <div id="confirmOverlay" class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="confirm-modal">
+            <h3 id="confirmTitle">確認</h3>
+            <p id="confirmMessage"></p>
+            <div class="confirm-actions">
+                <button type="button" class="btn-cancel" id="confirmCancelBtn">取消</button>
+                <button type="button" class="btn-ok" id="confirmOkBtn">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script>
+        var db;
+        initFirebase(function(app) {
+            db = app.firestore();
+            loadBoxTitlesThenInitForm();
+        });
+
+        function loadBoxTitlesThenInitForm() {
+            db.collection('qrSettings').doc('display').get().then(function(doc) {
+                var boxTitles = (doc.exists && doc.data().boxTitles) ? doc.data().boxTitles : [];
+                if (!Array.isArray(boxTitles)) boxTitles = [];
+                initForm(boxTitles);
+            }).catch(function() { initForm([]); });
+        }
+
+        function initForm(boxTitles) {
+            var container = document.getElementById('blocksContainer');
+            var addBtn = document.getElementById('addBlockBtn');
+            var form = document.getElementById('form');
+            var submitBtn = document.getElementById('submitBtn');
+
+            function addBlock(value, label) {
+                value = value || '';
+                label = label || '';
+                var row = document.createElement('div');
+                row.className = 'block-row';
+                var left = document.createElement('div');
+                left.style.flex = '1';
+                left.style.minWidth = '0';
+                if (label) {
+                    var lbl = document.createElement('div');
+                    lbl.className = 'block-label';
+                    lbl.textContent = label;
+                    left.appendChild(lbl);
+                }
+                var inp = document.createElement('input');
+                inp.type = 'text';
+                inp.className = 'block-input';
+                inp.placeholder = label ? '請輸入…' : '輸入內容…';
+                inp.value = value;
+                inp.setAttribute('maxlength', '2000');
+                left.appendChild(inp);
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn-remove';
+                removeBtn.setAttribute('aria-label', '移除區塊');
+                removeBtn.textContent = '×';
+                removeBtn.onclick = function() {
+                    if (container.children.length <= 1) return;
+                    showConfirm('移除此區塊', '確定要移除此輸入區塊嗎？', '取消', '移除', function() {
+                        row.remove();
+                    });
+                };
+                row.appendChild(left);
+                row.appendChild(removeBtn);
+                container.appendChild(row);
+                inp.focus();
+            }
+
+            addBtn.onclick = function() { addBlock('', ''); };
+
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                var inputs = container.querySelectorAll('.block-input');
+                var blocks = [];
+                inputs.forEach(function(inp) {
+                    var t = (inp.value || '').trim();
+                    if (t) blocks.push(t);
+                });
+                if (blocks.length === 0) {
+                    showToast('請至少填寫一個區塊', 'error');
+                    return;
+                }
+                submitBtn.disabled = true;
+                var titlesToSave = (boxTitles && boxTitles.length) ? boxTitles : [];
+                db.collection('qrSubmissions').add({
+                    blocks: blocks,
+                    boxTitles: titlesToSave,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(function() {
+                    showToast('提交成功！', 'success');
+                    container.innerHTML = '';
+                    if (boxTitles && boxTitles.length > 0) {
+                        boxTitles.forEach(function(t) { addBlock('', t); });
+                    } else {
+                        addBlock('', '');
+                    }
+                    submitBtn.disabled = false;
+                }).catch(function(err) {
+                    showToast('提交失敗，請稍後再試', 'error');
+                    submitBtn.disabled = false;
+                });
+            };
+
+            container.innerHTML = '';
+            if (boxTitles && boxTitles.length > 0) {
+                boxTitles.forEach(function(t) { addBlock('', t); });
+            } else {
+                addBlock('', '');
+            }
+        }
+
+        function escapeAttr(s) {
+            var div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML.replace(/"/g, '&quot;');
+        }
+
+        function showToast(msg, type) {
+            var el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast ' + (type || 'success') + ' show';
+            setTimeout(function() {
+                el.classList.remove('show');
+            }, 2800);
+        }
+
+        function showConfirm(title, message, cancelLabel, okLabel, onConfirm, onCancel) {
+            var overlay = document.getElementById('confirmOverlay');
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message || '';
+            document.getElementById('confirmCancelBtn').textContent = cancelLabel || '取消';
+            document.getElementById('confirmOkBtn').textContent = okLabel || '確定';
+            overlay.classList.add('show');
+            function close() {
+                overlay.classList.remove('show');
+                document.getElementById('confirmOkBtn').onclick = null;
+                document.getElementById('confirmCancelBtn').onclick = null;
+                overlay.onclick = null;
+            }
+            document.getElementById('confirmOkBtn').onclick = function() {
+                close();
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+            document.getElementById('confirmCancelBtn').onclick = function() {
+                close();
+                if (typeof onCancel === 'function') onCancel();
+            };
+            overlay.onclick = function(e) {
+                if (e.target === overlay) {
+                    close();
+                    if (typeof onCancel === 'function') onCancel();
+                }
+            };
+        }
+    </script>
+</body>
+</html>

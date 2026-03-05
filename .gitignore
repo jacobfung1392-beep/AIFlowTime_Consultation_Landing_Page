@@ -12,6 +12,10 @@ ui-debug.log
 .env
 .env.local
 
+# Service account keys (never commit)
+service-account.json
+*-service-account*.json
+
 # OS files
 .DS_Store
 Thumbs.db

@@ -39,7 +39,7 @@ function initFirebase(callback, opts) {
 
     if (typeof firebase !== 'undefined' && firebase.auth) {
         var auth = app.auth();
-        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .then(function() { if (typeof callback === 'function') callback(app); })
             .catch(function() { if (typeof callback === 'function') callback(app); });
     } else {

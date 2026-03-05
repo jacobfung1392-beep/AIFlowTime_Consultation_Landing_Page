@@ -4,6 +4,7 @@
   },
   "devDependencies": {
     "firebase-admin": "^13.7.0",
+    "googleapis": "^144.0.0",
     "gifsicle": "^7.0.1"
   }
 }

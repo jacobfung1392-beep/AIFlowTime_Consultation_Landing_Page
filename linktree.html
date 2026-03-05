@@ -357,6 +357,8 @@
             padding: 0 1rem 3rem;
             position: relative;
             z-index: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Tools section label blocks */
@@ -449,6 +451,30 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+        
+        /* Link item with optional top image (16:9) */
+        .link-item--with-image {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .link-item--with-image .link-item-image-wrap {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            flex-shrink: 0;
+            border-radius: 0.75rem 0.75rem 0 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .link-item--with-image .link-item-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .link-item--with-image .link-content {
+            padding: 1rem 1.5rem;
         }
         
         .link-text {
@@ -580,8 +606,12 @@
             );
         }
         
-        /* 
-         * CRITICAL: Prevent browser from removing elements on scroll
+        /* Hide layout sections until Firestore layout is applied (prevents flash of default order) */
+        body.layout-pending [data-section-id] {
+            opacity: 0 !important;
+        }
+        
+        /*
          * These properties force GPU layer promotion and prevent memory reclamation
          */
         .fade-in, .link-item, .linktree-divider-block, .linktree-header, .linktree-footer {
@@ -958,7 +988,7 @@
         }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Safari Theme Color Helper - Must be at top for Safari to detect -->
     <div style="position: fixed; top: 0; left: 0; right: 0; height: 100vh; width: 100%; background: #020111; pointer-events: none; z-index: -3;"></div>
     
@@ -982,12 +1012,8 @@
     <!-- Safari Color Detection Bar - Visible deep space area for Safari to sample -->
     <div style="width: 100%; height: 60px; background: #020111; position: relative; z-index: 10;"></div>
     
-    <!-- Header -->
-    <header class="linktree-header fade-in" data-section-id="lt-header" data-section-type="hero" style="padding-top: 1rem;">
-        <img src="Landing-page-logo.png" alt="AIFlowTime" class="profile-avatar" id="profileAvatar" width="100" height="100" loading="eager" decoding="async">
-        <h1 class="profile-name">AIFlowTime的世界</h1>
-        <p class="profile-bio" style="font-size: 1.1em;"><strong>用 AI 換時間</strong>｜建立會<span style="color: #FFD700; font-weight: bold; font-size: 1.15em;">自己跑</span>的工作系統<br>專為斜槓族、AI 新手、小生意老闆而設</p>
-    </header>
+    <!-- Header (content from layout editor) -->
+    <header class="linktree-header fade-in" data-section-id="lt-header" data-section-type="hero" style="padding-top: 1rem;"></header>
     
     <!-- Links Container -->
     <div class="links-container">
@@ -1015,186 +1041,39 @@
             </div>
         </section>
         
-        <div data-section-id="lt-services" data-section-type="link-list">
-        <a href="consultation.html" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">有唔識嘅AI問題？將你嘅問題話我知！</div>
-                    <div class="link-description">了解更多諮詢內容與流程</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-        
-        <a href="ai-beginner-workshop.html" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title" style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span>👩‍🏫 AI 課程工作坊</span>
-                        <span class="pixelated-text">立即報名！</span>
-                    </div>
-                    <div class="link-description">專為斜槓族、小生意老闆、AI 新手而設 — 零基礎也能上手的實戰課程</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-        
-        <a href="#" class="link-item fade-in" id="aiGuideLink" onclick="event.preventDefault(); openWhatsAppModal();">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">📚 2026年5個必學AI指南</div>
-                    <div class="link-description">免費領取AI工作流指南</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-        
-        <a href="quiz.html" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title" style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span>🎯 2分鐘AI能力診斷</span>
-                        <span class="pixelated-text">免費！</span>
-                    </div>
-                    <div class="link-description">搵出你嘅 AI 瓶頸，獲取個人化學習建議</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-        
-        <a href="about-jacob.html" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">👤 關於 Jacob</div>
-                    <div class="link-description">了解更多關於創辦人的故事</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-        </div>
+        <div data-section-id="lt-services" data-section-type="link-list"></div>
 
         <div class="linktree-divider-block fade-in" data-section-id="lt-divider-tools" data-section-type="section-divider">
             <div class="linktree-divider"></div>
-            <div class="profile-name linktree-section-title">Jacob的AI工具箱</div>
+            <div class="profile-name linktree-section-title"></div>
+            <div class="profile-bio linktree-section-subtitle" style="display:none;"></div>
         </div>
 
-        <div data-section-id="lt-tools" data-section-type="tools-grid">
-        <a href="https://www.kimi.com/?utm_campaign=TR_kWNaAwSQ&utm_content=&utm_medium=Instagram&utm_source=CH_pzQ7f4g6&utm_term=" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">
-                        <img src="KIMI.png" alt="KIMI AI" width="80" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block; mix-blend-mode: screen;">
-                    </div>
-                    <div class="link-description">集深度研究與 Nano Banana 簡報製作於一身的全能 AI 生產力助手。</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-
-        <a href="https://dub.florafauna.ai/fung-tsun-sing" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title" style="display: flex; align-items: center; gap: 0.75rem;">
-                        <img src="Flora_AI.png" alt="Florafauna AI" width="28" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
-                        <span class="pixelated-text">25%OFF with AIFlowTime</span>
-                    </div>
-                    <div class="link-description">FloraFauna AI 是讓創作者在一個智慧畫布上，串連多模型、構建可重複創作流程的專業 AI 工作室。</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-
-        <a href="https://app.lupaupscaler.com/?via=AIFlowTime" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">
-                        <img src="Lupa.png" alt="Lupa AI" width="80" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
-                    </div>
-                    <div class="link-description">讓模糊影像秒變高解析、視角可調、細節自然銳利的專業升級工具。</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-
-        <a href="https://apps.apple.com/hk/app/%E6%A5%B5%E5%BD%B1%E7%9B%B8%E6%A9%9F-%E5%8F%A3%E8%A2%8B%E4%B8%AD%E7%9A%84%E5%B0%88%E6%A5%AD%E7%9B%B8%E6%A9%9F/id1459953293" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">
-                        <img src="Fotorgear.png" alt="Fotorgear" width="120" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
-                    </div>
-                    <div class="link-description">☝️Jacob話最好用嘅iPhone攝影app🤳🏻</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-
-        <a href="https://designsparks.app.creativityai.io/" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">
-                        <img src="DesignSpark.png" alt="Design Sparks" width="120" height="28" loading="eager" decoding="async" style="height: 28px; width: auto; display: block;">
-                    </div>
-                    <div class="link-description">結合 AI 與創意思考術，秒生大量設計點子，支援永續循環設計，專為設計師打造。</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
-        </div>
+        <div data-section-id="lt-tools" data-section-type="tools-grid"></div>
 
         <div class="linktree-divider-block fade-in" data-section-id="lt-divider-coming" data-section-type="section-divider" style="margin-top: 1.25rem;">
             <div class="linktree-divider"></div>
-            <div class="profile-name linktree-section-title">即將推出！</div>
-            <div class="profile-bio linktree-section-subtitle">快啲加入Google嘅waiting list👇🏻</div>
+            <div class="profile-name linktree-section-title"></div>
+            <div class="profile-bio linktree-section-subtitle" style="display:none;"></div>
         </div>
 
-        <div data-section-id="lt-coming-soon" data-section-type="link-list">
-        <a href="https://labs.google/disco" target="_blank" rel="noopener noreferrer" class="link-item fade-in">
-            <div class="link-content">
-                <div class="link-text">
-                    <div class="link-title">Disco 🌍</div>
-                    <div class="link-description">探索 Google 最新的 AI 網頁功能</div>
-                </div>
-                <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </div>
-        </a>
+        <div data-section-id="lt-coming-soon" data-section-type="link-list"></div>
+
+        <div class="linktree-divider-block fade-in" data-section-id="lt-divider-management" data-section-type="section-divider" style="margin-top: 1.25rem;">
+            <div class="linktree-divider"></div>
+            <div class="profile-name linktree-section-title"></div>
+            <div class="profile-bio linktree-section-subtitle" style="display:none;"></div>
         </div>
-    </div>
-    
-    <!-- Social Links -->
-    <div class="social-links" data-section-id="lt-social" data-section-type="link-list">
-        <a href="index.html" class="social-link" aria-label="Home">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-        </a>
-        <a href="https://www.instagram.com/aiflowtime" target="_blank" class="social-link" aria-label="Instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-        </a>
+
+        <div data-section-id="lt-management" data-section-type="link-list"></div>
+
+        <div class="social-links" data-section-id="lt-social" data-section-type="link-list"></div>
+
+        <!-- Templates for dynamically added sections (layout editor); hidden and cloned when section id not in DOM -->
+        <div data-section-id="_tpl_link-list" data-section-type="link-list" style="display:none !important;"></div>
+        <div data-section-id="_tpl_tools-grid" data-section-type="tools-grid" style="display:none !important;"></div>
+        <div class="linktree-divider-block fade-in" data-section-id="_tpl_section-divider" data-section-type="section-divider" style="display:none !important;"><div class="linktree-divider"></div><div class="profile-name linktree-section-title"></div><div class="profile-bio linktree-section-subtitle" style="display:none;"></div></div>
+        <header class="linktree-header fade-in" data-section-id="_tpl_hero" data-section-type="hero" style="display:none !important;"></header>
     </div>
     
     <!-- Footer -->
@@ -2382,15 +2261,65 @@
     (function() {
         var _isPreview = new URLSearchParams(window.location.search).has('preview');
 
+        var LINKTREE_DEFAULT_SECTIONS = [
+            { id: 'lt-header', type: 'hero', visible: true, content: { title: 'AIFlowTime的世界', subtitle: '用 AI 換時間｜建立會自己跑的工作系統\n專為斜槓族、AI 新手、小生意老闆而設', gifUrl: 'Landing-page-logo.png' } },
+            { id: 'lt-services', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
+                { label: '有唔識嘅AI問題？將你嘅問題話我知！', url: '/consultation', description: '了解更多諮詢內容與流程', badgeText: '', imageUrl: '' },
+                { label: '👩‍🏫 AI 課程工作坊', url: '/ai-beginner-workshop', description: '專為斜槓族、小生意老闆、AI 新手而設', badgeText: '立即報名！', imageUrl: '' },
+                { label: '📚 2026年5個必學AI指南', url: '#', description: '免費領取AI工作流指南', badgeText: '', imageUrl: '' },
+                { label: '🎯 2分鐘AI能力診斷', url: '/quiz', description: '搵出你嘅 AI 瓶頸，獲取個人化學習建議', badgeText: '免費！', imageUrl: '' },
+                { label: '👤 關於 Jacob', url: '/about-jacob', description: '了解更多關於創辦人的故事', badgeText: '', imageUrl: '' }
+            ]}},
+            { id: 'lt-divider-tools', type: 'section-divider', visible: true, content: { title: 'Jacob的AI工具箱', subtitle: '' } },
+            { id: 'lt-tools', type: 'tools-grid', visible: true, content: { sectionTitle: '', tools: [
+                { name: 'KIMI AI', description: '集深度研究與 Nano Banana 簡報製作於一身的全能 AI 生產力助手。', logoUrl: 'KIMI.png', url: 'https://www.kimi.com/', badgeText: '' },
+                { name: 'FloraFauna AI', description: '串連多模型、構建可重複創作流程的專業 AI 工作室。', logoUrl: 'Flora_AI.png', url: 'https://dub.florafauna.ai/fung-tsun-sing', badgeText: '25%OFF' },
+                { name: 'Lupa', description: '讓模糊影像秒變高解析的專業升級工具。', logoUrl: 'Lupa.png', url: 'https://app.lupaupscaler.com/?via=AIFlowTime', badgeText: '' },
+                { name: 'Fotorgear', description: 'Jacob話最好用嘅iPhone攝影app', logoUrl: 'Fotorgear.png', url: '#', badgeText: '' },
+                { name: 'Design Sparks', description: '結合 AI 與創意思考術，秒生大量設計點子。', logoUrl: 'DesignSpark.png', url: 'https://designsparks.app.creativityai.io/', badgeText: '' }
+            ]}},
+            { id: 'lt-divider-coming', type: 'section-divider', visible: true, content: { title: '即將推出！', subtitle: '快啲加入Google嘅waiting list👇🏻' } },
+            { id: 'lt-coming-soon', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
+                { label: 'Disco 🌍', url: 'https://labs.google/disco', description: '探索 Google 最新的 AI 網頁功能', badgeText: '', imageUrl: '' }
+            ]}},
+            { id: 'lt-divider-management', type: 'section-divider', visible: true, content: { title: '管理', subtitle: '' } },
+            { id: 'lt-management', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
+                { label: '📱 QR 顯示頁', url: '/qr-display', description: '掃描 QR Code 提交的內容即時顯示（需登入）', badgeText: '', imageUrl: '' }
+            ]}},
+            { id: 'lt-social', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
+                { label: 'Home', url: '/', description: '', badgeText: '', imageUrl: '' },
+                { label: 'Instagram', url: 'https://www.instagram.com/aiflowtime', description: '', badgeText: '', imageUrl: '' }
+            ]}},
+            { id: 'lt-lead-magnet', type: 'lead-magnet', visible: true, content: { title: '領取免費2026年AI指南', description: '想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！', imageUrl: '', formFields: [{ label: '姓名', type: 'text' }, { label: 'WhatsApp 號碼', type: 'tel' }], submitText: '免費領取指南', triggerText: '📚 領取免費AI指南' } }
+        ];
+
+        var MANAGEMENT_QR_SECTIONS = [
+            { id: 'lt-divider-management', type: 'section-divider', visible: true, content: { title: '管理', subtitle: '' } },
+            { id: 'lt-management', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
+                { label: '📱 QR 顯示頁', url: '/qr-display', description: '掃描 QR Code 提交的內容即時顯示（需登入）', badgeText: '', imageUrl: '' }
+            ]}}
+        ];
+
+        function ensureManagementSections(sections) {
+            if (!sections || !sections.length) return LINKTREE_DEFAULT_SECTIONS;
+            var hasManagement = sections.some(function(s) { return s.id === 'lt-management'; });
+            if (hasManagement) return sections;
+            var idx = -1;
+            for (var i = 0; i < sections.length; i++) {
+                if (sections[i].id === 'lt-coming-soon') { idx = i; break; }
+            }
+            var next = sections.slice(0, idx + 1).concat(MANAGEMENT_QR_SECTIONS).concat(sections.slice(idx + 1));
+            return next;
+        }
+
         function _escHtml(s) { return escHtml(s); }
 
         function applySections(sections) {
             var allSecs = document.querySelectorAll('[data-section-id]');
-            allSecs.forEach(function(el) { el.style.display = 'none'; el.style.order = ''; });
+            allSecs.forEach(function(el) { el.style.display = 'none'; el.style.order = ''; el.style.opacity = ''; });
 
             if (!sections || !sections.length) {
-                allSecs.forEach(function(el) { el.style.display = ''; });
-                return;
+                sections = LINKTREE_DEFAULT_SECTIONS;
             }
 
             var matched = 0;
@@ -2403,20 +2332,24 @@
                     if (tpl) {
                         el = tpl.cloneNode(true);
                         el.setAttribute('data-section-id', sec.id);
-                        tpl.parentNode.insertBefore(el, tpl);
+                        el.removeAttribute('style');
+                        var container = document.querySelector('.links-container');
+                        if (container) container.appendChild(el);
                     }
                 }
                 if (!el) { console.warn('[Layout] No template for section:', sec.type, sec.id); return; }
                 matched++;
-                el.style.display = '';
+                el.style.display = (sec.type === 'lead-magnet') ? 'none' : '';
+                el.style.opacity = (sec.type === 'lead-magnet') ? '' : '1';
                 el.style.order = order++;
                 applyContent(el, sec);
             });
 
             if (matched === 0) {
                 console.warn('[Layout] No sections matched — showing default layout');
-                allSecs.forEach(function(el) { el.style.display = ''; });
+                allSecs.forEach(function(el) { el.style.display = ''; el.style.opacity = '1'; });
             }
+            document.body.classList.remove('layout-pending');
         }
 
         function applyContent(el, sec) {
@@ -2424,15 +2357,42 @@
             var type = sec.type;
 
             switch (type) {
+                case 'hero':
+                    var title = c.title || '';
+                    var subtitle = (c.subtitle || '').replace(/\n/g, '<br>');
+                    var avatarSrc = c.gifUrl ? _escHtml(c.gifUrl) : 'Landing-page-logo.png';
+                    el.innerHTML = '<img src="' + avatarSrc + '" alt="AIFlowTime" class="profile-avatar" id="profileAvatar" width="100" height="100" loading="eager" decoding="async">' +
+                        '<h1 class="profile-name">' + _escHtml(title) + '</h1>' +
+                        '<p class="profile-bio" style="font-size:1.1em;">' + subtitle + '</p>';
+                    break;
+
                 case 'link-list':
                     if (c.links) {
                         el.innerHTML = '';
+                        if (sec.id === 'lt-social') {
+                            var homeSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>';
+                            var igSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
+                            c.links.forEach(function(lnk) {
+                                var a = document.createElement('a');
+                                a.className = 'social-link';
+                                a.href = lnk.url || '#';
+                                if ((lnk.url || '').indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+                                var isIg = (lnk.url || '').indexOf('instagram') !== -1 || (lnk.label || '').toLowerCase().indexOf('instagram') !== -1;
+                                a.innerHTML = isIg ? igSvg : homeSvg;
+                                a.setAttribute('aria-label', lnk.label || (isIg ? 'Instagram' : 'Home'));
+                                el.appendChild(a);
+                            });
+                        } else {
                         c.links.forEach(function(lnk) {
                             var a = document.createElement('a');
-                            a.className = 'link-item fade-in';
+                            a.className = 'link-item fade-in' + (lnk.imageUrl ? ' link-item--with-image' : '');
                             a.href = lnk.url || '#';
                             if (lnk.url && lnk.url.indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-                            var inner = '<div class="link-content"><div class="link-text">';
+                            var inner = '';
+                            if (lnk.imageUrl) {
+                                inner += '<div class="link-item-image-wrap"><img src="' + _escHtml(lnk.imageUrl) + '" alt="" loading="lazy"></div>';
+                            }
+                            inner += '<div class="link-content"><div class="link-text">';
                             inner += '<div class="link-title">';
                             if (lnk.badgeText) {
                                 inner += '<span style="display:flex;align-items:center;gap:0.75rem;"><span>' + _escHtml(lnk.label) + '</span><span class="pixelated-text">' + _escHtml(lnk.badgeText) + '</span></span>';
@@ -2443,8 +2403,12 @@
                             if (lnk.description) inner += '<div class="link-description">' + _escHtml(lnk.description) + '</div>';
                             inner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';
                             a.innerHTML = inner;
+                            if ((lnk.url || '') === '#') {
+                                a.addEventListener('click', function(e) { e.preventDefault(); if (typeof openWhatsAppModal === 'function') openWhatsAppModal(); });
+                            }
                             el.appendChild(a);
                         });
+                        }
                     }
                     break;
 
@@ -2495,11 +2459,15 @@
             initFirebase(function() {
                 var db = firebase.firestore();
                 db.collection('pageLayouts').doc('linktree').get().then(function(doc) {
-                    if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
-                    console.log('[Layout] Loaded linktree layout from Firestore');
-                    applySections(doc.data().sections);
+                    var sections = (doc.exists && doc.data().sections && doc.data().sections.length > 0)
+                        ? doc.data().sections
+                        : LINKTREE_DEFAULT_SECTIONS;
+                    sections = ensureManagementSections(sections);
+                    if (sections.length > 0 && doc.exists) console.log('[Layout] Loaded linktree layout from Firestore');
+                    applySections(sections);
                 }).catch(function(err) {
-                    console.log('[Layout] No layout config found for linktree.', err);
+                    console.log('[Layout] No layout config found for linktree, using default.', err);
+                    applySections(ensureManagementSections(LINKTREE_DEFAULT_SECTIONS));
                 });
             });
         }

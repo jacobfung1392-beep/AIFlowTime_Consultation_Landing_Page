@@ -49,6 +49,7 @@
         .ws-detail-label{font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;}
         .ws-detail-value{font-size:16px;font-weight:700;color:var(--text);}
         .ws-detail-value.price{color:var(--accent-text);font-size:20px;}
+        .ws-session-placeholder{color:var(--accent);font-weight:600;font-style:italic;}
         .price-original{text-decoration:line-through;color:var(--text-light);font-size:14px;font-weight:500;margin-right:8px;}
         .price-discount-badge{display:inline-block;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;}
 
@@ -544,11 +545,18 @@ function _renderSessionLines(el, sessions) {
             return txt;
         }).filter(function(t) { return t; });
         el.innerHTML = lines.join('<br>');
+        el.classList.remove('ws-session-placeholder');
     } else {
         var d = _wsData || {};
         var fallback = (d.date || '待定') + (d.time ? ' ' + d.time : '');
         el.textContent = fallback;
+        el.classList.remove('ws-session-placeholder');
     }
+}
+
+function _showSessionPlaceholder(el) {
+    el.innerHTML = '請從下方選擇日期';
+    el.classList.add('ws-session-placeholder');
 }
 
 function _renderRoundSelector(rounds) {
@@ -590,11 +598,13 @@ function _buildVirtualRoundsFromSessions(d) {
         if (s.visible === false) return;
         var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
         var sid = 'session_' + i;
+        // Prefer workshop doc's session.enrolled (synced by CMS & confirmPaymentUpload)
+        var enrolled = (s.enrolled !== undefined && s.enrolled !== null) ? s.enrolled : (sessionEnrolled[sid] || 0);
         rounds.push({
             id: sid,
             label: dateLabel,
             capacity: s.capacity !== undefined ? s.capacity : globalCap,
-            enrolled: sessionEnrolled[sid] || 0,
+            enrolled: enrolled,
             sessions: [s]
         });
     });
@@ -710,6 +720,22 @@ function initPayment() {
             return;
         }
         _wsData = doc.data();
+        // Defensive: if dot-notation updates converted arrays to maps, fix them
+        if (_wsData.sessions && !Array.isArray(_wsData.sessions) && typeof _wsData.sessions === 'object') {
+            var sKeys = Object.keys(_wsData.sessions).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+            _wsData.sessions = sKeys.map(function(k) { return _wsData.sessions[k]; });
+        }
+        if (_wsData.rounds && !Array.isArray(_wsData.rounds) && typeof _wsData.rounds === 'object') {
+            var rKeys = Object.keys(_wsData.rounds).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+            _wsData.rounds = rKeys.map(function(k) {
+                var round = _wsData.rounds[k];
+                if (round.sessions && !Array.isArray(round.sessions) && typeof round.sessions === 'object') {
+                    var rsKeys = Object.keys(round.sessions).sort(function(a2, b2) { return parseInt(a2) - parseInt(b2); });
+                    round.sessions = rsKeys.map(function(k2) { return round.sessions[k2]; });
+                }
+                return round;
+            });
+        }
         var d = _wsData;
         document.getElementById('wsBadge').textContent = d.levelBadge || '';
         document.getElementById('wsBadge').className = 'ws-badge ' + (d.levelType || 'beginner');
@@ -720,35 +746,54 @@ function initPayment() {
         var isSingleMultiDate = !isContinuous && d.sessions && d.sessions.length > 1;
         var roundSelWrap = document.getElementById('roundSelectorWrap');
         var sessEl = document.getElementById('wsSessions');
+        var remaining = 0;
 
         if (isContinuous) {
             document.getElementById('roundSelectorLabel').textContent = '選擇期數';
             roundSelWrap.style.display = '';
             _renderRoundSelector(d.rounds);
-            if (!_selectedRound) _selectRound(d.rounds[0]);
+            if (d.rounds.length === 1) {
+                if (!_selectedRound) _selectRound(d.rounds[0]);
+            }
             var sr = _selectedRound;
-            var roundSessions = sr ? (sr.sessions || []) : [];
-            _renderSessionLines(sessEl, roundSessions);
-            var remaining = Math.max(0, (sr ? sr.capacity || 0 : 0) - (sr ? sr.enrolled || 0 : 0));
-            document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (sr.enrolled || 0) + '/' + (sr.capacity || 0) + ' 人報名') : '已滿';
-            document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(sr.capacity, sr.enrolled);
+            if (sr) {
+                var roundSessions = sr.sessions || [];
+                _renderSessionLines(sessEl, roundSessions);
+                remaining = Math.max(0, (sr.capacity || 0) - (sr.enrolled || 0));
+                document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (sr.enrolled || 0) + '/' + (sr.capacity || 0) + ' 人報名') : '已滿';
+                document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(sr.capacity, sr.enrolled);
+            } else {
+                _showSessionPlaceholder(sessEl);
+                document.getElementById('wsSeatsText').textContent = '—';
+                document.getElementById('wsCapacityBar').innerHTML = '';
+                remaining = 1;
+            }
         } else if (isSingleMultiDate) {
             document.getElementById('roundSelectorLabel').textContent = '選擇日期';
             roundSelWrap.style.display = '';
             var virtualRounds = _buildVirtualRoundsFromSessions(d);
             d._virtualRounds = virtualRounds;
             _renderRoundSelector(virtualRounds);
-            if (!_selectedRound) _selectRound(virtualRounds[0]);
+            if (virtualRounds.length === 1) {
+                if (!_selectedRound) _selectRound(virtualRounds[0]);
+            }
             var sr = _selectedRound;
-            _renderSessionLines(sessEl, sr ? (sr.sessions || []) : []);
-            var remaining = Math.max(0, (sr ? sr.capacity || 0 : 0) - (sr ? sr.enrolled || 0 : 0));
-            document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (sr.enrolled || 0) + '/' + (sr.capacity || 0) + ' 人報名') : '已滿';
-            document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(sr.capacity, sr.enrolled);
+            if (sr) {
+                _renderSessionLines(sessEl, sr.sessions || []);
+                remaining = Math.max(0, (sr.capacity || 0) - (sr.enrolled || 0));
+                document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (sr.enrolled || 0) + '/' + (sr.capacity || 0) + ' 人報名') : '已滿';
+                document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(sr.capacity, sr.enrolled);
+            } else {
+                _showSessionPlaceholder(sessEl);
+                document.getElementById('wsSeatsText').textContent = '—';
+                document.getElementById('wsCapacityBar').innerHTML = '';
+                remaining = 1;
+            }
         } else {
             roundSelWrap.style.display = 'none';
             _selectedRound = null;
             _renderSessionLines(sessEl, d.sessions);
-            var remaining = Math.max(0, (d.capacity || 0) - (d.enrolled || 0));
+            remaining = Math.max(0, (d.capacity || 0) - (d.enrolled || 0));
             document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (d.enrolled || 0) + '/' + (d.capacity || 0) + ' 人報名') : '已滿';
             document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(d.capacity, d.enrolled);
         }
@@ -791,37 +836,9 @@ function initPayment() {
         errDiv.appendChild(card);
     });
 
-    // Real-time listener for per-session enrollment counts (single multi-date)
-    db.collection('registrations')
-        .where('workshopId', '==', _wsId)
-        .where('status', 'in', ['pending', 'confirmed'])
-        .onSnapshot(function(snap) {
-            if (!_wsData || _wsData.courseType === 'continuous') return;
-            if (!_wsData.sessions || _wsData.sessions.length <= 1) return;
-            var sorted = _sortSessionsList(_wsData.sessions);
-            var counts = {};
-            sorted.forEach(function(s, i) { counts['session_' + i] = 0; });
-            snap.forEach(function(doc) {
-                var r = doc.data();
-                if (r.selectedRound && counts.hasOwnProperty(r.selectedRound)) {
-                    counts[r.selectedRound]++;
-                }
-            });
-            _wsData._sessionEnrolled = counts;
-            var virtualRounds = _buildVirtualRoundsFromSessions(_wsData);
-            _wsData._virtualRounds = virtualRounds;
-            // Update selected round enrolled count
-            if (_selectedRound && _selectedRound.id) {
-                var updated = virtualRounds.find(function(vr) { return vr.id === _selectedRound.id; });
-                if (updated) _selectedRound = updated;
-            }
-            _renderRoundSelector(virtualRounds);
-            if (_selectedRound) {
-                var rem = Math.max(0, (_selectedRound.capacity || 0) - (_selectedRound.enrolled || 0));
-                document.getElementById('wsSeatsText').textContent = rem > 0 ? ('已有 ' + (_selectedRound.enrolled || 0) + '/' + (_selectedRound.capacity || 0) + ' 人報名') : '已滿';
-                document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(_selectedRound.capacity, _selectedRound.enrolled);
-            }
-        });
+    // Enrollment counts for multi-date workshops come from the workshop doc
+    // (sessions[].enrolled synced by CMS and confirmPaymentUpload). No registrations
+    // query needed — avoids permission-denied for unauthenticated users.
 }
 
 // ============================================================

@@ -324,11 +324,36 @@ exports.confirmPaymentUpload = onCall(
       throw new HttpsError("not-found", "Workshop not found");
     }
 
-    // Atomically increment enrolled and mark as counted
-    const batch = db.batch();
-    batch.update(workshopRef, {
+    const workshop = workshopSnap.data();
+    const updateData = {
       enrolled: admin.firestore.FieldValue.increment(1),
-    });
+    };
+
+    // Per-round or per-session enrolled — read-modify-write the full array
+    // to avoid Firestore dot-notation converting arrays to maps
+    const selectedRound = reg.selectedRound || "";
+    if (workshop.courseType === "continuous" && Array.isArray(workshop.rounds) && workshop.rounds.length && selectedRound) {
+      const ri = workshop.rounds.findIndex((r) => (r.id || "") === selectedRound);
+      if (ri >= 0) {
+        const updatedRounds = workshop.rounds.map((r, idx) => {
+          if (idx === ri) return { ...r, enrolled: (r.enrolled || 0) + 1 };
+          return r;
+        });
+        updateData.rounds = updatedRounds;
+      }
+    } else if (Array.isArray(workshop.sessions) && workshop.sessions.length > 1 && selectedRound.startsWith("session_")) {
+      const si = parseInt(selectedRound.replace("session_", ""), 10);
+      if (!Number.isNaN(si) && si >= 0 && si < workshop.sessions.length) {
+        const updatedSessions = workshop.sessions.map((s, idx) => {
+          if (idx === si) return { ...s, enrolled: (s.enrolled || 0) + 1 };
+          return s;
+        });
+        updateData.sessions = updatedSessions;
+      }
+    }
+
+    const batch = db.batch();
+    batch.update(workshopRef, updateData);
     batch.update(regRef, {
       _enrollmentCounted: true,
     });

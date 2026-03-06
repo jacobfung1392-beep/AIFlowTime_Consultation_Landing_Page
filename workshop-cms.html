@@ -3019,7 +3019,17 @@ function loadAllWorkshops() {
             return;
         }
         // Populate cache for calendar (will be overridden by real-time listener later)
-        snapshot.forEach(function(doc) { if (!_allWorkshopsCache[doc.id]) _allWorkshopsCache[doc.id] = doc.data(); });
+        snapshot.forEach(function(doc) {
+            if (!_allWorkshopsCache[doc.id]) {
+                var d = doc.data();
+                _normalizeArrayField(d, 'sessions');
+                _normalizeArrayField(d, 'rounds');
+                if (Array.isArray(d.rounds)) {
+                    d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
+                }
+                _allWorkshopsCache[doc.id] = d;
+            }
+        });
         // Collect categories from existing workshops
         snapshot.forEach(function(doc) {
             var cat = doc.data().category;
@@ -3028,6 +3038,11 @@ function loadAllWorkshops() {
         var hasCurrent = false, hasArchived = false;
         snapshot.forEach(function(doc) {
             var d = doc.data();
+            _normalizeArrayField(d, 'sessions');
+            _normalizeArrayField(d, 'rounds');
+            if (Array.isArray(d.rounds)) {
+                d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
+            }
             var isArchived = d.archived === true;
             var item = buildWorkshopItem(doc.id, d);
             if (isArchived) {
@@ -4649,6 +4664,18 @@ function switchMemberView(view) {
 var _membersData = []; // { user, registrations[] }
 var _allRegistrations = [];
 var _allWorkshopsCache = {};
+
+// If Firestore dot-notation updates converted arrays to maps, convert them back
+function _normalizeArrayField(obj, field) {
+    if (!obj || !obj[field]) return;
+    if (Array.isArray(obj[field])) return;
+    if (typeof obj[field] === 'object') {
+        var keys = Object.keys(obj[field]).sort(function(a, b) { return parseInt(a) - parseInt(b); });
+        var arr = keys.map(function(k) { return obj[field][k]; });
+        obj[field] = arr;
+    }
+}
+
 var _membersLoaded = false;
 
 var _usersCache = {};
@@ -4664,7 +4691,15 @@ function loadMembersData() {
     // Real-time listener on workshops (keeps enrolled count always fresh)
     _wsUnsub = db.collection('workshops').orderBy('order', 'asc').onSnapshot(function(wsSnap) {
         _allWorkshopsCache = {};
-        wsSnap.forEach(function(doc) { _allWorkshopsCache[doc.id] = doc.data(); });
+        wsSnap.forEach(function(doc) {
+            var d = doc.data();
+            _normalizeArrayField(d, 'sessions');
+            _normalizeArrayField(d, 'rounds');
+            if (Array.isArray(d.rounds)) {
+                d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
+            }
+            _allWorkshopsCache[doc.id] = d;
+        });
         _membersDataReady.workshops = true;
 
         // Sync enrolled inputs in workshop management tab
@@ -5698,30 +5733,26 @@ function reassignRound(regId, newRoundValue, newRoundLabel) {
         var isActive = reg.status === 'confirmed' || reg.status === 'pending';
         if (isActive && ws) {
             var wsRef = db.collection('workshops').doc(wsId);
-            var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+            var isContinuous = ws.courseType === 'continuous' && Array.isArray(ws.rounds) && ws.rounds.length;
             if (isContinuous) {
-                var updates = {};
-                ws.rounds.forEach(function(round, ri) {
-                    if (round.id === oldRound) {
-                        updates['rounds.' + ri + '.enrolled'] = Math.max((round.enrolled || 0) - 1, 0);
-                    }
-                    if (round.id === newRoundValue) {
-                        updates['rounds.' + ri + '.enrolled'] = (round.enrolled || 0) + 1;
-                    }
+                var updatedRounds = ws.rounds.map(function(round) {
+                    var copy = {};
+                    for (var k in round) copy[k] = round[k];
+                    if (round.id === oldRound) copy.enrolled = Math.max((round.enrolled || 0) - 1, 0);
+                    if (round.id === newRoundValue) copy.enrolled = (round.enrolled || 0) + 1;
+                    return copy;
                 });
-                if (Object.keys(updates).length) batch.update(wsRef, updates);
-            } else if (ws.sessions && ws.sessions.length > 1) {
-                var updates = {};
-                ws.sessions.forEach(function(s, si) {
+                batch.update(wsRef, { rounds: updatedRounds });
+            } else if (Array.isArray(ws.sessions) && ws.sessions.length > 1) {
+                var updatedSessions = ws.sessions.map(function(s, si) {
+                    var copy = {};
+                    for (var k in s) copy[k] = s[k];
                     var sid = 'session_' + si;
-                    if (sid === oldRound) {
-                        updates['sessions.' + si + '.enrolled'] = Math.max((s.enrolled || 0) - 1, 0);
-                    }
-                    if (sid === newRoundValue) {
-                        updates['sessions.' + si + '.enrolled'] = (s.enrolled || 0) + 1;
-                    }
+                    if (sid === oldRound) copy.enrolled = Math.max((s.enrolled || 0) - 1, 0);
+                    if (sid === newRoundValue) copy.enrolled = (s.enrolled || 0) + 1;
+                    return copy;
                 });
-                if (Object.keys(updates).length) batch.update(wsRef, updates);
+                batch.update(wsRef, { sessions: updatedSessions });
             }
         }
 
@@ -6033,6 +6064,14 @@ function bulkChangeStatus(wsId, newStatus) {
     }
 
     Promise.all(promises).then(function() {
+        // Keep workshop enrolled in sync with "By Member" confirmed count
+        selected.forEach(function(cb) {
+            var ac = cb.closest('.applicant-card');
+            var regId = ac.dataset.regId;
+            var reg = _allRegistrations.find(function(r) { return r._id === regId; });
+            if (reg) reg.status = newStatus;
+        });
+        reconcileEnrolledCounts();
         hideLoadingOverlay();
         showToast(selected.length + ' 個報名已更新為「' + getStatusText(newStatus) + '」');
     }).catch(function(err) {
@@ -6101,6 +6140,11 @@ function computeEnrolledFromRegs(workshopId) {
 function reconcileEnrolledCounts() {
     Object.keys(_allWorkshopsCache).forEach(function(wsId) {
         var ws = _allWorkshopsCache[wsId];
+        _normalizeArrayField(ws, 'sessions');
+        _normalizeArrayField(ws, 'rounds');
+        if (Array.isArray(ws.rounds)) {
+            ws.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
+        }
         var realCount = computeEnrolledFromRegs(wsId);
         var storedCount = ws.enrolled || 0;
         var updatePayload = {};
@@ -6230,6 +6274,14 @@ function changeRegistrationStatus(regId, workshopId, newStatus, badgeEl) {
     }
 
     db.collection('registrations').doc(regId).update(updateData).then(function() {
+        // Keep workshop enrolled in sync with "By Member" confirmed count
+        var reg = _allRegistrations.find(function(r) { return r._id === regId; });
+        if (reg) {
+            reg.status = newStatus;
+            if (needsToken) reg.attendanceToken = updateData.attendanceToken;
+            else if (needsRemoveToken) { reg.attendanceToken = undefined; reg.attendedAt = undefined; }
+        }
+        reconcileEnrolledCounts();
         hideLoadingOverlay();
         showToast('狀態已更新' + (needsToken ? '，簽到碼已生成' : ''));
     }).catch(function(err) {

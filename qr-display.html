@@ -102,6 +102,28 @@
             margin-bottom: 20px;
             color: var(--text);
         }
+        .quiz-name-display-box {
+            display: none;
+            margin-bottom: 24px;
+            padding: 20px 28px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px var(--shadow);
+            border: 2px solid var(--accent);
+        }
+        .quiz-name-display-box.show { display: block; }
+        .quiz-name-display-box .quiz-name-quote {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1.2;
+        }
+        .quiz-name-display-box #quizNameDisplayText {
+            font-size: clamp(24px, 4vw, 42px);
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
         .qr-wrap {
             display: inline-block;
             padding: 24px;
@@ -123,6 +145,20 @@
         }
         .box-titles-panel h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
         .box-titles-panel .hint { font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
+        .quiz-name-row { margin-bottom: 16px; }
+        .quiz-name-row label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+        .quiz-name-row input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--bg-off);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--white);
+        }
+        .quiz-name-row input:focus { outline: none; border-color: var(--accent); }
+        .quiz-name-row input::placeholder { color: var(--text-light); }
         .box-titles-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
         .box-title-row { display: flex; gap: 10px; align-items: center; }
         .box-title-row input {
@@ -136,6 +172,13 @@
             background: var(--white);
         }
         .box-title-row input:focus { outline: none; border-color: var(--accent); }
+        .box-title-row .box-title-label {
+            flex-shrink: 0;
+            width: 88px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
         .box-title-row .btn-remove-title {
             flex-shrink: 0;
             width: 40px; height: 44px;
@@ -175,12 +218,71 @@
         .btn-save-titles { margin-top: 16px; width: 100%; height: 44px; }
         .save-status { font-size: 12px; color: var(--text-light); margin-top: 8px; }
         .save-status.saved { color: #2E7D32; }
+        .btn-delete-quiz {
+            margin-top: 20px;
+            width: 100%;
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px solid #C62828;
+            background: transparent;
+            color: #C62828;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-delete-quiz:hover {
+            background: rgba(198, 40, 40, 0.08);
+        }
         .submissions-section h2 {
             font-size: clamp(20px, 2.5vw, 24px);
             margin-bottom: 20px;
             color: var(--text);
         }
-        .submissions-list { display: flex; flex-direction: column; gap: 20px; }
+        .submissions-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .submissions-toolbar label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .submissions-toolbar input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+        .submissions-toolbar .btn-delete-selected {
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px solid #C62828;
+            background: transparent;
+            color: #C62828;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submissions-toolbar .btn-delete-selected:hover:not(:disabled) {
+            background: rgba(198, 40, 40, 0.08);
+        }
+        .submissions-toolbar .btn-delete-selected:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .submission-card {
             display: flex;
             gap: 16px;
@@ -209,12 +311,13 @@
         }
         .submission-card .block-label:first-of-type { margin-top: 0; }
         .submission-card .block {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            padding: 10px 0;
+            margin-bottom: 6px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
             font-size: 15px;
             line-height: 1.6;
         }
-        .submission-card .block:last-child { border-bottom: none; }
+        .submission-card .block:last-child { border-bottom: none; margin-bottom: 0; }
         .submission-card .btn-delete {
             flex-shrink: 0;
             width: 40px;
@@ -231,6 +334,14 @@
             border-color: #C62828;
             color: #C62828;
             background: rgba(198, 40, 40, 0.06);
+        }
+        .submission-card .submission-checkbox {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            margin-top: 2px;
+            accent-color: var(--accent);
+            cursor: pointer;
         }
         .empty-state {
             text-align: center;
@@ -288,6 +399,62 @@
             border-color: var(--text-light);
             color: var(--text);
         }
+        /* Right-side quiz menu */
+        .quiz-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 260px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border-left: 1px solid var(--glass-border);
+            padding: 80px 16px 24px 16px;
+            overflow-y: auto;
+            z-index: 50;
+        }
+        .quiz-menu h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            padding: 0 8px;
+        }
+        .quiz-menu-list { display: flex; flex-direction: column; gap: 6px; }
+        .quiz-menu-item {
+            display: block;
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .quiz-menu-item:hover { background: rgba(217, 119, 87, 0.08); color: var(--accent); }
+        .quiz-menu-item.active {
+            background: rgba(217, 119, 87, 0.12);
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .quiz-menu-item.add-new {
+            border: 2px dashed var(--bg-off);
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+        .quiz-menu-item.add-new:hover { border-color: var(--accent); color: var(--accent); }
+        .main-with-menu { margin-right: 260px; }
+        @media (max-width: 900px) {
+            .quiz-menu { width: 220px; padding-top: 72px; }
+            .main-with-menu { margin-right: 220px; }
+        }
     </style>
 </head>
 <body>
@@ -309,10 +476,13 @@
                 </div>
             </div>
         </header>
-        <main class="container">
+        <main class="container main-with-menu">
             <section class="qr-hero">
                 <div class="qr-section">
                     <h2>掃描下方 QR Code 提交內容</h2>
+                    <div id="quizNameDisplayBox" class="quiz-name-display-box" aria-hidden="true">
+                        <span class="quiz-name-quote">"</span><span id="quizNameDisplayText"></span><span class="quiz-name-quote">"</span>
+                    </div>
                     <div class="qr-wrap">
                         <img id="qrImage" src="" alt="QR Code" width="280" height="280">
                     </div>
@@ -321,18 +491,33 @@
                 <div class="box-titles-panel">
                     <h3>區塊標題設定</h3>
                     <p class="hint">設定後，掃描者會看到這些標題對應的輸入框。留空則使用預設「輸入內容…」。</p>
+                    <div class="quiz-name-row">
+                        <label for="quizNameInput">問卷名稱</label>
+                        <input type="text" id="quizNameInput" placeholder="例如：活動回饋、課後問卷" maxlength="60">
+                    </div>
                     <div id="boxTitlesList" class="box-titles-list"></div>
                     <button type="button" class="btn-add-title" id="addTitleBtn">＋ 新增標題</button>
-                    <button type="button" class="btn btn-save-titles" id="saveTitlesBtn">儲存標題</button>
+                    <button type="button" class="btn btn-save-titles" id="saveTitlesBtn">儲存問卷詳情</button>
                     <p id="saveStatus" class="save-status"></p>
+                    <button type="button" class="btn-delete-quiz" id="deleteQuizBtn">刪除此問卷</button>
                 </div>
             </section>
             <section class="submissions-section">
                 <h2>提交結果</h2>
+                <div id="submissionsToolbar" class="submissions-toolbar" style="display:none;">
+                    <label><input type="checkbox" id="selectAllSubmissions" aria-label="全選"> 全選</label>
+                    <button type="button" class="btn-delete-selected" id="deleteSelectedBtn" disabled>刪除所選 (0)</button>
+                </div>
                 <div id="submissionsList" class="submissions-list"></div>
                 <div id="emptyState" class="empty-state" style="display:none;">尚未有提交內容</div>
             </section>
         </main>
+        <!-- Right-side quiz menu -->
+        <aside id="quizMenu" class="quiz-menu" aria-label="選擇問卷">
+            <h3>選擇問卷</h3>
+            <div id="quizMenuList" class="quiz-menu-list"></div>
+            <button type="button" class="quiz-menu-item add-new" id="addQuizBtn">＋ 新增問卷</button>
+        </aside>
     </div>
 
     <!-- Confirm modal (workshop-style UI) -->
@@ -355,6 +540,7 @@
         var auth, db;
         var ALLOWED_EMAIL = 'jacobfung1392@gmail.com';
         var unsubSnapshot = null;
+        var _currentQuizId = 'display';
 
         initFirebase(function(app) {
             auth = app.auth();
@@ -401,16 +587,131 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             document.getElementById('userEmail').textContent = user.email;
+            var qnInput = document.getElementById('quizNameInput');
+            if (qnInput && !qnInput._quizNameListenerAttached) {
+                qnInput._quizNameListenerAttached = true;
+                qnInput.addEventListener('input', updateQuizNameDisplay);
+            }
+            renderQuizMenu();
             setQrImage();
             loadBoxTitles();
             subscribeSubmissions();
+            document.getElementById('deleteQuizBtn').onclick = deleteCurrentQuiz;
         }
 
-        var QR_SETTINGS_DOC = 'display';
+        function deleteCurrentQuiz() {
+            var quizId = _currentQuizId;
+            showConfirm(
+                '刪除此問卷',
+                '確定要刪除此問卷嗎？此問卷的所有提交記錄也會一併永久刪除，無法復原。',
+                '取消',
+                '確定刪除',
+                function() {
+                    showConfirm(
+                        '再次確認',
+                        '即將永久刪除此問卷及其所有提交，無法復原。確定要刪除嗎？',
+                        '取消',
+                        '確定刪除',
+                        function() {
+                            db.collection('qrSubmissions').get().then(function(snap) {
+                                var docs = (snap && snap.docs) ? snap.docs : [];
+                                var toDelete = docs.filter(function(doc) {
+                                    var d = doc.data();
+                                    var sid = d.settingsId;
+                                    if (quizId === 'display') {
+                                        return sid == null || sid === '' || sid === 'display';
+                                    }
+                                    return sid === quizId;
+                                });
+                                var chain = Promise.resolve();
+                                toDelete.forEach(function(doc) {
+                                    chain = chain.then(function() {
+                                        return db.collection('qrSubmissions').doc(doc.id).delete();
+                                    });
+                                });
+                                return chain.then(function() {
+                                    return db.collection('qrSettings').doc(quizId).delete();
+                                });
+                            }).then(function() {
+                                return db.collection('qrSettings').get();
+                            }).then(function(snap) {
+                                var docs = (snap && snap.docs) ? snap.docs : [];
+                                if (docs.length > 0) {
+                                    var hasDisplay = docs.some(function(d) { return d.id === 'display'; });
+                                    _currentQuizId = hasDisplay ? 'display' : docs[0].id;
+                                } else {
+                                    _currentQuizId = 'display';
+                                    return db.collection('qrSettings').doc('display').set({ quizName: '預設問卷', boxTitles: [] }, { merge: true });
+                                }
+                            }).then(function() {
+                                renderQuizMenu();
+                                setQrImage();
+                                loadBoxTitles();
+                                subscribeSubmissions();
+                            }).catch(function(err) {
+                                console.error('Delete quiz failed', err);
+                            });
+                        }
+                    );
+                }
+            );
+        }
+
+        function renderQuizMenu() {
+            db.collection('qrSettings').get().then(function(snap) {
+                var listEl = document.getElementById('quizMenuList');
+                listEl.innerHTML = '';
+                var docs = snap.docs || [];
+                docs.forEach(function(doc) {
+                    var id = doc.id;
+                    var d = doc.data();
+                    var label = (d.quizName && String(d.quizName).trim()) ? String(d.quizName).trim() : (id === 'display' ? '預設問卷' : id);
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'quiz-menu-item' + (id === _currentQuizId ? ' active' : '');
+                    btn.textContent = label;
+                    btn.setAttribute('data-quiz-id', id);
+                    btn.onclick = function() {
+                        _currentQuizId = id;
+                        renderQuizMenu();
+                        setQrImage();
+                        loadBoxTitles();
+                        subscribeSubmissions();
+                    };
+                    listEl.appendChild(btn);
+                });
+                document.getElementById('addQuizBtn').onclick = addNewQuiz;
+            }).catch(function() {
+                document.getElementById('addQuizBtn').onclick = addNewQuiz;
+            });
+        }
+
+        function addNewQuiz() {
+            var newId = 'quiz-' + Date.now();
+            db.collection('qrSettings').doc(newId).set({
+                quizName: '新問卷',
+                boxTitles: []
+            }).then(function() {
+                _currentQuizId = newId;
+                renderQuizMenu();
+                setQrImage();
+                loadBoxTitles();
+                subscribeSubmissions();
+                document.getElementById('quizNameInput').value = '新問卷';
+                document.getElementById('quizNameInput').focus();
+            }).catch(function(err) {
+                console.error('Add quiz failed', err);
+            });
+        }
+
         function loadBoxTitles() {
-            db.collection('qrSettings').doc(QR_SETTINGS_DOC).get().then(function(doc) {
-                var titles = (doc.exists && doc.data().boxTitles) ? doc.data().boxTitles : [];
-                if (!Array.isArray(titles)) titles = [];
+            var docId = _currentQuizId;
+            db.collection('qrSettings').doc(docId).get().then(function(doc) {
+                var data = doc.exists ? doc.data() : {};
+                var titles = (data.boxTitles && Array.isArray(data.boxTitles)) ? data.boxTitles : [];
+                var name = (data.quizName != null) ? String(data.quizName) : '';
+                document.getElementById('quizNameInput').value = name;
+                updateQuizNameDisplay();
                 renderBoxTitlesList(titles);
             }).catch(function() { renderBoxTitlesList([]); });
         }
@@ -420,7 +721,9 @@
             titles.forEach(function(t, i) {
                 var row = document.createElement('div');
                 row.className = 'box-title-row';
-                row.innerHTML = '<input type="text" class="title-input" placeholder="例如：姓名、意見、問題" value="' + escapeAttrForInput(t || '') + '" maxlength="80">' +
+                var questionNum = i + 1;
+                row.innerHTML = '<span class="box-title-label">Question ' + questionNum + '</span>' +
+                    '<input type="text" class="title-input" placeholder="例如：姓名、意見、問題" value="' + escapeAttrForInput(t || '') + '" maxlength="80">' +
                     '<button type="button" class="btn-remove-title" aria-label="移除標題">×</button>';
                 row.querySelector('.btn-remove-title').onclick = function() {
                     showConfirm('移除此標題', '確定要移除此區塊標題嗎？掃描者表單將不再顯示此欄位。', '取消', '移除', function() {
@@ -446,11 +749,17 @@
             var inputs = document.querySelectorAll('#boxTitlesList .title-input');
             var boxTitles = [];
             inputs.forEach(function(inp) { boxTitles.push((inp.value || '').trim() || ''); });
+            var quizName = (document.getElementById('quizNameInput').value || '').trim();
             document.getElementById('saveStatus').textContent = '儲存中…';
             document.getElementById('saveStatus').classList.remove('saved');
-            db.collection('qrSettings').doc(QR_SETTINGS_DOC).set({ boxTitles: boxTitles }).then(function() {
+            db.collection('qrSettings').doc(_currentQuizId).set({
+                quizName: quizName,
+                boxTitles: boxTitles
+            }, { merge: true }).then(function() {
                 document.getElementById('saveStatus').textContent = '已儲存';
                 document.getElementById('saveStatus').classList.add('saved');
+                renderQuizMenu();
+                updateQuizNameDisplay();
             }).catch(function() {
                 document.getElementById('saveStatus').textContent = '儲存失敗';
                 document.getElementById('saveStatus').classList.remove('saved');
@@ -462,27 +771,85 @@
             return div.innerHTML.replace(/"/g, '&quot;');
         }
 
+        function updateQuizNameDisplay() {
+            var name = (document.getElementById('quizNameInput').value || '').trim();
+            var box = document.getElementById('quizNameDisplayBox');
+            var textEl = document.getElementById('quizNameDisplayText');
+            if (name) {
+                textEl.textContent = name;
+                box.classList.add('show');
+                box.setAttribute('aria-hidden', 'false');
+            } else {
+                box.classList.remove('show');
+                box.setAttribute('aria-hidden', 'true');
+            }
+        }
+
         function setQrImage() {
             var base = window.location.origin || (window.location.protocol + '//' + window.location.host);
-            var submitUrl = base + '/qr-submit.html';
+            var submitUrl = base + '/qr-submit.html?q=' + encodeURIComponent(_currentQuizId);
             document.getElementById('qrImage').src =
                 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=' + encodeURIComponent(submitUrl);
         }
 
         function subscribeSubmissions() {
             if (unsubSnapshot) unsubSnapshot();
+            var currentQuizId = _currentQuizId;
             unsubSnapshot = db.collection('qrSubmissions')
                 .orderBy('createdAt', 'desc')
                 .onSnapshot(function(snap) {
                     var listEl = document.getElementById('submissionsList');
                     var emptyEl = document.getElementById('emptyState');
+                    var toolbarEl = document.getElementById('submissionsToolbar');
+                    var selectAllCb = document.getElementById('selectAllSubmissions');
+                    var deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
                     listEl.innerHTML = '';
-                    if (!snap || snap.empty) {
+                    var docs = (snap && snap.docs) ? snap.docs : [];
+                    var filtered = docs.filter(function(doc) {
+                        var d = doc.data();
+                        var sid = d.settingsId;
+                        if (currentQuizId === 'display') {
+                            return sid == null || sid === '' || sid === 'display';
+                        }
+                        return sid === currentQuizId;
+                    });
+                    if (filtered.length === 0) {
                         emptyEl.style.display = 'block';
+                        if (toolbarEl) toolbarEl.style.display = 'none';
                         return;
                     }
                     emptyEl.style.display = 'none';
-                    snap.docs.forEach(function(doc) {
+                    if (toolbarEl) toolbarEl.style.display = 'flex';
+                    if (selectAllCb) selectAllCb.checked = false;
+                    if (deleteSelectedBtn) { deleteSelectedBtn.disabled = true; deleteSelectedBtn.textContent = '刪除所選 (0)'; }
+
+                    function updateDeleteButtonState() {
+                        var checked = listEl.querySelectorAll('.submission-checkbox:checked');
+                        var n = checked.length;
+                        if (deleteSelectedBtn) {
+                            deleteSelectedBtn.textContent = '刪除所選 (' + n + ')';
+                            deleteSelectedBtn.disabled = n === 0;
+                        }
+                        if (selectAllCb) {
+                            selectAllCb.checked = n === filtered.length;
+                            selectAllCb.indeterminate = n > 0 && n < filtered.length;
+                        }
+                    }
+
+                    function doDeleteIds(ids, callback) {
+                        var chain = Promise.resolve();
+                        ids.forEach(function(id) {
+                            chain = chain.then(function() {
+                                return db.collection('qrSubmissions').doc(id).delete();
+                            });
+                        });
+                        chain.then(function() { if (callback) callback(); }).catch(function(err) {
+                            console.error('Delete failed', err);
+                            if (callback) callback();
+                        });
+                    }
+
+                    filtered.forEach(function(doc) {
                         var d = doc.data();
                         var card = document.createElement('div');
                         card.className = 'submission-card';
@@ -502,17 +869,72 @@
                         });
                         if (blocks.length === 0) bodyHtml += '<div class="block">（無內容）</div>';
                         var subId = doc.id;
-                        card.innerHTML = '<div class="card-body">' + bodyHtml + '</div>' +
-                            '<button type="button" class="btn-delete" aria-label="刪除此筆">刪除</button>';
-                        card.querySelector('.btn-delete').onclick = function() {
+                        var cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.className = 'submission-checkbox';
+                        cb.setAttribute('data-submission-id', subId);
+                        cb.setAttribute('aria-label', '選取此筆');
+                        cb.onchange = updateDeleteButtonState;
+                        card.appendChild(cb);
+                        var cardBody = document.createElement('div');
+                        cardBody.className = 'card-body';
+                        cardBody.innerHTML = bodyHtml;
+                        card.appendChild(cardBody);
+                        var delBtn = document.createElement('button');
+                        delBtn.type = 'button';
+                        delBtn.className = 'btn-delete';
+                        delBtn.setAttribute('aria-label', '刪除此筆');
+                        delBtn.textContent = '刪除';
+                        delBtn.onclick = function() {
                             showConfirm('刪除此筆提交', '確定要刪除這筆提交嗎？刪除後無法復原。', '取消', '刪除', function() {
                                 db.collection('qrSubmissions').doc(subId).delete().catch(function(err) {
                                     console.error('Delete failed', err);
                                 });
                             });
                         };
+                        card.appendChild(delBtn);
                         listEl.appendChild(card);
                     });
+
+                    if (selectAllCb) {
+                        selectAllCb.onclick = function() {
+                            var check = selectAllCb.checked;
+                            listEl.querySelectorAll('.submission-checkbox').forEach(function(cb) { cb.checked = check; });
+                            updateDeleteButtonState();
+                        };
+                    }
+                    if (deleteSelectedBtn) {
+                        deleteSelectedBtn.onclick = function() {
+                            var checked = listEl.querySelectorAll('.submission-checkbox:checked');
+                            var ids = [];
+                            checked.forEach(function(cb) { ids.push(cb.getAttribute('data-submission-id')); });
+                            var n = ids.length;
+                            if (n === 0) return;
+                            var isDeleteAll = (n === filtered.length);
+                            function performDelete() {
+                                doDeleteIds(ids);
+                            }
+                            if (n === 1) {
+                                showConfirm('刪除此筆提交', '確定要刪除這筆提交嗎？刪除後無法復原。', '取消', '刪除', performDelete);
+                            } else {
+                                showConfirm(
+                                    isDeleteAll ? '刪除全部提交' : '刪除所選提交',
+                                    '確定要刪除所選的 ' + n + ' 筆提交嗎？刪除後無法復原。',
+                                    '取消',
+                                    '確定刪除',
+                                    function() {
+                                        showConfirm(
+                                            '再次確認',
+                                            '即將永久刪除這 ' + n + ' 筆提交，無法復原。確定要刪除嗎？',
+                                            '取消',
+                                            '確定刪除',
+                                            performDelete
+                                        );
+                                    }
+                                );
+                            }
+                        };
+                    }
                 }, function(err) {
                     console.error('qrSubmissions listener error', err);
                     document.getElementById('emptyState').textContent = '無法載入提交記錄';

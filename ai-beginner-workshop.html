@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI課程工作坊 | AIFLOWTIME - 香港在職人士AI進修首選</title>
     <meta name="description" content="AIFLOWTIME提供實用AI課程與工作坊，專為香港在職人士設計。零基礎學習Prompt Engineering及AI工具，即學即用提升職場效率。立即報名！">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23D97757'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif'>A</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -2772,7 +2773,7 @@
                     }
                 }
 
-                if (!el) { console.warn('[Layout] No template found for section:', sec.type, sec.id); return; }
+                if (!el) { console.debug('[Layout] No template for section:', sec.type, sec.id); return; }
 
                 if (sec.visible === false) {
                     el.style.display = 'none';

@@ -86,8 +86,8 @@
         .block-row .block-input::placeholder { color: var(--text-light); }
         .block-label {
             font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
+            font-weight: 700;
+            color: var(--accent);
             margin-bottom: 6px;
         }
         .block-row .btn-remove {
@@ -265,7 +265,10 @@
         });
 
         function loadBoxTitlesThenInitForm() {
-            db.collection('qrSettings').doc('display').get().then(function(doc) {
+            var params = new URLSearchParams(window.location.search);
+            var settingsId = params.get('q') || 'display';
+            window.__qrSettingsId = settingsId;
+            db.collection('qrSettings').doc(settingsId).get().then(function(doc) {
                 var boxTitles = (doc.exists && doc.data().boxTitles) ? doc.data().boxTitles : [];
                 if (!Array.isArray(boxTitles)) boxTitles = [];
                 initForm(boxTitles);
@@ -332,9 +335,11 @@
                 }
                 submitBtn.disabled = true;
                 var titlesToSave = (boxTitles && boxTitles.length) ? boxTitles : [];
+                var settingsId = window.__qrSettingsId || 'display';
                 db.collection('qrSubmissions').add({
                     blocks: blocks,
                     boxTitles: titlesToSave,
+                    settingsId: settingsId,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(function() {
                     showToast('提交成功！', 'success');

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>版面編輯 Layout Editor | AIFLOWTIME</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23D97757'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif'>A</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -175,6 +176,7 @@
         }
         .sec-btn:hover { background: var(--bg-pampas); color: var(--text); }
         .sec-btn.vis-on { color: var(--accent); }
+        .sec-btn.vis-on svg { color: var(--accent); }
         .sec-btn.del-btn:hover { background: var(--red-bg); color: var(--red); }
 
         .add-section-bar {
@@ -182,10 +184,15 @@
             display: flex; justify-content: center;
         }
 
-        /* RIGHT PANEL — EDIT FORM */
+        /* RIGHT PANEL — EDIT FORM (scrolls independently) */
         .panel-right {
-            min-height: 400px;
+            height: calc(100vh - 96px);
+            overflow-y: auto;
+            min-height: 200px;
         }
+        .panel-right::-webkit-scrollbar { width: 6px; }
+        .panel-right::-webkit-scrollbar-track { background: transparent; }
+        .panel-right::-webkit-scrollbar-thumb { background: var(--bg-off); border-radius: 4px; }
         .edit-card {
             background: var(--white); border-radius: 16px;
             padding: 28px; box-shadow: 0 2px 12px var(--shadow);
@@ -260,6 +267,13 @@
         .array-item-img-zone .preview-wrap img {
             max-height: 140px;
             object-fit: cover;
+        }
+        /* Hero avatar (linktree): square like profile image */
+        .img-upload-zone.hero-avatar {
+            aspect-ratio: 1; width: 100%; max-width: 200px; min-height: 0;
+        }
+        .img-upload-zone.hero-avatar .preview-wrap img {
+            aspect-ratio: 1; object-fit: cover; width: 100%; max-height: none;
         }
         .img-upload-progress {
             margin-top: 6px; height: 4px; background: var(--bg-off); border-radius: 4px;
@@ -375,6 +389,7 @@
         /* PREVIEW PANEL */
         .panel-preview {
             position: sticky; top: 72px;
+            align-self: start;
             height: calc(100vh - 96px);
             display: flex; flex-direction: column;
         }
@@ -390,6 +405,20 @@
             border: 1.5px solid var(--bg-off);
             background: var(--white);
             position: relative;
+        }
+        .preview-frame-wrap.desktop-mode {
+            aspect-ratio: 16/10;
+            min-height: 0;
+            flex: 1 1 auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .preview-frame-wrap.desktop-mode iframe {
+            width: 1280px !important;
+            height: 800px !important;
+            transform-origin: top center;
+            flex-shrink: 0;
         }
         .preview-frame-wrap iframe {
             width: 100%; height: 100%; border: none;
@@ -466,6 +495,36 @@
             display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
         }
+        .status-bar .page-select-wrap { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+        /* Custom page dropdown — CMS design language (no native select UI) */
+        .layout-page-select-wrap { position: relative; display: inline-block; }
+        .layout-page-select-trigger {
+            min-width: 180px; height: 44px; padding: 0 36px 0 14px;
+            border: 1.5px solid var(--bg-off); border-radius: 10px;
+            font-family: 'Noto Sans TC', sans-serif; font-size: 15px; font-weight: 600;
+            background: var(--white); color: var(--text);
+            cursor: pointer; transition: border-color 0.3s;
+            display: flex; align-items: center;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237A7A7A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center;
+        }
+        .layout-page-select-trigger:hover { border-color: var(--accent); }
+        .layout-page-select-trigger.open { border-color: var(--accent); }
+        .layout-page-select-dropdown {
+            position: fixed; z-index: 200; background: var(--white);
+            border: 1.5px solid var(--bg-off); border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.14); padding: 8px;
+            min-width: 200px; max-width: 280px; display: none;
+            max-height: 320px; overflow-y: auto;
+        }
+        .layout-page-select-dropdown::-webkit-scrollbar { width: 6px; }
+        .layout-page-select-dropdown::-webkit-scrollbar-thumb { background: var(--bg-off); border-radius: 3px; }
+        .layout-page-option {
+            padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 14px;
+            font-weight: 500; color: var(--text); transition: all 0.15s;
+        }
+        .layout-page-option:hover { background: rgba(217,119,87,0.1); }
+        .layout-page-option.selected { background: var(--accent); color: var(--white); font-weight: 700; }
         .status-msg {
             font-size: 13px; color: var(--text-light); font-weight: 500;
         }
@@ -507,7 +566,10 @@
             <div>
                 <h1 style="font-size:22px;font-weight:700;">頁面版面編輯 Page Layout</h1>
                 <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
-                    <select id="pageSelector" onchange="switchPage(this.value)" style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;color:var(--text);font-weight:600;cursor:pointer;"></select>
+                    <div class="layout-page-select-wrap" id="pageSelectWrap">
+                        <div class="layout-page-select-trigger" id="pageSelectTrigger">選擇頁面</div>
+                        <div class="layout-page-select-dropdown" id="pageSelectDropdown"></div>
+                    </div>
                     <a id="previewPageLink" href="/ai-beginner-workshop" target="_blank" style="color:var(--accent);font-size:13px;">查看頁面 ↗</a>
                 </div>
             </div>
@@ -562,7 +624,7 @@
                         <button class="btn btn-outline btn-sm" onclick="refreshPreview()">重新整理</button>
                     </div>
                 </div>
-                <div class="preview-frame-wrap">
+                <div class="preview-frame-wrap desktop-mode" id="previewFrameWrap">
                     <iframe id="previewFrame" src="/ai-beginner-workshop?preview=1"></iframe>
                 </div>
             </div>
@@ -852,7 +914,7 @@ var SECTION_TYPES = {
         }
     },
     'tools-grid': {
-        label: '工具展示 Tools Grid',
+        label: '帶圖示與說明的區塊',
         icon: '🧰',
         desc: '產品/工具卡片 + Logo',
         defaults: {
@@ -1205,6 +1267,7 @@ function showDashboard(user) {
     }
     initPageSelector();
     loadLayout();
+    setTimeout(function() { updateDesktopPreviewScale(); }, 100);
     if (!window._layoutPreviewLiveBound) {
         window._layoutPreviewLiveBound = true;
         document.addEventListener('change', function(e) {
@@ -1212,6 +1275,9 @@ function showDashboard(user) {
         });
         document.addEventListener('input', function(e) {
             if (document.getElementById('editCard') && document.getElementById('editCard').contains(e.target)) schedulePreviewUpdate();
+        });
+        window.addEventListener('resize', function() {
+            if (document.querySelector('.preview-frame-wrap.desktop-mode')) updateDesktopPreviewScale();
         });
     }
 }
@@ -1414,23 +1480,80 @@ function setPreviewMode(mode) {
     btns.forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-mode') === mode); });
     if (mode === 'mobile') {
         wrap.classList.add('mobile-mode');
+        wrap.classList.remove('desktop-mode');
+        var iframe = document.getElementById('previewFrame');
+        if (iframe) { iframe.style.width = ''; iframe.style.height = ''; iframe.style.transform = ''; }
     } else {
         wrap.classList.remove('mobile-mode');
+        wrap.classList.add('desktop-mode');
+        updateDesktopPreviewScale();
     }
 }
 
+function updateDesktopPreviewScale() {
+    var wrap = document.querySelector('.preview-frame-wrap.desktop-mode');
+    var iframe = document.getElementById('previewFrame');
+    if (!wrap || !iframe) return;
+    var w = wrap.clientWidth;
+    if (w <= 0) return;
+    var scale = w / 1280;
+    iframe.style.width = '1280px';
+    iframe.style.height = '800px';
+    iframe.style.transform = 'scale(' + scale + ')';
+    iframe.style.transformOrigin = 'top center';
+}
+
 function initPageSelector() {
-    var sel = document.getElementById('pageSelector');
-    if (!sel) return;
-    sel.innerHTML = '';
+    var trigger = document.getElementById('pageSelectTrigger');
+    var dropdown = document.getElementById('pageSelectDropdown');
+    if (!trigger || !dropdown) return;
+    dropdown.innerHTML = '';
     Object.keys(PAGE_REGISTRY).forEach(function(pid) {
-        var opt = document.createElement('option');
-        opt.value = pid;
+        var opt = document.createElement('div');
+        opt.className = 'layout-page-option' + (pid === currentPageId ? ' selected' : '');
+        opt.setAttribute('data-page-id', pid);
         opt.textContent = PAGE_REGISTRY[pid].label;
-        if (pid === currentPageId) opt.selected = true;
-        sel.appendChild(opt);
+        opt.addEventListener('click', function() {
+            switchPage(pid);
+            closePageDropdown();
+        });
+        dropdown.appendChild(opt);
     });
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = dropdown.style.display === 'block';
+        if (open) { closePageDropdown(); return; }
+        var rect = trigger.getBoundingClientRect();
+        dropdown.style.left = rect.left + 'px';
+        dropdown.style.top = (rect.bottom + 4) + 'px';
+        dropdown.style.display = 'block';
+        trigger.classList.add('open');
+    });
+    document.addEventListener('click', function(e) {
+        if (!trigger.contains(e.target) && !dropdown.contains(e.target)) closePageDropdown();
+    });
+    updatePageSelectorUI();
     updatePageLink();
+}
+
+function closePageDropdown() {
+    var dropdown = document.getElementById('pageSelectDropdown');
+    var trigger = document.getElementById('pageSelectTrigger');
+    if (dropdown) dropdown.style.display = 'none';
+    if (trigger) trigger.classList.remove('open');
+}
+
+function updatePageSelectorUI() {
+    var trigger = document.getElementById('pageSelectTrigger');
+    var dropdown = document.getElementById('pageSelectDropdown');
+    if (!trigger) return;
+    var page = PAGE_REGISTRY[currentPageId];
+    trigger.textContent = page ? page.label : '選擇頁面';
+    if (dropdown) {
+        dropdown.querySelectorAll('.layout-page-option').forEach(function(opt) {
+            opt.classList.toggle('selected', opt.getAttribute('data-page-id') === currentPageId);
+        });
+    }
 }
 
 function updatePageLink() {
@@ -1444,7 +1567,7 @@ function switchPage(pageId) {
     if (pageId === currentPageId) return;
     if (isDirty) {
         if (!confirm('目前有未儲存的變更。確定要切換頁面嗎？未儲存的變更將會丟失。')) {
-            document.getElementById('pageSelector').value = currentPageId;
+            updatePageSelectorUI();
             return;
         }
     }
@@ -1453,6 +1576,8 @@ function switchPage(pageId) {
     selectedSectionId = null;
     document.getElementById('editCard').style.display = 'none';
     document.getElementById('emptyState').style.display = 'flex';
+    closePageDropdown();
+    updatePageSelectorUI();
     updatePageLink();
     refreshPreview();
     loadLayout();
@@ -1461,6 +1586,9 @@ function switchPage(pageId) {
 // ============================================================
 // SECTION LIST RENDERING
 // ============================================================
+var SEC_VISIBLE_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var SEC_HIDDEN_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
 function renderSectionList() {
     var list = document.getElementById('sectionList');
     list.innerHTML = '';
@@ -1483,7 +1611,7 @@ function renderSectionList() {
             '</div>' +
             '<div class="sec-actions">' +
                 '<button class="sec-btn ' + (sec.visible !== false ? 'vis-on' : '') + '" title="' + (sec.visible !== false ? '隱藏' : '顯示') + '" onclick="toggleVisibility(' + idx + ');">' +
-                    (sec.visible !== false ? '👁' : '👁‍🗨') +
+                    (sec.visible !== false ? SEC_VISIBLE_SVG : SEC_HIDDEN_SVG) +
                 '</button>' +
                 '<button class="sec-btn" title="複製" onclick="duplicateSection(' + idx + ');">⧉</button>' +
                 '<button class="sec-btn del-btn" title="刪除" onclick="deleteSection(' + idx + ');">✕</button>' +
@@ -1826,7 +1954,7 @@ function renderEditForm() {
             html += field('標題 Title', 'title', c.title);
             html += textareaField('副標題 Subtitle', 'subtitle', c.subtitle);
             html += '<div class="form-row">' + field('CTA 文字', 'ctaText', c.ctaText) + field('CTA 連結', 'ctaLink', c.ctaLink) + '</div>';
-            html += field('GIF / 圖片 URL', 'gifUrl', c.gifUrl);
+            html += imageUploadField('頭像 / 圖片', 'gifUrl', c.gifUrl, { aspectClass: 'hero-avatar' });
             break;
 
         case 'pain-points':
@@ -2004,7 +2132,7 @@ function renderEditForm() {
             html += arrayEditor('tools', '工具', c.tools || [], [
                 { key: 'name', label: '名稱' },
                 { key: 'description', label: '描述' },
-                { key: 'logoUrl', label: 'Logo URL' },
+                { key: 'logoUrl', label: 'Logo (選填)', type: 'image' },
                 { key: 'url', label: '連結 URL' },
                 { key: 'badgeText', label: '徽章文字' }
             ]);
@@ -2067,7 +2195,8 @@ function renderEditForm() {
         '</div>';
     card.innerHTML = html;
     if (sec.type === 'countdown') loadCountdownDcForm(card, sec);
-    if (sec.type === 'link-list') initLinksArrayDrag(card);
+    if (sec.type === 'link-list') initSortableArrayDrag(card, 'links');
+    if (sec.type === 'tools-grid') initSortableArrayDrag(card, 'tools');
 }
 
 function loadCountdownDcForm(card, sec) {
@@ -2121,15 +2250,17 @@ function textareaField(label, name, value) {
         '<textarea data-field="' + name + '" onchange="setDirty(true)">' + escHtml(value || '') + '</textarea></div>';
 }
 
-function imageUploadField(label, fieldName, currentUrl) {
+function imageUploadField(label, fieldName, currentUrl, opts) {
+    opts = opts || {};
     var hasImg = !!currentUrl;
     var safeUrl = escHtml(currentUrl || '');
+    var zoneClass = 'img-upload-zone' + (hasImg ? ' has-image' : '') + (opts.aspectClass ? ' ' + opts.aspectClass : '');
     var html = '<div class="form-group">' +
         '<label>' + escHtml(label) + '</label>' +
-        '<div class="img-upload-zone' + (hasImg ? ' has-image' : '') + '" ' +
+        '<div class="' + zoneClass + '" ' +
             'data-img-field="' + fieldName + '" ' +
             'ondragover="imgDragOver(event, this)" ondragleave="imgDragLeave(event, this)" ' +
-            'ondrop="imgDrop(event, this)" onclick="imgZoneClick(this)">';
+            'ondrop="imgDrop(event, this)" onclick="imgZoneClick(event, this)">';
     if (hasImg) {
         html += '<div class="preview-wrap">' +
             '<img src="' + safeUrl + '" alt="preview">' +
@@ -2160,7 +2291,9 @@ function imgDrop(e, zone) {
     var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) _uploadLayoutImage(zone, file);
 }
-function imgZoneClick(zone) {
+function imgZoneClick(e, zone) {
+    if (!zone) zone = e && e.currentTarget;
+    if (e && e.target && e.target.type === 'file') return;
     var inp = zone.querySelector('input[type="file"]');
     if (inp) inp.click();
 }
@@ -2184,6 +2317,10 @@ function imgRemove(zone) {
 }
 
 function _uploadLayoutImage(zone, file) {
+    if (!storage) {
+        alert('儲存服務尚未載入，請重新整理頁面後再試。');
+        return;
+    }
     if (file.size > 5 * 1024 * 1024) { alert('圖片大小不能超過 5MB'); return; }
     var progressWrap = zone.parentElement.querySelector('.img-upload-progress');
     var progressBar = progressWrap ? progressWrap.querySelector('.bar') : null;
@@ -2209,11 +2346,15 @@ function _uploadLayoutImage(zone, file) {
                 if (progressWrap) progressWrap.style.display = 'none';
                 var fieldName = zone.getAttribute('data-img-field');
                 var hidden = zone.parentElement.querySelector('input[data-field="' + fieldName + '"]');
+                if (!hidden) {
+                    var card = zone.closest('#editCard');
+                    if (card) hidden = card.querySelector('input[data-field="' + fieldName + '"]');
+                }
                 if (hidden) hidden.value = url;
 
                 zone.classList.add('has-image');
                 zone.innerHTML = '<div class="preview-wrap">' +
-                    '<img src="' + url + '" alt="preview">' +
+                    '<img src="' + escHtml(url) + '" alt="preview">' +
                     '<div class="img-overlay">' +
                         '<button class="btn-change" onclick="event.stopPropagation(); imgZoneClick(this.closest(\'.img-upload-zone\'))">更換圖片</button>' +
                         '<button class="btn-remove" onclick="event.stopPropagation(); imgRemove(this.closest(\'.img-upload-zone\'))">移除</button>' +
@@ -2243,7 +2384,7 @@ function arrayEditor(arrayName, title, items, fieldDefs) {
 }
 
 function renderArrayItem(arrayName, item, fieldDefs, idx) {
-    var sortable = arrayName === 'links';
+    var sortable = arrayName === 'links' || arrayName === 'tools';
     var dragHandleSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
     var html = '<div class="array-item' + (sortable ? ' sortable' : '') + '" data-array-item-idx="' + idx + '">';
     if (sortable) {
@@ -2260,7 +2401,7 @@ function renderArrayItem(arrayName, item, fieldDefs, idx) {
             var safeUrl = escHtml(cur);
             html += '<div class="img-upload-zone array-item-img-zone' + (hasImg ? ' has-image' : '') + '" data-img-field="' + fd.key + '" ' +
                 'ondragover="imgDragOver(event, this)" ondragleave="imgDragLeave(event, this)" ' +
-                'ondrop="imgDrop(event, this)" onclick="imgZoneClick(this)">';
+                'ondrop="imgDrop(event, this)" onclick="imgZoneClick(event, this)">';
             if (hasImg) {
                 html += '<div class="preview-wrap">' +
                     '<img src="' + safeUrl + '" alt="preview">' +
@@ -2299,12 +2440,13 @@ function addArrayItem(arrayName, btn) {
     var countEl = btn.closest('.array-group').querySelector('.array-group-title span');
     countEl.textContent = countEl.textContent.replace(/\(\d+\)/, '(' + container.children.length + ')');
     setDirty(true);
-    if (arrayName === 'links') initLinksArrayDrag(document.getElementById('editCard'));
+    if (arrayName === 'links') initSortableArrayDrag(document.getElementById('editCard'), 'links');
+    if (arrayName === 'tools') initSortableArrayDrag(document.getElementById('editCard'), 'tools');
 }
 
-function initLinksArrayDrag(card) {
+function initSortableArrayDrag(card, arrayName) {
     if (!card) return;
-    var container = card.querySelector('[data-array-items="links"]');
+    var container = card.querySelector('[data-array-items="' + arrayName + '"]');
     if (!container) return;
     var items = container.querySelectorAll('.array-item.sortable');
     var draggedEl = null;

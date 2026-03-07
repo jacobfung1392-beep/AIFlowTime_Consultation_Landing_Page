@@ -1992,6 +1992,18 @@ initFirebase(function(app) {
     });
 }, { appName: 'cms' });
 
+function syncWorkshopEnrollmentCounters(workshopId) {
+    if (!workshopId) return Promise.resolve();
+    return fetch('https://asia-east2-aiflowtime-hk.cloudfunctions.net/repairWorkshopEnrollmentCounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { workshopId: workshopId } })
+    }).then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+    });
+}
+
 function verifyAdminAccess(user) {
     db.collection('registrations')
         .where('status', '==', 'confirmed')
@@ -2037,6 +2049,7 @@ function showDashboard(user) {
         loadAllWorkshops();
     });
     loadDashboardData();
+    loadMembersData();
     // Pre-load WhatsApp templates so they're ready when the user clicks a WA button
     db.collection('workshopSettings').doc('config').get().then(function(doc) {
         _wsSettings = doc.exists ? doc.data() : {};
@@ -3027,6 +3040,9 @@ function loadAllWorkshops() {
                 if (Array.isArray(d.rounds)) {
                     d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
                 }
+                if (Array.isArray(d.sessions)) {
+                    d.sessions.forEach(function(s, i) { if (!s.id) s.id = sessionStableId(s, i); });
+                }
                 _allWorkshopsCache[doc.id] = d;
             }
         });
@@ -3188,10 +3204,6 @@ function _renderWsBody(item) {
     body.innerHTML =
         '<form class="ws-form" onsubmit="return saveWorkshop(event, \'' + id + '\')">' +
             '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📋</span> 基本資料</div></div>' +
-            '<div class="toggle-wrap">' +
-                '<label class="toggle-switch"><input type="checkbox" name="visible"' + (d.visible ? ' checked' : '') + '><span class="toggle-slider"></span></label>' +
-                '<span class="toggle-label">' + (d.visible ? '已上架' : '已下架') + '</span>' +
-            '</div>' +
             '<div class="form-row">' +
                 '<div class="form-group"><label>Workshop 編號</label><input type="text" name="workshopNumber" value="' + escHtml(d.workshopNumber || '') + '" placeholder="e.g. Workshop 0"></div>' +
                 '<div class="form-group"><label>排列順序</label><input type="number" name="order" value="' + (d.order != null ? d.order : 0) + '"></div>' +
@@ -3314,7 +3326,7 @@ function _renderWsBody(item) {
             '<div class="single-capacity-wrap" style="' + (d.courseType === 'continuous' || (d.sessions && d.sessions.length > 1) ? 'display:none;' : '') + '">' +
                 '<div class="form-row">' +
                     '<div class="form-group"><label>最大名額</label><input type="number" name="capacity" value="' + (d.capacity || 0) + '" min="0" oninput="updateCapacityPreview(this)"></div>' +
-                    '<div class="form-group"><label>已報名人數 <span style="font-size:11px;color:var(--text-light);font-weight:500;">(自動更新)</span></label><input type="number" name="enrolled" value="' + (d.enrolled || 0) + '" min="0" oninput="updateCapacityPreview(this)"></div>' +
+                    '<div class="form-group"><label>已報名人數 <span style="font-size:11px;color:var(--text-light);font-weight:500;">(自動更新)</span></label><input type="number" name="enrolled" value="' + (d.enrolled || 0) + '" min="0" readonly tabindex="-1"></div>' +
                 '</div>' +
                 '<div class="capacity-bar-preview-wrap">' + capBarHtml + '</div>' +
             '</div>' +
@@ -3357,13 +3369,6 @@ function _renderWsBody(item) {
             '</div>' +
         '</form>';
 
-    var toggleInput = item.querySelector('.ws-form input[name="visible"]');
-    if (toggleInput) {
-        toggleInput.addEventListener('change', function() {
-            this.closest('.toggle-wrap').querySelector('.toggle-label').textContent = this.checked ? '已上架' : '已下架';
-        });
-    }
-
     initDatePicker(item.querySelector('.date-picker-wrap'));
     initTimePicker(item.querySelector('.time-picker-wrap'));
     item.querySelectorAll('.session-row').forEach(function(row) { initSessionPickers(row); });
@@ -3380,12 +3385,11 @@ function _renderWsBody(item) {
 function snapshotFormValues(form) {
     if (!form) return {};
     var snap = {};
-    var fields = ['visible','workshopNumber','order','title','category','difficulty','duration','price','date','time','description','capacity','enrolled','ctaText','ctaColor','ctaLink'];
+    var fields = ['workshopNumber','order','title','category','difficulty','duration','price','date','time','description','capacity','ctaText','ctaColor','ctaLink'];
     fields.forEach(function(n) {
         var el = form.querySelector('[name="' + n + '"]');
         if (!el) return;
-        if (el.type === 'checkbox') snap[n] = el.checked;
-        else snap[n] = el.value;
+        snap[n] = el.value;
     });
     // Details list
     var detailInputs = form.querySelectorAll('.detail-input');
@@ -3396,13 +3400,12 @@ function snapshotFormValues(form) {
 
 function hasFormChanged(form, snap) {
     if (!form || !snap) return false;
-    var fields = ['visible','workshopNumber','order','title','category','difficulty','duration','price','date','time','description','capacity','enrolled','ctaText','ctaColor','ctaLink'];
+    var fields = ['workshopNumber','order','title','category','difficulty','duration','price','date','time','description','capacity','ctaText','ctaColor','ctaLink'];
     for (var i = 0; i < fields.length; i++) {
         var n = fields[i];
         var el = form.querySelector('[name="' + n + '"]');
         if (!el) continue;
-        var cur = el.type === 'checkbox' ? el.checked : el.value;
-        if (String(cur) !== String(snap[n])) return true;
+        if (String(el.value) !== String(snap[n])) return true;
     }
     // Details
     var detailInputs = form.querySelectorAll('.detail-input');
@@ -3417,7 +3420,7 @@ function hasFormChanged(form, snap) {
 
 function restoreFormFromSnapshot(form, snap) {
     if (!form || !snap) return;
-    var fields = ['visible','workshopNumber','order','title','category','difficulty','duration','price','date','time','description','capacity','enrolled','ctaText','ctaColor','ctaLink'];
+    var fields = ['visible','workshopNumber','order','title','category','difficulty','duration','price','date','time','description','capacity','ctaText','ctaColor','ctaLink'];
     fields.forEach(function(n) {
         var el = form.querySelector('[name="' + n + '"]');
         if (!el) return;
@@ -3605,10 +3608,6 @@ function updateVisibility(workshopId, visible, inputEl) {
                 badge.className = 'vis-badge ' + (visible ? 'on' : 'off');
                 badge.textContent = visible ? '已上架' : '已下架';
             }
-            var formCheck = item.querySelector('.ws-form input[name="visible"]');
-            if (formCheck) formCheck.checked = visible;
-            var formLabel = item.querySelector('.toggle-wrap .toggle-label');
-            if (formLabel) formLabel.textContent = visible ? '已上架' : '已下架';
         }
     }).catch(function(err) {
         showToast('更新失敗：' + err.message, 'error');
@@ -4238,6 +4237,14 @@ function sortSessions(sessions) {
     });
 }
 
+function sessionStableId(s, fallbackIdx) {
+    if (s && s.id && s.id.indexOf('session_') === 0 && !/^session_\d+$/.test(s.id)) return s.id;
+    var d = (s && s.date || '').replace(/[年月]/g, '-').replace(/日.*/, '').replace(/\s/g, '');
+    var t = (s && s.time || '').replace(/[^0-9:]/g, '');
+    if (d || t) return 'session_' + d + (t ? '_' + t : '');
+    return 'session_' + (fallbackIdx !== undefined ? fallbackIdx : 0);
+}
+
 // ============================================================
 // IMAGE UPLOAD
 // ============================================================
@@ -4324,6 +4331,66 @@ function _initWsFormDirtyTracking(item, wsId) {
 // ============================================================
 // SAVE WORKSHOP
 // ============================================================
+function stripSessionEnrollmentFields(sessions) {
+    return (sessions || []).map(function(session) {
+        var copy = {};
+        for (var key in session) {
+            if (key === 'enrolled') continue;
+            copy[key] = session[key];
+        }
+        return copy;
+    });
+}
+
+function stripRoundEnrollmentFields(rounds) {
+    return (rounds || []).map(function(round) {
+        var copy = {};
+        for (var key in round) {
+            if (key === 'enrolled') continue;
+            copy[key] = key === 'sessions' ? stripSessionEnrollmentFields(round.sessions || []) : round[key];
+        }
+        return copy;
+    });
+}
+
+function preserveWorkshopEnrollmentLocally(workshopData, cachedWorkshop) {
+    var merged = {};
+    Object.keys(workshopData || {}).forEach(function(key) { merged[key] = workshopData[key]; });
+    cachedWorkshop = cachedWorkshop || {};
+
+    if (cachedWorkshop.enrolled !== undefined) merged.enrolled = cachedWorkshop.enrolled;
+
+    if (Array.isArray(merged.rounds)) {
+        var roundEnrolledById = {};
+        (cachedWorkshop.rounds || []).forEach(function(round) {
+            if (round && round.id) roundEnrolledById[round.id] = round.enrolled || 0;
+        });
+        merged.rounds = merged.rounds.map(function(round) {
+            var copy = {};
+            for (var key in round) copy[key] = round[key];
+            if (copy.id && roundEnrolledById[copy.id] !== undefined) copy.enrolled = roundEnrolledById[copy.id];
+            return copy;
+        });
+    }
+
+    if (Array.isArray(merged.sessions)) {
+        var sessionEnrolledById = {};
+        (cachedWorkshop.sessions || []).forEach(function(session, index) {
+            var sid = session.id || sessionStableId(session, index);
+            sessionEnrolledById[sid] = session.enrolled || 0;
+        });
+        merged.sessions = merged.sessions.map(function(session, index) {
+            var copy = {};
+            for (var key in session) copy[key] = session[key];
+            var sid = copy.id || sessionStableId(copy, index);
+            if (sessionEnrolledById[sid] !== undefined) copy.enrolled = sessionEnrolledById[sid];
+            return copy;
+        });
+    }
+
+    return merged;
+}
+
 function saveWorkshop(event, workshopId) {
     event.preventDefault();
     var form = event.target;
@@ -4346,8 +4413,11 @@ function saveWorkshop(event, workshopId) {
 
     var courseType = (form.querySelector('[name="courseType"]') || {}).value || 'single';
 
+    var wsItem = form.closest('.ws-item');
+    var cachedWorkshop = _allWorkshopsCache[workshopId] || {};
+    var headerVisToggle = wsItem ? wsItem.querySelector('.header-vis-toggle input[type="checkbox"]') : null;
     var data = {
-        visible: form.querySelector('[name="visible"]').checked,
+        visible: headerVisToggle ? headerVisToggle.checked : true,
         workshopNumber: form.querySelector('[name="workshopNumber"]').value.trim(),
         order: parseInt(form.querySelector('[name="order"]').value) || 0,
         title: form.querySelector('[name="title"]').value.trim(),
@@ -4376,49 +4446,33 @@ function saveWorkshop(event, workshopId) {
     };
 
     if (courseType === 'continuous') {
-        data.rounds = collectRounds(form);
-        // Preserve per-round enrolled counts from existing data
-        var wsItem = form.closest('.ws-item');
-        var _cachedWsR = wsItem ? (_allWorkshopsCache[wsItem.dataset.id] || {}) : {};
-        var existingRounds = Array.isArray(_cachedWsR.rounds) ? _cachedWsR.rounds : [];
-        var enrolledMap = {};
-        existingRounds.forEach(function(er) { enrolledMap[er.id] = er.enrolled || 0; });
-        data.rounds.forEach(function(r) { if (enrolledMap[r.id] !== undefined) r.enrolled = enrolledMap[r.id]; });
-        // Flatten sessions and sum capacity for backward compat
+        var rawRounds = collectRounds(form);
+        data.rounds = stripRoundEnrollmentFields(rawRounds);
         var allSessions = [];
-        var totalCap = 0, totalEnr = 0;
-        data.rounds.forEach(function(r) {
+        var totalCap = 0;
+        rawRounds.forEach(function(r) {
             totalCap += r.capacity || 0;
-            totalEnr += r.enrolled || 0;
             (r.sessions || []).forEach(function(s) { allSessions.push(s); });
         });
-        data.sessions = sortSessions(allSessions);
+        allSessions = sortSessions(allSessions);
+        allSessions.forEach(function(s, idx) { s.id = s.id || sessionStableId(s, idx); });
+        data.sessions = stripSessionEnrollmentFields(allSessions);
         data.capacity = totalCap;
-        data.enrolled = totalEnr;
     } else {
         data.rounds = [];
-        data.sessions = sortSessions(collectSessions(form));
-        if (data.sessions.length > 1) {
-            // Multi-date single course: per-session capacity; preserve enrolled from existing data
-            var wsItem = form.closest('.ws-item');
-            var _cachedWs = wsItem ? (_allWorkshopsCache[wsItem.dataset.id] || {}) : {};
-            var existingSessions = Array.isArray(_cachedWs.sessions) ? _cachedWs.sessions : [];
-            var enrolledBySortKey = {};
-            existingSessions.forEach(function(es, idx) {
-                enrolledBySortKey[idx] = es.enrolled || 0;
-            });
-            var totalCap = 0, totalEnr = 0;
-            data.sessions.forEach(function(s, idx) {
+        var rawSessions = sortSessions(collectSessions(form));
+        rawSessions.forEach(function(s, idx) { s.id = sessionStableId(s, idx); });
+        if (rawSessions.length > 1) {
+            var totalCap = 0;
+            rawSessions.forEach(function(s) {
                 if (s.capacity === undefined) s.capacity = parseInt(form.querySelector('[name="capacity"]').value) || 0;
-                s.enrolled = enrolledBySortKey[idx] || 0;
                 totalCap += s.capacity;
-                totalEnr += s.enrolled;
             });
+            data.sessions = stripSessionEnrollmentFields(rawSessions);
             data.capacity = totalCap;
-            data.enrolled = totalEnr;
         } else {
+            data.sessions = stripSessionEnrollmentFields(rawSessions);
             data.capacity = parseInt(form.querySelector('[name="capacity"]').value) || 0;
-            data.enrolled = parseInt(form.querySelector('[name="enrolled"]').value) || 0;
         }
     }
 
@@ -4439,6 +4493,12 @@ function saveWorkshop(event, workshopId) {
     showLoadingOverlay('正在儲存工作坊...');
 
     db.collection('workshops').doc(workshopId).update(data).then(function() {
+        return syncWorkshopEnrollmentCounters(workshopId).catch(function(err) {
+            console.error('Enrollment sync failed for ' + workshopId + ':', err);
+            showToast('工作坊已儲存，但名額同步稍後完成', 'error');
+            return null;
+        });
+    }).then(function() {
         hideLoadingOverlay();
         showToast('工作坊已儲存');
         btn.disabled = false;
@@ -4452,16 +4512,17 @@ function saveWorkshop(event, workshopId) {
         badge.textContent = data.visible ? '已上架' : '已下架';
         var headerToggle = item.querySelector('.header-vis-toggle input[type="checkbox"]');
         if (headerToggle) headerToggle.checked = data.visible;
+        var localWorkshopData = preserveWorkshopEnrollmentLocally(data, cachedWorkshop);
         // Update header capacity bar
         var headerCap = item.querySelector('.ws-header-capacity');
-        if (headerCap) headerCap.innerHTML = buildMiniCapacityContent(data.capacity, data.enrolled);
+        if (headerCap) headerCap.innerHTML = buildMiniCapacityContent(localWorkshopData.capacity || 0, localWorkshopData.enrolled || 0);
         item._formSnapshot = snapshotFormValues(form);
-        if (item._wsData) Object.keys(data).forEach(function(k) { item._wsData[k] = data[k]; });
+        if (item._wsData) Object.keys(localWorkshopData).forEach(function(k) { item._wsData[k] = localWorkshopData[k]; });
         _markWsSaved(workshopId);
         if (_allWorkshopsCache[workshopId]) {
-            Object.keys(data).forEach(function(k) { _allWorkshopsCache[workshopId][k] = data[k]; });
+            Object.keys(localWorkshopData).forEach(function(k) { _allWorkshopsCache[workshopId][k] = localWorkshopData[k]; });
         } else {
-            _allWorkshopsCache[workshopId] = data;
+            _allWorkshopsCache[workshopId] = localWorkshopData;
         }
         renderCalendar();
     }).catch(function(err) {
@@ -4547,6 +4608,24 @@ function duplicateWorkshop(wsId) {
         copy.title = (copy.title || '') + ' (副本)';
         copy.visible = false;
         copy.enrolled = 0;
+        if (Array.isArray(copy.sessions)) {
+            copy.sessions = copy.sessions.map(function(session) {
+                session.enrolled = 0;
+                return session;
+            });
+        }
+        if (Array.isArray(copy.rounds)) {
+            copy.rounds = copy.rounds.map(function(round) {
+                round.enrolled = 0;
+                if (Array.isArray(round.sessions)) {
+                    round.sessions = round.sessions.map(function(session) {
+                        session.enrolled = 0;
+                        return session;
+                    });
+                }
+                return round;
+            });
+        }
         copy.createdAt = firebase.firestore.FieldValue.serverTimestamp();
         copy.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
         return db.collection('workshops').add(copy);
@@ -4698,6 +4777,9 @@ function loadMembersData() {
             if (Array.isArray(d.rounds)) {
                 d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
             }
+            if (Array.isArray(d.sessions)) {
+                d.sessions.forEach(function(s, i) { if (!s.id) s.id = sessionStableId(s, i); });
+            }
             _allWorkshopsCache[doc.id] = d;
         });
         _membersDataReady.workshops = true;
@@ -4753,10 +4835,8 @@ function loadMembersData() {
 }
 
 function rebuildMembersData() {
-    // Only rebuild once all three listeners have fired at least once
     if (!_membersDataReady.users || !_membersDataReady.regs || !_membersDataReady.workshops) return;
 
-    // Group registrations by userId
     var regsByUser = {};
     _allRegistrations.forEach(function(r) {
         var uid = r.userId || 'guest';
@@ -4764,12 +4844,10 @@ function rebuildMembersData() {
         regsByUser[uid].push(r);
     });
 
-    // Merge: registered users + guest registrations
     _membersData = [];
     Object.keys(_usersCache).forEach(function(uid) {
         _membersData.push({ user: _usersCache[uid], registrations: regsByUser[uid] || [] });
     });
-    // Add guests (registrations without userId or with userId not in users)
     Object.keys(regsByUser).forEach(function(uid) {
         if (uid === 'guest' || uid === 'null' || !_usersCache[uid]) {
             regsByUser[uid].forEach(function(r) {
@@ -4777,9 +4855,6 @@ function rebuildMembersData() {
             });
         }
     });
-
-    // Reconcile enrolled counts from actual registrations
-    reconcileEnrolledCounts();
 
     renderByMemberView();
     renderByWorkshopView();
@@ -5261,7 +5336,7 @@ function renderByWorkshopView() {
                 noRound.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
             }
         } else if (ws.sessions && ws.sessions.length > 1) {
-            // Single course with multiple date options — group by selectedRound (session_N)
+            // Single course with multiple date options — group by selectedRound (stable session ID)
             var sorted = (ws.sessions || []).slice().sort(function(a, b) {
                 var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
                 var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
@@ -5270,18 +5345,42 @@ function renderByWorkshopView() {
                 var tb = (b.time || '').replace(/[^0-9:]/g, '');
                 return ta < tb ? -1 : ta > tb ? 1 : 0;
             });
+            var stableIdSet = {};
+            sorted.forEach(function(s, i) { stableIdSet[s.id || sessionStableId(s, i)] = true; });
             var bySession = {};
             var noSession = [];
             regs.forEach(function(r) {
-                if (r.selectedRound && r.selectedRound.indexOf('session_') === 0) {
-                    if (!bySession[r.selectedRound]) bySession[r.selectedRound] = [];
-                    bySession[r.selectedRound].push(r);
+                var sr = r.selectedRound || '';
+                if (!sr) { noSession.push(r); return; }
+                if (stableIdSet[sr]) {
+                    if (!bySession[sr]) bySession[sr] = [];
+                    bySession[sr].push(r);
+                    return;
+                }
+                var matched = null;
+                var label = r.selectedRoundLabel || '';
+                if (label) {
+                    for (var j = 0; j < sorted.length; j++) {
+                        var sDate = sorted[j].date || '';
+                        if (sDate && label.indexOf(sDate) === 0) { matched = sorted[j]; break; }
+                    }
+                }
+                if (!matched && r.workshopDate) {
+                    for (var j = 0; j < sorted.length; j++) {
+                        if (sorted[j].date && sorted[j].date.indexOf(r.workshopDate) !== -1) { matched = sorted[j]; break; }
+                    }
+                }
+                if (matched) {
+                    var mid = matched.id || sessionStableId(matched);
+                    if (!bySession[mid]) bySession[mid] = [];
+                    bySession[mid].push(r);
                 } else {
-                    noSession.push(r);
+                    if (!bySession[sr]) bySession[sr] = [];
+                    bySession[sr].push(r);
                 }
             });
             sorted.forEach(function(s, i) {
-                var sid = 'session_' + i;
+                var sid = s.id || sessionStableId(s, i);
                 var sessionRegs = bySession[sid] || [];
                 var activeCount = sessionRegs.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
                 var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
@@ -5481,9 +5580,11 @@ function _getWaTemplate(status) {
 function _resolveSessionLocation(ws, reg) {
     if (!ws || !reg) return ws ? (ws.location || '') : '';
     var sessions = ws.sessions || [];
-    if (reg.selectedRound && reg.selectedRound.indexOf('session_') === 0) {
-        var idx = parseInt(reg.selectedRound.replace('session_', ''));
-        if (sessions[idx] && sessions[idx].location) return sessions[idx].location;
+    if (reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || sessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound && sessions[i].location) return sessions[i].location;
+        }
     }
     if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
         for (var ri = 0; ri < ws.rounds.length; ri++) {
@@ -5501,9 +5602,11 @@ function _resolveSessionLocation(ws, reg) {
 function _resolveRegDateTime(ws, reg) {
     if (!ws || !reg) return { date: reg ? reg.workshopDate || '' : '', time: reg ? reg.workshopTime || '' : '' };
     var sessions = ws.sessions || [];
-    if (reg.selectedRound && reg.selectedRound.indexOf('session_') === 0 && sessions.length > 1) {
-        var idx = parseInt(reg.selectedRound.replace('session_', ''));
-        if (idx >= 0 && idx < sessions.length) return { date: sessions[idx].date || '', time: sessions[idx].time || '' };
+    if (reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || sessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound) return { date: sessions[i].date || '', time: sessions[i].time || '' };
+        }
     }
     if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
         for (var ri = 0; ri < ws.rounds.length; ri++) {
@@ -5600,7 +5703,7 @@ function _buildPmRoundField(reg, regId) {
         ws.sessions.forEach(function(s, i) {
             var lbl = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
             var cap = s.capacity !== undefined ? s.capacity : (ws.capacity || 0);
-            options.push({ value: 'session_' + i, label: lbl, meta: '', capacity: cap, enrolled: s.enrolled || 0 });
+            options.push({ value: s.id || sessionStableId(s, i), label: lbl, meta: '', capacity: cap, enrolled: s.enrolled || 0 });
         });
     }
     if (options.length < 2 && !reg.selectedRoundLabel) return '';
@@ -5639,7 +5742,7 @@ function togglePmRoundPicker(regId) {
                 ws.sessions.forEach(function(s, i) {
                     var lbl = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
                     var cap = s.capacity !== undefined ? s.capacity : (ws.capacity || 0);
-                    options.push({ value: 'session_' + i, label: lbl, meta: '', capacity: cap, enrolled: s.enrolled || 0 });
+                    options.push({ value: s.id || sessionStableId(s, i), label: lbl, meta: '', capacity: cap, enrolled: s.enrolled || 0 });
                 });
             }
             if (options.length < 2) { showToast('此工作坊只有一個日期', 'error'); return; }
@@ -5721,60 +5824,20 @@ function reassignRound(regId, newRoundValue, newRoundLabel) {
         if (oldRound === newRoundValue) return;
 
         var wsId = reg.workshopId;
-        var ws = _allWorkshopsCache[wsId];
-        var batch = db.batch();
         var regRef = db.collection('registrations').doc(regId);
-        batch.update(regRef, {
+        regRef.update({
             selectedRound: newRoundValue,
             selectedRoundLabel: newRoundLabel,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        var isActive = reg.status === 'confirmed' || reg.status === 'pending';
-        if (isActive && ws) {
-            var wsRef = db.collection('workshops').doc(wsId);
-            var isContinuous = ws.courseType === 'continuous' && Array.isArray(ws.rounds) && ws.rounds.length;
-            if (isContinuous) {
-                var updatedRounds = ws.rounds.map(function(round) {
-                    var copy = {};
-                    for (var k in round) copy[k] = round[k];
-                    if (round.id === oldRound) copy.enrolled = Math.max((round.enrolled || 0) - 1, 0);
-                    if (round.id === newRoundValue) copy.enrolled = (round.enrolled || 0) + 1;
-                    return copy;
-                });
-                batch.update(wsRef, { rounds: updatedRounds });
-            } else if (Array.isArray(ws.sessions) && ws.sessions.length > 1) {
-                var updatedSessions = ws.sessions.map(function(s, si) {
-                    var copy = {};
-                    for (var k in s) copy[k] = s[k];
-                    var sid = 'session_' + si;
-                    if (sid === oldRound) copy.enrolled = Math.max((s.enrolled || 0) - 1, 0);
-                    if (sid === newRoundValue) copy.enrolled = (s.enrolled || 0) + 1;
-                    return copy;
-                });
-                batch.update(wsRef, { sessions: updatedSessions });
-            }
-        }
-
-        return batch.commit().then(function() {
+        }).then(function() {
             showToast('已更改至「' + newRoundLabel + '」');
             if (btn) {
                 btn.childNodes[0].textContent = newRoundLabel + ' ';
             }
-            if (ws) {
-                var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
-                if (isContinuous) {
-                    ws.rounds.forEach(function(round) {
-                        if (round.id === oldRound) round.enrolled = Math.max((round.enrolled || 0) - 1, 0);
-                        if (round.id === newRoundValue) round.enrolled = (round.enrolled || 0) + 1;
-                    });
-                } else if (ws.sessions && ws.sessions.length > 1) {
-                    ws.sessions.forEach(function(s, si) {
-                        var sid = 'session_' + si;
-                        if (sid === oldRound) s.enrolled = Math.max((s.enrolled || 0) - 1, 0);
-                        if (sid === newRoundValue) s.enrolled = (s.enrolled || 0) + 1;
-                    });
-                }
+            var localReg = _allRegistrations.find(function(r) { return r._id === regId; });
+            if (localReg) {
+                localReg.selectedRound = newRoundValue;
+                localReg.selectedRoundLabel = newRoundLabel;
             }
             rebuildMembersData();
         });
@@ -6071,7 +6134,6 @@ function bulkChangeStatus(wsId, newStatus) {
             var reg = _allRegistrations.find(function(r) { return r._id === regId; });
             if (reg) reg.status = newStatus;
         });
-        reconcileEnrolledCounts();
         hideLoadingOverlay();
         showToast(selected.length + ' 個報名已更新為「' + getStatusText(newStatus) + '」');
     }).catch(function(err) {
@@ -6102,8 +6164,6 @@ function bulkDeleteForever(wsId) {
     });
 
     Promise.all(promises).then(function() {
-        // Reconcile enrolled counts after permanent deletion
-        reconcileEnrolledCounts();
         renderByWorkshopView();
         renderByMemberView();
         showToast(selected.length + ' 個報名已永久刪除');
@@ -6119,10 +6179,57 @@ function isEnrolledStatus(s) { return s === 'confirmed'; }
 
 // A registration counts as enrolled if confirmed, or if pending WITH a payment screenshot
 function isEnrolledReg(r) {
-    var s = r.status || 'pending';
-    if (s === 'confirmed') return true;
-    if (s === 'pending' && r.paymentScreenshotUrl) return true;
-    return false;
+    var s = (r.status || 'pending').toLowerCase();
+    if (s === 'cancelled' || s === 'deleted') return false;
+    return s === 'confirmed' || s === 'pending';
+}
+
+function _migrateSessionRoundIds(wsId, ws) {
+    if (ws.courseType === 'continuous') return;
+    if (!ws.sessions || ws.sessions.length <= 1) return;
+    var sorted = sortSessions(ws.sessions);
+
+    var stableIds = {};
+    sorted.forEach(function(s, i) { stableIds[s.id || sessionStableId(s, i)] = true; });
+
+    _allRegistrations.forEach(function(r) {
+        if (r.workshopId !== wsId) return;
+        if (!r.selectedRound) return;
+        if (stableIds[r.selectedRound]) return;
+        if (!/^session_\d+$/.test(r.selectedRound)) return;
+
+        var matched = null;
+        var label = r.selectedRoundLabel || '';
+        if (label) {
+            for (var i = 0; i < sorted.length; i++) {
+                var sDate = sorted[i].date || '';
+                if (sDate && label.indexOf(sDate) === 0) { matched = sorted[i]; break; }
+            }
+        }
+        if (!matched && r.workshopDate) {
+            for (var i = 0; i < sorted.length; i++) {
+                if (sorted[i].date && sorted[i].date.indexOf(r.workshopDate) !== -1) { matched = sorted[i]; break; }
+            }
+        }
+        if (!matched && r.allSessionDates && r.allSessionDates.length === 1) {
+            var rd = r.allSessionDates[0].date || '';
+            if (rd) {
+                for (var i = 0; i < sorted.length; i++) {
+                    if (sorted[i].date && sorted[i].date.indexOf(rd) !== -1) { matched = sorted[i]; break; }
+                }
+            }
+        }
+
+        if (matched) {
+            var newId = matched.id || sessionStableId(matched);
+            if (newId !== r.selectedRound) {
+                db.collection('registrations').doc(r._id).update({ selectedRound: newId }).catch(function(err) {
+                    console.error('Migration failed for reg ' + r._id + ':', err);
+                });
+                r.selectedRound = newId;
+            }
+        }
+    });
 }
 
 // Compute the REAL enrolled count from registrations for a given workshopId
@@ -6137,94 +6244,6 @@ function computeEnrolledFromRegs(workshopId) {
 }
 
 // Reconcile enrolled counts: compute from registrations and update Firestore if different
-function reconcileEnrolledCounts() {
-    Object.keys(_allWorkshopsCache).forEach(function(wsId) {
-        var ws = _allWorkshopsCache[wsId];
-        _normalizeArrayField(ws, 'sessions');
-        _normalizeArrayField(ws, 'rounds');
-        if (Array.isArray(ws.rounds)) {
-            ws.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
-        }
-        var realCount = computeEnrolledFromRegs(wsId);
-        var storedCount = ws.enrolled || 0;
-        var updatePayload = {};
-
-        if (realCount !== storedCount) {
-            updatePayload.enrolled = realCount;
-            _allWorkshopsCache[wsId].enrolled = realCount;
-        }
-
-        // Reconcile per-round enrolled for continuous courses
-        if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length) {
-            var perRound = {};
-            ws.rounds.forEach(function(r) { perRound[r.id] = 0; });
-            _allRegistrations.forEach(function(r) {
-                if (r.workshopId === wsId && isEnrolledReg(r) && r.selectedRound && perRound.hasOwnProperty(r.selectedRound)) {
-                    perRound[r.selectedRound]++;
-                }
-            });
-            var roundsChanged = false;
-            var updatedRounds = ws.rounds.map(function(r) {
-                var real = perRound[r.id] || 0;
-                if (real !== (r.enrolled || 0)) {
-                    roundsChanged = true;
-                    var copy = {};
-                    for (var k in r) copy[k] = r[k];
-                    copy.enrolled = real;
-                    return copy;
-                }
-                return r;
-            });
-            if (roundsChanged) {
-                updatePayload.rounds = updatedRounds;
-                _allWorkshopsCache[wsId].rounds = updatedRounds;
-                var totalEnr = 0;
-                updatedRounds.forEach(function(r) { totalEnr += r.enrolled || 0; });
-                updatePayload.enrolled = totalEnr;
-                _allWorkshopsCache[wsId].enrolled = totalEnr;
-            }
-        }
-
-        // Reconcile per-session enrolled for single multi-date workshops
-        if (ws.courseType !== 'continuous' && ws.sessions && ws.sessions.length > 1) {
-            var sortedSess = sortSessions(ws.sessions);
-            var perSession = {};
-            sortedSess.forEach(function(s, i) { perSession['session_' + i] = 0; });
-            _allRegistrations.forEach(function(r) {
-                if (r.workshopId === wsId && isEnrolledReg(r) && r.selectedRound && perSession.hasOwnProperty(r.selectedRound)) {
-                    perSession[r.selectedRound]++;
-                }
-            });
-            var sessionsChanged = false;
-            var updatedSessions = sortedSess.map(function(s, i) {
-                var real = perSession['session_' + i] || 0;
-                if (real !== (s.enrolled || 0)) {
-                    sessionsChanged = true;
-                    var copy = {};
-                    for (var k in s) copy[k] = s[k];
-                    copy.enrolled = real;
-                    return copy;
-                }
-                return s;
-            });
-            if (sessionsChanged) {
-                updatePayload.sessions = updatedSessions;
-                _allWorkshopsCache[wsId].sessions = updatedSessions;
-                var totalEnr2 = 0;
-                updatedSessions.forEach(function(s) { totalEnr2 += s.enrolled || 0; });
-                updatePayload.enrolled = totalEnr2;
-                _allWorkshopsCache[wsId].enrolled = totalEnr2;
-            }
-        }
-
-        if (Object.keys(updatePayload).length) {
-            db.collection('workshops').doc(wsId).update(updatePayload).catch(function(err) {
-                console.error('Enrolled reconcile failed for ' + wsId + ':', err);
-            });
-        }
-    });
-}
-
 // ============================================================
 // CHANGE REGISTRATION STATUS + AUTO-UPDATE ENROLLED
 // ============================================================
@@ -6281,7 +6300,6 @@ function changeRegistrationStatus(regId, workshopId, newStatus, badgeEl) {
             if (needsToken) reg.attendanceToken = updateData.attendanceToken;
             else if (needsRemoveToken) { reg.attendanceToken = undefined; reg.attendedAt = undefined; }
         }
-        reconcileEnrolledCounts();
         hideLoadingOverlay();
         showToast('狀態已更新' + (needsToken ? '，簽到碼已生成' : ''));
     }).catch(function(err) {
@@ -7808,7 +7826,9 @@ function _getEffectiveRoster() {
     }
 
     if (_isSingleMultiDate(ws) && typeof _attendSelectedSession === 'number') {
-        var sessionRoundId = 'session_' + _attendSelectedSession;
+        var sess = sortSessions(ws.sessions || []);
+        var selSess = sess[_attendSelectedSession];
+        var sessionRoundId = selSess ? (selSess.id || sessionStableId(selSess, _attendSelectedSession)) : ('session_' + _attendSelectedSession);
         return _attendRoster.filter(function(r) { return r.selectedRound === sessionRoundId; });
     }
 

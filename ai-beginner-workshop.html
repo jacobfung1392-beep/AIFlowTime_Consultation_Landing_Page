@@ -445,6 +445,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
+            justify-content: center;
         }
         
         /* Section Styles */
@@ -2489,6 +2490,7 @@
 
             var card = document.createElement('div');
             card.className = 'glass-card workshop-card fade-in';
+            card.setAttribute('data-ws-id', doc.id);
             card.innerHTML =
                 '<div class="workshop-card-image">' +
                     '<span class="workshop-number">' + escHtml(d.workshopNumber || '') + '</span>' +
@@ -2526,17 +2528,32 @@
               .where('visible', '==', true)
               .orderBy('order', 'asc')
               .onSnapshot(function(snapshot) {
-                  grid.innerHTML = '';
                   if (snapshot.empty) {
                       grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料即將更新，請稍候。</p>';
                       return;
                   }
+                  var nonCards = grid.querySelectorAll(':scope > :not([data-ws-id])');
+                  nonCards.forEach(function(el) { el.remove(); });
+                  var newIds = {};
                   snapshot.forEach(function(doc) {
                       var d = doc.data();
-                      if (d.archived) return; // Skip archived workshops
-                      grid.appendChild(renderWorkshopCard(doc));
+                      if (d.archived) return;
+                      newIds[doc.id] = true;
+                      var existing = grid.querySelector('[data-ws-id="' + doc.id + '"]');
+                      if (existing) {
+                          var fresh = renderWorkshopCard(doc);
+                          fresh.setAttribute('data-ws-id', doc.id);
+                          existing.replaceWith(fresh);
+                      } else {
+                          var card = renderWorkshopCard(doc);
+                          card.setAttribute('data-ws-id', doc.id);
+                          grid.appendChild(card);
+                      }
                   });
-                  // Re-init scroll animations for new cards
+                  var toRemove = grid.querySelectorAll('[data-ws-id]');
+                  toRemove.forEach(function(el) {
+                      if (!newIds[el.getAttribute('data-ws-id')]) el.remove();
+                  });
                   initScrollAnimations();
                   initWorkshopParallax();
               }, function(err) {

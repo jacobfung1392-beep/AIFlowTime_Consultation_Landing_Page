@@ -49,6 +49,7 @@
         .ws-detail-label{font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;}
         .ws-detail-value{font-size:16px;font-weight:700;color:var(--text);}
         .ws-detail-value.price{color:var(--accent-text);font-size:20px;}
+        .ws-mode-badge{display:block;font-size:12px;font-weight:600;color:var(--text-light);margin-top:4px;}
         .ws-session-placeholder{color:var(--accent);font-weight:600;font-style:italic;}
         .price-original{text-decoration:line-through;color:var(--text-light);font-size:14px;font-weight:500;margin-right:8px;}
         .price-discount-badge{display:inline-block;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;}
@@ -258,7 +259,7 @@
             <h2 id="wsTitle" class="ws-title"></h2>
             <p id="wsDesc" class="ws-desc"></p>
             <div class="ws-detail-grid">
-                <div class="ws-detail-item" id="wsSessionsWrap"><span class="ws-detail-label">日期與時間</span><div id="wsSessions" class="ws-detail-value">待定</div></div>
+                <div class="ws-detail-item" id="wsSessionsWrap"><span class="ws-detail-label">日期與時間</span><div id="wsSessions" class="ws-detail-value">待定</div><span id="wsMode" class="ws-mode-badge" aria-hidden="true"></span></div>
                 <div class="ws-detail-item"><span class="ws-detail-label">時長</span><span id="wsDuration" class="ws-detail-value"></span></div>
                 <div class="ws-detail-item"><span class="ws-detail-label">費用</span><span id="wsPrice" class="ws-detail-value price"></span></div>
                 <div class="ws-detail-item"><span class="ws-detail-label">名額狀態</span><span id="wsSeatsText" class="ws-detail-value"></span></div>
@@ -534,6 +535,14 @@ function _sortSessionsList(sessions) {
     return sortSessionsList(sessions);
 }
 
+function sessionStableId(s, fallbackIdx) {
+    if (s && s.id && s.id.indexOf('session_') === 0 && !/^session_\d+$/.test(s.id)) return s.id;
+    var d = (s && s.date || '').replace(/[年月]/g, '-').replace(/日.*/, '').replace(/\s/g, '');
+    var t = (s && s.time || '').replace(/[^0-9:]/g, '');
+    if (d || t) return 'session_' + d + (t ? '_' + t : '');
+    return 'session_' + (fallbackIdx !== undefined ? fallbackIdx : 0);
+}
+
 function _renderSessionLines(el, sessions) {
     if (sessions && sessions.length) {
         var sorted = _sortSessionsList(sessions).filter(function(s) { return s.visible !== false; });
@@ -597,8 +606,7 @@ function _buildVirtualRoundsFromSessions(d) {
     allSorted.forEach(function(s, i) {
         if (s.visible === false) return;
         var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
-        var sid = 'session_' + i;
-        // Prefer workshop doc's session.enrolled (synced by CMS & confirmPaymentUpload)
+        var sid = s.id || sessionStableId(s, i);
         var enrolled = (s.enrolled !== undefined && s.enrolled !== null) ? s.enrolled : (sessionEnrolled[sid] || 0);
         rounds.push({
             id: sid,
@@ -799,6 +807,17 @@ function initPayment() {
         }
         document.getElementById('wsDuration').textContent = d.duration || '';
         document.getElementById('wsDesc').textContent = d.description || '';
+
+        var modeEl = document.getElementById('wsMode');
+        if (d.mode) {
+            modeEl.textContent = (d.mode === 'hybrid' || d.mode === 'both') ? '線上+線下' : (d.mode === 'online' ? '線上' : (d.mode === 'offline' ? '線下' : d.mode));
+            modeEl.style.display = '';
+            modeEl.removeAttribute('aria-hidden');
+        } else {
+            modeEl.textContent = '';
+            modeEl.style.display = 'none';
+            modeEl.setAttribute('aria-hidden', 'true');
+        }
 
         updatePriceDisplay();
 

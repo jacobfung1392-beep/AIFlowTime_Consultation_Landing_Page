@@ -240,8 +240,8 @@
                 }
             }
         }
-        // For single-multi-date: resolve session_N to the specific chosen session
-        if (!sessionLines.length && reg.selectedRound && reg.selectedRound.indexOf('session_') === 0 && ws.sessions && ws.sessions.length > 1) {
+        // For single-multi-date: resolve session ID to the specific chosen session
+        if (!sessionLines.length && reg.selectedRound && ws.sessions && ws.sessions.length > 1) {
             var sorted = ws.sessions.slice().sort(function(a, b) {
                 var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
                 var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
@@ -250,9 +250,17 @@
                 var tb = (b.time || '').replace(/[^0-9:]/g, '');
                 return ta < tb ? -1 : ta > tb ? 1 : 0;
             });
-            var idx = parseInt(reg.selectedRound.replace('session_', ''), 10);
-            if (idx >= 0 && idx < sorted.length) {
-                var s = sorted[idx];
+            var matchedSession = null;
+            for (var si = 0; si < sorted.length; si++) {
+                var sid = sorted[si].id || ('session_' + si);
+                if (sid === reg.selectedRound) { matchedSession = sorted[si]; break; }
+            }
+            if (!matchedSession && reg.selectedRound.indexOf('session_') === 0) {
+                var idx = parseInt(reg.selectedRound.replace('session_', ''), 10);
+                if (idx >= 0 && idx < sorted.length) matchedSession = sorted[idx];
+            }
+            if (matchedSession) {
+                var s = matchedSession;
                 var line = '';
                 if (s.label) line += _safeText(s.label) + ': ';
                 line += _parseDateToEnglish(s.date);

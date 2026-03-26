@@ -1,0 +1,49 @@
+node_modules
+.git
+.github
+*.map
+*.ts
+README.md
+.env*
+src/
+tests/
+functions
+scripts
+package.json
+package-lock.json
+service-account.json
+*.ai
+AIFLOWTIME_Workshop/**
+Workshop C/**
+AI Video.mp4
+workshop-c-assets/ai-video.mp4
+*.gif
+**/*_original.gif
+**/*_pre_compress.gif
+**/*.md
+seed-workshops.js
+storage.rules
+firestore.rules
+firestore.indexes.json
+About_Jacob.jpg
+Computer_Image.png
+Computer_Image_optimized.png
+Gemini_Generated_Image_xlxr2rxlxr2rxlxr.png
+IMG_1756.JPG
+Jacob.jpg
+Jacob (half tone).png
+Jacob_not_ugly.jpg
+Notes.png
+Notes_optimized.png
+Piu Shot for Jacob-131.jpg
+This dude.JPG
+Workshop_Learning.jpg
+hero-workflow.png
+My2025/89C2A262-E577-443A-95E0-1B3A3BB3B5DC.JPG
+My2025/CNY_2025014.JPG
+My2025/IMG_7914.JPG
+My2025/Piu Shot for Jacob-095.jpg
+My2025/Shanghai_2025-312.jpg
+小班教學，逐個跟進.jpg
+導師每天都在用 AI 做實事.jpg
+不只教工具，教你用 AI 的思維.jpg

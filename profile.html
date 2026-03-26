@@ -579,8 +579,12 @@ var _wsHistoryUnsub = null;
 var _wsDataUnsub = null;
 var _workshopDataCache = {}; // cached workshop data keyed by workshopId
 
+function normalizeRegistrationStatus(status) {
+    return String(status || 'pending').trim().toLowerCase();
+}
+
 function getStatusText(status) {
-    switch(status) {
+    switch(normalizeRegistrationStatus(status)) {
         case 'confirmed': return '已確認付款';
         case 'cancelled': return '已取消';
         case 'deleted': return '已刪除';
@@ -612,6 +616,79 @@ function isUpcoming(dateStr, timeStr) {
         d.setHours(23, 59, 59, 999); // end of day if no time
     }
     return d > now;
+}
+
+function profileSessionStableId(session, fallbackIdx) {
+    if (session && session.id && session.id.indexOf('session_') === 0 && !/^session_\d+$/.test(session.id)) return session.id;
+    var d = (session && session.date || '').replace(/[年月]/g, '-').replace(/日.*/, '').replace(/\s/g, '');
+    var t = (session && session.time || '').replace(/[^0-9:]/g, '');
+    if (d || t) return 'session_' + d + (t ? '_' + t : '');
+    return 'session_' + (fallbackIdx !== undefined ? fallbackIdx : 0);
+}
+
+function _profileResolveSessionMode(wsData, reg) {
+    wsData = wsData || {};
+    var sessions = wsData.sessions || [];
+    if (reg && reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || profileSessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound) return sessions[i].mode || wsData.mode || 'offline';
+        }
+    }
+    if (reg && wsData.courseType === 'continuous' && wsData.rounds && wsData.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < wsData.rounds.length; ri++) {
+            if (wsData.rounds[ri].id === reg.selectedRound) {
+                var rSess = wsData.rounds[ri].sessions || [];
+                if (rSess.length) return rSess[0].mode || wsData.mode || 'offline';
+            }
+        }
+    }
+    if (sessions.length === 1 && sessions[0].mode) return sessions[0].mode;
+    return wsData.mode || 'offline';
+}
+
+function _profileResolveZoomLink(wsData, reg) {
+    wsData = wsData || {};
+    var sessions = wsData.sessions || [];
+    if (reg && reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || profileSessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound) return sessions[i].zoomLink || wsData.zoomLink || '';
+        }
+    }
+    if (reg && wsData.courseType === 'continuous' && wsData.rounds && wsData.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < wsData.rounds.length; ri++) {
+            if (wsData.rounds[ri].id === reg.selectedRound) {
+                var rSess = wsData.rounds[ri].sessions || [];
+                for (var si = 0; si < rSess.length; si++) {
+                    if (rSess[si].zoomLink) return rSess[si].zoomLink;
+                }
+            }
+        }
+    }
+    if (sessions.length === 1 && sessions[0].zoomLink) return sessions[0].zoomLink;
+    return wsData.zoomLink || '';
+}
+
+function _profileResolveLocation(wsData, reg) {
+    wsData = wsData || {};
+    var sessions = wsData.sessions || [];
+    if (reg && reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || profileSessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound) return sessions[i].location || wsData.location || '';
+        }
+    }
+    if (reg && wsData.courseType === 'continuous' && wsData.rounds && wsData.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < wsData.rounds.length; ri++) {
+            if (wsData.rounds[ri].id === reg.selectedRound) {
+                var rSess = wsData.rounds[ri].sessions || [];
+                if (rSess.length) return rSess[0].location || wsData.location || '';
+            }
+        }
+    }
+    if (sessions.length === 1 && sessions[0].location) return sessions[0].location;
+    return wsData.location || '';
 }
 
 function _rebuildProfileWorkshops() {
@@ -661,6 +738,7 @@ function loadWorkshopHistory(uid) {
             _wsRegistrations = [];
             snap.forEach(function(doc) {
                 var r = doc.data();
+                if (normalizeRegistrationStatus(r.status) === 'deleted') return;
                 r._id = doc.id;
                 r._wsDate = r.workshopDate || '';
                 r._wsTime = r.workshopTime || '';
@@ -679,7 +757,7 @@ var _svgCalendar = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" s
 var _svgClock = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
 function buildWsHistoryItemHtml(r) {
-    var status = r.status || 'pending';
+    var status = normalizeRegistrationStatus(r.status);
     var hasScreenshot = r.paymentScreenshotUrl && r.paymentScreenshotUrl.length > 0;
     var isAwaitingPayment = status === 'pending' && !hasScreenshot;
     var statusClass = isAwaitingPayment ? 'awaiting_payment' : status;
@@ -719,8 +797,8 @@ function buildWsHistoryItemHtml(r) {
 
     // Workshop mode & Zoom link
     var wsData = _workshopDataCache[r.workshopId] || {};
-    var wsMode = wsData.mode || 'offline';
-    var wsZoomLink = wsData.zoomLink || '';
+    var wsMode = _profileResolveSessionMode(wsData, r);
+    var wsZoomLink = _profileResolveZoomLink(wsData, r);
 
     // QR code for confirmed upcoming workshops (offline / both)
     var qrHtml = '';
@@ -750,7 +828,7 @@ function buildWsHistoryItemHtml(r) {
 
     // Location for confirmed upcoming workshops (offline / both only)
     var locationHtml = '';
-    var wsLocation = wsData.location || '';
+    var wsLocation = _profileResolveLocation(wsData, r);
     if (status === 'confirmed' && upcoming && wsLocation && wsMode !== 'online') {
         locationHtml = '<div class="ws-h-location-wrap">' +
             '<span class="ws-h-location-icon">📍</span>' +
@@ -781,6 +859,7 @@ function buildWsHistoryItemHtml(r) {
             discountApplied: r.discountApplied || false,
             confirmedAt: r.confirmedAt || r.updatedAt || '',
             location: wsLocation || '',
+            zoomLink: wsZoomLink || '',
             notice: wsData.notice || '',
             attendanceToken: r.attendanceToken || '',
             workshopMode: wsMode || 'offline'
@@ -827,7 +906,7 @@ function applyWsFilterSort() {
     // Deduplicate: keep only the most relevant registration per workshop
     // Priority: confirmed > pending-with-screenshot > pending-no-screenshot > cancelled
     function regPriority(r) {
-        var s = r.status || 'pending';
+        var s = normalizeRegistrationStatus(r.status);
         if (s === 'confirmed') return 4;
         if (s === 'pending' && r.paymentScreenshotUrl) return 3;
         if (s === 'pending') return 2;
@@ -852,7 +931,7 @@ function applyWsFilterSort() {
     // Filter
     var filtered = deduped.filter(function(r) {
         if (_wsFilter === 'all') return true;
-        var status = r.status || 'pending';
+        var status = normalizeRegistrationStatus(r.status);
         var hasScreenshot = r.paymentScreenshotUrl && r.paymentScreenshotUrl.length > 0;
         if (_wsFilter === 'awaiting_payment') return status === 'pending' && !hasScreenshot;
         if (_wsFilter === 'pending') return status === 'pending' && hasScreenshot;
@@ -861,8 +940,8 @@ function applyWsFilterSort() {
 
     // Sort: upcoming first (by date ascending), then rest by createdAt
     filtered.sort(function(a, b) {
-        var aStatus = a.status || 'pending';
-        var bStatus = b.status || 'pending';
+        var aStatus = normalizeRegistrationStatus(a.status);
+        var bStatus = normalizeRegistrationStatus(b.status);
         var aUpcoming = isUpcoming(a._wsDate, a._wsTime) && aStatus !== 'cancelled' && aStatus !== 'deleted';
         var bUpcoming = isUpcoming(b._wsDate, b._wsTime) && bStatus !== 'cancelled' && bStatus !== 'deleted';
 
@@ -903,7 +982,7 @@ function applyWsFilterSort() {
 
     // Auto-expand if there are upcoming workshops
     var hasUpcoming = _wsRegistrations.some(function(r) {
-        var s = r.status || 'pending';
+        var s = normalizeRegistrationStatus(r.status);
         return isUpcoming(r._wsDate, r._wsTime) && s !== 'cancelled' && s !== 'deleted';
     });
     if (hasUpcoming) {
@@ -922,7 +1001,7 @@ function renderAttendanceHistory() {
 
     var records = [];
     _wsRegistrations.forEach(function(r) {
-        if (r.status !== 'confirmed') return;
+        if (normalizeRegistrationStatus(r.status) !== 'confirmed') return;
         var wsData = _workshopDataCache[r.workshopId] || {};
         var wsName = (wsData.workshopNumber ? wsData.workshopNumber + ' — ' : '') + (r._wsTitle || r.workshopId || '');
 
@@ -1100,7 +1179,9 @@ async function generateReceipt(jsonStr) {
     var safeTime = _safeText(r.workshopTime);
     var safePricePaid = _safeText(r.pricePaid) || 'N/A';
     var safePromo = _safeText(r.promoCode);
-    var safeLocation = _safeText(r.location);
+    var receiptMode = _safeText(r.workshopMode).toLowerCase() || 'offline';
+    var safeLocation = receiptMode === 'online' ? '' : _safeText(r.location);
+    var safeMeetingLink = (receiptMode === 'online' || receiptMode === 'both') ? _safeText(r.zoomLink) : '';
 
     // Header bar
     doc.setFillColor(217, 119, 87);
@@ -1221,12 +1302,19 @@ async function generateReceipt(jsonStr) {
         y += 0.5;
     }
 
-    // Location
+    // Location / meeting link
     if (safeLocation) {
         doc.setFontSize(9);
         doc.setTextColor(100, 100, 100);
         doc.text('Location: ' + safeLocation, margin + 4, y);
         y += 5;
+    }
+    if (safeMeetingLink) {
+        doc.setFontSize(9);
+        doc.setTextColor(21, 101, 192);
+        var meetingLines = doc.splitTextToSize('Meeting Link: ' + safeMeetingLink, W - margin * 2 - 8);
+        doc.text(meetingLines, margin + 4, y);
+        y += meetingLines.length * 4.5 + 0.5;
     }
 
     // Discount info

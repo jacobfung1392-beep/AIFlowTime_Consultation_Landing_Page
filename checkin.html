@@ -63,6 +63,19 @@
         .checkin-back { display:inline-block; margin-top:16px; font-size:13px; color:var(--text-light); text-decoration:none; font-weight:600; }
         .checkin-back:hover { color:var(--accent); }
 
+        .checkin-session-note { font-size:13px; color:var(--text-light); font-weight:600; margin:-4px 0 16px; }
+        .checkin-session-list { display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
+        .checkin-session-btn {
+            width:100%; border:1px solid var(--bg-off); background:var(--white); color:var(--text);
+            border-radius:12px; padding:14px 16px; text-align:left; cursor:pointer; transition:all 0.2s;
+            font-family:'Noto Sans TC',sans-serif;
+        }
+        .checkin-session-btn:hover { border-color:var(--accent); transform:translateY(-1px); }
+        .checkin-session-btn:disabled { cursor:not-allowed; opacity:1; transform:none; }
+        .checkin-session-btn.checked { border-color:rgba(46,125,50,0.25); background:var(--green-bg); }
+        .checkin-session-btn-title { display:block; font-size:14px; font-weight:700; color:var(--text); }
+        .checkin-session-btn-sub { display:block; font-size:12px; color:var(--text-light); margin-top:4px; }
+
         .spinner { width:36px; height:36px; border:3px solid var(--bg-off); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
         @keyframes spin { to { transform:rotate(360deg); } }
     </style>
@@ -97,7 +110,185 @@ function getStatusText(s) {
     return map[s] || s || '—';
 }
 
-function renderCard(type, title, msg, reg, showBtn) {
+function _sortSessions(sessions) {
+    if (typeof sortSessionsList === 'function') return sortSessionsList(sessions);
+    return (sessions || []).slice().sort(function(a, b) {
+        var da = _normDateKey(a.date);
+        var db2 = _normDateKey(b.date);
+        if (da !== db2) return da < db2 ? -1 : 1;
+        var ta = (a.time || '').replace(/[^0-9:]/g, '');
+        var tb = (b.time || '').replace(/[^0-9:]/g, '');
+        return ta < tb ? -1 : ta > tb ? 1 : 0;
+    });
+}
+
+function _sessionStableId(session, fallbackIdx) {
+    if (session && session.id && session.id.indexOf('session_') === 0 && !/^session_\d+$/.test(session.id)) return session.id;
+    var d = (session && session.date || '').replace(/[年月]/g, '-').replace(/日.*/, '').replace(/\s/g, '');
+    var t = (session && session.time || '').replace(/[^0-9:]/g, '');
+    if (d || t) return 'session_' + d + (t ? '_' + t : '');
+    return 'session_' + (fallbackIdx !== undefined ? fallbackIdx : 0);
+}
+
+function _formatSessionLabel(session, fallbackIdx, prefix) {
+    var parts = [];
+    if (session && session.label) parts.push(session.label);
+    if (session && session.date) parts.push(session.date);
+    if (session && session.time) parts.push(session.time);
+    if (!parts.length) parts.push('第' + ((fallbackIdx || 0) + 1) + '堂');
+    var label = parts.join(' ');
+    if (session && session.mode === 'online') label += ' 線上';
+    else if (session && session.mode === 'both') label += ' 實體＋線上';
+    if (prefix) label = prefix + ' — ' + label;
+    return label;
+}
+
+function _hasSessionAttendance(reg, sessionKey) {
+    return !!(reg && reg.attendance && reg.attendance[sessionKey] && reg.attendance[sessionKey].attendedAt);
+}
+
+function _getSessionAttendanceTime(reg, sessionKey) {
+    if (!reg || !reg.attendance || !reg.attendance[sessionKey]) return null;
+    return reg.attendance[sessionKey].attendedAt || null;
+}
+
+function _resolveCheckinPlan(reg, ws) {
+    var plan = {
+        mode: 'plain',
+        buttonLabel: '✓ 確認簽到',
+        checkinMessage: '此參加者已確認付款，可以簽到。',
+        checkedMessage: '',
+        choices: []
+    };
+    if (!reg || !ws) {
+        if (reg && reg.attendedAt) {
+            var plainTime = reg.attendedAt.toDate ? reg.attendedAt.toDate() : new Date(reg.attendedAt);
+            plan.alreadyChecked = true;
+            plan.checkedMessage = '此參加者已於 ' + plainTime.toLocaleString('zh-Hant') + ' 完成簽到。';
+        }
+        return plan;
+    }
+
+    var isContinuous = ws.courseType === 'continuous' && ws.rounds && ws.rounds.length;
+    if (isContinuous && reg.selectedRound) {
+        var roundIdx = -1;
+        var round = null;
+        for (var ri = 0; ri < ws.rounds.length; ri++) {
+            var candidate = ws.rounds[ri];
+            if ((candidate.id && candidate.id === reg.selectedRound) || ((candidate.label || '') === (reg.selectedRoundLabel || ''))) {
+                roundIdx = ri;
+                round = candidate;
+                break;
+            }
+        }
+        if (round) {
+            var roundLabel = round.label || reg.selectedRoundLabel || ('第' + (roundIdx + 1) + '期');
+            var roundSessions = (round.sessions || []).filter(function(s) { return s.visible !== false; });
+            plan.mode = 'choose';
+            plan.checkinMessage = '請選擇這位學員今次出席的課堂。';
+            plan.choiceNote = '這是多堂課程，簽到會記錄到指定課堂。';
+            roundSessions.forEach(function(session, idx) {
+                var key = 'round_' + roundIdx + '_session_' + idx;
+                var attendedAt = _getSessionAttendanceTime(reg, key);
+                var timeText = '';
+                if (attendedAt) {
+                    var d = attendedAt.toDate ? attendedAt.toDate() : new Date(attendedAt);
+                    timeText = '已於 ' + d.toLocaleString('zh-Hant') + ' 簽到';
+                } else {
+                    timeText = '按此簽到這一堂';
+                }
+                plan.choices.push({
+                    key: key,
+                    label: _formatSessionLabel(session, idx, roundLabel),
+                    checked: !!attendedAt,
+                    subLabel: timeText
+                });
+            });
+            plan.allChecked = !!plan.choices.length && plan.choices.every(function(choice) { return choice.checked; });
+            if (plan.allChecked) {
+                plan.alreadyChecked = true;
+                plan.checkedMessage = '這位學員已完成此報讀期數的所有課堂簽到。';
+            }
+            return plan;
+        }
+    }
+
+    var sessions = (ws.sessions || []).filter(function(s) { return s.visible !== false; });
+    if (sessions.length > 1) {
+        var sorted = _sortSessions(sessions);
+        var matchedIdx = -1;
+        var matchedSession = null;
+        for (var i = 0; i < sorted.length; i++) {
+            var sid = sorted[i].id || _sessionStableId(sorted[i], i);
+            if (reg.selectedRound && sid === reg.selectedRound) {
+                matchedIdx = i;
+                matchedSession = sorted[i];
+                break;
+            }
+        }
+        if (!matchedSession && reg.selectedRoundLabel) {
+            for (var j = 0; j < sorted.length; j++) {
+                var label = _formatSessionLabel(sorted[j], j, '');
+                if (label === reg.selectedRoundLabel) {
+                    matchedIdx = j;
+                    matchedSession = sorted[j];
+                    break;
+                }
+            }
+        }
+        if (!matchedSession && reg.workshopDate) {
+            for (var k = 0; k < sorted.length; k++) {
+                var sameDate = (sorted[k].date || '') === (reg.workshopDate || '');
+                var sameTime = !reg.workshopTime || (sorted[k].time || '') === (reg.workshopTime || '');
+                if (sameDate && sameTime) {
+                    matchedIdx = k;
+                    matchedSession = sorted[k];
+                    break;
+                }
+            }
+        }
+        if (matchedSession) {
+            var sessionKey = 'session-' + matchedIdx;
+            var attendedAt = _getSessionAttendanceTime(reg, sessionKey) || reg.attendedAt || null;
+            plan.mode = 'session';
+            plan.sessionKey = sessionKey;
+            plan.buttonLabel = '✓ 確認簽到：' + _formatSessionLabel(matchedSession, matchedIdx, '');
+            plan.checkinMessage = '此學員將會簽到已報名的指定場次。';
+            if (attendedAt) {
+                var sTime = attendedAt.toDate ? attendedAt.toDate() : new Date(attendedAt);
+                plan.alreadyChecked = true;
+                plan.checkedMessage = '此參加者已於 ' + sTime.toLocaleString('zh-Hant') + ' 完成該場次簽到。';
+            }
+            return plan;
+        }
+    }
+
+    if (reg.attendedAt) {
+        var attendTime = reg.attendedAt.toDate ? reg.attendedAt.toDate() : new Date(reg.attendedAt);
+        plan.alreadyChecked = true;
+        plan.checkedMessage = '此參加者已於 ' + attendTime.toLocaleString('zh-Hant') + ' 完成簽到。';
+    }
+    return plan;
+}
+
+function _buildSessionChoiceHtml(reg, plan) {
+    if (!reg || !reg._id || !plan || !plan.choices || !plan.choices.length) return '';
+    var html = '';
+    if (plan.choiceNote) html += '<div class="checkin-session-note">' + escHtml(plan.choiceNote) + '</div>';
+    html += '<div class="checkin-session-list">';
+    plan.choices.forEach(function(choice) {
+        var onclick = choice.checked ? '' : ' onclick="doCheckin(' + JSON.stringify(reg._id) + ', ' + JSON.stringify(choice.key) + ')"';
+        html += '<button type="button" class="checkin-session-btn' + (choice.checked ? ' checked' : '') + '"' + (choice.checked ? ' disabled' : '') + onclick + '>';
+        html += '<span class="checkin-session-btn-title">' + escHtml(choice.label) + '</span>';
+        html += '<span class="checkin-session-btn-sub">' + escHtml(choice.subLabel || '') + '</span>';
+        html += '</button>';
+    });
+    html += '</div>';
+    return html;
+}
+
+function renderCard(type, title, msg, reg, showBtn, opts) {
+    opts = opts || {};
     var card = document.getElementById('checkinCard');
     var iconMap = { success: '✅', error: '❌', warn: '⚠️', checked: '☑️', loading: '⏳' };
 
@@ -118,8 +309,13 @@ function renderCard(type, title, msg, reg, showBtn) {
         html += '</div>';
     }
 
-    if (showBtn && reg && reg._id) {
-        html += '<button class="checkin-btn" id="checkinBtn" onclick="doCheckin(\'' + escHtml(reg._id) + '\')">✓ 確認簽到</button>';
+    if (opts.extraHtml) html += opts.extraHtml;
+
+    if (opts.actionsHtml) {
+        html += opts.actionsHtml;
+    } else if (showBtn && reg && reg._id) {
+        var onclick = 'doCheckin(' + JSON.stringify(reg._id) + (opts.sessionKey ? ', ' + JSON.stringify(opts.sessionKey) : '') + ')';
+        html += '<button class="checkin-btn" id="checkinBtn" onclick="' + onclick + '">' + escHtml(opts.buttonLabel || '✓ 確認簽到') + '</button>';
     }
 
     html += '<a class="checkin-back" href="/workshop-cms">← 返回 CMS</a>';
@@ -128,6 +324,7 @@ function renderCard(type, title, msg, reg, showBtn) {
 
 var _token = null;
 var _regData = null;
+var _workshopData = null;
 var ADMIN_EMAILS = ['jacobfung1392@gmail.com', 'jacobfung@aiflowtime.com'];
 
 function init() {
@@ -167,28 +364,78 @@ function lookupToken() {
             return;
         }
 
-        if (reg.attendedAt) {
-            var attendTime = reg.attendedAt.toDate ? reg.attendedAt.toDate() : new Date(reg.attendedAt);
-            renderCard('checked', '已簽到', '此參加者已於 ' + attendTime.toLocaleString('zh-Hant') + ' 完成簽到。', reg, false);
+        if (!reg.workshopId) {
+            renderResolvedCheckin(reg, null);
             return;
         }
 
-        // Valid — show confirm button (admin check is optional for speed on workshop day)
-        renderCard('success', '驗證成功', '此參加者已確認付款，可以簽到。', reg, true);
-
+        db.collection('workshops').doc(reg.workshopId).get().then(function(wsSnap) {
+            _workshopData = wsSnap.exists ? wsSnap.data() : null;
+            renderResolvedCheckin(reg, _workshopData);
+        }).catch(function() {
+            _workshopData = null;
+            renderResolvedCheckin(reg, null);
+        });
     }).catch(function(err) {
         renderCard('error', '查詢失敗', '無法查詢報名資料：' + err.message, null, false);
     });
 }
 
-function doCheckin(regId) {
+function renderResolvedCheckin(reg, ws) {
+    var plan = _resolveCheckinPlan(reg, ws);
+    if (plan.mode === 'choose') {
+        if (plan.alreadyChecked) {
+            renderCard('checked', '已簽到', plan.checkedMessage, reg, false, { extraHtml: _buildSessionChoiceHtml(reg, plan) });
+            return;
+        }
+        renderCard('success', '驗證成功', plan.checkinMessage, reg, false, { actionsHtml: _buildSessionChoiceHtml(reg, plan) });
+        return;
+    }
+    if (plan.alreadyChecked) {
+        renderCard('checked', '已簽到', plan.checkedMessage, reg, false);
+        return;
+    }
+    renderCard('success', '驗證成功', plan.checkinMessage, reg, true, {
+        buttonLabel: plan.buttonLabel,
+        sessionKey: plan.sessionKey || ''
+    });
+}
+
+function doCheckin(regId, sessionKey) {
     var btn = document.getElementById('checkinBtn');
     if (btn) { btn.disabled = true; btn.textContent = '正在簽到...'; }
 
-    db.collection('registrations').doc(regId).update({
-        attendedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function() {
-        renderCard('checked', '簽到成功！', '參加者已成功簽到。', _regData, false);
+    var updateData = {};
+    var sessionLabel = '';
+    if (sessionKey) {
+        var plan = _resolveCheckinPlan(_regData, _workshopData);
+        if (plan && plan.choices && plan.choices.length) {
+            for (var i = 0; i < plan.choices.length; i++) {
+                if (plan.choices[i].key === sessionKey) {
+                    sessionLabel = plan.choices[i].label || '';
+                    break;
+                }
+            }
+        } else if (plan && plan.sessionKey === sessionKey) {
+            sessionLabel = (plan.buttonLabel || '').replace(/^✓\s*確認簽到：/, '');
+        }
+        updateData['attendance.' + sessionKey + '.attendedAt'] = firebase.firestore.FieldValue.serverTimestamp();
+        if (sessionLabel) updateData['attendance.' + sessionKey + '.label'] = sessionLabel;
+    } else {
+        updateData.attendedAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+
+    db.collection('registrations').doc(regId).update(updateData).then(function() {
+        if (sessionKey) {
+            if (!_regData.attendance) _regData.attendance = {};
+            _regData.attendance[sessionKey] = {
+                attendedAt: new Date(),
+                label: sessionLabel || ((_regData.attendance[sessionKey] && _regData.attendance[sessionKey].label) || '')
+            };
+        } else {
+            _regData.attendedAt = new Date();
+        }
+        renderResolvedCheckin(_regData, _workshopData);
     }).catch(function(err) {
         if (btn) { btn.disabled = false; btn.textContent = '✓ 確認簽到'; }
         alert('簽到失敗：' + err.message);

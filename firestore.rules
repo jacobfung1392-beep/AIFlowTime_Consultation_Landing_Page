@@ -34,13 +34,17 @@ service cloud.firestore {
       allow get: if true;
       allow read: if request.auth != null
         && resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null
-        && resource.data.userId == request.auth.uid
+      allow update: if (
+          (request.auth != null && resource.data.userId == request.auth.uid) ||
+          (request.auth == null && resource.data.userId == null)
+        )
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'paymentScreenshotUrl',
           'name', 'ageGroup', 'phone', 'jobType', 'reasons',
           'aiProblem', 'expectation',
           'workshopTitle', 'workshopDate', 'workshopTime', 'workshopDescription',
+          'allSessionDates', 'selectedRound', 'selectedRoundLabel',
+          'pricePaid', 'discountApplied', 'promoCode',
           'updatedAt'
         ]);
       allow read, write: if request.auth != null
@@ -172,6 +176,82 @@ service cloud.firestore {
 
     // Consultation settings: admin only
     match /consultationSettings/{docId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Game scores: anyone can create (submit from game); public read; admin update/delete
+    match /gameScores/{scoreId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Floating icon reusable assets: public read (linktree renders them), admin write
+    match /floatingIconAssets/{assetId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // AI Tools: public read (landing pages render tool labels), admin write
+    match /aiTools/{toolId} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Free-material download leads: anyone can create; admin read
+    match /freeMaterialLeads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Trigger Email extension: anyone can create a mail doc; admin read
+    match /mail/{mailId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Layout document library assets: admin only
+    match /layoutDocumentAssets/{assetId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Layout document folders: admin only
+    match /layoutDocumentFolders/{folderId} {
       allow read, write: if request.auth != null
         && request.auth.token.email_verified == true
         && request.auth.token.email in [

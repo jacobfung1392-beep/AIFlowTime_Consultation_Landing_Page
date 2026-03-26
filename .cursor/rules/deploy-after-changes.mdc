@@ -1,0 +1,14 @@
+---
+description: Deploy to Firebase after completing changes that affect the live site
+alwaysApply: true
+---
+
+# Deploy After Changes
+
+When you complete changes that affect the live site (HTML, CSS, JS, Firebase config, Firestore rules, etc.):
+
+1. **Deploy without being asked.** Run `npx firebase deploy` from the project root after finishing the work. Do not wait for the user to say "deploy" or "deploy please."
+2. **One deploy at the end.** Deploy once after all related edits are done, not after every single file change.
+3. **Skip deploy only when:** the user explicitly says not to deploy, or the changes are docs-only / scripts that don’t affect hosting (e.g. migration script that runs locally).
+
+Hosting URL: https://aiflowtime-hk.web.app

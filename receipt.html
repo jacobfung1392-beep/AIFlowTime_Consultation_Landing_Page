@@ -169,9 +169,9 @@
 
         var wsMode = ws.mode || 'offline';
         var qrDataUrl = null;
-        if (reg.attendanceToken && wsMode !== 'online') {
-            var checkinUrl = window.location.origin + '/checkin?token=' + encodeURIComponent(reg.attendanceToken);
-            qrDataUrl = await _generateQrDataUrl(checkinUrl, 200);
+        function _resolvedReceiptMode() {
+            if (sessionLines.length === 1 && sessionLines[0] && sessionLines[0].mode) return sessionLines[0].mode;
+            return _safeText(wsMode).toLowerCase() || 'offline';
         }
 
         var jsPDF = window.jspdf.jsPDF;
@@ -216,40 +216,46 @@
         var safeTitle = _safeText(ws.title ? (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + ws.title : reg.workshopTitle) || 'Workshop';
         var sessionLines = [];
         var safeRoundLabel = '';
-        function _addSessionItem(line, location) {
-            if (line) sessionLines.push({ line: line, location: location ? _safeText(location) : '' });
+        function _modeValue(mode) {
+            return _safeText(mode).toLowerCase() || _safeText(ws.mode).toLowerCase() || 'offline';
+        }
+        function _locationForMode(mode, location) {
+            var currentMode = _modeValue(mode);
+            if (currentMode === 'online') return '';
+            return _safeText(location);
+        }
+        function _meetingLinkForMode(mode, zoomLink) {
+            var currentMode = _modeValue(mode);
+            if (currentMode !== 'online' && currentMode !== 'both') return '';
+            return _safeText(zoomLink);
+        }
+        function _addSessionItem(line, location, meetingLink, mode) {
+            if (line) sessionLines.push({
+                line: line,
+                location: _locationForMode(mode, location),
+                meetingLink: _meetingLinkForMode(mode, meetingLink),
+                mode: _modeValue(mode)
+            });
         }
         // For continuous courses, show only the selected round's sessions
         if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
             var matchedRound = ws.rounds.find(function(r) { return r.id === reg.selectedRound; });
             if (matchedRound) {
                 safeRoundLabel = _safeText(matchedRound.label || reg.selectedRoundLabel || '');
-                var roundSessions = (matchedRound.sessions || []).filter(function(s) { return s.visible !== false; }).sort(function(a, b) {
-                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    return da < db2 ? -1 : da > db2 ? 1 : 0;
-                });
+                var roundSessions = sortSessionsList((matchedRound.sessions || []).filter(function(s) { return s.visible !== false; }));
                 for (var si = 0; si < roundSessions.length; si++) {
                     var s = roundSessions[si];
                     var line = '';
                     if (s.label) line += _safeText(s.label) + ': ';
                     line += _parseDateToEnglish(s.date);
                     if (s.time) line += ' | ' + _safeText(s.time);
-                    var loc = s.location || ws.location || '';
-                    _addSessionItem(line, loc);
+                    _addSessionItem(line, s.location || ws.location, s.zoomLink || ws.zoomLink, s.mode || ws.mode);
                 }
             }
         }
         // For single-multi-date: resolve session ID to the specific chosen session
         if (!sessionLines.length && reg.selectedRound && ws.sessions && ws.sessions.length > 1) {
-            var sorted = ws.sessions.slice().sort(function(a, b) {
-                var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                if (da !== db2) return da < db2 ? -1 : 1;
-                var ta = (a.time || '').replace(/[^0-9:]/g, '');
-                var tb = (b.time || '').replace(/[^0-9:]/g, '');
-                return ta < tb ? -1 : ta > tb ? 1 : 0;
-            });
+            var sorted = sortSessionsList(ws.sessions);
             var matchedSession = null;
             for (var si = 0; si < sorted.length; si++) {
                 var sid = sorted[si].id || ('session_' + si);
@@ -265,26 +271,19 @@
                 if (s.label) line += _safeText(s.label) + ': ';
                 line += _parseDateToEnglish(s.date);
                 if (s.time) line += ' | ' + _safeText(s.time);
-                _addSessionItem(line, s.location || ws.location);
+                _addSessionItem(line, s.location || ws.location, s.zoomLink || ws.zoomLink, s.mode || ws.mode);
                 safeRoundLabel = _safeText(reg.selectedRoundLabel || '');
             }
         }
         if (!sessionLines.length && ws.sessions && ws.sessions.length) {
-            var sorted = ws.sessions.filter(function(s) { return s.visible !== false; }).sort(function(a, b) {
-                var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                if (da !== db2) return da < db2 ? -1 : 1;
-                var ta = (a.time || '').replace(/[^0-9:]/g, '');
-                var tb = (b.time || '').replace(/[^0-9:]/g, '');
-                return ta < tb ? -1 : ta > tb ? 1 : 0;
-            });
+            var sorted = sortSessionsList(ws.sessions.filter(function(s) { return s.visible !== false; }));
             for (var si = 0; si < sorted.length; si++) {
                 var s = sorted[si];
                 var line = '';
                 if (s.label) line += _safeText(s.label) + ': ';
                 line += _parseDateToEnglish(s.date);
                 if (s.time) line += ' | ' + _safeText(s.time);
-                _addSessionItem(line, s.location || ws.location);
+                _addSessionItem(line, s.location || ws.location, s.zoomLink || ws.zoomLink, s.mode || ws.mode);
             }
         }
         if (!sessionLines.length && reg.allSessionDates && reg.allSessionDates.length) {
@@ -293,19 +292,35 @@
                 if (sd.label) line += _safeText(sd.label) + ': ';
                 line += _parseDateToEnglish(sd.date);
                 if (sd.time) line += ' | ' + _safeText(sd.time);
-                _addSessionItem(line, sd.location || ws.location);
+                _addSessionItem(line, sd.location || ws.location, sd.zoomLink || ws.zoomLink, sd.mode || ws.mode);
             });
         }
         if (!sessionLines.length) {
             var fallbackDate = _parseDateToEnglish(ws.date || reg.workshopDate);
             var fallbackTime = _safeText(ws.time || reg.workshopTime);
             var fb = [fallbackDate, fallbackTime].filter(Boolean).join(' | ');
-            if (fb) sessionLines.push({ line: fb, location: '' });
+            if (fb) {
+                sessionLines.push({
+                    line: fb,
+                    location: _locationForMode(ws.mode, ws.location),
+                    meetingLink: _meetingLinkForMode(ws.mode, ws.zoomLink),
+                    mode: _modeValue(ws.mode)
+                });
+            }
         }
         var safePricePaid = _safeText(reg.pricePaid) || 'N/A';
         var safePromo = _safeText(reg.promoCode);
         var safeLocation = '';
-        if (sessionLines.length === 1 && !sessionLines[0].location) safeLocation = _safeText(ws.location);
+        var safeMeetingLink = '';
+        if (sessionLines.length === 1) {
+            var singleMode = sessionLines[0].mode || ws.mode;
+            if (!sessionLines[0].location) safeLocation = _locationForMode(singleMode, ws.location);
+            if (!sessionLines[0].meetingLink) safeMeetingLink = _meetingLinkForMode(singleMode, ws.zoomLink);
+        }
+        if (reg.attendanceToken && _resolvedReceiptMode() !== 'online') {
+            var checkinUrl = window.location.origin + '/checkin?token=' + encodeURIComponent(reg.attendanceToken);
+            qrDataUrl = await _generateQrDataUrl(checkinUrl, 200);
+        }
 
         // Header bar
         doc.setFillColor(217, 119, 87);
@@ -395,7 +410,7 @@
             doc.text(safeRoundLabel, margin + 4, y);
             y += 5;
         }
-        // Session lines may contain Chinese labels; show location under each date when per-session
+        // Session lines may contain Chinese labels; show location / meeting link under each date when per-session
         if (sessionLines.length) {
             setCJK(9);
             for (var sl = 0; sl < sessionLines.length; sl++) {
@@ -403,6 +418,7 @@
                 var isObj = item && typeof item === 'object';
                 var lineText = isObj ? item.line : item;
                 var lineLoc = isObj ? (item.location || '') : '';
+                var lineMeetingLink = isObj ? (item.meetingLink || '') : '';
                 doc.setTextColor(120, 120, 120);
                 doc.text(lineText, margin + 4, y);
                 y += 4.5;
@@ -410,6 +426,12 @@
                     doc.setTextColor(100, 100, 100);
                     doc.text('  Location: ' + lineLoc, margin + 4, y);
                     y += 4.5;
+                }
+                if (lineMeetingLink) {
+                    doc.setTextColor(21, 101, 192);
+                    var lineMeetingLines = doc.splitTextToSize('  Meeting Link: ' + lineMeetingLink, W - margin * 2 - 12);
+                    doc.text(lineMeetingLines, margin + 4, y);
+                    y += lineMeetingLines.length * 4.5;
                 }
             }
             y += 0.5;
@@ -420,6 +442,13 @@
             doc.setTextColor(100, 100, 100);
             doc.text('Location: ' + safeLocation, margin + 4, y);
             y += 5;
+        }
+        if (safeMeetingLink) {
+            setCJK(9);
+            doc.setTextColor(21, 101, 192);
+            var meetingLines = doc.splitTextToSize('Meeting Link: ' + safeMeetingLink, W - margin * 2 - 8);
+            doc.text(meetingLines, margin + 4, y);
+            y += meetingLines.length * 4.5 + 0.5;
         }
 
         if (safePromo) {

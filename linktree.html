@@ -335,6 +335,10 @@
             margin-bottom: 0.5rem;
             color: var(--text-primary);
         }
+        .profile-name b,
+        .profile-name strong {
+            font-weight: 900;
+        }
         
         body.dark-mode .profile-name {
             color: #ffffff;
@@ -986,6 +990,64 @@
                 top: -40px;
                 right: 0.5rem;
             }
+        }
+
+        /* Floating draggable icon */
+        .floating-icon-wrap {
+            position: fixed;
+            z-index: 120000;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            transition: filter 0.2s;
+        }
+        .floating-icon-wrap:active { cursor: grabbing; }
+        .floating-icon-wrap a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            pointer-events: auto;
+        }
+        .floating-icon-wrap img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            border-radius: 8px;
+        }
+        .floating-icon-scale-stage {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        .floating-icon-scale-inner {
+            flex-shrink: 0;
+            transform-origin: center center;
+            border-radius: 8px;
+            line-height: 0;
+        }
+        .floating-icon-scale-inner iframe {
+            display: block;
+            border: none;
+            border-radius: 8px;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        @keyframes fi-bob {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .floating-icon-wrap.fi-idle {
+            animation: fi-bob 3s ease-in-out infinite;
+        }
+        .floating-icon-wrap.fi-dragging {
+            animation: none;
+            filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
         }
     </style>
 </head>
@@ -2326,7 +2388,8 @@
             var matched = 0;
             var order = 0;
             sections.forEach(function(sec) {
-                if (!sec.visible) return;
+                if (sec.visible === false) return;
+                if (sec.type === 'floating-icon') return;
                 var el = document.querySelector('[data-section-id="' + sec.id + '"]');
                 if (!el) {
                     var tpl = document.querySelector('[data-section-type="' + sec.type + '"][data-section-id^="_tpl_"]');
@@ -2336,6 +2399,13 @@
                         el.removeAttribute('style');
                         var container = document.querySelector('.links-container');
                         if (container) container.appendChild(el);
+                    } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download') {
+                        el = document.createElement('section');
+                        el.setAttribute('data-section-id', sec.id);
+                        el.setAttribute('data-section-type', sec.type);
+                        el.className = 'fade-in';
+                        var linksContainer = document.querySelector('.links-container');
+                        if (linksContainer) linksContainer.appendChild(el);
                     }
                 }
                 if (!el) { console.warn('[Layout] No template for section:', sec.type, sec.id); return; }
@@ -2351,6 +2421,12 @@
                 allSecs.forEach(function(el) { el.style.display = ''; el.style.opacity = '1'; });
             }
             document.body.classList.remove('layout-pending');
+
+            document.querySelectorAll('.floating-icon-wrap').forEach(function(el) { el.remove(); });
+            sections.forEach(function(sec) {
+                if (sec.type !== 'floating-icon' || sec.visible === false) return;
+                _renderFloatingIcon(sec);
+            });
         }
 
         function applyContent(el, sec) {
@@ -2360,10 +2436,11 @@
             switch (type) {
                 case 'hero':
                     var title = c.title || '';
+                    var titleHtml = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(title) : _escHtml(title).replace(/\n/g, '<br>');
                     var subtitle = (c.subtitle || '').replace(/\n/g, '<br>');
                     var avatarSrc = c.gifUrl ? _escHtml(c.gifUrl) : 'Landing-page-logo.png';
                     el.innerHTML = '<img src="' + avatarSrc + '" alt="AIFlowTime" class="profile-avatar" id="profileAvatar" width="100" height="100" loading="eager" decoding="async">' +
-                        '<h1 class="profile-name">' + _escHtml(title) + '</h1>' +
+                        '<h1 class="profile-name">' + titleHtml + '</h1>' +
                         '<p class="profile-bio" style="font-size:1.1em;">' + subtitle + '</p>';
                     break;
 
@@ -2448,7 +2525,230 @@
                         });
                     }
                     break;
+
+                case 'free-material-download':
+                    renderFreeMaterialSection(el, 'linktree', el.getAttribute('data-section-id') || 'free-material-download', c, {
+                        surface: 'rgba(16,20,26,0.92)',
+                        surfaceAlt: 'rgba(255,255,255,0.05)',
+                        text: '#f7efe4',
+                        muted: 'rgba(247,239,228,0.74)',
+                        accent: '#D97757',
+                        accentText: '#ffffff',
+                        border: 'rgba(255,255,255,0.10)',
+                        backdrop: 'rgba(7,10,15,0.74)'
+                    });
+                    break;
+
+                case 'image-only':
+                    var ltImgAlign = c.align === 'left' ? 'flex-start' : c.align === 'right' ? 'flex-end' : 'center';
+                    var ltImgShadow = c.shadow === 'strong'
+                        ? '0 20px 50px rgba(0,0,0,0.28)'
+                        : c.shadow === 'none'
+                            ? 'none'
+                            : '0 10px 26px rgba(0,0,0,0.18)';
+                    var ltImg = _escHtml(c.imageUrl || '');
+                    var ltAlt = _escHtml(c.alt || '');
+                    var ltCap = _escHtml(c.caption || '');
+                    var ltLink = String(c.linkUrl || '').trim();
+                    var ltStart = ltLink ? '<a href="' + _escHtml(ltLink) + '"' + (/^https?:/i.test(ltLink) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
+                    var ltEnd = ltLink ? '</a>' : '</div>';
+                    el.style.padding = (parseInt(c.paddingTop, 10) || 32) + 'px 0 ' + (parseInt(c.paddingBottom, 10) || 32) + 'px';
+                    el.style.display = 'flex';
+                    el.style.justifyContent = ltImgAlign;
+                    el.innerHTML = '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 760) + 'px);">' +
+                        ltStart +
+                        '<img src="' + ltImg + '" alt="' + ltAlt + '" style="display:block;width:100%;height:auto;max-height:70vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + ltImgShadow + ';">' +
+                        (ltCap ? '<p style="margin-top:12px;color:rgba(255,255,255,0.62);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + ltCap + '</p>' : '') +
+                        ltEnd +
+                        '</div>';
+                    break;
+
+                case 'text-only':
+                    var ltTextAlign = c.align || 'center';
+                    var ltSurfaceStyle = c.surface === 'accent'
+                        ? 'background:rgba(217,119,87,0.16);border:1px solid rgba(217,119,87,0.35);box-shadow:0 18px 42px rgba(0,0,0,0.18);'
+                        : c.surface === 'card'
+                            ? 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);box-shadow:0 18px 42px rgba(0,0,0,0.18);'
+                            : 'background:transparent;border:none;box-shadow:none;';
+                    var ltLabel = c.sectionLabel ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.sectionLabel) : _escHtml(c.sectionLabel)) : '';
+                    var ltTitle = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : _escHtml(c.title)) : '';
+                    var ltBody = c.body ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.body) : _escHtml(c.body)) : '';
+                    var ltBtn = (c.ctaText || '').trim();
+                    var ltBtnLink = _escHtml(c.ctaLink || '#');
+                    el.style.padding = (parseInt(c.paddingTop, 10) || 36) + 'px 0 ' + (parseInt(c.paddingBottom, 10) || 36) + 'px';
+                    el.style.display = 'flex';
+                    el.style.justifyContent = 'center';
+                    el.innerHTML = '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 700) + 'px);padding:' + (c.surface === 'none' ? '0' : '28px') + ';border-radius:24px;text-align:' + ltTextAlign + ';' + ltSurfaceStyle + '">' +
+                        (ltLabel ? '<div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--brand);font-weight:700;margin-bottom:10px;">' + ltLabel + '</div>' : '') +
+                        (ltTitle ? '<div style="font-size:clamp(28px,5vw,48px);line-height:1.12;font-weight:800;color:#fff;">' + ltTitle + '</div>' : '') +
+                        (ltBody ? '<div style="margin-top:14px;color:rgba(255,255,255,0.72);font-size:16px;line-height:1.8;">' + ltBody + '</div>' : '') +
+                        (ltBtn ? '<div style="margin-top:22px;"><a href="' + ltBtnLink + '" class="link-item" style="display:inline-flex;padding:0.95rem 1.35rem;">' + _escHtml(ltBtn) + '</a></div>' : '') +
+                        '</div>';
+                    break;
             }
+        }
+
+        function _renderFloatingIcon(sec) {
+            var c = sec.content || {};
+            var size = parseInt(c.size, 10) || 120;
+            var wrap = document.createElement('div');
+            wrap.className = 'floating-icon-wrap fi-idle';
+            wrap.setAttribute('data-fi-id', sec.id);
+            wrap.style.width = size + 'px';
+            wrap.style.height = size + 'px';
+            wrap.style.right = (parseInt(c.startX, 10) || 20) + 'px';
+            wrap.style.bottom = (parseInt(c.startY, 10) || 80) + 'px';
+
+            var codeStr = (c.code != null) ? String(c.code).trim() : '';
+            var imgUrl = (c.imageUrl != null) ? String(c.imageUrl).trim() : '';
+            if (typeof fixStorageUrl === 'function' && imgUrl && /firebasestorage|googleapis\.com/i.test(imgUrl)) {
+                imgUrl = fixStorageUrl(imgUrl);
+            }
+            var st = String(c.sourceType || '').toLowerCase();
+            var useCode = (st === 'code' && !!codeStr) || (!imgUrl && !!codeStr);
+            var useImg = !useCode && !!imgUrl;
+
+            var innerHost = document.createElement('div');
+            innerHost.style.cssText = 'width:100%;height:100%;overflow:hidden;border-radius:8px;';
+
+            if (useCode) {
+                var baseW = parseInt(c.codeBaseWidth, 10);
+                var baseH = parseInt(c.codeBaseHeight, 10);
+                if (!baseW || baseW < 40) baseW = 340;
+                if (!baseH || baseH < 40) baseH = 560;
+                var fiScale = Math.min(size / baseW, size / baseH);
+
+                var stage = document.createElement('div');
+                stage.className = 'floating-icon-scale-stage';
+
+                var scaler = document.createElement('div');
+                scaler.className = 'floating-icon-scale-inner';
+                scaler.style.width = baseW + 'px';
+                scaler.style.height = baseH + 'px';
+                scaler.style.transform = 'scale(' + fiScale + ')';
+
+                var iframe = document.createElement('iframe');
+                iframe.sandbox = 'allow-scripts';
+                iframe.style.cssText = 'width:' + baseW + 'px;height:' + baseH + 'px;border:none;border-radius:8px;pointer-events:none;overflow:hidden;background:transparent;';
+                iframe.srcdoc = codeStr;
+                iframe.setAttribute('title', String(c.name || 'Floating icon'));
+                scaler.appendChild(iframe);
+                stage.appendChild(scaler);
+                innerHost.appendChild(stage);
+            } else if (useImg) {
+                var img = document.createElement('img');
+                img.src = imgUrl;
+                img.alt = c.name || 'icon';
+                img.draggable = false;
+                img.style.cssText = 'width:100%;height:100%;object-fit:contain;pointer-events:none;border-radius:8px;';
+                innerHost.appendChild(img);
+            } else {
+                console.warn('[FloatingIcon] No code or imageUrl for section', sec.id, c);
+                innerHost.innerHTML = '<div style="width:100%;height:100%;background:rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;text-align:center;padding:4px;">圖示<br>（請在版面編輯選擇圖片或貼上程式碼）</div>';
+            }
+
+            var linkHref = '';
+            if (c.linkType === 'page' && c.linkPage) linkHref = c.linkPage;
+            else if (c.linkUrl) linkHref = String(c.linkUrl).trim();
+
+            if (linkHref) {
+                var a = document.createElement('a');
+                a.href = linkHref;
+                if (linkHref.indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+                a.style.cssText = 'display:block;width:100%;height:100%;';
+                a.appendChild(innerHost);
+                wrap.appendChild(a);
+            } else {
+                wrap.appendChild(innerHost);
+            }
+
+            document.body.appendChild(wrap);
+            _initFloatingDrag(wrap);
+        }
+
+        function _initFloatingDrag(el) {
+            var startX, startY, origRight, origBottom, moved, vw, vh;
+            function onStart(e) {
+                var t = e.touches ? e.touches[0] : e;
+                startX = t.clientX; startY = t.clientY;
+                var style = getComputedStyle(el);
+                origRight = parseInt(style.right, 10) || 0;
+                origBottom = parseInt(style.bottom, 10) || 0;
+                vw = window.innerWidth; vh = window.innerHeight;
+                moved = false;
+                el.classList.remove('fi-idle');
+                el.classList.add('fi-dragging');
+                document.addEventListener('mousemove', onMove, { passive: false });
+                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onEnd);
+            }
+            function onMove(e) {
+                e.preventDefault();
+                var t = e.touches ? e.touches[0] : e;
+                var dx = t.clientX - startX;
+                var dy = t.clientY - startY;
+                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+                var newRight = Math.max(0, Math.min(vw - el.offsetWidth, origRight - dx));
+                // bottom: larger px = higher on screen; clientY increases downward so subtract dy
+                var newBottom = Math.max(0, Math.min(vh - el.offsetHeight, origBottom - dy));
+                el.style.right = newRight + 'px';
+                el.style.bottom = newBottom + 'px';
+            }
+            function onEnd(e) {
+                el.classList.remove('fi-dragging');
+                el.classList.add('fi-idle');
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onEnd);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend', onEnd);
+                if (moved) {
+                    // Was a drag — suppress the link click
+                    var aEl = el.querySelector('a');
+                    if (aEl) {
+                        aEl.addEventListener('click', function handler(ev) { ev.preventDefault(); aEl.removeEventListener('click', handler); }, { once: true });
+                    }
+                } else {
+                    // Was a tap (no drag) — navigate to the link
+                    var aEl = el.querySelector('a');
+                    if (aEl && aEl.href) {
+                        if (aEl.target === '_blank') {
+                            window.open(aEl.href, '_blank', 'noopener,noreferrer');
+                        } else {
+                            window.location.href = aEl.href;
+                        }
+                    }
+                }
+            }
+            el.addEventListener('mousedown', onStart);
+            el.addEventListener('touchstart', onStart, { passive: true });
+        }
+
+        var _FI_GAMEBOY_CODE = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"><style>:root{--gb-body:#c4cacc;--gb-body-shadow:#9ba0a3;--gb-body-highlight:#e8ecef;--screen-bezel:#5a595e;--screen-bezel-shadow:#3b3a3e;--screen-glass:#8bac0f;--dpad-color:#333;--button-purple:#9c27b0;--button-purple-shadow:#6a1b9a;--button-grey:#8a8d91;--border-thick:4px solid #111;--pixel-font:"Press Start 2P",cursive}*{box-sizing:border-box;margin:0;padding:0}body{background:transparent;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:var(--pixel-font);overflow:hidden}.gameboy-wrapper{filter:drop-shadow(8px 8px 0 rgba(0,0,0,.4))}.gameboy{position:relative;width:340px;height:560px;background:var(--gb-body);border:var(--border-thick);border-radius:10px 10px 55px 10px;box-shadow:inset -6px -6px 0 var(--gb-body-shadow),inset 6px 6px 0 var(--gb-body-highlight);overflow:hidden}@keyframes shimmer{0%{left:-150%;opacity:0}10%{opacity:1}20%{left:200%;opacity:0}100%{left:200%;opacity:0}}.shimmer{position:absolute;top:0;left:-150%;width:150%;height:100%;background:linear-gradient(to right,rgba(255,255,255,0) 0%,rgba(255,255,255,.5) 50%,rgba(255,255,255,0) 100%);transform:skewX(-25deg);animation:shimmer 5s infinite;pointer-events:none;z-index:100}.top-grooves{position:absolute;top:-4px;left:20px;width:calc(100% - 40px);height:30px;border-left:var(--border-thick);border-right:var(--border-thick);border-bottom:var(--border-thick);background:var(--gb-body)}.top-grooves::before,.top-grooves::after{content:"";position:absolute;width:100%;height:4px;background:#111}.top-grooves::before{top:8px}.top-grooves::after{top:18px}.screen-bezel{position:absolute;top:50px;left:25px;width:282px;height:215px;background:var(--screen-bezel);border:var(--border-thick);border-radius:10px 10px 45px 10px;box-shadow:inset -4px -4px 0 var(--screen-bezel-shadow)}.battery-light{position:absolute;top:60px;left:15px;width:10px;height:10px;background:#ff3b3b;border-radius:50%;border:2px solid #111;box-shadow:0 0 5px #ff3b3b}.battery-text{position:absolute;top:75px;left:8px;font-size:6px;color:#ccc;letter-spacing:1px}.screen{position:absolute;top:25px;left:45px;width:180px;height:160px;background:var(--screen-glass);border:var(--border-thick);box-shadow:inset 6px 6px 0 rgba(0,0,0,.15),inset -6px -6px 0 rgba(255,255,255,.2);display:flex;justify-content:center;align-items:center;overflow:hidden}.screen::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(0,0,0,.05) 2px,transparent 2px);background-size:4px 4px;pointer-events:none;z-index:10}.eyes-container{display:flex;gap:24px;z-index:5}.eye-mover{transition:transform .15s steps(3)}.eye{width:12px;height:36px;background:#0f380f;border-radius:2px;transition:transform .1s;transform-origin:center}.look-left{transform:translateX(-16px)}.look-right{transform:translateX(16px)}.blink{transform:scaleY(.1)}.brand-text{position:absolute;top:280px;left:25px;font-size:10px;color:#111}.brand-text span{font-size:14px;font-style:italic;color:#2b2b8e;font-family:sans-serif;font-weight:900}.d-pad{position:absolute;top:340px;left:25px;width:90px;height:90px}.d-pad-vertical,.d-pad-horizontal{position:absolute;background:var(--dpad-color);border:var(--border-thick);border-radius:4px;box-shadow:inset -2px -2px 0 rgba(0,0,0,.5),inset 2px 2px 0 rgba(255,255,255,.2)}.d-pad-vertical{top:0;left:30px;width:30px;height:90px}.d-pad-horizontal{top:30px;left:0;width:90px;height:30px}.d-pad-center{position:absolute;top:30px;left:30px;width:30px;height:30px;background:var(--dpad-color);z-index:2}.d-pad-circle{position:absolute;top:36px;left:36px;width:18px;height:18px;background:rgba(0,0,0,.15);border-radius:50%;z-index:3;box-shadow:inset 1px 1px 3px rgba(0,0,0,.4)}.d-pad-arrow{position:absolute;width:0;height:0;border-style:solid;z-index:4;opacity:.6}.d-pad-arrow.up{top:6px;left:40px;border-width:0 5px 6px 5px;border-color:transparent transparent #111 transparent}.d-pad-arrow.down{bottom:6px;left:40px;border-width:6px 5px 0 5px;border-color:#111 transparent transparent transparent}.d-pad-arrow.left{top:40px;left:6px;border-width:5px 6px 5px 0;border-color:transparent #111 transparent transparent}.d-pad-arrow.right{top:40px;right:6px;border-width:5px 0 5px 6px;border-color:transparent transparent transparent #111}.buttons-ab{position:absolute;top:370px;right:25px;display:flex;gap:20px;transform:rotate(-20deg)}.btn-group{display:flex;flex-direction:column;align-items:flex-end;gap:4px}.btn-action{width:44px;height:44px;background:var(--button-purple);border:var(--border-thick);border-radius:50%;box-shadow:inset -3px -3px 0 var(--button-purple-shadow),inset 3px 3px 0 rgba(255,255,255,.4),0 4px 0 #111}.btn-label{margin-right:4px;font-size:14px;color:#111;font-weight:900;font-family:sans-serif;transform:rotate(20deg)}.system-buttons{position:absolute;top:480px;left:105px;display:flex;gap:20px;transform:rotate(-20deg)}.btn-system-wrapper{display:flex;flex-direction:column;align-items:center;gap:8px}.btn-system{width:45px;height:14px;background:var(--button-grey);border:var(--border-thick);border-radius:10px;box-shadow:inset -2px -2px 0 rgba(0,0,0,.3),0 3px 0 #111}.system-label{font-size:8px;color:#111;letter-spacing:-1px}.speaker-grills{position:absolute;bottom:30px;right:25px;display:flex;gap:6px;transform:rotate(-25deg)}.grill{width:8px;height:55px;background:var(--gb-body);border:3px solid #111;border-radius:4px;box-shadow:inset 2px 2px 0 rgba(0,0,0,.5)}</style></head><body><div class="gameboy-wrapper"><div class="gameboy"><div class="shimmer"></div><div class="top-grooves"></div><div class="screen-bezel"><div class="battery-light"></div><div class="battery-text">BATTERY</div><div class="screen"><div class="eyes-container" id="eyesContainer"><div class="eye-mover" id="leftEyeMover"><div class="eye" id="leftEye"></div></div><div class="eye-mover" id="rightEyeMover"><div class="eye" id="rightEye"></div></div></div></div></div><div class="brand-text">8-BIT <span>BOY</span></div><div class="d-pad"><div class="d-pad-vertical"></div><div class="d-pad-horizontal"></div><div class="d-pad-center"></div><div class="d-pad-circle"></div><div class="d-pad-arrow up"></div><div class="d-pad-arrow down"></div><div class="d-pad-arrow left"></div><div class="d-pad-arrow right"></div></div><div class="buttons-ab"><div class="btn-group"><div class="btn-action btn-b"></div><div class="btn-label">B</div></div><div class="btn-group"><div class="btn-action btn-a"></div><div class="btn-label">A</div></div></div><div class="system-buttons"><div class="btn-system-wrapper"><div class="btn-system"></div><div class="system-label">SELECT</div></div><div class="btn-system-wrapper"><div class="btn-system"></div><div class="system-label">START</div></div></div><div class="speaker-grills"><div class="grill"></div><div class="grill"></div><div class="grill"></div><div class="grill"></div><div class="grill"></div><div class="grill"></div></div></div></div><script>document.addEventListener("DOMContentLoaded",function(){var m=[document.getElementById("leftEyeMover"),document.getElementById("rightEyeMover")],e=[document.getElementById("leftEye"),document.getElementById("rightEye")];function a(){m.forEach(function(x){x.classList.remove("look-left","look-right")});e.forEach(function(x){x.classList.remove("blink")});var r=Math.random();if(Math.random()<.25)b();if(r<.3)m.forEach(function(x){x.classList.add("look-left")});else if(r<.6)m.forEach(function(x){x.classList.add("look-right")});setTimeout(a,1e3+Math.random()*2500)}function b(){e.forEach(function(x){x.classList.add("blink")});setTimeout(function(){e.forEach(function(x){x.classList.remove("blink")})},150)}setTimeout(a,1e3);setInterval(function(){if(Math.random()<.3){b();setTimeout(b,250)}},5e3)});<\/script></body></html>';
+
+        function _ensureFloatingIcons(sections) {
+            var hasFi = sections.some(function(s) { return s.type === 'floating-icon'; });
+            if (hasFi) return sections;
+            sections.push({
+                id: 'lt-floating-gameboy',
+                type: 'floating-icon',
+                visible: true,
+                content: {
+                    name: '8-Bit Retro Gameboy',
+                    sourceType: 'code',
+                    imageUrl: '',
+                    code: _FI_GAMEBOY_CODE,
+                    size: 120,
+                    linkType: 'url',
+                    linkUrl: '',
+                    linkPage: '',
+                    startX: 20,
+                    startY: 80,
+                    codeBaseWidth: 340,
+                    codeBaseHeight: 560
+                }
+            });
+            return sections;
         }
 
         if (_isPreview) {
@@ -2464,11 +2764,14 @@
                         ? doc.data().sections
                         : LINKTREE_DEFAULT_SECTIONS;
                     sections = ensureManagementSections(sections);
+                    sections = _ensureFloatingIcons(sections);
                     if (sections.length > 0 && doc.exists) console.log('[Layout] Loaded linktree layout from Firestore');
                     applySections(sections);
                 }).catch(function(err) {
                     console.log('[Layout] No layout config found for linktree, using default.', err);
-                    applySections(ensureManagementSections(LINKTREE_DEFAULT_SECTIONS));
+                    var fallback = ensureManagementSections(LINKTREE_DEFAULT_SECTIONS);
+                    fallback = _ensureFloatingIcons(fallback);
+                    applySections(fallback);
                 });
             });
         }

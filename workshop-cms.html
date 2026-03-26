@@ -461,9 +461,15 @@
         .session-mode-pills { display: flex; gap: 4px; }
         .session-mode-pill { padding: 4px 12px; font-size: 11px; font-weight: 600; border: 1.5px solid var(--bg-off); border-radius: 20px; background: var(--white); color: var(--text-light); cursor: pointer; transition: all 0.18s; line-height: 1.3; }
         .session-location-row { display: flex; align-items: center; gap: 6px; }
+        .session-location-row.is-hidden { display: none; }
         .session-location-row .session-loc-icon { font-size: 12px; flex-shrink: 0; }
         .session-location-input { flex: 1; padding: 5px 10px; border: 1.5px solid var(--bg-off); border-radius: 8px; font-size: 12px; font-weight: 500; background: var(--white); color: var(--text); min-width: 0; }
         .session-location-input:focus { border-color: var(--accent); outline: none; }
+        .session-zoom-row { display: flex; align-items: center; gap: 6px; }
+        .session-zoom-row .session-zoom-icon { font-size: 12px; flex-shrink: 0; }
+        .session-zoom-row.is-hidden { display: none; }
+        .session-zoom-input { flex: 1; padding: 5px 10px; border: 1.5px solid var(--bg-off); border-radius: 8px; font-size: 12px; font-weight: 500; background: var(--white); color: var(--text); min-width: 0; }
+        .session-zoom-input:focus { border-color: var(--accent); outline: none; }
         .session-mode-pill:hover { border-color: var(--accent); color: var(--accent); }
         .session-mode-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
         .session-remove { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border: none; background: var(--red-bg); color: var(--red); border-radius: 7px; cursor: pointer; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; z-index: 2; line-height: 1; }
@@ -635,6 +641,13 @@
 
         /* Form actions */
         .form-actions { display: flex; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1.5px solid rgba(0,0,0,0.06); flex-wrap: wrap; }
+        .form-actions.stuck-bottom {
+            position: fixed; bottom: 0; z-index: 19;
+            background: rgba(255,255,255,0.92); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 0; margin-top: 0; padding: 14px 24px;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.10);
+            border-top: 1.5px solid rgba(0,0,0,0.08);
+        }
 
         /* Toast notifications */
         .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
@@ -960,6 +973,64 @@
         .applicant-name.clickable { cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; text-decoration-color: rgba(0,0,0,0.2); }
         .applicant-name.clickable:hover { color: var(--accent); text-decoration-color: var(--accent); }
 
+        /* Manual applicant modal */
+        .manual-app-modal-overlay { display: none; position: fixed; inset: 0; z-index: 1001; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px; }
+        .manual-app-modal-overlay.open { display: flex; }
+        .manual-app-modal {
+            background: var(--white); border-radius: 20px; width: 100%; max-width: 560px;
+            max-height: 88vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.2); animation: profileSlideIn 0.25s ease;
+        }
+        .manual-app-modal-header {
+            padding: 24px 24px 18px; border-bottom: 1px solid var(--bg-off);
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+        }
+        .manual-app-modal-header h3 { font-size: 20px; font-weight: 800; margin: 0; }
+        .manual-app-modal-sub { font-size: 12px; color: var(--text-light); font-weight: 500; margin-top: 4px; line-height: 1.7; }
+        .manual-app-modal-body { padding: 20px 24px 24px; }
+        .manual-app-meta-card {
+            background: var(--bg-pampas); border: 1px solid var(--bg-off); border-radius: 14px; padding: 14px 16px; margin-bottom: 18px;
+        }
+        .manual-app-meta-title { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .manual-app-meta-main { font-size: 15px; font-weight: 700; color: var(--text); }
+        .manual-app-meta-sub { font-size: 12px; color: var(--text-light); font-weight: 500; margin-top: 4px; line-height: 1.7; }
+        .manual-app-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        @media (max-width: 560px) { .manual-app-form-grid { grid-template-columns: 1fr; } }
+        .manual-app-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+        .manual-app-field input {
+            width: 100%; height: 44px; padding: 0 14px; border: 1.5px solid var(--bg-off); border-radius: 10px;
+            font-size: 15px; font-family: 'Noto Sans TC', sans-serif; color: var(--text); background: var(--white); transition: border-color 0.2s;
+        }
+        .manual-app-field input:focus { outline: none; border-color: var(--accent); }
+        .manual-app-match-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+        .manual-app-match-title { font-size: 13px; font-weight: 800; color: var(--text); }
+        .manual-app-match-note { font-size: 12px; color: var(--text-light); font-weight: 500; }
+        .manual-app-match-list { display: flex; flex-direction: column; gap: 8px; }
+        .manual-app-match-card {
+            border: 1.5px solid var(--bg-off); border-radius: 14px; background: var(--white); padding: 12px 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .manual-app-match-card:hover { border-color: rgba(217,119,87,0.35); box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .manual-app-match-card.active { border-color: var(--accent); background: rgba(217,119,87,0.04); box-shadow: 0 6px 18px rgba(217,119,87,0.12); }
+        .manual-app-match-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+        .manual-app-match-name { font-size: 14px; font-weight: 700; color: var(--text); }
+        .manual-app-match-badge {
+            display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 10px;
+            border-radius: 999px; font-size: 11px; font-weight: 800; background: rgba(33,150,243,0.12); color: #1565C0; flex-shrink: 0;
+        }
+        .manual-app-match-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--text-light); font-weight: 500; }
+        .manual-app-match-selected {
+            margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: rgba(33,150,243,0.08);
+            border: 1px solid rgba(21,101,192,0.18); font-size: 13px; color: #0D47A1; font-weight: 600;
+        }
+        .manual-app-empty, .manual-app-helper {
+            border-radius: 12px; padding: 12px 14px; font-size: 13px; font-weight: 500; line-height: 1.6;
+        }
+        .manual-app-helper { background: rgba(0,0,0,0.025); color: var(--text-light); border: 1px dashed rgba(0,0,0,0.1); }
+        .manual-app-empty { background: rgba(217,119,87,0.05); color: var(--text-light); border: 1px dashed rgba(217,119,87,0.18); }
+        .manual-app-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .manual-app-status { min-height: 18px; margin-top: 10px; font-size: 12px; font-weight: 600; }
+        .manual-app-status.error { color: var(--red); }
+        .manual-app-status.success { color: var(--green); }
+
         /* Workshop applicant card (By Workshop view) */
         .ws-applicants-card { background: var(--glass-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-border); border-radius: 16px; padding: 0; box-shadow: 0 4px 20px var(--shadow); margin-bottom: 16px; overflow: hidden; }
         .ws-applicants-card.open { overflow: visible; backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -988,6 +1059,235 @@
         .ws-applicants-card.open.deleted-view .bulk-toolbar-normal { display: none; }
         .ws-applicants-card.open.deleted-view .bulk-toolbar-deleted { display: flex; }
         .ws-applicants-content { padding: 0 20px 20px; border-top: 1px solid rgba(0,0,0,0.06); }
+        .ws-subgroup { margin: 16px 0 8px; border-radius: 12px; border: 1px solid rgba(217,119,87,0.12); background: rgba(217,119,87,0.04); overflow: hidden; }
+        .ws-subgroup.muted { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.025); }
+        .ws-subgroup-header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; }
+        .ws-subgroup-header:hover { background: rgba(0,0,0,0.02); }
+        .ws-subgroup-title { font-size: 14px; font-weight: 700; flex: 1; min-width: 0; }
+        .ws-subgroup-summary { font-size: 12px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+        .ws-subgroup-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
+        .ws-subgroup-add-btn, .ws-subgroup-notes-btn {
+            height: 30px; padding: 0 12px; border-radius: 999px; border: 1.5px solid rgba(217,119,87,0.24);
+            background: rgba(217,119,87,0.08); color: var(--accent); font-size: 11px; font-weight: 800;
+            font-family: 'Noto Sans TC', sans-serif; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .ws-subgroup-add-btn:hover, .ws-subgroup-notes-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
+        .ws-subgroup-notes-btn { border-color: rgba(76,175,80,0.3); color: var(--green); background: rgba(76,175,80,0.06); }
+        .ws-subgroup-notes-btn:hover { background: var(--green); border-color: var(--green); color: var(--white); }
+
+        /* Send Notes modal */
+        .send-notes-modal-overlay { display: none; position: fixed; inset: 0; z-index: 1001; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px; }
+        .send-notes-modal-overlay.open { display: flex; }
+        .send-notes-modal {
+            background: var(--white); border-radius: 20px; width: 100%; max-width: 640px;
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.2); animation: profileSlideIn 0.25s ease;
+        }
+        .send-notes-header { padding: 24px 24px 18px; border-bottom: 1px solid var(--bg-off); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .send-notes-header h3 { font-size: 20px; font-weight: 800; margin: 0; }
+        .send-notes-body { padding: 20px 24px 16px; }
+        .send-notes-field { margin-bottom: 14px; }
+        .send-notes-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+        .send-notes-field input, .send-notes-field textarea {
+            width: 100%; padding: 10px 14px; border: 1.5px solid var(--bg-off); border-radius: 10px;
+            font-size: 14px; font-family: 'Noto Sans TC', sans-serif; color: var(--text); background: var(--white); transition: border-color 0.2s;
+        }
+        .send-notes-field input:focus, .send-notes-field textarea:focus { outline: none; border-color: var(--accent); }
+        .send-notes-field textarea { min-height: 140px; resize: vertical; font-family: monospace; font-size: 13px; line-height: 1.6; }
+        .send-notes-vars { padding: 10px 14px; background: var(--bg-pampas); border-radius: 10px; font-size: 11px; color: var(--text-light); margin-bottom: 14px; line-height: 2; }
+        .send-notes-vars code { background: rgba(76,175,80,0.12); color: var(--green); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .send-notes-student-list { margin-top: 18px; border-top: 1px solid var(--bg-off); padding-top: 16px; }
+        .send-notes-student-list h4 { font-size: 14px; font-weight: 700; margin: 0 0 12px; color: var(--text); }
+        .send-notes-student { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bg-off); }
+        .send-notes-student:last-child { border-bottom: none; }
+        .send-notes-student-info { flex: 1; min-width: 0; }
+        .send-notes-student-name { font-size: 14px; font-weight: 700; color: var(--text); }
+        .send-notes-student-phone { font-size: 12px; color: var(--text-light); }
+        .send-notes-send-btn {
+            height: 32px; padding: 0 14px; border-radius: 999px; border: none;
+            background: #25D366; color: var(--white); font-size: 12px; font-weight: 700;
+            cursor: pointer; font-family: 'Noto Sans TC', sans-serif; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+        }
+        .send-notes-send-btn:hover { background: #1da851; }
+        .send-notes-no-students { font-size: 13px; color: var(--text-light); padding: 12px 0; }
+
+        /* Custom confirm dialog */
+        .cms-confirm-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 20px; }
+        .cms-confirm-overlay.open { display: flex; }
+        .cms-confirm-box {
+            background: var(--white); border-radius: 18px; width: 100%; max-width: 380px;
+            box-shadow: 0 20px 56px rgba(0,0,0,0.22); animation: profileSlideIn 0.2s ease; overflow: hidden;
+        }
+        .cms-confirm-body { padding: 28px 24px 20px; text-align: center; }
+        .cms-confirm-icon { font-size: 36px; margin-bottom: 12px; }
+        .cms-confirm-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .cms-confirm-msg { font-size: 14px; color: var(--text-light); line-height: 1.6; font-weight: 500; }
+        .cms-confirm-actions { display: flex; border-top: 1px solid var(--bg-off); }
+        .cms-confirm-btn {
+            flex: 1; padding: 14px 0; border: none; background: none; font-size: 15px; font-weight: 700;
+            cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: background 0.15s;
+        }
+        .cms-confirm-btn:first-child { border-right: 1px solid var(--bg-off); color: var(--text-light); }
+        .cms-confirm-btn:first-child:hover { background: var(--bg-pampas); }
+        .cms-confirm-btn:last-child { color: #C62828; }
+        .cms-confirm-btn:last-child:hover { background: rgba(198,40,40,0.06); }
+
+        /* Link Manager in Send Notes Modal */
+        .link-manager-wrap { margin-bottom: 14px; }
+        .link-manager-field { margin-bottom: 14px; }
+        .link-manager-field:last-child { margin-bottom: 0; }
+        .link-manager-row { display: flex; align-items: stretch; gap: 8px; }
+        .link-manager-select-wrap { flex: 1; position: relative; }
+        .link-manager-trigger {
+            width: 100%; height: 44px; padding: 0 12px 0 14px; border: 1.5px solid var(--bg-off); border-radius: 10px;
+            font-size: 14px; font-family: 'Noto Sans TC', sans-serif; color: var(--text); background: var(--white);
+            cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .link-manager-trigger:hover,
+        .link-manager-trigger:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,119,87,0.08); }
+        .link-manager-trigger-label { flex: 1; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-manager-trigger-label.empty { color: var(--text-light); }
+        .link-manager-trigger svg { width: 16px; height: 16px; color: var(--text-light); flex-shrink: 0; }
+        .link-manager-btn {
+            width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid var(--bg-off);
+            background: var(--white); color: var(--accent); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s;
+        }
+        .link-manager-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
+        .link-manager-btn svg { width: 20px; height: 20px; }
+        .link-manager-btn[title="新增一列"] { flex-shrink: 0; }
+        .link-manager-remove-btn {
+            width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--bg-off);
+            background: var(--white); color: var(--text-light); cursor: pointer; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .link-manager-remove-btn:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+        .link-manager-remove-btn svg { width: 16px; height: 16px; }
+        .link-manager-row-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .link-manager-row-wrap:last-child { margin-bottom: 0; }
+
+        /* Link Edit Modal */
+        .link-edit-overlay { display: none; position: fixed; inset: 0; z-index: 1101; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 20px; }
+        .link-edit-overlay.open { display: flex; }
+        .link-edit-box {
+            background: var(--white); border-radius: 18px; width: 100%; max-width: 480px;
+            box-shadow: 0 20px 56px rgba(0,0,0,0.22); animation: profileSlideIn 0.2s ease; overflow: hidden;
+        }
+        .link-edit-header { padding: 22px 24px 16px; border-bottom: 1px solid var(--bg-off); display: flex; align-items: center; justify-content: space-between; }
+        .link-edit-header h4 { font-size: 17px; font-weight: 800; margin: 0; }
+        .link-edit-body { padding: 20px 24px; }
+        .link-edit-field { margin-bottom: 16px; }
+        .link-edit-field:last-child { margin-bottom: 0; }
+        .link-edit-field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 6px; }
+        .link-edit-field input {
+            width: 100%; height: 44px; padding: 0 14px; border: 1.5px solid var(--bg-off); border-radius: 10px;
+            font-size: 14px; font-family: 'Noto Sans TC', sans-serif; color: var(--text); transition: border-color 0.2s;
+        }
+        .link-edit-field input:focus { outline: none; border-color: var(--accent); }
+
+        /* Link name dropdown in edit modal */
+        .link-edit-name-wrap { position: relative; display: flex; align-items: center; }
+        .link-edit-name-wrap input { flex: 1; padding-right: 40px; }
+        .link-edit-name-toggle {
+            position: absolute; right: 2px; top: 2px; bottom: 2px; width: 36px;
+            border: none; border-radius: 8px; background: transparent; color: var(--text-light);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .link-edit-name-toggle:hover { background: rgba(0,0,0,0.06); color: var(--text); }
+        .link-edit-name-toggle svg { width: 16px; height: 16px; }
+        .link-edit-name-dropdown {
+            position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px;
+            background: var(--white); border: 1.5px solid var(--bg-off); border-radius: 12px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.12); max-height: 200px; overflow-y: auto;
+            display: none; z-index: 10;
+        }
+        .link-edit-name-dropdown.open { display: block; }
+        .link-edit-name-option {
+            padding: 10px 14px; cursor: pointer; font-size: 14px; font-weight: 500;
+            transition: background 0.15s; border-bottom: 1px solid var(--bg-off);
+        }
+        .link-edit-name-option:last-child { border-bottom: none; }
+        .link-edit-name-option:hover { background: rgba(217,119,87,0.1); }
+        .link-edit-name-option strong { color: var(--accent); font-weight: 700; }
+        .link-edit-name-option-sub { display: block; font-size: 11px; color: var(--text-light); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .link-edit-actions { display: flex; border-top: 1px solid var(--bg-off); }
+        .link-edit-btn {
+            flex: 1; padding: 14px 0; border: none; background: none; font-size: 15px; font-weight: 700;
+            cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: background 0.15s;
+        }
+        .link-edit-btn:first-child { border-right: 1px solid var(--bg-off); color: var(--text-light); }
+        .link-edit-btn:first-child:hover { background: var(--bg-pampas); }
+        .link-edit-btn.save { color: var(--accent); }
+        .link-edit-btn.save:hover { background: rgba(217,119,87,0.06); }
+        .link-edit-btn.delete { color: #C62828; }
+        .link-edit-btn.delete:hover { background: rgba(198,40,40,0.06); }
+        .link-edit-divider { width: 1px; background: var(--bg-off); }
+
+        /* Dropdown option with pencil */
+        .link-dropdown-item {
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+            border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s;
+        }
+        .link-dropdown-item:hover { background: rgba(217,119,87,0.1); }
+        .link-dropdown-item.selected { background: var(--accent); color: var(--white); }
+        .link-dropdown-item.selected .link-dropdown-edit { color: var(--white); }
+        .link-dropdown-label { flex: 1; min-width: 0; display: block; }
+        .link-dropdown-label-main { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-dropdown-label-sub { display: block; font-size: 11px; color: var(--text-light); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-dropdown-item.selected .link-dropdown-label-sub { color: rgba(255,255,255,0.82); }
+        .link-dropdown-item.used-elsewhere { opacity: 0.6; }
+        .link-dropdown-item.used-elsewhere .link-dropdown-label { cursor: not-allowed; pointer-events: none; }
+        .link-dropdown-item.used-elsewhere .link-dropdown-edit { pointer-events: auto; }
+        .link-dropdown-edit {
+            width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            margin-left: 8px; color: var(--text-light); flex-shrink: 0; opacity: 1; transition: all 0.15s;
+            background: rgba(0,0,0,0.04);
+        }
+        .link-dropdown-item:hover .link-dropdown-edit { background: rgba(0,0,0,0.1); }
+        .link-dropdown-edit svg { width: 14px; height: 14px; }
+        .link-dropdown-add {
+            display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px;
+            cursor: pointer; font-size: 14px; font-weight: 600; color: var(--accent); transition: all 0.15s;
+            border-top: 1px solid var(--bg-off); margin-top: 6px;
+        }
+        .link-dropdown-add:hover { background: rgba(217,119,87,0.1); }
+        .link-dropdown-menu {
+            position: fixed; z-index: 1200; background: var(--white);
+            border: 1.5px solid var(--bg-off); border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.14); padding: 8px; width: 320px; display: none;
+            max-height: 360px; overflow-y: auto;
+        }
+        .link-dropdown-menu.open { display: block; }
+
+        .send-notes-footer {
+            position: sticky; bottom: 0; background: var(--white); border-top: 1px solid var(--bg-off);
+            padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            border-radius: 0 0 20px 20px; z-index: 2;
+        }
+        .send-notes-save-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; transition: opacity 0.25s; }
+        .send-notes-save-status.saved { color: var(--accent); }
+        .send-notes-save-status.unsaved { color: #C62828; }
+        .send-notes-save-status .sn-save-icon { width: 16px; height: 16px; flex-shrink: 0; }
+        .send-notes-save-btn {
+            height: 38px; padding: 0 22px; border-radius: 10px; border: none;
+            background: var(--accent); color: var(--white); font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.2s; flex-shrink: 0;
+        }
+        .send-notes-save-btn:hover { background: #c56845; }
+        .send-notes-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .ws-subgroup-cap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .ws-subgroup-cap .mini-cap-bar { display: flex; gap: 3px; }
+        .ws-subgroup-cap .mini-rect { width: 8px; height: 12px; border-radius: 4px; background: rgba(0,0,0,0.08); }
+        .ws-subgroup-cap .mini-rect.filled { background: var(--accent); }
+        .ws-subgroup-cap .mini-cap-text { font-size: 11px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+        .ws-subgroup-toggle { font-size: 13px; color: var(--accent); font-weight: 800; transition: transform 0.2s; flex-shrink: 0; }
+        .ws-subgroup.open .ws-subgroup-toggle { transform: rotate(90deg); }
+        .ws-subgroup-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .ws-subgroup.open .ws-subgroup-body { max-height: 4000px; }
+        .ws-subgroup-content { padding: 0 12px 12px; }
 
         .empty-state { text-align: center; padding: 40px 16px; color: var(--text-light); font-weight: 500; }
         .search-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -1415,6 +1715,16 @@
             /* Form actions */
             .form-actions { gap: 8px; }
             .form-actions .btn { flex: 1 1 calc(50% - 4px); text-align: center; font-size: 13px; padding: 10px 12px; }
+            .form-actions.stuck-bottom { padding: 12px 16px; }
+
+            /* Session subgroup headers — stack on mobile */
+            .ws-subgroup-header { flex-wrap: wrap; gap: 6px 10px; padding: 10px; }
+            .ws-subgroup-title { flex: 1 1 100%; font-size: 13px; }
+            .ws-subgroup-actions { width: 100%; justify-content: flex-start; gap: 6px; margin-left: 0; }
+            .ws-subgroup-add-btn, .ws-subgroup-notes-btn { height: 26px; padding: 0 10px; font-size: 11px; }
+            .ws-subgroup-cap .mini-cap-text { font-size: 10px; }
+            .ws-subgroup-toggle { position: absolute; top: 10px; right: 10px; }
+            .ws-subgroup { position: relative; }
         }
     </style>
 </head>
@@ -1441,6 +1751,7 @@
             <div class="cms-user">
                 <a href="/layout-editor" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;">版面編輯 →</a>
                 <a href="/business-cms" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;">業務文件 →</a>
+                <a href="/game-scores-admin" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;">遊戲排行 →</a>
                 <span id="userEmail"></span>
                 <img id="userAvatar" src="" alt="">
                 <button class="btn btn-sm btn-outline" onclick="handleLogout()">登出</button>
@@ -1458,12 +1769,12 @@
         <!-- SECTION: Workshop -->
         <div class="mega-section active" id="sectionWorkshop">
         <div class="cms-tabs">
-            <button class="cms-tab active" onclick="switchTab('dashboard')">數據總覽</button>
-            <button class="cms-tab" onclick="switchTab('workshops')">工作坊管理</button>
-            <button class="cms-tab" onclick="switchTab('members')">會員管理</button>
-            <button class="cms-tab" onclick="switchTab('attendance')">出席管理</button>
-            <button class="cms-tab" onclick="switchTab('discounts')">折扣碼</button>
-            <button class="cms-tab" onclick="switchTab('settings')">設定</button>
+            <button class="cms-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">數據總覽</button>
+            <button class="cms-tab" data-tab="workshops" onclick="switchTab('workshops')">工作坊管理</button>
+            <button class="cms-tab" data-tab="members" onclick="switchTab('members')">會員管理</button>
+            <button class="cms-tab" data-tab="attendance" onclick="switchTab('attendance')">出席管理</button>
+            <button class="cms-tab" data-tab="discounts" onclick="switchTab('discounts')">折扣碼</button>
+            <button class="cms-tab" data-tab="settings" onclick="switchTab('settings')">設定</button>
         </div>
 
         <!-- TAB: Dashboard -->
@@ -1722,7 +2033,6 @@
                 <div class="empty-state">載入中...</div>
             </div>
         </div>
-    </div>
 
         <!-- TAB: Attendance -->
         <div class="tab-content" id="tabAttendance">
@@ -1859,6 +2169,21 @@
                     <label>待確認 Pending — 發送給已上傳截圖但尚未確認的學員</label>
                     <textarea id="stWaTplPending" rows="6" style="min-height:120px;font-family:monospace;font-size:13px;"></textarea>
                 </div>
+
+                <hr style="border:none;border-top:1px solid var(--bg-off);margin:28px 0 20px;">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">報名截止設定 Registration Gate</h3>
+                <div style="padding:12px 16px;background:var(--bg-pampas);border-radius:10px;font-size:12px;color:var(--text-light);margin-bottom:16px;line-height:1.8;">
+                    全局預設值：當工作坊未設定自己的截止時間時，將使用此值。<br>
+                    課堂開始前指定小時數，該課堂的報名選項將自動隱藏。設為 0 表示不自動關閉。
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>預設截止時間（小時）</label>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:13px;color:var(--text-light);white-space:nowrap;">開始前</span>
+                        <input type="number" id="stRegCloseHours" value="3" min="0" step="0.5" style="width:80px;text-align:center;">
+                        <span style="font-size:13px;color:var(--text-light);white-space:nowrap;">小時自動關閉報名</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1950,6 +2275,160 @@
         </div>
     </div>
 
+    <!-- Manual Applicant Modal -->
+    <div class="manual-app-modal-overlay" id="manualApplicantModal" onclick="if(event.target===this)closeManualApplicantModal()">
+        <div class="manual-app-modal">
+            <div class="manual-app-modal-header">
+                <div>
+                    <h3>手動新增報名者</h3>
+                    <div class="manual-app-modal-sub" id="manualApplicantModalSub">輸入姓名和電話後，系統會即時比對已登入會員。</div>
+                </div>
+                <button class="pm-close" onclick="closeManualApplicantModal()">×</button>
+            </div>
+            <div class="manual-app-modal-body">
+                <div class="manual-app-meta-card">
+                    <div class="manual-app-meta-title">報名目標</div>
+                    <div class="manual-app-meta-main" id="manualApplicantTargetTitle">—</div>
+                    <div class="manual-app-meta-sub" id="manualApplicantTargetMeta">—</div>
+                </div>
+
+                <div class="manual-app-form-grid">
+                    <div class="manual-app-field">
+                        <label for="manualApplicantName">姓名</label>
+                        <input id="manualApplicantName" type="text" placeholder="輸入報名者姓名" oninput="onManualApplicantInputChange()">
+                    </div>
+                    <div class="manual-app-field">
+                        <label for="manualApplicantPhone">電話 / WhatsApp</label>
+                        <input id="manualApplicantPhone" type="tel" placeholder="輸入電話號碼" oninput="onManualApplicantInputChange()">
+                    </div>
+                </div>
+
+                <div class="manual-app-match-head">
+                    <div class="manual-app-match-title">會員比對結果</div>
+                    <div class="manual-app-match-note" id="manualApplicantMatchNote">開始輸入後會自動搜尋</div>
+                </div>
+                <div class="manual-app-match-list" id="manualApplicantMatchList">
+                    <div class="manual-app-helper">開始輸入姓名或電話後，系統會根據現有會員資料即時比對。找不到合適帳號時，你仍可新增為非會員報名。</div>
+                </div>
+                <div id="manualApplicantSelectedBox"></div>
+                <div class="manual-app-status" id="manualApplicantStatus"></div>
+
+                <div class="manual-app-footer">
+                    <button class="btn btn-outline" type="button" onclick="closeManualApplicantModal()">取消</button>
+                    <button class="btn" id="manualApplicantSubmitBtn" type="button" onclick="submitManualApplicant()">新增非會員報名</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Notes Modal -->
+    <div class="send-notes-modal-overlay" id="sendNotesModal" onclick="if(event.target===this)_trySendNotesClose()">
+        <div class="send-notes-modal">
+            <div class="send-notes-header">
+                <div>
+                    <h3>📝 傳送課後筆記</h3>
+                    <div style="font-size:12px;color:var(--text-light);font-weight:500;margin-top:4px;" id="sendNotesTargetInfo">—</div>
+                </div>
+                <button class="pm-close" onclick="_trySendNotesClose()">×</button>
+            </div>
+            <div class="send-notes-body">
+                <!-- Link Manager (rows rendered by _renderLinkManagerRows) -->
+                <div class="link-manager-wrap">
+                    <div class="link-manager-field">
+                        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:6px;">教材／筆記連結</label>
+                        <div id="sendNotesNotesRows"></div>
+                    </div>
+                    <div class="link-manager-field">
+                        <label style="display:block;font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:6px;">問卷連結</label>
+                        <div id="sendNotesQuestionnaireRows"></div>
+                    </div>
+                </div>
+
+                <!-- Link Dropdown Menu (positioned via JS) -->
+                <div class="link-dropdown-menu" id="linkDropdownMenu">
+                    <div id="linkDropdownItems"></div>
+                    <div class="link-dropdown-add" onclick="openLinkEditModal('', _sendNotesActiveTarget); _closeLinkDropdown();">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        新增連結
+                    </div>
+                </div>
+
+                <div class="send-notes-vars">
+                    可用變數：
+                    <code>{name}</code>
+                    <code>{workshopTitle}</code>
+                    <code>{workshopNumber}</code>
+                    <code>{date}</code>
+                    <code>{time}</code>
+                    <code>{notesList}</code>
+                    <code>{questionnaireList}</code>
+                    <code>{receiptLink}</code>
+                    <code>{notice}</code>
+                </div>
+                <div class="send-notes-field">
+                    <label>訊息模板</label>
+                    <textarea id="sendNotesTemplate" rows="8" oninput="_markSendNotesDirty()"></textarea>
+                </div>
+                <div class="send-notes-student-list">
+                    <h4>已確認學員 <span style="font-weight:500;color:var(--text-light);font-size:12px;" id="sendNotesStudentCount"></span></h4>
+                    <div id="sendNotesStudentListBody"></div>
+                </div>
+            </div>
+            <div class="send-notes-footer">
+                <div class="send-notes-save-status saved" id="sendNotesSaveStatus">
+                    <svg class="sn-save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                    <span id="sendNotesSaveLabel">已儲存</span>
+                </div>
+                <button class="send-notes-save-btn" id="sendNotesSaveBtn" onclick="saveSendNotesData()">儲存變更</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link Edit Modal -->
+    <div class="link-edit-overlay" id="linkEditModal" onclick="if(event.target===this)_closeLinkEditModal()">
+        <div class="link-edit-box">
+            <div class="link-edit-header">
+                <h4 id="linkEditTitle">新增資源連結</h4>
+                <button class="pm-close" onclick="_closeLinkEditModal()">×</button>
+            </div>
+            <div class="link-edit-body">
+                <div class="link-edit-field">
+                    <label>選擇資源連結</label>
+                    <div class="link-edit-name-wrap">
+                        <input type="text" id="linkEditName" placeholder="輸入新名稱或選擇現有..." onfocus="_showLinkNameDropdown()" oninput="_onLinkNameInput(this.value)">
+                        <button class="link-edit-name-toggle" type="button" onclick="_toggleLinkNameDropdown()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="link-edit-name-dropdown" id="linkEditNameDropdown"></div>
+                </div>
+                <div class="link-edit-field">
+                    <label>連結 URL</label>
+                    <input type="text" id="linkEditUrl" placeholder="https://...">
+                </div>
+            </div>
+            <div class="link-edit-actions" id="linkEditActions">
+                <button class="link-edit-btn" onclick="_closeLinkEditModal()">取消</button>
+                <button class="link-edit-btn save" onclick="saveLinkEdit()">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Dialog -->
+    <div class="cms-confirm-overlay" id="cmsConfirmOverlay">
+        <div class="cms-confirm-box">
+            <div class="cms-confirm-body">
+                <div class="cms-confirm-icon" id="cmsConfirmIcon">⚠️</div>
+                <div class="cms-confirm-title" id="cmsConfirmTitle">確定要離開嗎？</div>
+                <div class="cms-confirm-msg" id="cmsConfirmMsg">你有未儲存的變更。</div>
+            </div>
+            <div class="cms-confirm-actions">
+                <button class="cms-confirm-btn" id="cmsConfirmCancel">取消</button>
+                <button class="cms-confirm-btn" id="cmsConfirmOk">離開不儲存</button>
+            </div>
+        </div>
+    </div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- Chart.js -->
@@ -1970,6 +2449,11 @@
 <script src="/js/shared-utils.js"></script>
 
 <script>
+// Fallback definitions in case shared-utils.js fails to load on Safari/iOS
+if (typeof escHtml === 'undefined') window.escHtml = function(str) { if (!str) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; };
+if (typeof _normDateKey === 'undefined') window._normDateKey = function(dateStr) { if (!dateStr) return ''; var m = dateStr.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); if (!m) return dateStr; return m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2); };
+if (typeof sortSessionsList === 'undefined') window.sortSessionsList = function(sessions) { if (!sessions || !sessions.length) return []; return sessions.slice().sort(function(a, b) { var da = _normDateKey(a.date); var db2 = _normDateKey(b.date); if (da !== db2) return da < db2 ? -1 : 1; var ta = (a.time || '').replace(/[^0-9:]/g, ''); var tb = (b.time || '').replace(/[^0-9:]/g, ''); return ta < tb ? -1 : ta > tb ? 1 : 0; }); };
+if (typeof fixStorageUrl === 'undefined') window.fixStorageUrl = function(url) { if (!url) return ''; if (url.indexOf('blob:') === 0 || url.indexOf('data:') === 0) return url; var match = url.match(/\/o\/([^?]+)/); if (match) { return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(decodeURIComponent(match[1])); } if (url.indexOf('http') === 0) return url; return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(url); };
 // ============================================================
 // Init Firebase
 // ============================================================
@@ -2050,6 +2534,7 @@ function showDashboard(user) {
     });
     loadDashboardData();
     loadMembersData();
+    if (typeof _applyWorkshopTabFromHash === 'function') _applyWorkshopTabFromHash();
     // Pre-load WhatsApp templates so they're ready when the user clicks a WA button
     db.collection('workshopSettings').doc('config').get().then(function(doc) {
         _wsSettings = doc.exists ? doc.data() : {};
@@ -2082,6 +2567,404 @@ function showToast(message, type) {
 function stripPricePrefix(val) {
     if (!val) return '';
     return val.replace(/^(HKD\s*|HK\$?\s*|\$\s*)/i, '').trim();
+}
+
+var _manualApplicantCtx = null;
+var _manualApplicantSelectedUserId = null;
+var _manualApplicantMatchTimer = null;
+var _manualApplicantSubmitting = false;
+
+function _manualNormalizeText(val) {
+    return String(val || '').toLowerCase().replace(/\s+/g, '').trim();
+}
+
+function _manualNormalizePhone(val) {
+    return String(val || '').replace(/[^\d]/g, '');
+}
+
+function _manualFormatPriceNumber(num) {
+    return 'HKD ' + Number(num || 0).toLocaleString('en-HK');
+}
+
+function _manualGetWorkshopBasePriceText(ws) {
+    if (!ws) return '免費';
+    if (ws.price) return ws.price;
+    if (ws.priceHkd) return _manualFormatPriceNumber(ws.priceHkd);
+    return '免費';
+}
+
+function _manualGetWorkshopPriceNumber(ws) {
+    if (!ws) return 0;
+    if (typeof ws.priceHkd === 'number' && ws.priceHkd > 0) return ws.priceHkd;
+    var raw = String(ws.price || '');
+    var match = raw.match(/[\d,]+/);
+    return match ? parseInt(match[0].replace(/,/g, ''), 10) : 0;
+}
+
+function _manualGetPriceInfo(ws, isMember) {
+    var baseText = _manualGetWorkshopBasePriceText(ws);
+    var amount = _manualGetWorkshopPriceNumber(ws);
+    if (!amount) return { text: baseText, discountApplied: false };
+    if (isMember) {
+        return {
+            text: _manualFormatPriceNumber(Math.round(amount * 0.95)),
+            discountApplied: true
+        };
+    }
+    return { text: baseText, discountApplied: false };
+}
+
+function _manualGetUserDisplayName(user) {
+    return user && (user.name || user.displayName || user.email || '未命名會員') || '未命名會員';
+}
+
+function _manualGetUserPhone(user) {
+    return user && (user.phone || user.whatsapp || user.phoneNumber || '') || '';
+}
+
+function _manualGetUserEmail(user) {
+    return user && (user.email || user.userEmail || '') || '';
+}
+
+function _manualGetUserRegCount(uid) {
+    var count = 0;
+    _allRegistrations.forEach(function(r) {
+        if (r.userId === uid && (r.status || 'pending') !== 'deleted') count++;
+    });
+    return count;
+}
+
+function _manualBuildContext(wsId, targetValue, targetLabel) {
+    var ws = _allWorkshopsCache[wsId] || null;
+    if (!ws) return null;
+
+    var ctx = {
+        wsId: wsId,
+        ws: ws,
+        wsTitle: (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || wsId),
+        selectedRound: targetValue || '',
+        selectedRoundLabel: targetLabel || '',
+        workshopDate: ws.date || '',
+        workshopTime: ws.time || '',
+        allSessionDates: []
+    };
+
+    if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && ctx.selectedRound) {
+        for (var i = 0; i < ws.rounds.length; i++) {
+            if (ws.rounds[i].id !== ctx.selectedRound) continue;
+            var round = ws.rounds[i];
+            var roundSessions = sortSessionsList((round.sessions || []).filter(function(s) { return s.visible !== false; }));
+            ctx.selectedRoundLabel = ctx.selectedRoundLabel || round.label || round.id || '';
+            if (roundSessions.length) {
+                ctx.workshopDate = roundSessions[0].date || ctx.workshopDate;
+                ctx.workshopTime = roundSessions[0].time || ctx.workshopTime;
+                ctx.allSessionDates = roundSessions.map(function(s) {
+                    return { date: s.date || '', time: s.time || '', label: s.label || '' };
+                });
+            }
+            break;
+        }
+    } else if (ws.sessions && ws.sessions.length) {
+        var sessions = sortSessionsList((ws.sessions || []).filter(function(s) { return s.visible !== false; }));
+        if (ctx.selectedRound && sessions.length > 1) {
+            for (var j = 0; j < sessions.length; j++) {
+                var sid = sessions[j].id || sessionStableId(sessions[j], j);
+                if (sid !== ctx.selectedRound) continue;
+                ctx.selectedRoundLabel = ctx.selectedRoundLabel || ((sessions[j].date || '') + (sessions[j].time ? ' ' + sessions[j].time : '')).trim();
+                ctx.workshopDate = sessions[j].date || ctx.workshopDate;
+                ctx.workshopTime = sessions[j].time || ctx.workshopTime;
+                ctx.allSessionDates = [{ date: sessions[j].date || '', time: sessions[j].time || '', label: sessions[j].label || '' }];
+                break;
+            }
+        } else if (sessions.length) {
+            ctx.workshopDate = sessions[0].date || ctx.workshopDate;
+            ctx.workshopTime = sessions[0].time || ctx.workshopTime;
+            ctx.allSessionDates = [{ date: sessions[0].date || '', time: sessions[0].time || '', label: sessions[0].label || '' }];
+        }
+    }
+
+    return ctx;
+}
+
+function openManualApplicantModalFromButton(btn) {
+    if (!btn) return;
+    openManualApplicantModal(btn.dataset.wsId || '', btn.dataset.targetValue || '', btn.dataset.targetLabel || '');
+}
+
+function openManualApplicantModal(wsId, targetValue, targetLabel) {
+    var ctx = _manualBuildContext(wsId, targetValue, targetLabel);
+    if (!ctx) {
+        showToast('找不到工作坊資料', 'error');
+        return;
+    }
+
+    _manualApplicantCtx = ctx;
+    _manualApplicantSelectedUserId = null;
+    _manualApplicantSubmitting = false;
+
+    document.getElementById('manualApplicantName').value = '';
+    document.getElementById('manualApplicantPhone').value = '';
+    document.getElementById('manualApplicantStatus').textContent = '';
+    document.getElementById('manualApplicantStatus').className = 'manual-app-status';
+    document.getElementById('manualApplicantTargetTitle').textContent = ctx.wsTitle;
+    document.getElementById('manualApplicantTargetMeta').textContent = ctx.selectedRoundLabel || ((ctx.workshopDate || '未指定日期') + (ctx.workshopTime ? ' ' + ctx.workshopTime : ''));
+    document.getElementById('manualApplicantModalSub').textContent = '輸入姓名和電話後，系統會即時比對已登入會員；如沒有合適帳號，亦可新增為非會員。';
+    document.getElementById('manualApplicantMatchNote').textContent = '開始輸入後會自動搜尋';
+    document.getElementById('manualApplicantMatchList').innerHTML = '<div class="manual-app-helper">開始輸入姓名或電話後，系統會根據現有會員資料即時比對。找不到合適帳號時，你仍可新增為非會員報名。</div>';
+    document.getElementById('manualApplicantSelectedBox').innerHTML = '';
+
+    var submitBtn = document.getElementById('manualApplicantSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '新增非會員報名';
+
+    document.getElementById('manualApplicantModal').classList.add('open');
+    setTimeout(function() {
+        document.getElementById('manualApplicantName').focus();
+    }, 0);
+}
+
+function closeManualApplicantModal() {
+    if (_manualApplicantMatchTimer) clearTimeout(_manualApplicantMatchTimer);
+    _manualApplicantMatchTimer = null;
+    _manualApplicantCtx = null;
+    _manualApplicantSelectedUserId = null;
+    _manualApplicantSubmitting = false;
+    document.getElementById('manualApplicantModal').classList.remove('open');
+}
+
+function onManualApplicantInputChange() {
+    if (_manualApplicantMatchTimer) clearTimeout(_manualApplicantMatchTimer);
+    _manualApplicantMatchTimer = setTimeout(renderManualApplicantMatches, 120);
+    updateManualApplicantSubmitState();
+}
+
+function _manualFindMatches(nameValue, phoneValue) {
+    var nameNorm = _manualNormalizeText(nameValue);
+    var phoneNorm = _manualNormalizePhone(phoneValue);
+    var results = [];
+    if (!nameNorm && phoneNorm.length < 3) return results;
+
+    Object.keys(_usersCache).forEach(function(uid) {
+        var user = _usersCache[uid] || {};
+        var userName = _manualGetUserDisplayName(user);
+        var userPhone = _manualGetUserPhone(user);
+        var userEmail = _manualGetUserEmail(user);
+        var userNameNorm = _manualNormalizeText(userName);
+        var userPhoneNorm = _manualNormalizePhone(userPhone);
+        var score = 0;
+
+        if (nameNorm) {
+            if (userNameNorm === nameNorm) score += 120;
+            else if (userNameNorm.indexOf(nameNorm) !== -1) score += 80;
+            else if (nameNorm.indexOf(userNameNorm) !== -1 && userNameNorm) score += 50;
+        }
+
+        if (phoneNorm) {
+            if (userPhoneNorm === phoneNorm && phoneNorm.length >= 6) score += 130;
+            else if (userPhoneNorm && (userPhoneNorm.indexOf(phoneNorm) !== -1 || phoneNorm.indexOf(userPhoneNorm) !== -1) && phoneNorm.length >= 4) score += 85;
+        }
+
+        if (score <= 0) return;
+
+        results.push({
+            uid: uid,
+            user: user,
+            score: score,
+            name: userName,
+            phone: userPhone,
+            email: userEmail,
+            regCount: _manualGetUserRegCount(uid)
+        });
+    });
+
+    results.sort(function(a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.name.localeCompare(b.name, 'zh-HK');
+    });
+    return results.slice(0, 8);
+}
+
+function renderManualApplicantMatches() {
+    var listEl = document.getElementById('manualApplicantMatchList');
+    var noteEl = document.getElementById('manualApplicantMatchNote');
+    if (!listEl || !noteEl) return;
+
+    var nameValue = document.getElementById('manualApplicantName').value.trim();
+    var phoneValue = document.getElementById('manualApplicantPhone').value.trim();
+    var matches = _manualFindMatches(nameValue, phoneValue);
+
+    if (!nameValue && !phoneValue) {
+        noteEl.textContent = '開始輸入後會自動搜尋';
+        listEl.innerHTML = '<div class="manual-app-helper">開始輸入姓名或電話後，系統會根據現有會員資料即時比對。找不到合適帳號時，你仍可新增為非會員報名。</div>';
+        _manualApplicantSelectedUserId = null;
+        renderManualApplicantSelectedState();
+        updateManualApplicantSubmitState();
+        return;
+    }
+
+    if (!matches.length) {
+        noteEl.textContent = '沒有找到相符會員';
+        listEl.innerHTML = '<div class="manual-app-empty">目前找不到相符的已登入會員，你可以直接新增為非會員報名。</div>';
+        _manualApplicantSelectedUserId = null;
+        renderManualApplicantSelectedState();
+        updateManualApplicantSubmitState();
+        return;
+    }
+
+    noteEl.textContent = '找到 ' + matches.length + ' 位可能相符的會員';
+    var html = '';
+    matches.forEach(function(match) {
+        var isActive = match.uid === _manualApplicantSelectedUserId;
+        html += '<div class="manual-app-match-card' + (isActive ? ' active' : '') + '" onclick="selectManualApplicantMatch(\'' + escHtml(match.uid) + '\')">';
+        html += '<div class="manual-app-match-top">';
+        html += '<div class="manual-app-match-name">' + escHtml(match.name) + '</div>';
+        html += '<span class="manual-app-match-badge">' + (isActive ? '已選擇' : '會員') + '</span>';
+        html += '</div>';
+        html += '<div class="manual-app-match-meta">';
+        if (match.email) html += '<span>✉ ' + escHtml(match.email) + '</span>';
+        if (match.phone) html += '<span>📱 ' + escHtml(match.phone) + '</span>';
+        html += '<span>🧾 ' + match.regCount + ' 個報名紀錄</span>';
+        html += '</div></div>';
+    });
+    listEl.innerHTML = html;
+
+    if (_manualApplicantSelectedUserId && !matches.some(function(match) { return match.uid === _manualApplicantSelectedUserId; })) {
+        _manualApplicantSelectedUserId = null;
+    }
+    renderManualApplicantSelectedState();
+    updateManualApplicantSubmitState();
+}
+
+function selectManualApplicantMatch(uid) {
+    _manualApplicantSelectedUserId = (_manualApplicantSelectedUserId === uid) ? null : uid;
+    renderManualApplicantMatches();
+}
+
+function renderManualApplicantSelectedState() {
+    var box = document.getElementById('manualApplicantSelectedBox');
+    if (!box) return;
+    if (!_manualApplicantSelectedUserId || !_usersCache[_manualApplicantSelectedUserId]) {
+        box.innerHTML = '';
+        return;
+    }
+
+    var user = _usersCache[_manualApplicantSelectedUserId];
+    box.innerHTML = '<div class="manual-app-match-selected">已選擇會員：' +
+        escHtml(_manualGetUserDisplayName(user)) +
+        (_manualGetUserEmail(user) ? '（' + escHtml(_manualGetUserEmail(user)) + '）' : '') +
+        '。提交後會建立與此會員帳號連結的報名紀錄。</div>';
+}
+
+function updateManualApplicantSubmitState() {
+    var btn = document.getElementById('manualApplicantSubmitBtn');
+    if (!btn) return;
+    if (_manualApplicantSubmitting) {
+        btn.disabled = true;
+        btn.textContent = '新增中...';
+        return;
+    }
+    var hasName = !!document.getElementById('manualApplicantName').value.trim();
+    var hasPhone = !!document.getElementById('manualApplicantPhone').value.trim();
+    btn.disabled = !(hasName && hasPhone);
+    btn.textContent = _manualApplicantSelectedUserId ? '新增會員報名' : '新增非會員報名';
+}
+
+function _manualFindDuplicateRegistration(ctx, userId, name, phone) {
+    var normalizedName = _manualNormalizeText(name);
+    var normalizedPhone = _manualNormalizePhone(phone);
+    for (var i = 0; i < _allRegistrations.length; i++) {
+        var reg = _allRegistrations[i];
+        var status = (reg.status || 'pending').toLowerCase();
+        if (status === 'deleted' || status === 'cancelled') continue;
+        if ((reg.workshopId || '') !== (ctx.wsId || '')) continue;
+        if ((reg.selectedRound || '') !== (ctx.selectedRound || '')) continue;
+        if (userId && reg.userId && reg.userId === userId) return reg;
+        var nameMatch = normalizedName && _manualNormalizeText(reg.name) === normalizedName;
+        var phoneMatch = normalizedPhone && _manualNormalizePhone(reg.phone) === normalizedPhone;
+        if (nameMatch && phoneMatch) return reg;
+    }
+    return null;
+}
+
+function submitManualApplicant() {
+    if (_manualApplicantSubmitting) return;
+    if (!_manualApplicantCtx || !_manualApplicantCtx.ws) {
+        showToast('找不到工作坊資料', 'error');
+        return;
+    }
+
+    var name = document.getElementById('manualApplicantName').value.trim();
+    var phone = document.getElementById('manualApplicantPhone').value.trim();
+    var statusEl = document.getElementById('manualApplicantStatus');
+    statusEl.textContent = '';
+    statusEl.className = 'manual-app-status';
+
+    if (!name) {
+        statusEl.textContent = '請輸入姓名。';
+        statusEl.classList.add('error');
+        return;
+    }
+    if (!phone) {
+        statusEl.textContent = '請輸入電話 / WhatsApp。';
+        statusEl.classList.add('error');
+        return;
+    }
+
+    var matchedUser = _manualApplicantSelectedUserId ? _usersCache[_manualApplicantSelectedUserId] : null;
+    var duplicate = _manualFindDuplicateRegistration(_manualApplicantCtx, _manualApplicantSelectedUserId, name, phone);
+    if (duplicate) {
+        statusEl.textContent = '此報名者在同一工作坊／日期已存在有效報名紀錄。';
+        statusEl.classList.add('error');
+        return;
+    }
+
+    var priceInfo = _manualGetPriceInfo(_manualApplicantCtx.ws, !!matchedUser);
+    var createData = {
+        workshopId: _manualApplicantCtx.wsId,
+        workshopTitle: _manualApplicantCtx.ws.title || '',
+        workshopDate: _manualApplicantCtx.workshopDate || '',
+        workshopTime: _manualApplicantCtx.workshopTime || '',
+        allSessionDates: _manualApplicantCtx.allSessionDates || [],
+        workshopDescription: _manualApplicantCtx.ws.description || '',
+        selectedRound: _manualApplicantCtx.selectedRound || '',
+        selectedRoundLabel: _manualApplicantCtx.selectedRoundLabel || '',
+        userId: matchedUser ? (_manualApplicantSelectedUserId || null) : null,
+        userEmail: matchedUser ? (_manualGetUserEmail(matchedUser) || null) : null,
+        name: name,
+        ageGroup: matchedUser && matchedUser.ageGroup ? matchedUser.ageGroup : '',
+        phone: phone,
+        jobType: matchedUser && matchedUser.jobType ? matchedUser.jobType : '',
+        reasons: [],
+        aiProblem: '',
+        expectation: '',
+        pricePaid: priceInfo.text,
+        discountApplied: !!priceInfo.discountApplied,
+        promoCode: '',
+        status: 'pending',
+        paymentScreenshotUrl: '',
+        applicationSubmittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        _enrollmentCounted: true,
+        source: 'cms-manual',
+        manualCreated: true,
+        manualCreatedBy: auth.currentUser ? (auth.currentUser.email || auth.currentUser.uid || 'cms-admin') : 'cms-admin',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    _manualApplicantSubmitting = true;
+    updateManualApplicantSubmitState();
+
+    db.collection('registrations').add(createData).then(function() {
+        statusEl.textContent = matchedUser ? '已新增會員報名。' : '已新增非會員報名。';
+        statusEl.className = 'manual-app-status success';
+        showToast(matchedUser ? '會員報名已新增' : '非會員報名已新增');
+        closeManualApplicantModal();
+    }).catch(function(err) {
+        statusEl.textContent = '新增失敗：' + err.message;
+        statusEl.className = 'manual-app-status error';
+        _manualApplicantSubmitting = false;
+        updateManualApplicantSubmitState();
+    });
 }
 
 // ============================================================
@@ -3220,6 +4103,11 @@ function _renderWsBody(item) {
             '<div class="form-row full">' +
                 '<div class="form-group"><label>參加者注意事項 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅顯示於收據）</span></label><textarea name="notice" rows="3" placeholder="例：請自備手提電腦、請提早 10 分鐘到場...">' + escHtml(d.notice || '') + '</textarea></div>' +
             '</div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📝</span> 課後資料</div></div>' +
+            '<div class="form-row">' +
+                '<div class="form-group"><label>教材／筆記連結</label><input type="text" name="notesLink" value="' + escHtml(d.notesLink || '') + '" placeholder="https://..."></div>' +
+                '<div class="form-group"><label>問卷連結</label><input type="text" name="questionnaireLink" value="' + escHtml(d.questionnaireLink || '') + '" placeholder="https://..."></div>' +
+            '</div>' +
             '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">💰</span> 分類與定價</div></div>' +
             '<div class="form-row">' +
                 '<div class="form-group"><label>類別</label>' +
@@ -3274,7 +4162,7 @@ function _renderWsBody(item) {
                     '<div class="form-group">' +
                         '<label>課堂日期 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（多堂課程可新增多個課堂）</span></label>' +
                         '<div class="sessions-list" data-ws-id="' + id + '">' +
-                            buildSessionsHtml(d.sessions || [], id, d.capacity || 0) +
+                            buildSessionsHtml(d.sessions || [], id, d.capacity || 0, d.zoomLink || '') +
                         '</div>' +
                         '<button type="button" class="btn btn-sm btn-outline" style="margin-top:8px;" onclick="addSessionRow(this)">+ 新增課堂</button>' +
                     '</div>' +
@@ -3285,18 +4173,35 @@ function _renderWsBody(item) {
                     '<div class="form-group">' +
                         '<label>期數與課堂 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（每期包含多個課堂，學員選擇一期報名）</span></label>' +
                         '<div class="rounds-editor">' +
-                            buildRoundsHtml(d.rounds || []) +
+                            buildRoundsHtml(d.rounds || [], d.zoomLink || '') +
                         '</div>' +
                         '<button type="button" class="btn btn-sm btn-outline" style="margin-top:12px;" onclick="addRound(this)">+ 新增期數</button>' +
                     '</div>' +
                 '</div>' +
             '</div>' +
+            '<div class="form-row full" style="margin-top:12px;">' +
+                '<div class="form-group">' +
+                    '<label>報名截止設定 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（課堂開始前多少小時自動隱藏該課堂的報名選項）</span></label>' +
+                    '<div style="display:flex;align-items:center;gap:8px;">' +
+                        '<span style="font-size:13px;color:var(--text-light);white-space:nowrap;">開始前</span>' +
+                        '<input type="number" name="regCloseHours" value="' + (d.regCloseHours !== undefined && d.regCloseHours !== null ? d.regCloseHours : 3) + '" min="0" step="0.5" style="width:80px;text-align:center;">' +
+                        '<span style="font-size:13px;color:var(--text-light);white-space:nowrap;">小時自動關閉報名</span>' +
+                        '<span style="font-size:11px;color:var(--text-light);margin-left:8px;">（設為 0 = 不自動關閉）</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
             '<input type="hidden" name="mode" value="' + escHtml(d.mode || 'offline') + '">' +
             '<div class="form-row full">' +
-                '<div class="form-group"><label>Zoom 連結 <span style="font-weight:500;color:var(--text-light);font-size:12px;">（適用於線上課堂）</span></label><input type="text" name="zoomLink" value="' + escHtml(d.zoomLink || '') + '" placeholder="例：https://zoom.us/j/1234567890"></div>' +
+                '<div class="form-group"><label>上課地點 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅用於 WhatsApp 訊息及個人檔案）</span></label><input type="text" name="location" value="' + escHtml(d.location || '') + '" placeholder="例：觀塘 ABC 大廈 12 樓 1201 室"></div>' +
             '</div>' +
             '<div class="form-row full">' +
-                '<div class="form-group"><label>上課地點 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅用於 WhatsApp 訊息及個人檔案）</span></label><input type="text" name="location" value="' + escHtml(d.location || '') + '" placeholder="例：觀塘 ABC 大廈 12 樓 1201 室"></div>' +
+                '<div class="form-group">' +
+                    '<label>地區 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（公開顯示於活動資訊卡）</span></label>' +
+                    '<select name="district" style="width:220px;">' +
+                        '<option value=""' + (!d.district ? ' selected' : '') + '>— 請選擇地區 —</option>' +
+                        _hkDistrictOptions(d.district || '') +
+                    '</select>' +
+                '</div>' +
             '</div>' +
             '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">✏️</span> 卡片內容</div></div>' +
             '<div class="form-row full">' +
@@ -3491,6 +4396,8 @@ function toggleWsItem(header) {
             item.classList.remove('open');
         }
         if (header._stickyCleanup) { header._stickyCleanup(); header._stickyCleanup = null; }
+        var closingFooter = item.querySelector('.form-actions');
+        if (closingFooter && closingFooter._stickyCleanup) { closingFooter._stickyCleanup(); closingFooter._stickyCleanup = null; }
         return;
     }
 
@@ -3510,11 +4417,14 @@ function toggleWsItem(header) {
             el.classList.remove('open');
             var otherHeader = el.querySelector('.ws-item-header');
             if (otherHeader && otherHeader._stickyCleanup) { otherHeader._stickyCleanup(); otherHeader._stickyCleanup = null; }
+            var otherFooter = el.querySelector('.form-actions');
+            if (otherFooter && otherFooter._stickyCleanup) { otherFooter._stickyCleanup(); otherFooter._stickyCleanup = null; }
         }
     });
     _renderWsBody(item);
     item.classList.add('open');
     _initStickyHeaderWatch(item);
+    _initStickyFooterWatch(item);
     refreshAllDcDropdowns();
     var renderedForm = item.querySelector('.ws-form');
     if (renderedForm) item._formSnapshot = snapshotFormValues(renderedForm);
@@ -3577,6 +4487,70 @@ function _initStickyHeaderWatch(item, headerSel) {
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
     header._stickyCleanup = function() {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+        unpin();
+        if (placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
+    };
+}
+
+function _initStickyFooterWatch(item) {
+    var footer = item.querySelector('.form-actions');
+    if (!footer || footer._stickyCleanup) return;
+
+    var placeholder = document.createElement('div');
+    placeholder.style.display = 'none';
+    footer.parentNode.insertBefore(placeholder, footer.nextSibling);
+
+    var isFixed = false;
+
+    function pin() {
+        if (isFixed) return;
+        var rect = footer.getBoundingClientRect();
+        var itemRect = item.getBoundingClientRect();
+        placeholder.style.display = 'block';
+        placeholder.style.height = rect.height + 'px';
+        footer.classList.add('stuck-bottom');
+        footer.style.width = itemRect.width + 'px';
+        footer.style.left = itemRect.left + 'px';
+        isFixed = true;
+    }
+
+    function unpin() {
+        if (!isFixed) return;
+        footer.classList.remove('stuck-bottom');
+        footer.style.width = '';
+        footer.style.left = '';
+        placeholder.style.display = 'none';
+        isFixed = false;
+    }
+
+    function onScroll() {
+        if (!item.classList.contains('open')) { unpin(); return; }
+
+        if (isFixed) {
+            var phRect = placeholder.getBoundingClientRect();
+            var itemRect = item.getBoundingClientRect();
+            if (phRect.top < window.innerHeight || itemRect.top >= window.innerHeight) {
+                unpin();
+            } else {
+                footer.style.left = itemRect.left + 'px';
+                footer.style.width = itemRect.width + 'px';
+            }
+        } else {
+            var fRect = footer.getBoundingClientRect();
+            var iRect = item.getBoundingClientRect();
+            if (fRect.bottom > window.innerHeight && iRect.top < window.innerHeight) {
+                pin();
+            }
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    requestAnimationFrame(onScroll);
+
+    footer._stickyCleanup = function() {
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('resize', onScroll);
         unpin();
@@ -3887,6 +4861,16 @@ function collectAppliedDiscountIds(form) {
     return ids;
 }
 
+function deriveWorkshopZoomLinkFromSessions(sessions) {
+    sessions = sessions || [];
+    for (var i = 0; i < sessions.length; i++) {
+        var s = sessions[i] || {};
+        var mode = s.mode || 'offline';
+        if ((mode === 'online' || mode === 'both') && s.zoomLink) return s.zoomLink;
+    }
+    return '';
+}
+
 // ============================================================
 // SESSIONS EDITOR
 // ============================================================
@@ -3902,11 +4886,36 @@ function _sessionModePills(mode) {
     '</div>';
 }
 
-function _sessionLocationRow(location) {
-    return '<div class="session-location-row">' +
+function _sessionLocationRow(location, mode) {
+    var m = mode || 'offline';
+    var hidden = (m === 'online') ? ' is-hidden' : '';
+    return '<div class="session-location-row' + hidden + '">' +
         '<span class="session-loc-icon">📍</span>' +
         '<input type="text" class="session-location-input" value="' + escHtml(location || '') + '" placeholder="上課地點（留空則用工作坊預設地點）">' +
     '</div>';
+}
+
+function _sessionZoomRow(zoomLink, mode) {
+    var m = mode || 'offline';
+    var hidden = (m === 'online' || m === 'both') ? '' : ' is-hidden';
+    return '<div class="session-zoom-row' + hidden + '">' +
+        '<span class="session-zoom-icon">🔗</span>' +
+        '<input type="text" class="session-zoom-input" value="' + escHtml(zoomLink || '') + '" placeholder="Zoom 連結（只適用於線上／實體＋線上）">' +
+    '</div>';
+}
+
+function syncSessionModeDependentFields(row) {
+    if (!row) return;
+    var pills = row.querySelector('.session-mode-pills');
+    var mode = pills ? (pills.dataset.value || 'offline') : 'offline';
+    var locationRow = row.querySelector('.session-location-row');
+    var zoomRow = row.querySelector('.session-zoom-row');
+    if (locationRow) {
+        locationRow.classList.toggle('is-hidden', mode === 'online');
+    }
+    if (zoomRow) {
+        zoomRow.classList.toggle('is-hidden', !(mode === 'online' || mode === 'both'));
+    }
 }
 
 function pickSessionMode(btn) {
@@ -3914,6 +4923,19 @@ function pickSessionMode(btn) {
     pills.querySelectorAll('.session-mode-pill').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     pills.dataset.value = btn.dataset.mode;
+    syncSessionModeDependentFields(btn.closest('.session-row'));
+}
+
+var HK_DISTRICTS = [
+    '中西區','灣仔','東區','南區',
+    '油尖旺','深水埗','九龍城','黃大仙','觀塘',
+    '荃灣','屯門','元朗','北區','大埔','沙田','西貢','葵青','離島'
+];
+
+function _hkDistrictOptions(selected) {
+    return HK_DISTRICTS.map(function(d) {
+        return '<option value="' + d + '"' + (selected === d ? ' selected' : '') + '>' + d + '</option>';
+    }).join('');
 }
 
 function _sessionVisToggle(visible) {
@@ -3946,7 +4968,7 @@ function _sessionCapRow(s, globalCap) {
     '</div>';
 }
 
-function buildSessionsHtml(sessions, wsId, globalCap) {
+function buildSessionsHtml(sessions, wsId, globalCap, fallbackZoomLink) {
     if (!sessions || !sessions.length) return '';
     var sorted = sortSessions(sessions);
     var isMulti = sorted.length > 1;
@@ -3955,6 +4977,7 @@ function buildSessionsHtml(sessions, wsId, globalCap) {
         var s = sorted[i];
         var vis = s.visible !== false;
         var sessionLabel = s.label || ('第' + (i + 1) + '期');
+        var sessionZoom = s.zoomLink || (((s.mode === 'online' || s.mode === 'both') && fallbackZoomLink) ? fallbackZoomLink : '');
         html += '<div class="session-row' + (vis ? '' : ' session-hidden') + '">' +
             '<div class="session-top">' +
                 _sessionVisToggle(vis) +
@@ -3964,7 +4987,8 @@ function buildSessionsHtml(sessions, wsId, globalCap) {
                 '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
             '</div>' +
             _sessionModePills(s.mode) +
-            _sessionLocationRow(s.location) +
+            _sessionLocationRow(s.location, s.mode) +
+            _sessionZoomRow(sessionZoom, s.mode) +
             (isMulti ? _sessionCapRow(s, globalCap) : '') +
         '</div>';
     }
@@ -3985,9 +5009,10 @@ function addSessionRow(btn) {
         '<div class="date-picker-wrap session-date-wrap"><input type="text" name="date" class="date-picker-input session-date-input" value="" placeholder="點擊選擇日期" readonly><div class="calendar-dropdown"></div></div>' +
         '<div class="time-picker-wrap session-time-wrap"><input type="text" name="time" class="time-picker-input session-time-input" value="" placeholder="點擊選擇時間" readonly><div class="time-dropdown"></div></div>' +
         '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
-    '</div>' + _sessionModePills('offline') + _sessionLocationRow('') + _sessionCapRow({ capacity: globalCap, enrolled: 0 }, globalCap);
+    '</div>' + _sessionModePills('offline') + _sessionLocationRow('', 'offline') + _sessionZoomRow('', 'offline') + _sessionCapRow({ capacity: globalCap, enrolled: 0 }, globalCap);
     list.appendChild(row);
     initSessionPickers(row);
+    syncSessionModeDependentFields(row);
     _syncSessionCapVisibility(form);
     row.querySelector('.session-label-input').focus();
 }
@@ -4028,6 +5053,7 @@ function initSessionPickers(row) {
     var timeWrap = row.querySelector('.session-time-wrap');
     if (dateWrap) initDatePicker(dateWrap);
     if (timeWrap) initTimePicker(timeWrap);
+    syncSessionModeDependentFields(row);
 }
 
 function initAllSessionPickers() {
@@ -4048,13 +5074,17 @@ function collectSessions(form) {
         var capInput = row.querySelector('.session-cap-input');
         var visCb = row.querySelector('.session-vis-cb');
         var locInput = row.querySelector('.session-location-input');
+        var zoomInput = row.querySelector('.session-zoom-input');
         var date = dateInput ? dateInput.value.trim() : '';
         var time = timeInput ? timeInput.value.trim() : '';
         var mode = modePills ? (modePills.dataset.value || 'offline') : 'offline';
         var visible = visCb ? visCb.checked : true;
         var location = locInput ? locInput.value.trim() : '';
+        var zoomLink = zoomInput ? zoomInput.value.trim() : '';
+        if (mode === 'online') location = '';
         if (label || date || time) {
             var s = { label: label, date: date, time: time, mode: mode, visible: visible, location: location };
+            if ((mode === 'online' || mode === 'both') && zoomLink) s.zoomLink = zoomLink;
             if (capInput) s.capacity = parseInt(capInput.value) || 0;
             sessions.push(s);
         }
@@ -4096,12 +5126,12 @@ function _nextRoundId() { return 'r' + (++_roundIdCounter) + '_' + Date.now(); }
 
 function _earliestDateKey(round) {
     var dates = (round.sessions || []).map(function(s) {
-        return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+        return _normDateKey(s.date);
     }).filter(Boolean).sort();
     return dates[0] || '';
 }
 
-function buildRoundsHtml(rounds) {
+function buildRoundsHtml(rounds, fallbackZoomLink) {
     if (!rounds || !rounds.length) return '';
     var sorted = rounds.slice().sort(function(a, b) {
         var da = _earliestDateKey(a);
@@ -4117,12 +5147,12 @@ function buildRoundsHtml(rounds) {
             var n = parseInt(r.id.match(/^r(\d+)/)[1]);
             if (n >= _roundIdCounter) _roundIdCounter = n + 1;
         }
-        html += buildSingleRoundHtml(r);
+        html += buildSingleRoundHtml(r, fallbackZoomLink);
     }
     return html;
 }
 
-function buildSingleRoundHtml(r) {
+function buildSingleRoundHtml(r, fallbackZoomLink) {
     var rid = r.id || _nextRoundId();
     var html = '<div class="round-card" data-round-id="' + escHtml(rid) + '">' +
         '<div class="round-header">' +
@@ -4137,6 +5167,7 @@ function buildSingleRoundHtml(r) {
         var s = sessions[j];
         var vis = s.visible !== false;
         var sessionLabel = s.label || ('第' + (j + 1) + '堂');
+        var sessionZoom = s.zoomLink || (((s.mode === 'online' || s.mode === 'both') && fallbackZoomLink) ? fallbackZoomLink : '');
         html += '<div class="session-row' + (vis ? '' : ' session-hidden') + '">' +
             '<div class="session-top">' +
                 _sessionVisToggle(vis) +
@@ -4146,7 +5177,8 @@ function buildSingleRoundHtml(r) {
                 '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
             '</div>' +
             _sessionModePills(s.mode) +
-            _sessionLocationRow(s.location) +
+            _sessionLocationRow(s.location, s.mode) +
+            _sessionZoomRow(sessionZoom, s.mode) +
         '</div>';
     }
     html += '</div>' +
@@ -4159,7 +5191,7 @@ function addRound(btn) {
     var editor = btn.previousElementSibling;
     var r = { id: _nextRoundId(), label: '', capacity: 10, enrolled: 0, sessions: [{ label: '第1堂', date: '', time: '' }] };
     var temp = document.createElement('div');
-    temp.innerHTML = buildSingleRoundHtml(r);
+    temp.innerHTML = buildSingleRoundHtml(r, '');
     var card = temp.firstChild;
     editor.appendChild(card);
     card.querySelectorAll('.session-row').forEach(function(row) { initSessionPickers(row); });
@@ -4184,9 +5216,10 @@ function addRoundSession(btn) {
         '<div class="date-picker-wrap session-date-wrap"><input type="text" name="date" class="date-picker-input session-date-input" value="" placeholder="點擊選擇日期" readonly><div class="calendar-dropdown"></div></div>' +
         '<div class="time-picker-wrap session-time-wrap"><input type="text" name="time" class="time-picker-input session-time-input" value="" placeholder="點擊選擇時間" readonly><div class="time-dropdown"></div></div>' +
         '<button type="button" class="session-remove" onclick="removeSessionRow(this)">×</button>' +
-    '</div>' + _sessionModePills('offline') + _sessionLocationRow('');
+    '</div>' + _sessionModePills('offline') + _sessionLocationRow('') + _sessionZoomRow('', 'offline');
     list.appendChild(row);
     initSessionPickers(row);
+    syncSessionModeDependentFields(row);
     row.querySelector('.session-label-input').focus();
 }
 
@@ -4211,7 +5244,14 @@ function collectRounds(form) {
             var visible = visCb ? visCb.checked : true;
             var locInput = row.querySelector('.session-location-input');
             var location = locInput ? locInput.value.trim() : '';
-            if (sl || sd.trim() || st.trim()) sessions.push({ label: sl, date: sd.trim(), time: st.trim(), mode: mode, visible: visible, location: location });
+            var zoomInput = row.querySelector('.session-zoom-input');
+            var zoomLink = zoomInput ? zoomInput.value.trim() : '';
+            if (mode === 'online') location = '';
+            if (sl || sd.trim() || st.trim()) {
+                var sessionData = { label: sl, date: sd.trim(), time: st.trim(), mode: mode, visible: visible, location: location };
+                if ((mode === 'online' || mode === 'both') && zoomLink) sessionData.zoomLink = zoomLink;
+                sessions.push(sessionData);
+            }
         });
         rounds.push({ id: rid, label: label, capacity: capacity, enrolled: 0, sessions: sortSessions(sessions) });
     });
@@ -4228,8 +5268,8 @@ function collectRounds(form) {
 function sortSessions(sessions) {
     if (!sessions || sessions.length <= 1) return sessions;
     return sessions.slice().sort(function(a, b) {
-        var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-        var db = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
+        var da = _normDateKey(a.date);
+        var db = _normDateKey(b.date);
         if (da !== db) return da < db ? -1 : 1;
         var ta = (a.time || '').replace(/[^0-9:]/g, '');
         var tb = (b.time || '').replace(/[^0-9:]/g, '');
@@ -4438,10 +5478,14 @@ function saveWorkshop(event, workshopId) {
         ctaLink: form.querySelector('[name="ctaLink"]').value.trim(),
         courseType: courseType,
         mode: 'offline',
-        zoomLink: form.querySelector('[name="zoomLink"]').value.trim(),
+        zoomLink: '',
         notice: form.querySelector('[name="notice"]').value.trim(),
+        notesLink: form.querySelector('[name="notesLink"]').value.trim(),
+        questionnaireLink: form.querySelector('[name="questionnaireLink"]').value.trim(),
         location: form.querySelector('[name="location"]').value.trim(),
+        district: form.querySelector('[name="district"]').value.trim(),
         appliedDiscountIds: collectAppliedDiscountIds(form),
+        regCloseHours: parseFloat(form.querySelector('[name="regCloseHours"]').value) || 0,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -4457,6 +5501,7 @@ function saveWorkshop(event, workshopId) {
         allSessions = sortSessions(allSessions);
         allSessions.forEach(function(s, idx) { s.id = s.id || sessionStableId(s, idx); });
         data.sessions = stripSessionEnrollmentFields(allSessions);
+        data.zoomLink = deriveWorkshopZoomLinkFromSessions(allSessions);
         data.capacity = totalCap;
     } else {
         data.rounds = [];
@@ -4469,9 +5514,11 @@ function saveWorkshop(event, workshopId) {
                 totalCap += s.capacity;
             });
             data.sessions = stripSessionEnrollmentFields(rawSessions);
+            data.zoomLink = deriveWorkshopZoomLinkFromSessions(rawSessions);
             data.capacity = totalCap;
         } else {
             data.sessions = stripSessionEnrollmentFields(rawSessions);
+            data.zoomLink = deriveWorkshopZoomLinkFromSessions(rawSessions);
             data.capacity = parseInt(form.querySelector('[name="capacity"]').value) || 0;
         }
     }
@@ -4690,37 +5737,80 @@ function deleteWorkshop(workshopId) {
 }
 
 // ============================================================
-// TABS
+// TABS (data-tab + URL hash for shareable links)
 // ============================================================
+var WORKSHOP_TAB_IDS = ['dashboard', 'workshops', 'members', 'attendance', 'discounts', 'settings'];
+var WORKSHOP_TAB_CONTENT_IDS = {
+    dashboard: 'tabDashboard',
+    workshops: 'tabWorkshops',
+    members: 'tabMembers',
+    attendance: 'tabAttendance',
+    discounts: 'tabDiscounts',
+    settings: 'tabSettings'
+};
+var WORKSHOP_TAB_LOADERS = {
+    dashboard: loadDashboardData,
+    workshops: function() {},
+    members: loadMembersData,
+    attendance: loadAttendanceLog,
+    discounts: loadGlobalDiscountCodes,
+    settings: loadWsSettings
+};
+
 function switchTab(tabId) {
+    if (WORKSHOP_TAB_IDS.indexOf(tabId) < 0) return;
+    var contentId = WORKSHOP_TAB_CONTENT_IDS[tabId];
+    if (!contentId || !document.getElementById(contentId)) return;
+
     document.querySelectorAll('#sectionWorkshop .cms-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('#sectionWorkshop .tab-content').forEach(function(c) { c.classList.remove('active'); });
 
-    if (tabId === 'dashboard') {
-        document.querySelector('#sectionWorkshop .cms-tab:nth-child(1)').classList.add('active');
-        document.getElementById('tabDashboard').classList.add('active');
-        loadDashboardData();
-    } else if (tabId === 'workshops') {
-        document.querySelector('#sectionWorkshop .cms-tab:nth-child(2)').classList.add('active');
-        document.getElementById('tabWorkshops').classList.add('active');
-    } else if (tabId === 'members') {
-        document.querySelector('#sectionWorkshop .cms-tab:nth-child(3)').classList.add('active');
-        document.getElementById('tabMembers').classList.add('active');
-        loadMembersData();
-    } else if (tabId === 'attendance') {
-        document.querySelector('#sectionWorkshop .cms-tab:nth-child(4)').classList.add('active');
-        document.getElementById('tabAttendance').classList.add('active');
-        loadAttendanceLog();
-    } else if (tabId === 'discounts') {
-        document.querySelector('#sectionWorkshop .cms-tab:nth-child(5)').classList.add('active');
-        document.getElementById('tabDiscounts').classList.add('active');
-        loadGlobalDiscountCodes();
-    } else if (tabId === 'settings') {
-        document.querySelector('#sectionWorkshop .cms-tab:nth-child(6)').classList.add('active');
-        document.getElementById('tabSettings').classList.add('active');
-        loadWsSettings();
-    }
+    var tabBtn = document.querySelector('#sectionWorkshop .cms-tab[data-tab="' + tabId + '"]');
+    if (tabBtn) tabBtn.classList.add('active');
+    var content = document.getElementById(contentId);
+    if (content) content.classList.add('active');
+
+    var loader = WORKSHOP_TAB_LOADERS[tabId];
+    if (typeof loader === 'function') loader();
+
+    // Sync URL hash for shareable / back-button friendly links
+    try {
+        if (tabId === 'dashboard') {
+            if (window.history.replaceState) window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            else window.location.hash = '';
+        } else {
+            if (window.history.replaceState) window.history.replaceState(null, '', window.location.pathname + window.location.search + '#' + tabId);
+            else window.location.hash = tabId;
+        }
+    } catch (e) {}
 }
+
+function _applyWorkshopTabFromHash() {
+    var hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+    if (WORKSHOP_TAB_IDS.indexOf(hash) >= 0) {
+        document.querySelectorAll('#sectionWorkshop .cms-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('#sectionWorkshop .tab-content').forEach(function(c) { c.classList.remove('active'); });
+        var tabBtn = document.querySelector('#sectionWorkshop .cms-tab[data-tab="' + hash + '"]');
+        if (tabBtn) tabBtn.classList.add('active');
+        var contentId = WORKSHOP_TAB_CONTENT_IDS[hash];
+        if (contentId) {
+            var content = document.getElementById(contentId);
+            if (content) content.classList.add('active');
+        }
+        var loader = WORKSHOP_TAB_LOADERS[hash];
+        if (typeof loader === 'function' && db) loader();
+        return true;
+    }
+    return false;
+}
+
+(function initWorkshopTabHash() {
+    if (!document.getElementById('sectionWorkshop')) return;
+    _applyWorkshopTabFromHash();
+    window.addEventListener('hashchange', function() {
+        if (document.getElementById('sectionWorkshop').classList.contains('active')) _applyWorkshopTabFromHash();
+    });
+})();
 
 function switchMemberView(view) {
     document.querySelectorAll('.members-subtab').forEach(function(t) { t.classList.remove('active'); });
@@ -4762,12 +5852,65 @@ var _regsUnsub = null;
 var _usersUnsub = null;
 var _wsUnsub = null;
 var _membersDataReady = { users: false, regs: false, workshops: false };
+var _membersLoadRetries = { users: 0, regs: 0, workshops: 0 };
+var _membersLoadTimeout = null;
+var MAX_LISTENER_RETRIES = 5;
 
-function loadMembersData() {
-    if (_membersLoaded) return;
-    _membersLoaded = true;
+function _membersShowLoadError(source, err) {
+    console.error('[loadMembersData] ' + source + ' listener error:', err);
+    var el = document.getElementById('memberViewByWorkshop');
+    if (el && !(_membersDataReady.users && _membersDataReady.regs && _membersDataReady.workshops)) {
+        el.innerHTML = '<div class="empty-state" style="color:var(--red);">' +
+            '載入失敗（' + source + '）：' + (err && err.message || '未知錯誤') +
+            '<div style="margin-top:12px;"><button onclick="_retryMembersLoad()" style="padding:8px 20px;border:1.5px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">重試</button></div>' +
+            '</div>';
+    }
+}
 
-    // Real-time listener on workshops (keeps enrolled count always fresh)
+function _startUsersListener() {
+    if (_usersUnsub) { try { _usersUnsub(); } catch(e) {} }
+    _usersUnsub = db.collection('users').onSnapshot(function(usersSnap) {
+        _usersCache = {};
+        usersSnap.forEach(function(doc) {
+            _usersCache[doc.id] = doc.data();
+            _usersCache[doc.id]._uid = doc.id;
+        });
+        _membersDataReady.users = true;
+        _membersLoadRetries.users = 0;
+        rebuildMembersData();
+    }, function(err) {
+        _membersShowLoadError('users', err);
+        if (_membersLoadRetries.users < MAX_LISTENER_RETRIES) {
+            _membersLoadRetries.users++;
+            setTimeout(_startUsersListener, 2000 * _membersLoadRetries.users);
+        }
+    });
+}
+
+function _startRegsListener() {
+    if (_regsUnsub) { try { _regsUnsub(); } catch(e) {} }
+    _regsUnsub = db.collection('registrations').orderBy('createdAt', 'desc').onSnapshot(function(regsSnap) {
+        _allRegistrations = [];
+        regsSnap.forEach(function(doc) {
+            var r = doc.data();
+            r._id = doc.id;
+            _allRegistrations.push(r);
+        });
+        _membersDataReady.regs = true;
+        _membersLoadRetries.regs = 0;
+        rebuildMembersData();
+        _refreshAttendanceIfOpen();
+    }, function(err) {
+        _membersShowLoadError('registrations', err);
+        if (_membersLoadRetries.regs < MAX_LISTENER_RETRIES) {
+            _membersLoadRetries.regs++;
+            setTimeout(_startRegsListener, 2000 * _membersLoadRetries.regs);
+        }
+    });
+}
+
+function _startWsListener() {
+    if (_wsUnsub) { try { _wsUnsub(); } catch(e) {} }
     _wsUnsub = db.collection('workshops').orderBy('order', 'asc').onSnapshot(function(wsSnap) {
         _allWorkshopsCache = {};
         wsSnap.forEach(function(doc) {
@@ -4783,8 +5926,8 @@ function loadMembersData() {
             _allWorkshopsCache[doc.id] = d;
         });
         _membersDataReady.workshops = true;
+        _membersLoadRetries.workshops = 0;
 
-        // Sync enrolled inputs in workshop management tab
         wsSnap.forEach(function(doc) {
             var wsItem = document.querySelector('.ws-item[data-id="' + doc.id + '"]');
             if (wsItem) {
@@ -4806,36 +5949,59 @@ function loadMembersData() {
         renderCalendar();
         _refreshAttendanceIfOpen();
     }, function(err) {
-        document.getElementById('memberViewByWorkshop').innerHTML = '<div class="empty-state" style="color:var(--red);">載入失敗：' + err.message + '</div>';
+        _membersShowLoadError('workshops', err);
+        if (_membersLoadRetries.workshops < MAX_LISTENER_RETRIES) {
+            _membersLoadRetries.workshops++;
+            setTimeout(_startWsListener, 2000 * _membersLoadRetries.workshops);
+        }
     });
+}
 
-    // Real-time listener on users
-    _usersUnsub = db.collection('users').onSnapshot(function(usersSnap) {
-        _usersCache = {};
-        usersSnap.forEach(function(doc) {
-            _usersCache[doc.id] = doc.data();
-            _usersCache[doc.id]._uid = doc.id;
-        });
-        _membersDataReady.users = true;
-        rebuildMembersData();
-    });
+function _retryMembersLoad() {
+    if (_membersLoadTimeout) { clearTimeout(_membersLoadTimeout); _membersLoadTimeout = null; }
+    _membersLoadRetries = { users: 0, regs: 0, workshops: 0 };
+    _membersDataReady = { users: false, regs: false, workshops: false };
+    document.getElementById('memberViewByWorkshop').innerHTML = '<div class="empty-state">載入中...</div>';
+    document.getElementById('memberViewByMember').innerHTML = '<div class="empty-state">載入中...</div>';
+    _startWsListener();
+    _startUsersListener();
+    _startRegsListener();
+    _startMembersLoadTimeout();
+}
 
-    // Real-time listener on registrations
-    _regsUnsub = db.collection('registrations').orderBy('createdAt', 'desc').onSnapshot(function(regsSnap) {
-        _allRegistrations = [];
-        regsSnap.forEach(function(doc) {
-            var r = doc.data();
-            r._id = doc.id;
-            _allRegistrations.push(r);
-        });
-        _membersDataReady.regs = true;
-        rebuildMembersData();
-        _refreshAttendanceIfOpen();
-    });
+function _startMembersLoadTimeout() {
+    if (_membersLoadTimeout) clearTimeout(_membersLoadTimeout);
+    _membersLoadTimeout = setTimeout(function() {
+        if (_membersDataReady.users && _membersDataReady.regs && _membersDataReady.workshops) return;
+        var missing = [];
+        if (!_membersDataReady.workshops) missing.push('工作坊');
+        if (!_membersDataReady.users) missing.push('會員');
+        if (!_membersDataReady.regs) missing.push('報名');
+        var msg = '載入時間較長（' + missing.join('、') + ' 資料未到達）';
+        var html = '<div class="empty-state">' +
+            '<div style="color:var(--text-light);margin-bottom:10px;">' + msg + '</div>' +
+            '<button onclick="_retryMembersLoad()" style="padding:8px 20px;border:1.5px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">重試</button>' +
+            '</div>';
+        if (!_membersDataReady.users || !_membersDataReady.regs || !_membersDataReady.workshops) {
+            document.getElementById('memberViewByWorkshop').innerHTML = html;
+        }
+    }, 15000);
+}
+
+function loadMembersData() {
+    if (_membersLoaded) return;
+    _membersLoaded = true;
+
+    _startWsListener();
+    _startUsersListener();
+    _startRegsListener();
+    _startMembersLoadTimeout();
 }
 
 function rebuildMembersData() {
     if (!_membersDataReady.users || !_membersDataReady.regs || !_membersDataReady.workshops) return;
+
+    if (_membersLoadTimeout) { clearTimeout(_membersLoadTimeout); _membersLoadTimeout = null; }
 
     var regsByUser = {};
     _allRegistrations.forEach(function(r) {
@@ -4856,8 +6022,11 @@ function rebuildMembersData() {
         }
     });
 
-    renderByMemberView();
-    renderByWorkshopView();
+    try { renderByMemberView(); } catch(e) { console.error('[rebuildMembersData] renderByMemberView error:', e); }
+    try { renderByWorkshopView(); } catch(e) {
+        console.error('[rebuildMembersData] renderByWorkshopView error:', e);
+        document.getElementById('memberViewByWorkshop').innerHTML = '<div class="empty-state" style="color:var(--red);">顯示失敗：' + (e.message || '未知錯誤') + '</div>';
+    }
 }
 
 // ============================================================
@@ -5209,10 +6378,14 @@ function renderByWorkshopView() {
     container.querySelectorAll('.ws-applicants-card.open').forEach(function(card) {
         if (card.dataset.wsId) openWsIds[card.dataset.wsId] = true;
     });
+    container.querySelectorAll('.ws-subgroup.open').forEach(function(group) {
+        if (group.dataset.groupKey) _openWsApplicantGroups[group.dataset.groupKey] = true;
+    });
 
     // Group registrations by workshopId
     var regsByWs = {};
     _allRegistrations.forEach(function(r) {
+        if (!shouldShowByWorkshopRegistration(r)) return;
         var wsId = r.workshopId || 'unknown';
         if (!regsByWs[wsId]) regsByWs[wsId] = [];
         regsByWs[wsId].push(r);
@@ -5317,34 +6490,39 @@ function renderByWorkshopView() {
             ws.rounds.forEach(function(round) {
                 var roundRegs = byRound[round.id] || [];
                 var activeCount = roundRegs.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
-                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(217,119,87,0.06);border-radius:10px;border-left:3px solid var(--accent);">';
-                html += '<strong style="font-size:14px;flex:1;">' + escHtml(round.label || round.id) + '</strong>';
-                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + activeCount + ' / ' + (round.capacity || 0) + ' 名額</span>';
-                html += '</div>';
-                if (roundRegs.length === 0) {
-                    html += '<p style="font-size:12px;color:var(--text-light);padding:4px 12px 8px;">此期數尚無報名。</p>';
-                } else {
-                    roundRegs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
-                }
+                var roundBody = '';
+                if (roundRegs.length === 0) roundBody = '<p style="font-size:12px;color:var(--text-light);padding:4px 0 0;">此期數尚無報名。</p>';
+                else roundRegs.forEach(function(r) { roundBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                html += _buildWsApplicantGroupHtml({
+                    wsId: wsId,
+                    groupId: 'round:' + (round.id || round.label || 'unknown'),
+                    title: round.label || round.id,
+                    bodyHtml: roundBody,
+                    capacity: round.capacity || 0,
+                    enrolled: activeCount,
+                    manualAdd: {
+                        wsId: wsId,
+                        targetValue: round.id || '',
+                        targetLabel: round.label || round.id || ''
+                    }
+                });
             });
             if (noRound.length > 0) {
                 var noRoundActive = noRound.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
-                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(0,0,0,0.04);border-radius:10px;border-left:3px solid var(--text-light);">';
-                html += '<strong style="font-size:14px;flex:1;color:var(--text-light);">未選擇期數</strong>';
-                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + noRoundActive + ' 位</span>';
-                html += '</div>';
-                noRound.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                var noRoundBody = '';
+                noRound.forEach(function(r) { noRoundBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                html += _buildWsApplicantGroupHtml({
+                    wsId: wsId,
+                    groupId: 'round:none',
+                    title: '未選擇期數',
+                    bodyHtml: noRoundBody,
+                    summaryText: noRoundActive + ' 位',
+                    muted: true
+                });
             }
         } else if (ws.sessions && ws.sessions.length > 1) {
             // Single course with multiple date options — group by selectedRound (stable session ID)
-            var sorted = (ws.sessions || []).slice().sort(function(a, b) {
-                var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                if (da !== db2) return da < db2 ? -1 : 1;
-                var ta = (a.time || '').replace(/[^0-9:]/g, '');
-                var tb = (b.time || '').replace(/[^0-9:]/g, '');
-                return ta < tb ? -1 : ta > tb ? 1 : 0;
-            });
+            var sorted = sortSessions(ws.sessions || []);
             var stableIdSet = {};
             sorted.forEach(function(s, i) { stableIdSet[s.id || sessionStableId(s, i)] = true; });
             var bySession = {};
@@ -5384,24 +6562,36 @@ function renderByWorkshopView() {
                 var sessionRegs = bySession[sid] || [];
                 var activeCount = sessionRegs.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
                 var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
-                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(217,119,87,0.06);border-radius:10px;border-left:3px solid var(--accent);">';
-                html += '<strong style="font-size:14px;flex:1;">' + escHtml(dateLabel) + '</strong>';
                 var sessionCap = s.capacity !== undefined ? s.capacity : (ws.capacity || 0);
-                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + activeCount + ' / ' + sessionCap + ' 名額</span>';
-                html += '</div>';
-                if (sessionRegs.length === 0) {
-                    html += '<p style="font-size:12px;color:var(--text-light);padding:4px 12px 8px;">此日期尚無報名。</p>';
-                } else {
-                    sessionRegs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
-                }
+                var sessionBody = '';
+                if (sessionRegs.length === 0) sessionBody = '<p style="font-size:12px;color:var(--text-light);padding:4px 0 0;">此日期尚無報名。</p>';
+                else sessionRegs.forEach(function(r) { sessionBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                html += _buildWsApplicantGroupHtml({
+                    wsId: wsId,
+                    groupId: 'session:' + sid,
+                    title: dateLabel,
+                    bodyHtml: sessionBody,
+                    capacity: sessionCap,
+                    enrolled: activeCount,
+                    manualAdd: {
+                        wsId: wsId,
+                        targetValue: sid,
+                        targetLabel: dateLabel
+                    }
+                });
             });
             if (noSession.length > 0) {
                 var noSessionActive = noSession.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
-                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(0,0,0,0.04);border-radius:10px;border-left:3px solid var(--text-light);">';
-                html += '<strong style="font-size:14px;flex:1;color:var(--text-light);">未選擇日期</strong>';
-                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + noSessionActive + ' 位</span>';
-                html += '</div>';
-                noSession.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                var noSessionBody = '';
+                noSession.forEach(function(r) { noSessionBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                html += _buildWsApplicantGroupHtml({
+                    wsId: wsId,
+                    groupId: 'session:none',
+                    title: '未選擇日期',
+                    bodyHtml: noSessionBody,
+                    summaryText: noSessionActive + ' 位',
+                    muted: true
+                });
             }
         } else if (ws.sessions && ws.sessions.length === 1) {
             var s0 = ws.sessions[0];
@@ -5411,25 +6601,50 @@ function renderByWorkshopView() {
                 if ((s0.mode || ws.mode) === 'online') modeStr = ' · 線上';
                 else if ((s0.mode || ws.mode) === 'both') modeStr = ' · 實體＋線上';
                 var singleCap = s0.capacity !== undefined ? s0.capacity : (ws.capacity || 0);
-                var singleEnr = s0.enrolled !== undefined ? s0.enrolled : (ws.enrolled || 0);
-                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(217,119,87,0.06);border-radius:10px;border-left:3px solid var(--accent);">';
-                html += '<strong style="font-size:14px;flex:1;">' + escHtml(singleLabel) + escHtml(modeStr) + '</strong>';
-                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + singleEnr + ' / ' + singleCap + ' 名額</span>';
-                html += '</div>';
+                var singleEnr = regs.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
+                var singleBody = '';
+                regs.forEach(function(r) { singleBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                html += _buildWsApplicantGroupHtml({
+                    wsId: wsId,
+                    groupId: 'session:single',
+                    title: singleLabel + modeStr,
+                    bodyHtml: singleBody,
+                    capacity: singleCap,
+                    enrolled: singleEnr,
+                    manualAdd: {
+                        wsId: wsId,
+                        targetValue: '',
+                        targetLabel: singleLabel
+                    }
+                });
+            } else {
+                regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
             }
-            regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
         } else {
             var legacyDate = (ws.date || '') + (ws.time ? ' ' + ws.time : '');
             if (legacyDate.trim()) {
                 var legacyMode = '';
                 if (ws.mode === 'online') legacyMode = ' · 線上';
                 else if (ws.mode === 'both') legacyMode = ' · 實體＋線上';
-                html += '<div class="round-group-header" style="display:flex;align-items:center;gap:10px;margin:16px 0 8px;padding:8px 12px;background:rgba(217,119,87,0.06);border-radius:10px;border-left:3px solid var(--accent);">';
-                html += '<strong style="font-size:14px;flex:1;">' + escHtml(legacyDate) + escHtml(legacyMode) + '</strong>';
-                html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">' + (ws.enrolled || 0) + ' / ' + (ws.capacity || 0) + ' 名額</span>';
-                html += '</div>';
+                var legacyEnr = regs.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
+                var legacyBody = '';
+                regs.forEach(function(r) { legacyBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                html += _buildWsApplicantGroupHtml({
+                    wsId: wsId,
+                    groupId: 'session:legacy',
+                    title: legacyDate + legacyMode,
+                    bodyHtml: legacyBody,
+                    capacity: ws.capacity || 0,
+                    enrolled: legacyEnr,
+                    manualAdd: {
+                        wsId: wsId,
+                        targetValue: '',
+                        targetLabel: legacyDate
+                    }
+                });
+            } else {
+                regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
             }
-            regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
         }
         html += '</div></div></div>';
     });
@@ -5452,6 +6667,69 @@ function renderByWorkshopView() {
 function toggleMemberCard(header) {
     var card = header.parentElement;
     card.classList.toggle('open');
+}
+
+var _openWsApplicantGroups = {};
+
+function shouldShowByWorkshopRegistration(r) {
+    if (!r) return false;
+    var s = (r.status || 'pending').toLowerCase();
+    if (s === 'confirmed') return true;
+    if (s === 'cancelled' || s === 'deleted') return true;
+    return !!(r.paymentScreenshotUrl || r.applicationSubmittedAt || r._enrollmentCounted === true);
+}
+
+function _wsApplicantGroupStateKey(wsId, groupId) {
+    return (wsId || 'unknown') + '::' + (groupId || 'group');
+}
+
+function _buildWsApplicantGroupHtml(opts) {
+    opts = opts || {};
+    var title = opts.title || '';
+    var bodyHtml = opts.bodyHtml || '';
+    var summaryText = opts.summaryText || '';
+    var stateKey = _wsApplicantGroupStateKey(opts.wsId, opts.groupId);
+    var isOpen = !!_openWsApplicantGroups[stateKey];
+    var cls = 'ws-subgroup' + (isOpen ? ' open' : '') + (opts.muted ? ' muted' : '');
+    var capHtml = '';
+    var actionHtml = '';
+    if (opts.capacity !== undefined && opts.capacity !== null) {
+        capHtml = '<div class="ws-subgroup-cap">' + buildMiniCapacityContent(opts.capacity || 0, opts.enrolled || 0) + '</div>';
+    }
+    if (opts.manualAdd) {
+        actionHtml = '<button class="ws-subgroup-add-btn" type="button"' +
+            ' data-ws-id="' + escHtml(opts.manualAdd.wsId || '') + '"' +
+            ' data-target-value="' + escHtml(opts.manualAdd.targetValue || '') + '"' +
+            ' data-target-label="' + escHtml(opts.manualAdd.targetLabel || '') + '"' +
+            ' onclick="event.stopPropagation();openManualApplicantModalFromButton(this)">' +
+            '＋ 手動新增報名' +
+        '</button>';
+        actionHtml += '<button class="ws-subgroup-notes-btn" type="button"' +
+            ' data-ws-id="' + escHtml(opts.manualAdd.wsId || '') + '"' +
+            ' data-target-value="' + escHtml(opts.manualAdd.targetValue || '') + '"' +
+            ' data-target-label="' + escHtml(opts.manualAdd.targetLabel || '') + '"' +
+            ' onclick="event.stopPropagation();openSendNotesModal(this)">' +
+            '📝 傳送筆記' +
+        '</button>';
+    }
+    return '<div class="' + cls + '" data-group-key="' + escHtml(stateKey) + '">' +
+        '<div class="ws-subgroup-header" onclick="toggleWsApplicantGroup(this)">' +
+            '<strong class="ws-subgroup-title">' + escHtml(title) + '</strong>' +
+            '<div class="ws-subgroup-actions">' +
+                (summaryText ? '<span class="ws-subgroup-summary">' + escHtml(summaryText) + '</span>' : '') +
+                actionHtml +
+                capHtml +
+            '</div>' +
+            '<span class="ws-subgroup-toggle">▸</span>' +
+        '</div>' +
+        '<div class="ws-subgroup-body"><div class="ws-subgroup-content">' + bodyHtml + '</div></div>' +
+    '</div>';
+}
+
+function toggleWsApplicantGroup(headerEl) {
+    var group = headerEl.parentElement;
+    var isOpen = group.classList.toggle('open');
+    if (group.dataset.groupKey) _openWsApplicantGroups[group.dataset.groupKey] = isOpen;
 }
 
 var _searchField = 'all'; // 'all', 'workshop', 'name', 'whatsapp', 'email'
@@ -5505,10 +6783,11 @@ function filterMembers() {
 // ============================================================
 var _E = { pin: '📌', cal: '📅', clock: '🕐', laptop: '💻', office: '🏢', loc: '📍', link: '🔗', doc: '📄' };
 var DEFAULT_WA_TEMPLATES = {
-    confirmed: 'Hi {name}！\n\n你已成功報名以下工作坊：\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n{mode}\n{location}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n\n如有任何問題，歡迎隨時聯絡我們！',
+    confirmed: 'Hi {name}！\n\n你已成功報名以下工作坊：\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n💰 費用：{fee}\n\n{mode}\n{location}\n{zoomLink}\nℹ️{notice}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n如有任何問題，歡迎隨時聯絡我們！',
     pending: 'Hi {name}！\n\n我們已收到你的付款截圖，正在確認中。\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n\n確認後我們會再通知你。如有任何問題，歡迎隨時聯絡我們！'
 };
 var _wsSettings = null;
+var _wsSettingsLoadingPromise = null;
 
 function loadWsSettings() {
     if (_wsSettings) {
@@ -5525,10 +6804,32 @@ function loadWsSettings() {
     });
 }
 
+function ensureWsSettingsLoaded() {
+    if (_wsSettings) return Promise.resolve(_wsSettings);
+    if (_wsSettingsLoadingPromise) return _wsSettingsLoadingPromise;
+    _wsSettingsLoadingPromise = db.collection('workshopSettings').doc('config').get().then(function(doc) {
+        _wsSettings = doc.exists ? doc.data() : {};
+        if (!_wsSettings.waTemplates) _wsSettings.waTemplates = {};
+        return _wsSettings;
+    }).catch(function() {
+        _wsSettings = { waTemplates: {} };
+        return _wsSettings;
+    }).then(function(result) {
+        _wsSettingsLoadingPromise = null;
+        return result;
+    }, function(err) {
+        _wsSettingsLoadingPromise = null;
+        throw err;
+    });
+    return _wsSettingsLoadingPromise;
+}
+
 function _populateSettingsUI() {
     var wt = (_wsSettings && _wsSettings.waTemplates) || {};
     document.getElementById('stWaTplConfirmed').value = _fixWaEmoji(wt.confirmed) || DEFAULT_WA_TEMPLATES.confirmed;
     document.getElementById('stWaTplPending').value = _fixWaEmoji(wt.pending) || DEFAULT_WA_TEMPLATES.pending;
+    var rch = document.getElementById('stRegCloseHours');
+    if (rch) rch.value = (_wsSettings && _wsSettings.regCloseHours !== undefined) ? _wsSettings.regCloseHours : 3;
 }
 
 function saveWsSettings() {
@@ -5538,6 +6839,7 @@ function saveWsSettings() {
             confirmed: document.getElementById('stWaTplConfirmed').value.trim() || DEFAULT_WA_TEMPLATES.confirmed,
             pending: document.getElementById('stWaTplPending').value.trim() || DEFAULT_WA_TEMPLATES.pending
         },
+        regCloseHours: parseFloat(document.getElementById('stRegCloseHours').value) || 0,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     db.collection('workshopSettings').doc('config').set(data, { merge: true }).then(function() {
@@ -5599,6 +6901,54 @@ function _resolveSessionLocation(ws, reg) {
     return ws.location || '';
 }
 
+function _resolveSessionMode(ws, reg) {
+    if (!ws || !reg) return ws ? (ws.mode || 'offline') : 'offline';
+    var sessions = ws.sessions || [];
+    if (reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || sessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound) return sessions[i].mode || ws.mode || 'offline';
+        }
+    }
+    if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < ws.rounds.length; ri++) {
+            if (ws.rounds[ri].id === reg.selectedRound) {
+                var rSess = ws.rounds[ri].sessions || [];
+                if (rSess.length) return rSess[0].mode || ws.mode || 'offline';
+                break;
+            }
+        }
+    }
+    if (sessions.length === 1 && sessions[0].mode) return sessions[0].mode;
+    return ws.mode || 'offline';
+}
+
+function _resolveSessionZoomLink(ws, reg) {
+    if (!ws || !reg) return ws ? (ws.zoomLink || '') : '';
+    var sessions = ws.sessions || [];
+    if (reg.selectedRound && sessions.length > 1) {
+        for (var i = 0; i < sessions.length; i++) {
+            var sid = sessions[i].id || sessionStableId(sessions[i], i);
+            if (sid === reg.selectedRound) return sessions[i].zoomLink || ws.zoomLink || '';
+        }
+    }
+    if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
+        for (var ri = 0; ri < ws.rounds.length; ri++) {
+            if (ws.rounds[ri].id === reg.selectedRound) {
+                var rSess = ws.rounds[ri].sessions || [];
+                if (rSess.length) {
+                    for (var si = 0; si < rSess.length; si++) {
+                        if (rSess[si].zoomLink) return rSess[si].zoomLink;
+                    }
+                }
+                break;
+            }
+        }
+    }
+    if (sessions.length === 1 && sessions[0].zoomLink) return sessions[0].zoomLink;
+    return ws.zoomLink || '';
+}
+
 function _resolveRegDateTime(ws, reg) {
     if (!ws || !reg) return { date: reg ? reg.workshopDate || '' : '', time: reg ? reg.workshopTime || '' : '' };
     var sessions = ws.sessions || [];
@@ -5627,12 +6977,18 @@ function _resolveRegDateTime(ws, reg) {
 function openWhatsApp(regId) {
     var reg = _allRegistrations.find(function(r) { return r._id === regId; });
     if (!reg) { showToast('找不到報名資料', 'error'); return; }
-    var ws = _allWorkshopsCache[reg.workshopId] || {};
-    var wsTitle = (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || '');
-    var waLoc = _resolveSessionLocation(ws, reg);
-    var dt = _resolveRegDateTime(ws, reg);
-    var url = buildWhatsAppUrl(reg.phone, reg.name, wsTitle, dt.date, dt.time, ws.mode, ws.zoomLink, waLoc, reg._id, reg.status, reg.pricePaid || ws.price || '', ws.notice || '');
-    window.open(url, '_blank', 'noopener');
+    ensureWsSettingsLoaded().then(function() {
+        var ws = _allWorkshopsCache[reg.workshopId] || {};
+        var wsTitle = (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || '');
+        var waLoc = _resolveSessionLocation(ws, reg);
+        var waMode = _resolveSessionMode(ws, reg);
+        var waZoomLink = _resolveSessionZoomLink(ws, reg);
+        var dt = _resolveRegDateTime(ws, reg);
+        var url = buildWhatsAppUrl(reg.phone, reg.name, wsTitle, dt.date, dt.time, waMode, waZoomLink, waLoc, reg._id, reg.status, reg.pricePaid || ws.price || '', ws.notice || '');
+        window.open(url, '_blank', 'noopener');
+    }).catch(function(err) {
+        showToast('載入 WhatsApp 設定失敗：' + err.message, 'error');
+    });
 }
 
 function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLink, wsLocation, regId, regStatus, fee, notice) {
@@ -5648,11 +7004,8 @@ function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLi
     else if (wsMode === 'both') modeText = _E.laptop + ' 模式：實體＋線上';
     else modeText = _E.office + ' 模式：實體';
 
-    var locationText = '';
-    if (wsLocation && wsMode !== 'online') locationText = _E.loc + ' 地點：' + wsLocation;
-    if (wsZoomLink && (wsMode === 'online' || wsMode === 'both')) {
-        locationText = (locationText ? locationText + '\n' : '') + _E.link + ' 線上連結：' + wsZoomLink;
-    }
+    var locationText = (wsLocation && wsMode !== 'online') ? (_E.loc + ' 地點：' + wsLocation) : '';
+    var zoomLinkText = (wsZoomLink && (wsMode === 'online' || wsMode === 'both')) ? (_E.link + ' 線上連結：' + wsZoomLink) : '';
 
     var receiptLink = regId ? 'https://aiflowtime-hk.web.app/receipt?id=' + regId : 'https://aiflowtime-hk.web.app/profile';
 
@@ -5665,8 +7018,10 @@ function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLi
         .replace(/\{location\}/g, locationText)
         .replace(/\{fee\}/g, fee || '')
         .replace(/\{notice\}/g, notice || '')
-        .replace(/\{zoomLink\}/g, wsZoomLink || '')
+        .replace(/\{zoomLink\}/g, zoomLinkText)
         .replace(/\{receiptLink\}/g, receiptLink);
+
+    msg = msg.replace(/\n{3,}/g, '\n\n').trim();
 
     return 'https://api.whatsapp.com/send?phone=' + num + '&text=' + encodeURIComponent(msg);
 }
@@ -5678,6 +7033,676 @@ function openScreenshotModal(url) {
 
 function closeScreenshotModal() {
     document.getElementById('ssModal').classList.remove('open');
+}
+
+// ============================================================
+// SEND NOTES VIA WHATSAPP - with Link Manager
+// ============================================================
+var DEFAULT_NOTES_TEMPLATE = 'Hi {name}！\n\n感謝你參加我們的工作坊！以下是課後資料：\n📌 工作坊：{workshopTitle}\n📅 日期：{date}\n🕐 時間：{time}\n\n📝 課後資料\n{notesList}\n\n📋 問卷\n{questionnaireList}\n\nℹ️{notice}\n\n如有任何問題，歡迎隨時聯絡我們！';
+var _sendNotesCtx = null;
+var _sendNotesDirty = false;
+var _sendNotesResourceLinks = []; // local working array
+var _sendNotesSelectedLinkIds = { notes: [], questionnaire: [] };
+var _sendNotesEditingLinkId = null; // for edit modal
+var _sendNotesActiveTarget = 'notes';
+var _sendNotesActiveRowIndex = 0;
+var _sendNotesNameOptionsCache = [];
+
+function openSendNotesModal(btn) {
+    if (!btn) return;
+    var wsId = btn.dataset.wsId || '';
+    var targetValue = btn.dataset.targetValue || '';
+    var targetLabel = btn.dataset.targetLabel || '';
+
+    var ws = _allWorkshopsCache[wsId];
+    if (!ws) { showToast('找不到工作坊資料', 'error'); return; }
+
+    var wsTitle = (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || '');
+    _sendNotesCtx = { wsId: wsId, ws: ws, wsTitle: wsTitle, targetValue: targetValue, targetLabel: targetLabel };
+
+    // Load resourceLinks from workshop (migrate from old format if needed)
+    _sendNotesResourceLinks = [];
+    if (ws.resourceLinks && Array.isArray(ws.resourceLinks)) {
+        _sendNotesResourceLinks = ws.resourceLinks.map(function(l) {
+            var link = JSON.parse(JSON.stringify(l));
+            if (!link.type) link.type = (link.id === ws.questionnaireLinkId || (ws.questionnaireLink && link.url === ws.questionnaireLink)) ? 'questionnaire' : 'notes';
+            return link;
+        });
+    } else {
+        // Migrate from old format
+        if (ws.notesLink) _sendNotesResourceLinks.push({ id: _genLinkId(), name: '課堂簡報', url: ws.notesLink, type: 'notes' });
+        if (ws.questionnaireLink) _sendNotesResourceLinks.push({ id: _genLinkId(), name: '問卷', url: ws.questionnaireLink, type: 'questionnaire' });
+    }
+    var notesLinkId = ws.notesLinkId || '';
+    var questionnaireLinkId = ws.questionnaireLinkId || '';
+    if (!notesLinkId && ws.notesLink) {
+        var matchedNotes = _sendNotesResourceLinks.find(function(link) { return link.url === ws.notesLink; });
+        notesLinkId = matchedNotes ? matchedNotes.id : '';
+    }
+    if (!questionnaireLinkId && ws.questionnaireLink) {
+        var matchedQuestionnaire = _sendNotesResourceLinks.find(function(link) { return link.url === ws.questionnaireLink; });
+        questionnaireLinkId = matchedQuestionnaire ? matchedQuestionnaire.id : '';
+    }
+    var firstNotes = _sendNotesResourceLinks.find(function(l) { return (l.type || 'notes') === 'notes'; });
+    var firstQuestionnaire = _sendNotesResourceLinks.find(function(l) { return (l.type || 'notes') === 'questionnaire'; });
+    var notesIds = [];
+    var questionnaireIds = [];
+    if (ws.notesLinkIds && Array.isArray(ws.notesLinkIds)) notesIds = ws.notesLinkIds.slice();
+    else if (notesLinkId) notesIds = [notesLinkId];
+    else if (firstNotes) notesIds = [firstNotes.id];
+    if (ws.questionnaireLinkIds && Array.isArray(ws.questionnaireLinkIds)) questionnaireIds = ws.questionnaireLinkIds.slice();
+    else if (questionnaireLinkId) questionnaireIds = [questionnaireLinkId];
+    else if (firstQuestionnaire) questionnaireIds = [firstQuestionnaire.id];
+    _sendNotesSelectedLinkIds = { notes: notesIds, questionnaire: questionnaireIds };
+
+    document.getElementById('sendNotesTargetInfo').textContent = wsTitle + (targetLabel ? ' — ' + targetLabel : '');
+    document.getElementById('sendNotesTemplate').value = ws.notesTemplate || DEFAULT_NOTES_TEMPLATE;
+
+    _renderLinkManagerRows();
+    _sendNotesDirty = false;
+    _updateSendNotesSaveStatus();
+    _renderSendNotesStudents();
+    document.getElementById('sendNotesModal').classList.add('open');
+}
+
+function _genLinkId() { return 'link_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
+
+function _getSelectedResourceLink(target, rowIndex) {
+    var arr = (_sendNotesSelectedLinkIds && _sendNotesSelectedLinkIds[target]) || [];
+    var linkId = null;
+    if (typeof rowIndex === 'number') linkId = arr[rowIndex] || null;
+    else linkId = arr[0] || null;
+    if (!linkId) return null;
+    for (var i = 0; i < _sendNotesResourceLinks.length; i++) {
+        if (_sendNotesResourceLinks[i].id === linkId) return _sendNotesResourceLinks[i];
+    }
+    return null;
+}
+
+function _getSelectedResourceLinks(target) {
+    var arr = (_sendNotesSelectedLinkIds && _sendNotesSelectedLinkIds[target]) || [];
+    return arr.map(function(linkId) {
+        return _sendNotesResourceLinks.find(function(l) { return l.id === linkId; });
+    }).filter(Boolean);
+}
+
+function addLinkRow(target) {
+    var arr = _sendNotesSelectedLinkIds[target] || [];
+    arr.push(null);
+    _sendNotesSelectedLinkIds[target] = arr;
+    _renderLinkManagerRows();
+    _markSendNotesDirty();
+}
+
+function removeLinkRow(target, index) {
+    var arr = (_sendNotesSelectedLinkIds[target] || []).slice();
+    if (arr.length <= 1) return;
+    arr.splice(index, 1);
+    _sendNotesSelectedLinkIds[target] = arr;
+    _renderLinkManagerRows();
+    _markSendNotesDirty();
+}
+
+function _renderLinkManagerRows() {
+    var renderSection = function(containerId, target) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var arr = _sendNotesSelectedLinkIds[target] || [];
+        if (arr.length === 0) arr = [null];
+        var html = '';
+        for (var i = 0; i < arr.length; i++) {
+            var link = _getSelectedResourceLink(target, i);
+            var label = link ? link.name : '— 選擇連結 —';
+            var isEmpty = !link;
+            html += '<div class="link-manager-row-wrap">';
+            html += '<div class="link-manager-row" style="flex:1;display:flex;align-items:stretch;gap:8px;">';
+            html += '<div class="link-manager-select-wrap" style="flex:1;">';
+            html += '<button class="link-manager-trigger" type="button" onclick="_openLinkDropdown(\'' + target + '\', ' + i + ', this)">';
+            html += '<span class="link-manager-trigger-label' + (isEmpty ? ' empty' : '') + '">' + escHtml(label) + '</span>';
+            html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+            html += '</button>';
+            html += '</div>';
+            html += '<button class="link-manager-btn" type="button" onclick="addLinkRow(\'' + target + '\')" title="新增一列">';
+            html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+            html += '</button>';
+            if (arr.length > 1) {
+                html += '<button class="link-manager-remove-btn" type="button" onclick="removeLinkRow(\'' + target + '\', ' + i + ')" title="移除這列">';
+                html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+                html += '</button>';
+            }
+            html += '</div></div>';
+        }
+        container.innerHTML = html;
+    };
+    renderSection('sendNotesNotesRows', 'notes');
+    renderSection('sendNotesQuestionnaireRows', 'questionnaire');
+}
+
+var _linkDropdownOpen = false;
+function _openLinkDropdown(target, rowIndex, triggerEl) {
+    var menu = document.getElementById('linkDropdownMenu');
+    if (!menu || !triggerEl) return;
+
+    if (_linkDropdownOpen) { _closeLinkDropdown(); return; }
+
+    _sendNotesActiveTarget = target || 'notes';
+    _sendNotesActiveRowIndex = typeof rowIndex === 'number' ? rowIndex : 0;
+
+    var rect = triggerEl.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top = (rect.bottom + 8) + 'px';
+    menu.style.width = (rect.width + 52) + 'px';
+
+    _renderLinkDropdownItems();
+    menu.classList.add('open');
+    _linkDropdownOpen = true;
+
+    function handler(e) {
+        if (!_linkDropdownOpen) { document.removeEventListener('mousedown', handler, true); return; }
+        if (menu.contains(e.target) || triggerEl.contains(e.target)) return;
+        _closeLinkDropdown();
+        document.removeEventListener('mousedown', handler, true);
+    }
+    setTimeout(function() { document.addEventListener('mousedown', handler, true); }, 50);
+}
+
+function _closeLinkDropdown() {
+    var menu = document.getElementById('linkDropdownMenu');
+    if (menu) menu.classList.remove('open');
+    _linkDropdownOpen = false;
+}
+
+function _getLinksByType(type) {
+    return _sendNotesResourceLinks.filter(function(l) { return (l.type || 'notes') === type; });
+}
+
+function _renderLinkDropdownItems() {
+    var container = document.getElementById('linkDropdownItems');
+    if (!container) return;
+
+    var target = _sendNotesActiveTarget || 'notes';
+    var pool = _getLinksByType(target);
+    var emptyMsg = target === 'notes' ? '尚無教材連結，請點擊「新增連結」' : '尚無問卷連結，請點擊「新增連結」';
+
+    if (pool.length === 0) {
+        container.innerHTML = '<div style="padding:12px;color:var(--text-light);font-size:13px;text-align:center;">' + emptyMsg + '</div>';
+        return;
+    }
+
+    var html = '';
+    var arr = _sendNotesSelectedLinkIds[_sendNotesActiveTarget] || [];
+    var currentId = arr[_sendNotesActiveRowIndex] || null;
+    pool.forEach(function(link) {
+        var isSelected = link.id === currentId;
+        var usedElsewhere = arr.some(function(id, idx) { return id === link.id && idx !== _sendNotesActiveRowIndex; });
+        var rowClass = (isSelected ? 'selected' : '') + (usedElsewhere ? ' used-elsewhere' : '');
+        html += '<div class="link-dropdown-item ' + rowClass + '" data-link-id="' + escHtml(link.id) + '"' + (usedElsewhere ? ' title="此連結已在其他列選用"' : '') + '>';
+        if (!usedElsewhere) {
+            html += '<span class="link-dropdown-label" onclick="_selectLinkId(\'' + escHtml(link.id) + '\')">';
+        } else {
+            html += '<span class="link-dropdown-label">';
+        }
+        html += '<span class="link-dropdown-label-main">' + escHtml(link.name) + '</span>';
+        html += '<span class="link-dropdown-label-sub">' + escHtml(link.url || '') + '</span>';
+        html += '</span>';
+        html += '<span class="link-dropdown-edit" onclick="event.stopPropagation();openLinkEditModal(\'' + escHtml(link.id) + '\');_closeLinkDropdown();" title="編輯">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>';
+        html += '</span>';
+        html += '</div>';
+    });
+    container.innerHTML = html;
+}
+
+function _selectLinkId(id) {
+    var arr = (_sendNotesSelectedLinkIds[_sendNotesActiveTarget] || []).slice();
+    while (arr.length <= _sendNotesActiveRowIndex) arr.push(null);
+    arr[_sendNotesActiveRowIndex] = id;
+    _sendNotesSelectedLinkIds[_sendNotesActiveTarget] = arr;
+    _renderLinkManagerRows();
+    _closeLinkDropdown();
+    _markSendNotesDirty();
+}
+
+function openLinkEditModal(linkId, target) {
+    if (target) _sendNotesActiveTarget = target;
+    _sendNotesEditingLinkId = linkId || null;
+    var isEdit = !!linkId;
+    document.getElementById('linkEditTitle').textContent = isEdit ? '編輯資源連結' : '新增資源連結';
+
+    if (isEdit) {
+        var link = _sendNotesResourceLinks.find(function(l) { return l.id === linkId; });
+        document.getElementById('linkEditName').value = link ? link.name : '';
+        document.getElementById('linkEditUrl').value = link ? link.url : '';
+    } else {
+        document.getElementById('linkEditName').value = '';
+        document.getElementById('linkEditUrl').value = '';
+    }
+
+    // Update actions to show/hide delete button
+    var actions = document.getElementById('linkEditActions');
+    if (isEdit) {
+        actions.innerHTML = '<button class="link-edit-btn" onclick="_closeLinkEditModal()">取消</button>' +
+            '<button class="link-edit-btn delete" onclick="deleteLinkEdit()">刪除</button>' +
+            '<button class="link-edit-btn save" onclick="saveLinkEdit()">儲存</button>';
+    } else {
+        actions.innerHTML = '<button class="link-edit-btn" onclick="_closeLinkEditModal()">取消</button>' +
+            '<button class="link-edit-btn save" onclick="saveLinkEdit()">儲存</button>';
+    }
+
+    document.getElementById('linkEditModal').classList.add('open');
+}
+
+function _closeLinkEditModal() {
+    document.getElementById('linkEditModal').classList.remove('open');
+    _closeLinkNameDropdown();
+    _sendNotesEditingLinkId = null;
+}
+
+function _getAllExistingResourceLinkOptions(typeFilter) {
+    var options = [];
+    var seen = {};
+
+    function addOption(name, url, linkType) {
+        var n = (name || '').trim();
+        var u = (url || '').trim();
+        if (!n || !u) return;
+        if (typeFilter && linkType !== typeFilter) return;
+        var key = n + '||' + u;
+        if (seen[key]) return;
+        seen[key] = true;
+        options.push({ name: n, url: u });
+    }
+
+    Object.keys(_allWorkshopsCache || {}).forEach(function(wsId) {
+        var ws = _allWorkshopsCache[wsId] || {};
+        if (Array.isArray(ws.resourceLinks)) {
+            ws.resourceLinks.forEach(function(link) {
+                var t = link.type || 'notes';
+                addOption(link.name, link.url, t);
+            });
+        }
+        if (!typeFilter || typeFilter === 'notes') addOption('課堂簡報', ws.notesLink, 'notes');
+        if (!typeFilter || typeFilter === 'questionnaire') addOption('問卷', ws.questionnaireLink, 'questionnaire');
+    });
+
+    _sendNotesResourceLinks.forEach(function(link) {
+        var t = link.type || 'notes';
+        addOption(link.name, link.url, t);
+    });
+
+    options.sort(function(a, b) {
+        return (a.name || '').localeCompare(b.name || '', 'zh-Hant');
+    });
+    return options;
+}
+
+var _linkNameDropdownOpen = false;
+function _showLinkNameDropdown() {
+    if (_linkNameDropdownOpen) return;
+    _renderLinkNameDropdown(document.getElementById('linkEditName').value.trim());
+    var dd = document.getElementById('linkEditNameDropdown');
+    dd.classList.add('open');
+    _linkNameDropdownOpen = true;
+
+    var wrap = document.querySelector('.link-edit-name-wrap');
+    function handler(e) {
+        if (!_linkNameDropdownOpen) { document.removeEventListener('mousedown', handler, true); return; }
+        if ((wrap && wrap.contains(e.target)) || (dd && dd.contains(e.target))) return;
+        _closeLinkNameDropdown();
+        document.removeEventListener('mousedown', handler, true);
+    }
+    setTimeout(function() { document.addEventListener('mousedown', handler, true); }, 50);
+}
+
+function _toggleLinkNameDropdown() {
+    if (_linkNameDropdownOpen) {
+        _closeLinkNameDropdown();
+    } else {
+        _showLinkNameDropdown();
+    }
+}
+
+function _closeLinkNameDropdown() {
+    document.getElementById('linkEditNameDropdown').classList.remove('open');
+    _linkNameDropdownOpen = false;
+}
+
+function _renderLinkNameDropdown(filterValue) {
+    var container = document.getElementById('linkEditNameDropdown');
+    var linkType = _sendNotesEditingLinkId
+        ? ((_sendNotesResourceLinks.find(function(l) { return l.id === _sendNotesEditingLinkId; }) || {}).type || 'notes')
+        : (_sendNotesActiveTarget || 'notes');
+    var options = _getAllExistingResourceLinkOptions(linkType);
+    var currentVal = document.getElementById('linkEditName').value.trim();
+    var filter = (filterValue || '').toLowerCase();
+
+    if (options.length === 0) {
+        container.innerHTML = '<div class="link-edit-name-option" style="color:var(--text-light);">尚無現有資源連結</div>';
+        return;
+    }
+
+    var visibleOptions = options.filter(function(option) {
+        if (!filter) return true;
+        return option.name.toLowerCase().indexOf(filter) !== -1 || option.url.toLowerCase().indexOf(filter) !== -1;
+    });
+    if (!visibleOptions.length) visibleOptions = options;
+
+    _sendNotesNameOptionsCache = visibleOptions.slice();
+    var html = '';
+    visibleOptions.forEach(function(option) {
+        var isMatch = option.name.toLowerCase() === currentVal.toLowerCase();
+        html += '<div class="link-edit-name-option" onclick="_selectLinkTemplateByIndex(' + _sendNotesNameOptionsCache.indexOf(option) + ')">';
+        html += isMatch ? '<strong>' + escHtml(option.name) + '</strong>' : escHtml(option.name);
+        html += '<span class="link-edit-name-option-sub">' + escHtml(option.url) + '</span>';
+        html += '</div>';
+    });
+    container.innerHTML = html;
+}
+
+function _onLinkNameInput(val) {
+    _renderLinkNameDropdown(val);
+    document.getElementById('linkEditNameDropdown').classList.add('open');
+}
+
+function _selectLinkTemplateByIndex(idx) {
+    var option = _sendNotesNameOptionsCache[idx];
+    if (!option) return;
+    document.getElementById('linkEditName').value = option.name;
+    document.getElementById('linkEditUrl').value = option.url || '';
+    _closeLinkNameDropdown();
+}
+
+function _normalizeUrl(url) {
+    if (!url) return '';
+    if (/^www\./i.test(url)) url = 'https://' + url;
+    return url;
+}
+
+function _isValidUrl(url) {
+    try { var u = new URL(url); return u.protocol === 'http:' || u.protocol === 'https:'; } catch (e) { return false; }
+}
+
+function saveLinkEdit() {
+    var name = document.getElementById('linkEditName').value.trim();
+    var url = _normalizeUrl(document.getElementById('linkEditUrl').value.trim());
+    document.getElementById('linkEditUrl').value = url;
+
+    if (!name) { showToast('請輸入名稱', 'error'); return; }
+    if (!url) { showToast('請輸入連結', 'error'); return; }
+    if (!_isValidUrl(url)) { showToast('連結格式不正確，請輸入完整網址（如 https://...）', 'error'); return; }
+
+    if (_sendNotesEditingLinkId) {
+        // Update existing
+        var idx = _sendNotesResourceLinks.findIndex(function(l) { return l.id === _sendNotesEditingLinkId; });
+        if (idx !== -1) {
+            _sendNotesResourceLinks[idx].name = name;
+            _sendNotesResourceLinks[idx].url = url;
+        }
+    } else {
+        // Add new - type comes from which selector opened the modal
+        var target = _sendNotesActiveTarget || 'notes';
+        var rowIdx = _sendNotesActiveRowIndex;
+        var newLink = { id: _genLinkId(), name: name, url: url, type: target };
+        _sendNotesResourceLinks.push(newLink);
+        var arr = (_sendNotesSelectedLinkIds[target] || []).slice();
+        while (arr.length <= rowIdx) arr.push(null);
+        arr[rowIdx] = newLink.id;
+        _sendNotesSelectedLinkIds[target] = arr;
+    }
+
+    _renderLinkManagerRows();
+    _markSendNotesDirty();
+    _closeLinkEditModal();
+}
+
+function deleteLinkEdit() {
+    var idToDelete = _sendNotesEditingLinkId;
+    if (!idToDelete) return;
+    _closeLinkEditModal();
+    showCmsConfirm({
+        icon: '🗑️',
+        title: '確定刪除此連結？',
+        msg: '刪除後無法復原。',
+        cancelText: '取消',
+        okText: '刪除',
+        onOk: function() {
+            _sendNotesResourceLinks = _sendNotesResourceLinks.filter(function(l) { return l.id !== idToDelete; });
+            var removeFromArr = function(arr, deletedId) {
+                var result = arr.filter(function(id) { return id !== deletedId; });
+                return result.length > 0 ? result : [null];
+            };
+            _sendNotesSelectedLinkIds.notes = removeFromArr(_sendNotesSelectedLinkIds.notes || [], idToDelete);
+            _sendNotesSelectedLinkIds.questionnaire = removeFromArr(_sendNotesSelectedLinkIds.questionnaire || [], idToDelete);
+            _renderLinkManagerRows();
+            _markSendNotesDirty();
+        }
+    });
+}
+
+function _trySendNotesClose() {
+    if (_sendNotesDirty) {
+        showCmsConfirm({
+            icon: '⚠️',
+            title: '確定要離開嗎？',
+            msg: '你有未儲存的變更，離開後將不會保留。',
+            cancelText: '繼續編輯',
+            okText: '離開不儲存',
+            onOk: function() { closeSendNotesModal(); }
+        });
+        return;
+    }
+    closeSendNotesModal();
+}
+
+function showCmsConfirm(opts) {
+    opts = opts || {};
+    var overlay = document.getElementById('cmsConfirmOverlay');
+    document.getElementById('cmsConfirmIcon').textContent = opts.icon || '⚠️';
+    document.getElementById('cmsConfirmTitle').textContent = opts.title || '確定嗎？';
+    document.getElementById('cmsConfirmMsg').textContent = opts.msg || '';
+    document.getElementById('cmsConfirmCancel').textContent = opts.cancelText || '取消';
+    document.getElementById('cmsConfirmOk').textContent = opts.okText || '確定';
+
+    var cancelBtn = document.getElementById('cmsConfirmCancel');
+    var okBtn = document.getElementById('cmsConfirmOk');
+
+    function cleanup() {
+        overlay.classList.remove('open');
+        cancelBtn.onclick = null;
+        okBtn.onclick = null;
+        overlay.onclick = null;
+    }
+
+    cancelBtn.onclick = function() { cleanup(); if (opts.onCancel) opts.onCancel(); };
+    okBtn.onclick = function() { cleanup(); if (opts.onOk) opts.onOk(); };
+    overlay.onclick = function(e) { if (e.target === overlay) { cleanup(); if (opts.onCancel) opts.onCancel(); } };
+
+    overlay.classList.add('open');
+}
+
+function closeSendNotesModal() {
+    document.getElementById('sendNotesModal').classList.remove('open');
+    _closeLinkDropdown();
+    _sendNotesCtx = null;
+    _sendNotesDirty = false;
+    _sendNotesResourceLinks = [];
+    _sendNotesSelectedLinkIds = { notes: [], questionnaire: [] };
+    _sendNotesActiveTarget = 'notes';
+    _sendNotesActiveRowIndex = 0;
+}
+
+function _markSendNotesDirty() {
+    if (!_sendNotesDirty) {
+        _sendNotesDirty = true;
+        _updateSendNotesSaveStatus();
+    }
+}
+
+function _updateSendNotesSaveStatus() {
+    var statusEl = document.getElementById('sendNotesSaveStatus');
+    var labelEl = document.getElementById('sendNotesSaveLabel');
+    if (_sendNotesDirty) {
+        statusEl.className = 'send-notes-save-status unsaved';
+        statusEl.querySelector('.sn-save-icon').innerHTML = '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><line x1="4" y1="4" x2="20" y2="20"/>';
+        labelEl.textContent = '未儲存變更';
+    } else {
+        statusEl.className = 'send-notes-save-status saved';
+        statusEl.querySelector('.sn-save-icon').innerHTML = '<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>';
+        labelEl.textContent = '已儲存';
+    }
+}
+
+function saveSendNotesData(onSuccess, onError) {
+    if (!_sendNotesCtx) return;
+    var btn = document.getElementById('sendNotesSaveBtn');
+    btn.disabled = true;
+    btn.textContent = '儲存中...';
+
+    var notesTemplate = document.getElementById('sendNotesTemplate').value.trim();
+
+    var notesLinks = _getSelectedResourceLinks('notes');
+    var questionnaireLinks = _getSelectedResourceLinks('questionnaire');
+    var notesIds = (_sendNotesSelectedLinkIds.notes || []).filter(Boolean);
+    var questionnaireIds = (_sendNotesSelectedLinkIds.questionnaire || []).filter(Boolean);
+    var updateData = {
+        resourceLinks: _sendNotesResourceLinks,
+        notesTemplate: notesTemplate || '',
+        notesLinkIds: notesIds,
+        questionnaireLinkIds: questionnaireIds,
+        notesLinkId: notesIds[0] || '',
+        questionnaireLinkId: questionnaireIds[0] || '',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    updateData.notesLink = notesLinks[0] ? notesLinks[0].url : '';
+    updateData.questionnaireLink = questionnaireLinks[0] ? questionnaireLinks[0].url : '';
+
+    db.collection('workshops').doc(_sendNotesCtx.wsId).update(updateData).then(function() {
+        _sendNotesCtx.ws.resourceLinks = JSON.parse(JSON.stringify(_sendNotesResourceLinks));
+        _sendNotesCtx.ws.notesTemplate = notesTemplate;
+        _sendNotesCtx.ws.notesLink = updateData.notesLink || '';
+        _sendNotesCtx.ws.questionnaireLink = updateData.questionnaireLink || '';
+        _sendNotesCtx.ws.notesLinkIds = updateData.notesLinkIds || [];
+        _sendNotesCtx.ws.questionnaireLinkIds = updateData.questionnaireLinkIds || [];
+        _sendNotesCtx.ws.notesLinkId = updateData.notesLinkId || '';
+        _sendNotesCtx.ws.questionnaireLinkId = updateData.questionnaireLinkId || '';
+        _sendNotesDirty = false;
+        _updateSendNotesSaveStatus();
+        btn.disabled = false;
+        btn.textContent = '儲存變更';
+        showToast('課後資料已儲存');
+        if (onSuccess) onSuccess(updateData);
+    }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = '儲存變更';
+        showToast('儲存失敗：' + err.message, 'error');
+        if (onError) onError(err);
+    });
+}
+
+function _renderSendNotesStudents() {
+    var container = document.getElementById('sendNotesStudentListBody');
+    var countEl = document.getElementById('sendNotesStudentCount');
+    if (!_sendNotesCtx) { container.innerHTML = ''; countEl.textContent = ''; return; }
+
+    var students = _allRegistrations.filter(function(r) {
+        if (r.status !== 'confirmed') return false;
+        if ((r.workshopId || '') !== _sendNotesCtx.wsId) return false;
+        if (_sendNotesCtx.targetValue && (r.selectedRound || '') !== _sendNotesCtx.targetValue) return false;
+        return true;
+    });
+
+    countEl.textContent = '（' + students.length + ' 位）';
+
+    if (students.length === 0) {
+        container.innerHTML = '<div class="send-notes-no-students">此日期暫無已確認學員。</div>';
+        return;
+    }
+
+    var html = '';
+    students.forEach(function(r) {
+        var hasPhone = !!(r.phone && r.phone.trim());
+        html += '<div class="send-notes-student">';
+        html += '<div class="send-notes-student-info">';
+        html += '<div class="send-notes-student-name">' + escHtml(r.name || '訪客') + '</div>';
+        html += '<div class="send-notes-student-phone">' + escHtml(r.phone || r.userEmail || '—') + '</div>';
+        html += '</div>';
+        if (hasPhone) {
+            html += '<button class="send-notes-send-btn" onclick="event.stopPropagation();requestSendNotesWhatsApp(\'' + escHtml(r._id) + '\')">WhatsApp 傳送</button>';
+        } else {
+            html += '<span style="font-size:11px;color:var(--text-light);">無電話</span>';
+        }
+        html += '</div>';
+    });
+
+    container.innerHTML = html;
+}
+
+function requestSendNotesWhatsApp(regId) {
+    if (!_sendNotesDirty) {
+        sendNotesWhatsApp(regId);
+        return;
+    }
+    showCmsConfirm({
+        icon: '☁️',
+        title: '先儲存變更？',
+        msg: '你有未儲存的課後筆記設定。為免傳出舊內容，請先儲存再開啟 WhatsApp。',
+        cancelText: '取消',
+        okText: '儲存後傳送',
+        onOk: function() {
+            saveSendNotesData(function() {
+                sendNotesWhatsApp(regId);
+            });
+        }
+    });
+}
+
+function _formatLinkList(links) {
+    if (!links || links.length === 0) return '';
+    return links.map(function(l, i) {
+        return (links.length > 1 ? (i + 1) + '. ' : '') + l.name + '\n' + l.url;
+    }).join('\n\n');
+}
+
+function sendNotesWhatsApp(regId) {
+    if (!_sendNotesCtx) return;
+    var reg = _allRegistrations.find(function(r) { return r._id === regId; });
+    if (!reg) { showToast('找不到報名資料', 'error'); return; }
+
+    var ws = _sendNotesCtx.ws;
+    var tpl = document.getElementById('sendNotesTemplate').value || DEFAULT_NOTES_TEMPLATE;
+    var notesLinks = _getSelectedResourceLinks('notes');
+    var questionnaireLinks = _getSelectedResourceLinks('questionnaire');
+    var notesList = _formatLinkList(notesLinks);
+    var questionnaireList = _formatLinkList(questionnaireLinks);
+
+    var dt = _resolveRegDateTime(ws, reg);
+    var receiptLink = regId ? 'https://aiflowtime-hk.web.app/receipt?id=' + regId : 'https://aiflowtime-hk.web.app/profile';
+
+    var msg = tpl
+        .replace(/\{name\}/g, reg.name || '')
+        .replace(/\{workshopTitle\}/g, _sendNotesCtx.wsTitle || '')
+        .replace(/\{workshopNumber\}/g, ws.workshopNumber || '')
+        .replace(/\{date\}/g, dt.date || '')
+        .replace(/\{time\}/g, dt.time || '')
+        .replace(/\{notesList\}/g, notesList)
+        .replace(/\{questionnaireList\}/g, questionnaireList)
+        .replace(/\{notesLink\}/g, notesList)
+        .replace(/\{notesLinks\}/g, notesList)
+        .replace(/\{questionnaireLink\}/g, questionnaireList)
+        .replace(/\{questionnaireLinks\}/g, questionnaireList)
+        .replace(/\{selectedLink\}/g, [notesList, questionnaireList].filter(Boolean).join('\n\n'))
+        .replace(/\{receiptLink\}/g, receiptLink)
+        .replace(/\{notice\}/g, ws.notice || '');
+
+    msg = msg.replace(/\n{3,}/g, '\n\n').trim();
+
+    var num = (reg.phone || '').replace(/[\s\-()]/g, '');
+    if (num.indexOf('+') === 0) num = num.substring(1);
+    else if (/^\d{8}$/.test(num)) num = '852' + num;
+
+    var url = 'https://api.whatsapp.com/send?phone=' + num + '&text=' + encodeURIComponent(msg);
+    window.open(url, '_blank', 'noopener');
 }
 
 // ============================================================
@@ -6177,11 +8202,13 @@ function bulkDeleteForever(wsId) {
 // ============================================================
 function isEnrolledStatus(s) { return s === 'confirmed'; }
 
-// A registration counts as enrolled if confirmed, or if pending WITH a payment screenshot
+// A registration counts as enrolled if confirmed, or if pending after final submission
 function isEnrolledReg(r) {
     var s = (r.status || 'pending').toLowerCase();
     if (s === 'cancelled' || s === 'deleted') return false;
-    return s === 'confirmed' || s === 'pending';
+    if (s === 'confirmed') return true;
+    if (s !== 'pending') return false;
+    return !!(r.paymentScreenshotUrl && (r.applicationSubmittedAt || r._enrollmentCounted === true));
 }
 
 function _migrateSessionRoundIds(wsId, ws) {
@@ -7769,8 +9796,9 @@ function attendSelectWs(wsId, isCompleted) {
         sessionSel.innerHTML = shtml;
         sessionSel.style.display = 'flex';
     } else if (ws.sessions && ws.sessions.length > 0) {
+        var sortedSessions = sortSessions(ws.sessions || []);
         var shtml = '<button class="attend-session-pill active" onclick="selectAttendSession(null,this)">全部課堂</button>';
-        ws.sessions.forEach(function(s, idx) {
+        sortedSessions.forEach(function(s, idx) {
             shtml += '<button class="attend-session-pill" onclick="selectAttendSession(' + idx + ',this)">' + escHtml(_attendSessionLabel(s, idx)) + '</button>';
         });
         sessionSel.innerHTML = shtml;

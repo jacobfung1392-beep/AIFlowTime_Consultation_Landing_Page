@@ -293,7 +293,13 @@
             var item = items[i];
             setCJK(10);
             var desc = (item.description || '').trim();
-            var descLines = pdf.splitTextToSize(desc, W - margin * 2 - 50);
+            var paragraphs = desc.split(/\r?\n/);
+            var descLines = [];
+            paragraphs.forEach(function(p) {
+                var wrapped = pdf.splitTextToSize(p, W - margin * 2 - 50);
+                descLines = descLines.concat(wrapped);
+            });
+            if (descLines.length === 0) descLines = [''];
             checkPage(descLines.length * 4.5 + 3);
             pdf.setTextColor(40, 40, 40);
             pdf.text(descLines, margin + 4, y);

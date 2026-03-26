@@ -419,6 +419,16 @@
             position: relative;
         }
 
+        /* Hide hero media until layout config is applied (avoids flash of default MP4) */
+        .hero-gif-wrap.hero-media-pending {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .hero-gif-wrap.hero-media-ready {
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
         .hero-gif {
             width: 100%;
             max-width: 420px;
@@ -439,6 +449,11 @@
         
         .hero h1 {
             margin-bottom: 24px;
+        }
+        /* Rich hero title: bolder than parent h1 (700) so <b>/<strong> are visible */
+        .hero h1 b,
+        .hero h1 strong {
+            font-weight: 900;
         }
         
         .hero-cta {
@@ -927,7 +942,8 @@
             border-radius: 20px 20px 0 0;
         }
         
-        .trust-card-image img {
+        .trust-card-image img,
+        .trust-card-image video {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -1346,6 +1362,13 @@
         }
         .sec-learning-outcomes .lo-item-title { font-weight: 700; font-size: 1.05rem; color: var(--text); }
         .sec-learning-outcomes .lo-item-desc { font-size: 0.9rem; color: var(--text-light); margin-top: 4px; }
+        .sec-learning-outcomes .lo-item-more {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 10px;
+            line-height: 1.55;
+            opacity: 0.92;
+        }
         .sec-learning-outcomes .lo-tools {
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 32px;
         }
@@ -1426,11 +1449,28 @@
             text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 40px; color: var(--text);
         }
         .sec-transformation .tf-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 900px; margin: 0 auto;
+            display: flex;
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            padding: 4px 2px 10px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(217,119,87,0.45) transparent;
+        }
+        .sec-transformation .tf-grid::-webkit-scrollbar { height: 8px; }
+        .sec-transformation .tf-grid::-webkit-scrollbar-track { background: transparent; }
+        .sec-transformation .tf-grid::-webkit-scrollbar-thumb {
+            background: rgba(217,119,87,0.45);
+            border-radius: 999px;
         }
         .sec-transformation .tf-card {
             background: #fff; border-radius: 16px; padding: 28px; border: 1px solid rgba(0,0,0,0.06);
             box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            flex: 0 0 min(320px, calc(100vw - 64px));
+            scroll-snap-align: start;
         }
         .sec-transformation .tf-theme {
             font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; color: var(--accent);
@@ -1445,7 +1485,7 @@
             margin-bottom: 4px;
         }
         .sec-transformation .tf-after { font-size: 0.9rem; color: var(--text); font-weight: 600; }
-        @media (max-width: 768px) { .sec-transformation .tf-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 1100px) { .sec-transformation .tf-card { flex-basis: 320px; } }
 
         .sec-countdown { padding: 60px 0; text-align: center; }
         .sec-countdown .countdown-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
@@ -1641,8 +1681,8 @@
     <!-- Hero Section -->
     <section class="hero" data-section-id="hero_default" data-section-type="hero">
         <div class="container">
-            <div class="hero-gif-wrap" style="text-align: center; margin-bottom: 24px;">
-                <img src="Capy Yawn.gif" alt="Capy" class="hero-gif" loading="eager" decoding="async">
+            <div class="hero-gif-wrap hero-media-pending" style="text-align: center; margin-bottom: 24px;">
+                <video src="Capy Yawn.mp4" aria-label="Capy" class="hero-gif" autoplay loop muted playsinline preload="auto"></video>
             </div>
             <div class="hero-content">
                 <h1>把 AI 變成你的時間槓桿</h1>
@@ -1785,7 +1825,7 @@
             <div class="trust-grid">
                 <div class="glass-card trust-card fade-in">
                     <div class="trust-card-image">
-                        <img src="小班教學，逐個跟進.gif" alt="小班教學，逐個跟進" loading="lazy" class="trust-card-gif" data-src="小班教學，逐個跟進.gif">
+                        <video src="小班教學，逐個跟進.mp4" aria-label="小班教學，逐個跟進" autoplay loop muted playsinline preload="metadata" class="trust-card-gif"></video>
                     </div>
                     <div class="trust-card-content">
                         <h4>小班教學，逐個跟進。</h4>
@@ -1794,7 +1834,7 @@
                 </div>
                 <div class="glass-card trust-card fade-in">
                     <div class="trust-card-image">
-                        <img src="不只教工具，教你用 AI 的思維.gif" alt="不只教工具，教你用 AI 的思維" loading="lazy" class="trust-card-gif" data-src="不只教工具，教你用 AI 的思維.gif">
+                        <video src="不只教工具，教你用 AI 的思維.mp4" aria-label="不只教工具，教你用 AI 的思維" autoplay loop muted playsinline preload="metadata" class="trust-card-gif"></video>
                     </div>
                     <div class="trust-card-content">
                         <h4>不只教工具，教你用 AI 的思維。</h4>
@@ -1803,7 +1843,7 @@
                 </div>
                 <div class="glass-card trust-card fade-in">
                     <div class="trust-card-image">
-                        <img src="導師每天都在用 AI 做實事.gif" alt="導師每天都在用 AI 做實事" loading="lazy" class="trust-card-gif" data-src="導師每天都在用 AI 做實事.gif">
+                        <video src="導師每天都在用 AI 做實事.mp4" aria-label="導師每天都在用 AI 做實事" autoplay loop muted playsinline preload="metadata" class="trust-card-gif"></video>
                     </div>
                     <div class="trust-card-content">
                         <h4>導師每天都在用 AI 做實事。</h4>
@@ -1884,7 +1924,7 @@
                         <!-- Photo -->
                         <div style="flex-shrink: 0; text-align: center;">
                             <a href="about-jacob.html">
-                                <img src="About_Jacob.jpg" alt="Jacob - 香港 AI 自動化導師" style="width: 240px; height: 240px; object-fit: cover; border-radius: 24px; border: 2px solid var(--accent); cursor: pointer; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" loading="lazy" decoding="async">
+                                <img src="About_Jacob.webp" alt="Jacob - 香港 AI 自動化導師" style="width: 240px; height: 240px; object-fit: cover; border-radius: 24px; border: 2px solid var(--accent); cursor: pointer; transition: opacity 0.3s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'" loading="lazy" decoding="async">
                             </a>
                             <div style="margin-top: 16px;">
                                 <a href="/about-jacob" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 12px; background: var(--accent); color: var(--white); font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(217,119,87,0.25);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px rgba(217,119,87,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(217,119,87,0.25)'">了解更多關於 Jacob <span style="font-size:16px;">→</span></a>
@@ -2264,9 +2304,21 @@
     <script src="/js/firebase-init.js"></script>
     <script src="/js/shared-utils.js"></script>
     <script>
-        initFirebase(function() { initWorkshopPage(); });
+        var _initWorkshopPageRetries = 0;
+        initFirebase(function() { window.setTimeout(initWorkshopPage, 0); }, { waitForAuthPersistence: false });
 
         function initWorkshopPage() {
+            if (typeof applyLayoutConfig !== 'function') {
+                if (_initWorkshopPageRetries < 40) {
+                    _initWorkshopPageRetries++;
+                    window.setTimeout(initWorkshopPage, 50);
+                } else {
+                    console.warn('[Layout] applyLayoutConfig was not ready in time.');
+                }
+                return;
+            }
+            if (window._workshopPageBooted) return;
+            window._workshopPageBooted = true;
             loadWorkshops();
             applyLayoutConfig();
             // Listen for auth state to update nav buttons
@@ -2356,6 +2408,8 @@
         // getCtaColorHex, buildCapacityBar, buildDiamondRating, escHtml, fixStorageUrl
         // are now loaded from /js/shared-utils.js
 
+        var _workshopsRenderedOnce = false;
+
         function renderWorkshopCard(doc) {
             var d = doc.data();
             var id = doc.id;
@@ -2418,14 +2472,13 @@
             // Date/time display with inline mode pill + per-date capacity
             if (isContinuous) {
                 var sortedRounds = d.rounds.slice().sort(function(a, b) {
-                    var aDates = (a.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); });
-                    var bDates = (b.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); });
-                    var aMin = aDates.sort()[0] || '';
-                    var bMin = bDates.sort()[0] || '';
+                    var aDates = (a.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
+                    var bDates = (b.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
+                    var aMin = aDates[0] || '', bMin = bDates[0] || '';
                     return aMin < bMin ? -1 : aMin > bMin ? 1 : 0;
                 });
                 sortedRounds.forEach(function(round) {
-                    var roundSessions = (round.sessions || []).filter(function(s) { return s.visible !== false; });
+                    var roundSessions = sortSessionsList((round.sessions || []).filter(function(s) { return s.visible !== false; }));
                     if (!roundSessions.length) return;
                     var roundMode = roundSessions.length ? (roundSessions[0].mode || d.mode || 'offline') : (d.mode || 'offline');
                     tagsHtml += '<span class="workshop-info-tag" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.5;width:100%;">' + svgCalendar + ' <strong style="font-size:12px;">' + escHtml(round.label || '') + '</strong>';
@@ -2442,14 +2495,7 @@
                 });
             } else if (d.sessions && d.sessions.length) {
                 var visibleSessions = d.sessions.filter(function(s) { return s.visible !== false; });
-                var sessionsSorted = visibleSessions.slice().sort(function(a, b) {
-                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    if (da !== db2) return da < db2 ? -1 : 1;
-                    var ta = (a.time || '').replace(/[^0-9:]/g, '');
-                    var tb = (b.time || '').replace(/[^0-9:]/g, '');
-                    return ta < tb ? -1 : ta > tb ? 1 : 0;
-                });
+                var sessionsSorted = sortSessionsList(visibleSessions);
                 var isMultiDate = sessionsSorted.length > 1;
                 for (var si = 0; si < sessionsSorted.length; si++) {
                     var sess = sessionsSorted[si];
@@ -2519,47 +2565,69 @@
             return card;
         }
 
+        function renderWorkshopsSnapshot(snapshot, grid) {
+            if (!grid) return;
+            var docs = [];
+            snapshot.forEach(function(doc) {
+                var d = doc.data();
+                if (d.archived) return;
+                docs.push(doc);
+            });
+            if (!docs.length) {
+                if (!_workshopsRenderedOnce) {
+                    grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料即將更新，請稍候。</p>';
+                }
+                return;
+            }
+            _workshopsRenderedOnce = true;
+            Array.prototype.slice.call(grid.children || []).forEach(function(el) {
+                if (!el.hasAttribute || !el.hasAttribute('data-ws-id')) el.remove();
+            });
+            var newIds = {};
+            docs.forEach(function(doc) {
+                newIds[doc.id] = true;
+                var existing = grid.querySelector('[data-ws-id="' + doc.id + '"]');
+                if (existing) {
+                    var fresh = renderWorkshopCard(doc);
+                    fresh.setAttribute('data-ws-id', doc.id);
+                    existing.replaceWith(fresh);
+                } else {
+                    var card = renderWorkshopCard(doc);
+                    card.setAttribute('data-ws-id', doc.id);
+                    grid.appendChild(card);
+                }
+            });
+            var toRemove = grid.querySelectorAll('[data-ws-id]');
+            toRemove.forEach(function(el) {
+                if (!newIds[el.getAttribute('data-ws-id')]) el.remove();
+            });
+            initScrollAnimations();
+            initWorkshopParallax();
+        }
+
         function loadWorkshops() {
             var db = firebase.firestore();
             var grid = document.getElementById('workshopsGrid');
-
-            // Real-time listener: updates instantly when workshop data changes
-            db.collection('workshops')
+            var query = db.collection('workshops')
               .where('visible', '==', true)
-              .orderBy('order', 'asc')
-              .onSnapshot(function(snapshot) {
-                  if (snapshot.empty) {
-                      grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料即將更新，請稍候。</p>';
-                      return;
-                  }
-                  var nonCards = grid.querySelectorAll(':scope > :not([data-ws-id])');
-                  nonCards.forEach(function(el) { el.remove(); });
-                  var newIds = {};
-                  snapshot.forEach(function(doc) {
-                      var d = doc.data();
-                      if (d.archived) return;
-                      newIds[doc.id] = true;
-                      var existing = grid.querySelector('[data-ws-id="' + doc.id + '"]');
-                      if (existing) {
-                          var fresh = renderWorkshopCard(doc);
-                          fresh.setAttribute('data-ws-id', doc.id);
-                          existing.replaceWith(fresh);
-                      } else {
-                          var card = renderWorkshopCard(doc);
-                          card.setAttribute('data-ws-id', doc.id);
-                          grid.appendChild(card);
-                      }
-                  });
-                  var toRemove = grid.querySelectorAll('[data-ws-id]');
-                  toRemove.forEach(function(el) {
-                      if (!newIds[el.getAttribute('data-ws-id')]) el.remove();
-                  });
-                  initScrollAnimations();
-                  initWorkshopParallax();
-              }, function(err) {
-                  console.error('Error loading workshops:', err);
-                  grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料載入失敗，請重新整理頁面。</p>';
-              });
+              .orderBy('order', 'asc');
+
+            query.get({ source: 'server' }).then(function(snapshot) {
+                renderWorkshopsSnapshot(snapshot, grid);
+            }).catch(function(err) {
+                console.error('Error loading workshops:', err);
+                if (!_workshopsRenderedOnce) {
+                    // If server failed (e.g. offline or bad cache), try default (cache then server)
+                    query.get().then(function(snap) {
+                        renderWorkshopsSnapshot(snap, grid);
+                    }).catch(function(e) {
+                        console.error('Fallback load failed:', e);
+                        grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料載入失敗，請重新整理頁面。</p>';
+                    });
+                } else {
+                    grid.innerHTML = '<p style="text-align:center;color:var(--text-light);font-weight:700;">工作坊資料載入失敗，請重新整理頁面。</p>';
+                }
+            });
         }
     </script>
 
@@ -2609,17 +2677,7 @@
             initScrollReveal('.fade-in');
         }
         
-        // Force trust-section GIFs to loop continuously (restart animation so they keep playing)
-        (function() {
-            var gifs = document.querySelectorAll('.trust-card-gif');
-            if (!gifs.length) return;
-            setInterval(function() {
-                gifs.forEach(function(img) {
-                    var base = img.getAttribute('data-src') || img.src.split('?')[0];
-                    if (base) img.src = base + '?t=' + Date.now();
-                });
-            }, 8000);
-        })();
+        // GIFs are allowed to loop natively; avoid forced re-fetches on slower devices.
         
         // Waitlist form submission
         (function() {
@@ -2685,6 +2743,8 @@
 
         // Workshop card parallax – subtle floating effect on scroll
         function initWorkshopParallax() {
+            if (window._workshopParallaxInitialized) return;
+            window._workshopParallaxInitialized = true;
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
             const cards = document.querySelectorAll('.workshop-card');
@@ -2739,11 +2799,19 @@
         // ============================================================
         var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
 
+        function revealHeroMedia() {
+            document.querySelectorAll('.hero-gif-wrap.hero-media-pending').forEach(function(wrap) {
+                wrap.classList.remove('hero-media-pending');
+                wrap.classList.add('hero-media-ready');
+            });
+        }
+
         function applyLayoutConfig() {
             if (_isPreviewMode) {
                 window.addEventListener('message', function(e) {
                     if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
                         applySections(e.data.sections);
+                        revealHeroMedia();
                     }
                 });
                 return;
@@ -2751,11 +2819,16 @@
 
             var db = firebase.firestore();
             db.collection('pageLayouts').doc('workshop-main').get().then(function(doc) {
-                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) {
+                    revealHeroMedia();
+                    return;
+                }
                 console.log('[Layout] Loaded workshop-main layout from Firestore (' + doc.data().sections.length + ' sections)');
                 applySections(doc.data().sections);
+                revealHeroMedia();
             }).catch(function(err) {
                 console.log('[Layout] No layout config found for workshop-main.', err);
+                revealHeroMedia();
             });
         }
 
@@ -2787,6 +2860,14 @@
                         el = template.cloneNode(true);
                         el.setAttribute('data-section-id', sec.id);
                         main.appendChild(el);
+                    } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download') {
+                        el = document.createElement('section');
+                        el.setAttribute('data-section-id', sec.id);
+                        el.setAttribute('data-section-type', sec.type);
+                        el.className = sec.type === 'image-only'
+                            ? 'sec-image-only'
+                            : (sec.type === 'text-only' ? 'sec-text-only' : 'sec-free-material');
+                        main.appendChild(el);
                     }
                 }
 
@@ -2802,9 +2883,88 @@
 
                 if (sec.content) applyContentToSection(el, sec.type, sec.content);
             });
+
+            // In layout-editor preview mode, make sure scroll-fade elements are visible.
+            // Otherwise desktop preview may keep them opacity:0, hiding font-size changes.
+            if (_isPreviewMode) {
+                document.querySelectorAll('.fade-in').forEach(function(el) { el.classList.add('visible'); });
+            }
         }
 
         function _escHtml(str) { return escHtml(str); }
+
+        function _isVideoMediaUrl(url) {
+            var s = String(url || '');
+            if (/\.mp4(?:[?#]|$)/i.test(s)) return true;
+            var pathMatch = s.match(/[?&]path=([^&]+)/);
+            if (pathMatch) return /\.mp4$/i.test(decodeURIComponent(pathMatch[1]));
+            var oMatch = s.match(/\/o\/([^?]+)/);
+            if (oMatch) return /\.mp4$/i.test(decodeURIComponent(oMatch[1]));
+            return false;
+        }
+
+        function _normalizeWorkshopMediaUrl(url) {
+            var raw = String(url || '');
+            if (!raw) return '';
+            if (/firebasestorage\.googleapis\.com/i.test(raw) || (/\/o\/[^?]+/.test(raw) && /alt=media/i.test(raw))) {
+                return fixStorageUrl(raw);
+            }
+            if (/^(?:https?:|data:|blob:)/i.test(raw)) return raw;
+            if (/\.gif(?:[?#]|$)/i.test(raw)) return raw.replace(/\.gif(?=[?#]|$)/i, '.webp');
+            return raw;
+        }
+
+        function _setMediaSource(el, url, altText) {
+            if (!el || !url) return;
+            url = _normalizeWorkshopMediaUrl(url);
+            if (el.tagName === 'VIDEO') {
+                el.src = url;
+                el.setAttribute('aria-label', altText || '');
+                el.muted = true;
+                el.autoplay = true;
+                el.loop = true;
+                el.playsInline = true;
+                el.load();
+                var playAttempt = el.play && el.play();
+                if (playAttempt && playAttempt.catch) playAttempt.catch(function() {});
+            } else {
+                el.src = url;
+                el.alt = altText || '';
+                el.setAttribute('data-src', url);
+            }
+        }
+
+        function _swapMediaElement(container, selector, url, altText) {
+            if (!container || !url) return;
+            url = _normalizeWorkshopMediaUrl(url);
+            var media = container.querySelector(selector);
+            if (!media) return;
+
+            var wantsVideo = _isVideoMediaUrl(url);
+            var isVideo = media.tagName === 'VIDEO';
+            if (wantsVideo !== isVideo) {
+                var replacement = document.createElement(wantsVideo ? 'video' : 'img');
+                replacement.className = media.className || '';
+                if (wantsVideo) {
+                    replacement.autoplay = true;
+                    replacement.loop = true;
+                    replacement.muted = true;
+                    replacement.playsInline = true;
+                    replacement.setAttribute('autoplay', '');
+                    replacement.setAttribute('loop', '');
+                    replacement.setAttribute('muted', '');
+                    replacement.setAttribute('playsinline', '');
+                    replacement.preload = replacement.classList.contains('hero-gif') ? 'auto' : 'none';
+                } else {
+                    replacement.loading = media.classList.contains('hero-gif') ? 'eager' : 'lazy';
+                    replacement.decoding = 'async';
+                }
+                media.replaceWith(replacement);
+                media = replacement;
+            }
+
+            _setMediaSource(media, url, altText);
+        }
 
         function _loadLogisticsCard(el, workshopId, ctaText, ctaLink) {
             var db = firebase.firestore();
@@ -2818,13 +2978,13 @@
                 if (d.courseType === 'continuous' && d.rounds && d.rounds.length) {
                     var dateHtml = '', timeHtml = '';
                     var lcSortedRounds = d.rounds.slice().sort(function(a, b) {
-                        var aDates = (a.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
-                        var bDates = (b.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
+                        var aDates = (a.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
+                        var bDates = (b.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
                         var aMin = aDates[0] || '', bMin = bDates[0] || '';
-                        return aMin > bMin ? -1 : aMin < bMin ? 1 : 0;
+                        return aMin < bMin ? -1 : aMin > bMin ? 1 : 0;
                     });
                     lcSortedRounds.forEach(function(round) {
-                        var visSess = (round.sessions || []).filter(function(s) { return s.visible !== false; });
+                        var visSess = sortSessionsList((round.sessions || []).filter(function(s) { return s.visible !== false; }));
                         if (!visSess.length) return;
                         dateHtml += '<div style="margin-bottom:6px;"><strong style="font-size:12px;opacity:.7;">' + escHtml(round.label || '') + '</strong></div>';
                         timeHtml += '<div style="margin-bottom:6px;">&nbsp;</div>';
@@ -2836,11 +2996,7 @@
                     if (dateEl) dateEl.innerHTML = dateHtml;
                     if (timeEl) timeEl.innerHTML = timeHtml;
                 } else if (d.sessions && d.sessions.length) {
-                    var sorted = d.sessions.filter(function(s) { return s.visible !== false; }).slice().sort(function(a, b) {
-                        var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                        var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                        return da > db2 ? -1 : da < db2 ? 1 : 0;
-                    });
+                    var sorted = sortSessionsList(d.sessions.filter(function(s) { return s.visible !== false; }));
                     if (dateEl) dateEl.innerHTML = sorted.map(function(s) { return '<div>' + (s.label ? '<small style="opacity:.6">' + escHtml(s.label) + '</small> ' : '') + escHtml(s.date || '待定') + '</div>'; }).join('');
                     if (timeEl) timeEl.innerHTML = sorted.map(function(s) { return '<div>' + (s.label ? '<small style="opacity:.6">' + escHtml(s.label) + '</small> ' : '') + escHtml(s.time || '待定') + '</div>'; }).join('');
                 } else {
@@ -2852,7 +3008,8 @@
                 var modeEl = el.querySelector('.lc-mode');
                 if (modeEl) {
                     var m = d.mode === 'online' ? '線上' : d.mode === 'both' ? '實體 + 線上' : '實體';
-                    if (d.location && d.mode !== 'online') m += ' · ' + d.location;
+                    var displayLoc = d.district || d.location || '';
+                    if (displayLoc && d.mode !== 'online') m += ' · ' + displayLoc;
                     modeEl.textContent = m;
                 }
                 var cap = d.capacity || 0, enrolled = d.enrolled || 0;
@@ -2882,14 +3039,13 @@
             switch (type) {
                 case 'hero':
                     var h1 = el.querySelector('h1');
-                    if (h1 && c.title) h1.textContent = c.title;
+                    if (h1) h1.innerHTML = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : (_escHtml(c.title).replace(/\n/g, '<br>'))) : '';
                     var sub = el.querySelector('.hero-subtitle');
                     if (sub && c.subtitle) sub.textContent = c.subtitle;
                     var cta = el.querySelector('.hero-cta .btn');
                     if (cta && c.ctaText) cta.textContent = c.ctaText;
                     if (cta && c.ctaLink) cta.href = c.ctaLink;
-                    var gif = el.querySelector('.hero-gif');
-                    if (gif && c.gifUrl) { gif.src = c.gifUrl; gif.setAttribute('data-src', c.gifUrl); }
+                    if (c.gifUrl) _swapMediaElement(el, '.hero-gif', c.gifUrl, c.title || 'Hero media');
                     break;
 
                 case 'pain-points':
@@ -2936,13 +3092,23 @@
                                 var tp = tcards[i].querySelector('p');
                                 if (tt && card.title) tt.textContent = card.title;
                                 if (tp && card.description) tp.textContent = card.description;
-                                if (card.gifUrl) {
-                                    var img = tcards[i].querySelector('img');
-                                    if (img) { img.src = card.gifUrl; img.alt = card.title || ''; }
-                                }
+                                if (card.gifUrl) _swapMediaElement(tcards[i], '.trust-card-gif', card.gifUrl, card.title || '');
                             }
                         });
                     }
+                    break;
+
+                case 'free-material-download':
+                    renderFreeMaterialSection(el, 'workshop-main', el.getAttribute('data-section-id') || 'free-material-download', c, {
+                        surface: '#fffaf6',
+                        surfaceAlt: 'rgba(217,119,87,0.10)',
+                        text: '#231f20',
+                        muted: 'rgba(35,31,32,0.72)',
+                        accent: '#D97757',
+                        accentText: '#ffffff',
+                        border: 'rgba(217,119,87,0.18)',
+                        backdrop: 'rgba(35,31,32,0.58)'
+                    });
                     break;
 
                 case 'testimonials':
@@ -3104,15 +3270,21 @@
 
                 case 'final-cta':
                     var ctaH2 = el.querySelector('h2');
-                    if (ctaH2 && c.title) ctaH2.textContent = c.title;
+                    if (ctaH2 && c.title) ctaH2.innerHTML = c.title;
                     var ctaP = el.querySelector('p');
-                    if (ctaP && c.subtitle) ctaP.textContent = c.subtitle;
+                    if (ctaP && c.subtitle) ctaP.innerHTML = c.subtitle;
                     var ctaBtn = el.querySelector('.btn');
                     if (ctaBtn && c.ctaText) ctaBtn.textContent = c.ctaText;
                     if (ctaBtn && c.ctaLink) ctaBtn.href = c.ctaLink;
                     var contactLinks = el.querySelectorAll('.contact-info a');
-                    if (contactLinks.length >= 1 && c.whatsappUrl) contactLinks[0].href = c.whatsappUrl;
-                    if (contactLinks.length >= 2 && c.instagramUrl) contactLinks[1].href = c.instagramUrl;
+                    if (contactLinks.length >= 1) {
+                        contactLinks[0].style.display = c.showWhatsapp !== false && c.whatsappUrl ? '' : 'none';
+                        if (c.whatsappUrl) contactLinks[0].href = c.whatsappUrl;
+                    }
+                    if (contactLinks.length >= 2) {
+                        contactLinks[1].style.display = c.showInstagram !== false && c.instagramUrl ? '' : 'none';
+                        if (c.instagramUrl) contactLinks[1].href = c.instagramUrl;
+                    }
                     break;
 
                 case 'video':
@@ -3154,17 +3326,22 @@
 
                 case 'learning-outcomes':
                     var loTitle = el.querySelector('.lo-title span');
-                    if (loTitle && c.sectionTitle) loTitle.textContent = c.sectionTitle;
+                    if (loTitle && c.sectionTitle) loTitle.innerHTML = c.sectionTitle;
                     if (c.items) {
                         var loList = el.querySelector('.lo-list');
                         if (loList) {
                             loList.innerHTML = '';
                             c.items.forEach(function(item, idx) {
+                                var safeTitle = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.title || '') : _escHtml(item.title || '');
+                                var safeDesc = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.description || '') : _escHtml(item.description || '');
+                                var safeMore = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.moreText || '') : _escHtml(item.moreText || '');
                                 var div = document.createElement('div');
                                 div.className = 'lo-item';
                                 div.innerHTML = '<div class="lo-num">' + (idx + 1) + '</div>' +
-                                    '<div><div class="lo-item-title">' + _escHtml(item.title || '') + '</div>' +
-                                    '<div class="lo-item-desc">' + _escHtml(item.description || '') + '</div></div>';
+                                    '<div><div class="lo-item-title">' + safeTitle + '</div>' +
+                                    '<div class="lo-item-desc">' + safeDesc +
+                                    (item.moreText ? '<div class="lo-item-more">' + safeMore + '</div>' : '') +
+                                    '</div></div>';
                                 loList.appendChild(div);
                             });
                         }
@@ -3175,7 +3352,7 @@
                         c.tools.forEach(function(t) {
                             var chip = document.createElement('span');
                             chip.className = 'lo-tool-chip';
-                            chip.textContent = t.name || '';
+                            chip.innerHTML = (t.iconUrl ? '<img src="' + _escHtml(t.iconUrl) + '" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:cover;vertical-align:middle;margin-right:4px;">' : '') + _escHtml(t.name || '');
                             loTools.appendChild(chip);
                         });
                     }
@@ -3217,7 +3394,7 @@
 
                 case 'transformation':
                     var tfTitle = el.querySelector('.tf-title span');
-                    if (tfTitle && c.sectionTitle) tfTitle.textContent = c.sectionTitle;
+                    if (tfTitle && c.sectionTitle) tfTitle.innerHTML = c.sectionTitle;
                     if (c.cards) {
                         var tfGrid = el.querySelector('.tf-grid');
                         if (tfGrid) {
@@ -3225,12 +3402,18 @@
                             c.cards.forEach(function(card) {
                                 var div = document.createElement('div');
                                 div.className = 'tf-card';
+                                if (c.colorCardBg) div.style.background = c.colorCardBg;
+                                if (c.colorCardBorder) div.style.borderColor = c.colorCardBorder;
                                 div.innerHTML =
                                     '<div class="tf-theme">' + _escHtml(card.theme || '') + '</div>' +
                                     '<div class="tf-before-label">之前</div>' +
                                     '<div class="tf-before">' + _escHtml(card.beforeText || '') + '</div>' +
                                     '<div class="tf-after-label">之後</div>' +
                                     '<div class="tf-after">' + _escHtml(card.afterText || '') + '</div>';
+                                if (c.colorTitle) { var th = div.querySelector('.tf-theme'); if (th) th.style.color = c.colorTitle; }
+                                if (c.colorBeforeLabel) { var bl = div.querySelector('.tf-before-label'); if (bl) bl.style.color = c.colorBeforeLabel; }
+                                if (c.colorAfterLabel) { var al = div.querySelector('.tf-after-label'); if (al) al.style.color = c.colorAfterLabel; }
+                                if (c.colorBodyText) { var bps = div.querySelectorAll('.tf-before, .tf-after'); bps.forEach(function(p) { p.style.color = c.colorBodyText; }); }
                                 tfGrid.appendChild(div);
                             });
                         }
@@ -3386,6 +3569,51 @@
                         pbCap.textContent = c.caption || '';
                         pbCap.style.display = c.caption ? '' : 'none';
                     }
+                    break;
+
+                case 'image-only':
+                    var aboImgAlign = c.align === 'left' ? 'flex-start' : c.align === 'right' ? 'flex-end' : 'center';
+                    var aboImgShadow = c.shadow === 'strong'
+                        ? '0 18px 50px rgba(0,0,0,0.16)'
+                        : c.shadow === 'none'
+                            ? 'none'
+                            : '0 10px 28px rgba(0,0,0,0.10)';
+                    var aboImgUrl = _escHtml(c.imageUrl || '');
+                    var aboAlt = _escHtml(c.alt || '');
+                    var aboCap = _escHtml(c.caption || '');
+                    var aboLink = String(c.linkUrl || '').trim();
+                    var aboStart = aboLink ? '<a href="' + _escHtml(aboLink) + '"' + (/^https?:/i.test(aboLink) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
+                    var aboEnd = aboLink ? '</a>' : '</div>';
+                    el.style.padding = (parseInt(c.paddingTop, 10) || 40) + 'px 0 ' + (parseInt(c.paddingBottom, 10) || 40) + 'px';
+                    el.innerHTML = '<div class="container" style="display:flex;justify-content:' + aboImgAlign + ';">' +
+                        '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 960) + 'px);">' +
+                        aboStart +
+                        '<img src="' + aboImgUrl + '" alt="' + aboAlt + '" style="display:block;width:100%;height:auto;max-height:72vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + aboImgShadow + ';background:#fff;">' +
+                        (aboCap ? '<p style="margin-top:12px;color:var(--text-light);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + aboCap + '</p>' : '') +
+                        aboEnd +
+                        '</div></div>';
+                    break;
+
+                case 'text-only':
+                    var aboTextAlign = c.align || 'center';
+                    var aboSurfaceStyle = c.surface === 'accent'
+                        ? 'background:rgba(217,119,87,0.10);border:1px solid rgba(217,119,87,0.22);box-shadow:0 14px 34px rgba(0,0,0,0.05);'
+                        : c.surface === 'card'
+                            ? 'background:#fff;border:1px solid rgba(0,0,0,0.06);box-shadow:0 12px 30px rgba(0,0,0,0.05);'
+                            : 'background:transparent;border:none;box-shadow:none;';
+                    var aboLabel = c.sectionLabel ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.sectionLabel) : _escHtml(c.sectionLabel)) : '';
+                    var aboTitle = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : _escHtml(c.title)) : '';
+                    var aboBody = c.body ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.body) : _escHtml(c.body)) : '';
+                    var aboBtn = (c.ctaText || '').trim();
+                    var aboBtnLink = _escHtml(c.ctaLink || '#');
+                    el.style.padding = (parseInt(c.paddingTop, 10) || 44) + 'px 0 ' + (parseInt(c.paddingBottom, 10) || 44) + 'px';
+                    el.innerHTML = '<div class="container" style="display:flex;justify-content:center;">' +
+                        '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 760) + 'px);padding:' + (c.surface === 'none' ? '0' : '30px') + ';border-radius:22px;text-align:' + aboTextAlign + ';' + aboSurfaceStyle + '">' +
+                        (aboLabel ? '<div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px;">' + aboLabel + '</div>' : '') +
+                        (aboTitle ? '<div style="font-size:clamp(28px,4vw,52px);line-height:1.12;font-weight:800;color:var(--text);">' + aboTitle + '</div>' : '') +
+                        (aboBody ? '<div style="margin-top:16px;color:var(--text-light);font-size:16px;line-height:1.8;">' + aboBody + '</div>' : '') +
+                        (aboBtn ? '<div style="margin-top:24px;"><a href="' + aboBtnLink + '" class="btn btn-shimmer">' + _escHtml(aboBtn) + '</a></div>' : '') +
+                        '</div></div>';
                     break;
             }
         }

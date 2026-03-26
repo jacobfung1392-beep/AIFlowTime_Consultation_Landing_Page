@@ -40,6 +40,14 @@
             font-size: 16px;
             overflow-x: hidden;
         }
+        body.layout-loading .page-content {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .page-content {
+            transition: opacity .35s ease;
+        }
 
         /* =============================================
            BACKGROUND "0" ANIMATION CANVAS
@@ -181,7 +189,7 @@
         /* =============================================
            GENERAL
         ============================================= */
-        section { padding: 100px 24px; }
+        section { padding: 25px 24px; }
         .container { max-width: 1100px; margin: 0 auto; }
 
         .section-label {
@@ -275,6 +283,21 @@
             position: relative;
         }
 
+        .hero-media-wrap {
+            text-align: center;
+            margin-bottom: 24px;
+            max-width: 480px;
+            width: 100%;
+        }
+        .hero-media-wrap.hero-media-pending { opacity: 0; }
+        .hero-media-wrap.hero-media-ready  { opacity: 1; transition: opacity .4s ease; }
+        .hero-media-wrap img.hero-media,
+        .hero-media-wrap video.hero-media {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
         .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -297,15 +320,11 @@
             letter-spacing: -0.02em;
             margin-bottom: 16px;
         }
-        .hero-title .accent { color: var(--accent); }
-
-        .hero-subtitle-en {
-            font-family: 'Courier Prime', monospace;
-            font-size: clamp(13px, 1.8vw, 16px);
-            color: var(--text-dim);
-            letter-spacing: 0.06em;
-            margin-bottom: 20px;
+        .hero-title b,
+        .hero-title strong {
+            font-weight: 900;
         }
+        .hero-title .accent { color: var(--accent); }
 
         .hero-tagline {
             font-size: clamp(16px, 2.5vw, 22px);
@@ -319,10 +338,8 @@
         .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
         .scroll-hint {
-            position: absolute;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%);
+            margin-top: auto;
+            padding-top: 32px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -378,10 +395,240 @@
         .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
         .card p { color: var(--text-dim); font-size: 15px; line-height: 1.6; }
 
+        .card-grid.lo-takeaway-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .lo-accordion-card {
+            padding: 24px 24px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .lo-accordion-card:hover { transform: translateY(-2px); }
+        .lo-accordion-card .card-number { margin-bottom: 6px; }
+        .lo-accordion-card h3 { font-size: 16px; margin-bottom: 6px; line-height: 1.35; }
+        .lo-accordion-card .lo-card-summary {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.55;
+            margin: 0;
+            flex: 1;
+        }
+        .lo-card-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .lo-card-details .lo-detail-text {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.65;
+            margin: 0;
+        }
+        .lo-accordion-toggle {
+            margin-top: 8px;
+            align-self: center;
+            width: 44px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--accent);
+            padding: 0;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .lo-accordion-toggle:hover { background: var(--accent-dim); }
+        .lo-tools {
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+            margin-top: 32px;
+        }
+        .lo-tool-box {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px 8px 8px;
+            border-radius: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            font-size: 14px; font-weight: 600; color: var(--text);
+        }
+        .lo-tool-box img {
+            width: 28px; height: 28px; border-radius: 8px; object-fit: cover;
+        }
+        .lo-acc-tri {
+            width: 0;
+            height: 0;
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+            border-top: 11px solid currentColor;
+            transition: transform 0.25s ease;
+        }
+        .lo-accordion-toggle.is-open .lo-acc-tri { transform: rotate(180deg); }
+
+        /* Testimonial marquee */
+        .sec-testimonial-marquee {
+            --tm-duration: 55s;
+            padding: 18px 0 14px;
+            overflow: hidden;
+        }
+        .sec-testimonial-marquee .tm-intro {
+            margin-top: 12px;
+            font-size: 15px;
+            color: var(--text-dim);
+            line-height: 1.65;
+            max-width: 42rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .sec-testimonial-marquee .tm-intro:empty { display: none !important; }
+        .tm-viewport {
+            overflow: hidden;
+            width: 100%;
+            margin-top: 8px;
+            mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+        }
+        .tm-viewport:hover .tm-track { animation-play-state: paused; }
+        .tm-track {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: clamp(16px, 3vw, 28px);
+            width: max-content;
+            animation: tm-marquee var(--tm-duration, 55s) linear infinite;
+        }
+        @keyframes tm-marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tm-track { animation: none; }
+            .tm-viewport:hover .tm-track { animation-play-state: unset; }
+        }
+        .tm-slide {
+            flex: 0 0 auto;
+            width: clamp(200px, 72vw, 320px);
+            max-width: 100%;
+        }
+        .tm-slide-caption {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dim);
+            line-height: 1.45;
+            margin: 0 0 10px;
+            min-height: 2.6em;
+        }
+        .tm-slide-img-btn {
+            display: block;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-card);
+            cursor: zoom-in;
+            overflow: hidden;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .tm-slide-img-btn:hover,
+        .tm-slide-img-btn:focus-visible {
+            border-color: var(--border-glow);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            outline: none;
+        }
+        .tm-slide-img-btn img {
+            display: block;
+            width: 100%;
+            height: auto;
+            vertical-align: middle;
+            object-fit: contain;
+            max-height: min(60vh, 420px);
+            background: var(--bg-card);
+        }
+
+        .tm-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .tm-lightbox[hidden] { display: none !important; }
+        .tm-lightbox-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(6, 6, 10, 0.92);
+            border: none;
+            cursor: zoom-out;
+        }
+        .tm-lightbox-dialog {
+            position: relative;
+            z-index: 1;
+            max-width: min(96vw, 1200px);
+            max-height: 92vh;
+            margin: 0;
+        }
+        .tm-lightbox-img {
+            display: block;
+            max-width: 100%;
+            max-height: 88vh;
+            width: auto;
+            height: auto;
+            margin: 0 auto;
+            border-radius: 10px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+        }
+        .tm-lightbox-close {
+            position: absolute;
+            top: -44px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 26px;
+            line-height: 1;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        .tm-lightbox-close:hover { color: var(--accent); }
+
         /* =============================================
            TRANSFORMATION CARDS
         ============================================= */
-        .tf-card { padding: 0; overflow: hidden; }
+        #transformation .card-grid {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            padding: 4px 2px 10px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-glow) transparent;
+        }
+        #transformation .card-grid::-webkit-scrollbar { height: 8px; }
+        #transformation .card-grid::-webkit-scrollbar-track { background: transparent; }
+        #transformation .card-grid::-webkit-scrollbar-thumb {
+            background: var(--border-glow);
+            border-radius: 999px;
+        }
+        .tf-card {
+            padding: 0;
+            overflow: hidden;
+            flex: 0 0 min(360px, calc(100vw - 64px));
+            scroll-snap-align: start;
+        }
+        @media (min-width: 1100px) {
+            .tf-card {
+                flex-basis: 340px;
+            }
+        }
         .tf-card-title {
             text-align: center;
             padding: 20px 24px 0;
@@ -433,6 +680,14 @@
             font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 20px;
+        }
+
+        .audience-for-lead {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 18px;
         }
 
         /* =============================================
@@ -572,10 +827,12 @@
         }
     </style>
 </head>
-<body>
-    <!-- Background "0" animation -->
-    <div id="bg-zero-wrap"><canvas id="bg-zero-canvas"></canvas></div>
-
+<body class="layout-loading">
+    <script>
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) document.body.classList.add('layout-loading');
+    });
+    </script>
     <div class="page-content">
         <!-- HEADER -->
         <header>
@@ -609,16 +866,14 @@
 
         <!-- HERO -->
         <section class="hero" id="hero" data-section-id="w0-hero" data-section-type="hero">
-            <div class="hero-badge">WORKSHOP 0 — CHANGE YOUR MIND</div>
-            <h1 class="hero-title">
-                定義問題的深度，<br>決定了 AI 解決問題的<span class="accent">高度</span>。
-            </h1>
-            <p class="hero-subtitle-en">1,5-HOUR AI EXPERIENCE WORKSHOP</p>
-            <p class="hero-tagline">
-                <strong>零基礎</strong> 也能學會 · 即場見效 · 帶走可用的方法
-            </p>
+            <div class="hero-media-wrap hero-media-pending" style="display:none;">
+                <img class="hero-media" src="" alt="Hero media" style="display:none;">
+            </div>
+            <div class="hero-badge"></div>
+            <h1 class="hero-title"></h1>
+            <p class="hero-tagline"></p>
             <div class="cta-group">
-                <a href="/workshop-payment?id=workshop-0" class="btn-primary">我要報名 →</a>
+                <a href="/workshop-payment?id=workshop-0" class="btn-primary"></a>
                 <a href="#experience" class="btn-outline">了解更多</a>
             </div>
             <div class="scroll-hint">
@@ -631,57 +886,11 @@
         <section id="transformation" data-section-id="w0-transformation" data-section-type="transformation">
             <div class="container">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
-                    <p class="section-label">TRANSFORMATION</p>
-                    <h2 class="section-title"><span style="color:var(--accent);">2.5 小時</span>，重新理解 AI 能為你做什麼</h2>
-                    <p class="section-desc" style="margin:12px auto 0;">看看這堂課如何改變你與 AI 的互動方式</p>
+                    <p class="section-label"></p>
+                    <h2 class="section-title"></h2>
+                    <p class="section-desc" style="margin:12px auto 0;"></p>
                 </div>
-
-                <div class="card-grid">
-                    <div class="card tf-card reveal reveal-delay-1">
-                        <p class="tf-card-title">精準表達</p>
-                        <div class="tf-card-body">
-                            <div class="tf-before">
-                                <p class="tf-label">BEFORE</p>
-                                <p>AI 好像什麼都會，但每次用起來都離自己的需求很遠</p>
-                            </div>
-                            <div class="tf-divider"></div>
-                            <div class="tf-after">
-                                <p class="tf-label">AFTER</p>
-                                <p>你學會了用清晰的指令讓 AI 準確理解你要什麼，不再只是碰運氣</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card tf-card reveal reveal-delay-2">
-                        <p class="tf-card-title">先問 AI</p>
-                        <div class="tf-card-body">
-                            <div class="tf-before">
-                                <p class="tf-label">BEFORE</p>
-                                <p>遇到問題還是習慣自己硬做，覺得 AI 不穩定、不可靠</p>
-                            </div>
-                            <div class="tf-divider"></div>
-                            <div class="tf-after">
-                                <p class="tf-label">AFTER</p>
-                                <p>下次遇到複雜任務，你會自然地想到：「我可以先問 AI」</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card tf-card reveal reveal-delay-3">
-                        <p class="tf-card-title">核心邏輯</p>
-                        <div class="tf-card-body">
-                            <div class="tf-before">
-                                <p class="tf-label">BEFORE</p>
-                                <p>AI 工具多到眼花撩亂，不知道該學哪一個</p>
-                            </div>
-                            <div class="tf-divider"></div>
-                            <div class="tf-after">
-                                <p class="tf-label">AFTER</p>
-                                <p>你理解了跟 AI 溝通的核心邏輯——不管工具怎麼換，這套方法都適用</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="card-grid"></div>
             </div>
         </section>
 
@@ -689,105 +898,44 @@
         <section id="audience" data-section-id="w0-audience" data-section-type="audience-fit">
             <div class="container" style="max-width:720px;">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
-                    <p class="section-label">WHO IS THIS FOR</p>
-                    <h2 class="section-title">這堂課適合誰？</h2>
+                    <p class="section-label"></p>
+                    <h2 class="section-title"></h2>
                 </div>
-
                 <div class="reveal reveal-delay-1">
-                    <div class="audience-item yes">
-                        <div class="audience-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                        <p>從未用過 AI，想試但不知從何開始</p>
-                    </div>
-                    <div class="audience-item yes">
-                        <div class="audience-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                        <p>用過一兩次，覺得 AI 回答很普通</p>
-                    </div>
-                    <div class="audience-item yes">
-                        <div class="audience-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                        <p>想知道為什麼別人用 AI 這麼厲害，自己卻做不到</p>
-                    </div>
+                    <p class="audience-for-lead" style="display:none" aria-hidden="true"></p>
+                    <div class="w0-af-for-list"></div>
                 </div>
-
                 <hr class="audience-divider">
-
                 <div class="reveal reveal-delay-2">
-                    <p class="audience-sub-title">這堂課不適合誰？</p>
-                    <div class="audience-item no">
-                        <div class="audience-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </div>
-                        <p>已經每天用 ChatGPT 工作的人（<span style="color:var(--text-muted);">進階工作坊更適合你</span>）</p>
-                    </div>
-                    <div class="audience-item no">
-                        <div class="audience-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        </div>
-                        <p>想學寫程式或開發 AI 產品的人</p>
-                    </div>
+                    <p class="audience-sub-title"></p>
+                    <div class="w0-af-notfor-list"></div>
                 </div>
             </div>
         </section>
 
-        <!-- EXPERIENCE / BENEFITS -->
+        <!-- TESTIMONIAL MARQUEE -->
+        <section id="testimonials" class="sec-testimonial-marquee" data-section-id="w0-testimonials" data-section-type="testimonial-marquee">
+            <div class="container">
+                <div class="reveal" style="text-align:center; margin-bottom:24px;">
+                    <p class="section-label">TESTIMONIALS</p>
+                    <h2 class="section-title">學員分享</h2>
+                    <div class="tm-intro"></div>
+                </div>
+                <div class="tm-viewport reveal reveal-delay-1">
+                    <div class="tm-track"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAKEAWAYS / LEARNING OUTCOMES -->
         <section id="experience" data-section-id="w0-experience" data-section-type="learning-outcomes">
             <div class="container">
-                <div class="reveal" style="text-align:center; margin-bottom:48px;">
-                    <p class="section-label">WHAT YOU'LL EXPERIENCE</p>
-                    <h2 class="section-title">在這 2.5 小時，你會經歷什麼？</h2>
+                <div class="reveal" style="text-align:center; margin-bottom:40px;">
+                    <p class="section-label"></p>
+                    <h2 class="section-title"></h2>
                 </div>
-
-                <div class="card-grid">
-                    <div class="card reveal reveal-delay-1">
-                        <div class="card-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
-                        </div>
-                        <p class="card-number">01</p>
-                        <h3>AI 是一面鏡子</h3>
-                        <p>你會明白為什麼同一個 AI，有人用得好、有人用得差</p>
-                    </div>
-
-                    <div class="card reveal reveal-delay-2">
-                        <div class="card-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </div>
-                        <p class="card-number">02</p>
-                        <h3>即場寫問句挑戰</h3>
-                        <p>開場寫一個，學完再寫一個，自己比較分別</p>
-                    </div>
-
-                    <div class="card reveal reveal-delay-3">
-                        <div class="card-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                        </div>
-                        <p class="card-number">03</p>
-                        <h3>拆解真實高手的問句</h3>
-                        <p>用真實案例學會結構，不靠死記硬背</p>
-                    </div>
-
-                    <div class="card reveal reveal-delay-4">
-                        <div class="card-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                        </div>
-                        <p class="card-number">04</p>
-                        <h3>3 個讓 AI 即刻變聰明的技巧</h3>
-                        <p>簡單、實用、課後馬上能用</p>
-                    </div>
-
-                    <div class="card reveal reveal-delay-5">
-                        <div class="card-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        </div>
-                        <p class="card-number">05</p>
-                        <h3>帶走問句速查表</h3>
-                        <p>一頁紙，課後隨時翻閱</p>
-                    </div>
-                </div>
+                <div class="card-grid lo-takeaway-grid"></div>
+                <div class="lo-tools" style="display:none;"></div>
             </div>
         </section>
 
@@ -795,10 +943,9 @@
         <section id="logistics" data-section-id="w0-logistics" data-section-type="logistics-card">
             <div class="container" style="max-width:640px;">
                 <div class="reveal" style="text-align:center; margin-bottom:48px;">
-                    <p class="section-label">WORKSHOP INFO</p>
-                    <h2 class="section-title">工作坊資訊</h2>
+                    <p class="section-label"></p>
+                    <h2 class="section-title"></h2>
                 </div>
-
                 <div class="logistics-card reveal reveal-delay-1" id="logisticsCard">
                     <div id="logisticsRows">
                         <div class="logistics-row">
@@ -806,7 +953,7 @@
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             </div>
                             <div class="logistics-label">課時</div>
-                            <div class="logistics-value" id="lDuration">載入中...</div>
+                            <div class="logistics-value" id="lDuration"></div>
                         </div>
                         <div id="lSessionsContainer"></div>
                         <div class="logistics-row">
@@ -814,46 +961,54 @@
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                             </div>
                             <div class="logistics-label">費用</div>
-                            <div class="logistics-value" id="lPrice">待定</div>
+                            <div class="logistics-value" id="lPrice"></div>
                         </div>
                         <div class="logistics-row">
                             <div class="logistics-icon">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                             </div>
                             <div class="logistics-label">地點</div>
-                            <div class="logistics-value" id="lMode" style="font-size:14px;font-weight:500;color:var(--text-muted);">地點將於報名確認後通知</div>
+                            <div class="logistics-value" id="lMode"></div>
                         </div>
                     </div>
                     <div class="logistics-cta">
-                        <a href="/workshop-payment?id=workshop-0" id="w0-cta-link" class="btn-primary" style="width:100%;justify-content:center;">立即報名 →</a>
+                        <a href="/workshop-payment?id=workshop-0" id="w0-cta-link" class="btn-primary" style="width:100%;justify-content:center;"></a>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- CTA -->
-        <section id="register" style="padding-bottom:120px;" data-section-id="w0-cta" data-section-type="final-cta">
+        <section id="register" style="padding-bottom:40px;" data-section-id="w0-cta" data-section-type="final-cta">
             <div class="container" style="max-width:640px; text-align:center;">
                 <div class="reveal">
-                    <p class="section-label">READY?</p>
-                    <h2 class="section-title">準備好讓 AI 幫你工作了嗎？</h2>
-                    <p class="section-desc" style="margin:0 auto 40px;">2.5 小時，改變你對 AI 的看法</p>
-                    <a href="/workshop-payment?id=workshop-0" class="btn-primary" style="font-size:17px; padding:16px 40px;">我要報名 →</a>
-                    <div style="display:flex; gap:24px; justify-content:center; flex-wrap:wrap; margin-top:32px;">
-                        <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                            <span style="font-size:14px;">零基礎也能學會</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                            <span style="font-size:14px;">小班教學，確保學懂</span>
-                        </div>
+                    <p class="section-label"></p>
+                    <h2 class="section-title"></h2>
+                    <p class="section-desc" style="margin:0 auto 40px;"></p>
+                    <a href="/workshop-payment?id=workshop-0" class="btn-primary" style="font-size:17px; padding:16px 40px;"></a>
+                    <div class="cta-social-links" style="display:flex;justify-content:center;gap:20px;margin-top:28px;">
+                        <a class="cta-wa-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:14px;text-decoration:none;transition:color .2s;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            WhatsApp
+                        </a>
+                        <a class="cta-ig-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:14px;text-decoration:none;transition:color .2s;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            Instagram
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
 
         </main><!-- end #main-content -->
+
+        <div id="w0-tm-lightbox" class="tm-lightbox" hidden>
+            <button type="button" class="tm-lightbox-backdrop" aria-label="關閉放大檢視"></button>
+            <div class="tm-lightbox-dialog" role="dialog" aria-modal="true" aria-label="學員分享圖片">
+                <button type="button" class="tm-lightbox-close" aria-label="關閉">&times;</button>
+                <img src="" alt="" class="tm-lightbox-img">
+            </div>
+        </div>
 
         <!-- FOOTER -->
         <footer>
@@ -899,8 +1054,227 @@
     // =============================================
     var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
 
+    function _escHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    var WORKSHOP0_ZERO_BG_CODE = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+#bg-zero-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+#bg-zero-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.3;
+}
+</style>
+</head>
+<body>
+<div id="bg-zero-wrap"><canvas id="bg-zero-canvas"></canvas></div>
+<script>
+(function() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var CONFIG = {
+    tileSize: 12,
+    gap: 2,
+    layerDepth: 20,
+    colors: {
+      front: { r: 224, g: 122, b: 95 },
+      back: { r: 120, g: 120, b: 130 }
+    },
+    animation: {
+      jitterRange: 1.5,
+      jitterSpeed: 0.002,
+      pulseSpeed: 0.003
+    },
+    rotation: { x: -35, y: 23, z: 0 }
+  };
+  var canvas = document.getElementById('bg-zero-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var tiles = [];
+  var time = 0;
+  function Tile(localX, localY, z, cx, cy, w, h, isBackLayer) {
+    this.localX = localX;
+    this.localY = localY;
+    this.originZ = z;
+    this.cx = cx;
+    this.cy = cy;
+    this.w = w;
+    this.h = h;
+    this.isBackLayer = isBackLayer;
+    this.baseAlpha = 0.15 + Math.random() * 0.35;
+    this.pulseOffset = Math.random() * Math.PI * 2;
+    this.jitterPhaseX = Math.random() * Math.PI * 2;
+    this.jitterPhaseY = Math.random() * Math.PI * 2;
+    this.screenX = 0;
+    this.screenY = 0;
+    this.depth = 0;
+    this.currentAlpha = 1;
+  }
+  Tile.prototype.update = function() {
+    var jx = Math.sin(time * CONFIG.animation.jitterSpeed + this.jitterPhaseX) * CONFIG.animation.jitterRange;
+    var jy = Math.cos(time * CONFIG.animation.jitterSpeed + this.jitterPhaseY) * CONFIG.animation.jitterRange;
+    var x = this.localX + jx;
+    var y = this.localY + jy;
+    var z = this.originZ;
+    var radX = CONFIG.rotation.x * (Math.PI / 180);
+    var radY = CONFIG.rotation.y * (Math.PI / 180);
+    var radZ = CONFIG.rotation.z * (Math.PI / 180);
+    var y1 = y * Math.cos(radX) - z * Math.sin(radX);
+    var z1 = y * Math.sin(radX) + z * Math.cos(radX);
+    var x2 = x * Math.cos(radY) + z1 * Math.sin(radY);
+    var z2 = -x * Math.sin(radY) + z1 * Math.cos(radY);
+    var x3 = x2 * Math.cos(radZ) - y1 * Math.sin(radZ);
+    var y3 = x2 * Math.sin(radZ) + y1 * Math.cos(radZ);
+    this.screenX = x3 + this.cx;
+    this.screenY = y3 + this.cy;
+    this.depth = z2;
+    var pulse = Math.sin(time * CONFIG.animation.pulseSpeed + this.pulseOffset);
+    this.currentAlpha = Math.max(0, Math.min(1, this.baseAlpha + pulse * 0.1));
+  };
+  Tile.prototype.draw = function() {
+    var c = this.isBackLayer ? CONFIG.colors.back : CONFIG.colors.front;
+    var alpha = this.currentAlpha * (this.isBackLayer ? 0.6 : 1);
+    ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha + ')';
+    ctx.fillRect(this.screenX, this.screenY, this.w, this.h);
+    ctx.strokeStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (this.isBackLayer ? 0.1 : 0.3) + ')';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(this.screenX, this.screenY, this.w, this.h);
+  };
+  function createTilesForCharacter(char, cx, cy, w, h) {
+    var buffer = document.createElement('canvas');
+    buffer.width = w;
+    buffer.height = h;
+    var bctx = buffer.getContext('2d');
+    bctx.fillStyle = '#000';
+    bctx.font = '900 ' + (h * 0.8) + 'px Arial, Helvetica, sans-serif';
+    bctx.textAlign = 'center';
+    bctx.textBaseline = 'middle';
+    bctx.fillText(char, w / 2, h / 2);
+    var data = bctx.getImageData(0, 0, w, h).data;
+    var step = CONFIG.tileSize;
+    for (var y = 0; y < h; y += step) {
+      for (var x = 0; x < w; x += step) {
+        var index = (y * w + x) * 4 + 3;
+        if (data[index] > 50) {
+          var localX = x - w / 2;
+          var localY = y - h / 2;
+          var tileW = CONFIG.tileSize - CONFIG.gap;
+          var tileH = CONFIG.tileSize - CONFIG.gap;
+          var jX = (Math.random() - 0.5) * 4;
+          var jY = (Math.random() - 0.5) * 4;
+          tiles.push(new Tile(localX + jX, localY + jY, CONFIG.layerDepth / 2, cx, cy, tileW, tileH, false));
+          tiles.push(new Tile(localX + jX, localY + jY, -CONFIG.layerDepth / 2, cx, cy, tileW, tileH, true));
+        }
+      }
+    }
+  }
+  function generateScene() {
+    tiles = [];
+    var dpr = window.devicePixelRatio || 1;
+    var screenW = canvas.width / dpr;
+    var screenH = canvas.height / dpr;
+    var isDesktop = screenW >= 768;
+    var charBaseW = isDesktop ? 600 : Math.min(screenW * 0.85, 420);
+    var charBaseH = isDesktop ? 900 : Math.min(screenH * 0.65, 630);
+    createTilesForCharacter('0', screenW / 2, screenH / 2, charBaseW, charBaseH);
+  }
+  var lastInitWidth = 0;
+  function init(force) {
+    var wrap = document.getElementById('bg-zero-wrap');
+    var screenW = wrap ? wrap.clientWidth : window.innerWidth;
+    var screenH = wrap ? wrap.clientHeight : window.innerHeight;
+    if (!force && Math.abs(screenW - lastInitWidth) < 5) return;
+    lastInitWidth = screenW;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = screenW * dpr;
+    canvas.height = screenH * dpr;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    generateScene();
+  }
+  function loop(timestamp) {
+    time = timestamp;
+    var dpr = window.devicePixelRatio || 1;
+    var screenW = canvas.width / dpr;
+    var screenH = canvas.height / dpr;
+    ctx.clearRect(0, 0, screenW + 1, screenH + 1);
+    tiles.forEach(function(tile) { tile.update(); });
+    tiles.sort(function(a, b) { return a.depth - b.depth; });
+    tiles.forEach(function(tile) { tile.draw(); });
+    requestAnimationFrame(loop);
+  }
+  init(true);
+  requestAnimationFrame(loop);
+  var resizeTimer = null;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() { init(false); }, 250);
+  });
+})();
+<\/script>
+</body>
+</html>`;
+
+    function _getDefaultWorkshop0BackgroundContent() {
+        return {
+            sourceType: 'code',
+            imageUrl: '',
+            css: '',
+            code: WORKSHOP0_ZERO_BG_CODE,
+            opacity: 100,
+            fixed: false
+        };
+    }
+
+    function _ensureWorkshop0BackgroundSection(rawSections) {
+        var sections = Array.isArray(rawSections) ? rawSections.slice() : [];
+        var hasBackground = sections.some(function(sec) { return sec && sec.type === 'page-background'; });
+        if (!hasBackground) {
+            sections.unshift({
+                id: 'w0-page-background',
+                type: 'page-background',
+                visible: true,
+                order: -1,
+                content: _getDefaultWorkshop0BackgroundContent()
+            });
+        }
+        return sections;
+    }
+
+    var _layoutRevealTimer = null;
+    var _w0BaseBodyInlineStyle = null;
+
+    function finishInitialLayoutRender() {
+        if (_layoutRevealTimer) { clearTimeout(_layoutRevealTimer); _layoutRevealTimer = null; }
+        document.body.classList.remove('layout-loading');
+    }
+
     function applyLayoutConfig() {
+        _applyPageBackground(_getDefaultWorkshop0BackgroundContent());
         if (_isPreviewMode) {
+            finishInitialLayoutRender();
             window.addEventListener('message', function(e) {
                 if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
                     applySections(e.data.sections);
@@ -908,19 +1282,64 @@
             });
             return;
         }
+        _layoutRevealTimer = setTimeout(finishInitialLayoutRender, 6000);
         initFirebase(function() {
             var db = firebase.firestore();
             db.collection('pageLayouts').doc('workshop-0').get().then(function(doc) {
-                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
+                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) {
+                    applySections([]);
+                    finishInitialLayoutRender();
+                    return;
+                }
                 applySections(doc.data().sections);
+                finishInitialLayoutRender();
             }).catch(function(err) {
                 console.log('[Layout] No layout config found for workshop-0.', err);
+                applySections([]);
+                finishInitialLayoutRender();
             });
         });
     }
 
+    function _applyPageBackground(c) {
+        var old = document.getElementById('w0-page-bg');
+        if (old) old.remove();
+        var legacy = document.getElementById('bg-zero-wrap');
+        if (legacy) legacy.remove();
+        if (_w0BaseBodyInlineStyle == null) _w0BaseBodyInlineStyle = document.body.style.cssText || '';
+        document.body.style.cssText = _w0BaseBodyInlineStyle;
+
+        if (!c || c.sourceType === undefined) return;
+        var opacity = c.opacity != null ? c.opacity / 100 : 1;
+
+        if (c.sourceType === 'css' && c.css) {
+            var styles = c.css;
+            if (c.fixed) styles += '; background-attachment: fixed;';
+            document.body.style.cssText += '; ' + styles;
+        } else if (c.sourceType === 'image' && c.imageUrl) {
+            var wrap = document.createElement('div');
+            wrap.id = 'w0-page-bg';
+            wrap.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:' + opacity + ';';
+            var img = document.createElement('img');
+            img.src = c.imageUrl;
+            img.alt = '';
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+            wrap.appendChild(img);
+            document.body.insertBefore(wrap, document.body.firstChild);
+        } else if (c.sourceType === 'code' && c.code) {
+            var wrap = document.createElement('div');
+            wrap.id = 'w0-page-bg';
+            wrap.style.cssText = 'position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:' + opacity + ';';
+            var iframe = document.createElement('iframe');
+            iframe.style.cssText = 'width:100%;height:100%;border:none;';
+            iframe.srcdoc = c.code;
+            wrap.appendChild(iframe);
+            document.body.insertBefore(wrap, document.body.firstChild);
+        }
+    }
+
     function applySections(rawSections) {
-        var sections = rawSections.slice().sort(function(a, b) {
+        var sections = _ensureWorkshop0BackgroundSection(rawSections).slice().sort(function(a, b) {
             return (a.order || 0) - (b.order || 0);
         });
         var main = document.getElementById('main-content');
@@ -939,6 +1358,11 @@
         });
 
         sections.forEach(function(sec) {
+            if (sec.type === 'page-background') {
+                if (sec.visible !== false && sec.content) _applyPageBackground(sec.content);
+                return;
+            }
+
             var el = existingEls[sec.id];
 
             if (!el && sec.visible !== false) {
@@ -946,6 +1370,14 @@
                 if (template) {
                     el = template.cloneNode(true);
                     el.setAttribute('data-section-id', sec.id);
+                    main.appendChild(el);
+                } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download') {
+                    el = document.createElement('section');
+                    el.setAttribute('data-section-id', sec.id);
+                    el.setAttribute('data-section-type', sec.type);
+                    el.className = sec.type === 'image-only'
+                        ? 'sec-image-only reveal'
+                        : (sec.type === 'text-only' ? 'sec-text-only reveal' : 'sec-free-material reveal');
                     main.appendChild(el);
                 }
             }
@@ -963,13 +1395,104 @@
         });
 
         initScrollReveal('.reveal', { threshold: 0.12 });
+        // In layout-editor preview mode, force scroll-reveal elements visible immediately.
+        // Otherwise desktop may keep them opacity:0, making font-size changes look like they didn't apply.
+        if (_isPreviewMode) {
+            document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
+        }
+        finishInitialLayoutRender();
+    }
+
+    var _W0_AF_SVG_YES = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    var _W0_AF_SVG_NO = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+    function _w0RebuildAudienceItems(container, classYesOrNo, items) {
+        if (!container) return;
+        container.innerHTML = '';
+        var yes = classYesOrNo === 'yes';
+        var svg = yes ? _W0_AF_SVG_YES : _W0_AF_SVG_NO;
+        items.forEach(function(item) {
+            var text = (item && item.text != null) ? String(item.text) : '';
+            var row = document.createElement('div');
+            row.className = 'audience-item ' + classYesOrNo;
+            row.innerHTML =
+                '<div class="audience-icon">' + svg + '</div>' +
+                '<p></p>';
+            row.querySelector('p').textContent = text;
+            container.appendChild(row);
+        });
+    }
+
+    function _w0ApplyTestimonialMarquee(el, c) {
+        if (!el || !c) return;
+        var label = el.querySelector('.section-label');
+        var title = el.querySelector('.section-title');
+        var intro = el.querySelector('.tm-intro');
+        var viewport = el.querySelector('.tm-viewport');
+        var track = el.querySelector('.tm-track');
+        if (c.sectionLabel && label) label.textContent = String(c.sectionLabel);
+        if (c.sectionTitle && title) title.innerHTML = String(c.sectionTitle);
+        if (intro) {
+            if (c.intro) {
+                intro.innerHTML = String(c.intro);
+                intro.style.display = '';
+            } else {
+                intro.innerHTML = '';
+                intro.style.display = 'none';
+            }
+        }
+        var dur = parseFloat(c.durationSec, 10);
+        if (!isFinite(dur) || dur < 12) dur = 55;
+        el.style.setProperty('--tm-duration', dur + 's');
+        if (!track) return;
+        var slides = Array.isArray(c.slides) ? c.slides.filter(function(s) {
+            return s && String(s.imageUrl || '').trim();
+        }) : [];
+        track.innerHTML = '';
+        if (!slides.length) {
+            if (viewport) viewport.style.display = 'none';
+            return;
+        }
+        if (viewport) viewport.style.display = '';
+
+        function buildSlide(s) {
+            var slide = document.createElement('div');
+            slide.className = 'tm-slide';
+            var cap = document.createElement('p');
+            cap.className = 'tm-slide-caption';
+            cap.textContent = s.textAbove != null ? String(s.textAbove) : '';
+            var ibtn = document.createElement('button');
+            ibtn.type = 'button';
+            ibtn.className = 'tm-slide-img-btn';
+            ibtn.setAttribute('aria-label', (String(s.imageAlt || '').trim() || '放大檢視圖片'));
+            var im = document.createElement('img');
+            var url = String(s.imageUrl || '').trim();
+            if (url) im.src = url;
+            im.alt = s.imageAlt != null ? String(s.imageAlt) : '';
+            im.loading = 'lazy';
+            im.decoding = 'async';
+            ibtn.appendChild(im);
+            slide.appendChild(cap);
+            slide.appendChild(ibtn);
+            return slide;
+        }
+
+        var built = [];
+        slides.forEach(function(s) {
+            var sl = buildSlide(s);
+            track.appendChild(sl);
+            built.push(sl);
+        });
+        built.forEach(function(sl) {
+            track.appendChild(sl.cloneNode(true));
+        });
     }
 
     function applyContentToSection(el, type, c) {
         switch (type) {
             case 'hero':
                 var h1 = el.querySelector('.hero-title');
-                if (h1 && c.title) h1.innerHTML = c.title;
+                if (h1) h1.innerHTML = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : String(c.title).replace(/\n/g, '<br>')) : '';
                 var tagline = el.querySelector('.hero-tagline');
                 if (tagline && c.subtitle) tagline.innerHTML = c.subtitle;
                 var badge = el.querySelector('.hero-badge');
@@ -977,68 +1500,391 @@
                 var cta = el.querySelector('.btn-primary');
                 if (cta && c.ctaText) cta.textContent = c.ctaText;
                 if (cta && c.ctaLink) cta.href = c.ctaLink;
+                var mediaWrap = el.querySelector('.hero-media-wrap');
+                if (mediaWrap) {
+                    if (c.gifUrl) {
+                        var isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(c.gifUrl);
+                        var oldMedia = mediaWrap.querySelector('.hero-media');
+                        var needsSwap = !oldMedia || (isVideo ? oldMedia.tagName !== 'VIDEO' : oldMedia.tagName !== 'IMG') || (oldMedia.src !== c.gifUrl && oldMedia.getAttribute('src') !== c.gifUrl);
+                        if (needsSwap) {
+                            var newEl;
+                            if (isVideo) {
+                                newEl = document.createElement('video');
+                                newEl.src = c.gifUrl;
+                                newEl.autoplay = true; newEl.loop = true; newEl.muted = true; newEl.playsInline = true;
+                            } else {
+                                newEl = document.createElement('img');
+                                newEl.src = c.gifUrl;
+                            }
+                            newEl.className = 'hero-media';
+                            newEl.alt = c.title ? c.title.replace(/<[^>]*>/g, '') : 'Hero media';
+                            newEl.style.display = '';
+                            if (oldMedia) oldMedia.replaceWith(newEl);
+                            else mediaWrap.appendChild(newEl);
+                        }
+                        mediaWrap.style.display = '';
+                        mediaWrap.classList.remove('hero-media-pending');
+                        mediaWrap.classList.add('hero-media-ready');
+                    } else {
+                        mediaWrap.style.display = 'none';
+                    }
+                }
+                var scrollHint = el.querySelector('.scroll-hint');
+                if (scrollHint) {
+                    scrollHint.style.display = c.showScrollHint === false ? 'none' : '';
+                    if (c.scrollHintColor) {
+                        scrollHint.style.color = c.scrollHintColor;
+                        var pill = scrollHint.querySelector('.scroll-hint-pill');
+                        if (pill) pill.style.borderColor = c.scrollHintColor;
+                    }
+                    if (c.scrollHintDotColor) {
+                        var dot = scrollHint.querySelector('.scroll-hint-dot');
+                        if (dot) dot.style.background = c.scrollHintDotColor;
+                    }
+                }
                 break;
 
             case 'transformation':
+                var lblTf = el.querySelector('.section-label');
+                if (lblTf && c.sectionLabel) lblTf.textContent = c.sectionLabel;
                 var h2t = el.querySelector('.section-title');
                 if (h2t && c.sectionTitle) h2t.innerHTML = c.sectionTitle;
                 var desc = el.querySelector('.section-desc');
                 if (desc && c.description) desc.textContent = c.description;
                 if (c.cards) {
-                    var tfCards = el.querySelectorAll('.tf-card');
-                    c.cards.forEach(function(card, i) {
-                        if (tfCards[i]) {
-                            var title = tfCards[i].querySelector('.tf-card-title');
-                            if (title && card.title) title.textContent = card.title;
-                            var before = tfCards[i].querySelector('.tf-before p:last-child');
-                            if (before && card.before) before.textContent = card.before;
-                            var after = tfCards[i].querySelector('.tf-after p:last-child');
-                            if (after && card.after) after.textContent = card.after;
-                        }
-                    });
+                    var grid = el.querySelector('.card-grid');
+                    if (grid) {
+                        grid.innerHTML = '';
+                        c.cards.forEach(function(card, i) {
+                            var cTitle = card.theme || card.title || '';
+                            var cBefore = card.beforeText || card.before || '';
+                            var cAfter = card.afterText || card.after || '';
+                            var d = document.createElement('div');
+                            d.className = 'card tf-card reveal reveal-delay-' + (i + 1);
+                            if (c.colorCardBg) d.style.background = c.colorCardBg;
+                            if (c.colorCardBorder) d.style.borderColor = c.colorCardBorder;
+                            d.innerHTML = '<p class="tf-card-title">' + _escHtml(cTitle) + '</p>' +
+                                '<div class="tf-card-body">' +
+                                '<div class="tf-before"><p class="tf-label">BEFORE</p><p>' + _escHtml(cBefore) + '</p></div>' +
+                                '<div class="tf-divider"></div>' +
+                                '<div class="tf-after"><p class="tf-label">AFTER</p><p>' + _escHtml(cAfter) + '</p></div>' +
+                                '</div>';
+                            if (c.colorTitle) { var tt = d.querySelector('.tf-card-title'); if (tt) tt.style.color = c.colorTitle; }
+                            if (c.colorBeforeLabel) { var bl = d.querySelector('.tf-before .tf-label'); if (bl) bl.style.color = c.colorBeforeLabel; }
+                            if (c.colorAfterLabel) { var al = d.querySelector('.tf-after .tf-label'); if (al) al.style.color = c.colorAfterLabel; }
+                            if (c.colorDivider) { var dv = d.querySelector('.tf-divider'); if (dv) dv.style.background = c.colorDivider; }
+                            if (c.colorBodyText) { var ps = d.querySelectorAll('.tf-before p:last-child, .tf-after p:last-child'); ps.forEach(function(p) { p.style.color = c.colorBodyText; }); }
+                            grid.appendChild(d);
+                        });
+                    }
                 }
                 break;
 
             case 'audience-fit':
-                var h2a = el.querySelector('.section-title');
-                if (h2a && c.sectionTitle) h2a.innerHTML = c.sectionTitle;
+                if (!c) break;
+                if (c.sectionLabel) {
+                    var sl = el.querySelector('.section-label');
+                    if (sl) sl.innerHTML = String(c.sectionLabel);
+                }
+                if (c.sectionTitle) {
+                    var h2a = el.querySelector('.section-title');
+                    if (h2a) h2a.innerHTML = String(c.sectionTitle);
+                }
+                if ('forTitle' in c) {
+                    var lead = el.querySelector('.audience-for-lead');
+                    if (lead) {
+                        var rawFt = c.forTitle == null ? '' : String(c.forTitle);
+                        var ft = rawFt.trim();
+                        if (ft) {
+                            lead.textContent = rawFt;
+                            lead.style.display = '';
+                            lead.setAttribute('aria-hidden', 'false');
+                        } else {
+                            lead.textContent = '';
+                            lead.style.display = 'none';
+                            lead.setAttribute('aria-hidden', 'true');
+                        }
+                    }
+                }
+                if (c.notForTitle) {
+                    var sub = el.querySelector('.audience-sub-title');
+                    if (sub) sub.textContent = String(c.notForTitle);
+                }
+                if (Array.isArray(c.forItems)) {
+                    _w0RebuildAudienceItems(el.querySelector('.w0-af-for-list'), 'yes', c.forItems);
+                }
+                if (Array.isArray(c.notForItems)) {
+                    _w0RebuildAudienceItems(el.querySelector('.w0-af-notfor-list'), 'no', c.notForItems);
+                }
                 break;
 
             case 'learning-outcomes':
+                if (c.sectionLabel) {
+                    var lblLo = el.querySelector('.section-label');
+                    if (lblLo) lblLo.innerHTML = String(c.sectionLabel);
+                }
                 var h2l = el.querySelector('.section-title');
                 if (h2l && c.sectionTitle) h2l.innerHTML = c.sectionTitle;
                 if (c.items) {
-                    var cards = el.querySelectorAll('.card');
-                    c.items.forEach(function(item, i) {
-                        if (cards[i]) {
-                            var h3 = cards[i].querySelector('h3');
-                            if (h3 && item.title) h3.textContent = item.title;
-                            var p = cards[i].querySelector('p:last-child');
-                            if (p && item.description) p.textContent = item.description;
-                        }
-                    });
+                    var loGrid = el.querySelector('.lo-takeaway-grid');
+                    if (loGrid) {
+                        loGrid.innerHTML = '';
+                        c.items.forEach(function(item, i) {
+                            var num = String(i + 1).padStart(2, '0');
+                            var more = (item.moreText != null ? String(item.moreText) : '').trim();
+                            var hasMore = !!more;
+                            var safeTitle = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.title || '') : _escHtml(item.title || '');
+                            var safeDesc = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.description || '') : _escHtml(item.description || '');
+                            var safeMore = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(more) : _escHtml(more);
+                            var d = document.createElement('div');
+                            d.className = 'card lo-accordion-card reveal reveal-delay-' + (i + 1);
+                            d.innerHTML = '<p class="card-number">' + num + '</p>' +
+                                '<h3>' + safeTitle + '</h3>' +
+                                '<p class="lo-card-summary">' + safeDesc + '</p>' +
+                                '<div class="lo-card-details"' + (hasMore ? '' : ' hidden') + '><p class="lo-detail-text">' + safeMore + '</p></div>' +
+                                '<button type="button" class="lo-accordion-toggle" aria-expanded="false" aria-label="展開詳情" style="display:' + (hasMore ? 'flex' : 'none') + ';"><span class="lo-acc-tri" aria-hidden="true"></span></button>';
+                            d.querySelector('.lo-card-details').hidden = true;
+                            loGrid.appendChild(d);
+                        });
+                    }
                 }
+                var loToolsWrap = el.querySelector('.lo-tools');
+                if (loToolsWrap && c.tools && c.tools.length) {
+                    loToolsWrap.style.display = '';
+                    loToolsWrap.innerHTML = '';
+                    c.tools.forEach(function(t) {
+                        var iconHtml = t.iconUrl ? '<img src="' + _escHtml(t.iconUrl) + '" alt="">' : '';
+                        var box = document.createElement('span');
+                        box.className = 'lo-tool-box';
+                        box.innerHTML = iconHtml + _escHtml(t.name || '');
+                        loToolsWrap.appendChild(box);
+                    });
+                } else if (loToolsWrap) {
+                    loToolsWrap.style.display = 'none';
+                }
+                break;
+
+            case 'testimonial-marquee':
+                _w0ApplyTestimonialMarquee(el, c);
                 break;
 
             case 'logistics-card':
                 var lLabel = el.querySelector('.section-label');
-                if (lLabel && c.sectionLabel) lLabel.textContent = c.sectionLabel;
+                if (lLabel && c.sectionLabel) lLabel.innerHTML = c.sectionLabel;
                 var lTitle = el.querySelector('.section-title');
                 if (lTitle && c.sectionTitle) lTitle.innerHTML = c.sectionTitle;
                 var lCta = el.querySelector('.logistics-cta .btn-primary');
                 if (lCta && c.ctaText) lCta.textContent = c.ctaText;
                 if (lCta && c.ctaLink) lCta.href = c.ctaLink;
+                var wsId = c.workshopId || 'workshop-0';
+                if (window._w0LogisticsWsId !== wsId) {
+                    window._w0LogisticsWsId = wsId;
+                    _w0LoadLogisticsFromWorkshop(wsId);
+                }
                 break;
 
             case 'final-cta':
                 var h2fc = el.querySelector('.section-title');
                 if (h2fc && c.title) h2fc.innerHTML = c.title;
                 var descFc = el.querySelector('.section-desc');
-                if (descFc && c.subtitle) descFc.textContent = c.subtitle;
+                if (descFc && c.subtitle) descFc.innerHTML = c.subtitle;
                 var ctaFc = el.querySelector('.btn-primary');
                 if (ctaFc && c.ctaText) ctaFc.textContent = c.ctaText;
                 if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
+                var waLink = el.querySelector('.cta-wa-link');
+                if (waLink) {
+                    waLink.style.display = c.showWhatsapp !== false && c.whatsappUrl ? '' : 'none';
+                    if (c.whatsappUrl) waLink.href = c.whatsappUrl;
+                }
+                var igLink = el.querySelector('.cta-ig-link');
+                if (igLink) {
+                    igLink.style.display = c.showInstagram !== false && c.instagramUrl ? '' : 'none';
+                    if (c.instagramUrl) igLink.href = c.instagramUrl;
+                }
                 break;
+
+            case 'free-material-download':
+                renderFreeMaterialSection(el, 'workshop-0', el.getAttribute('data-section-id') || 'free-material-download', c, {
+                    surface: 'rgba(255,248,241,0.92)',
+                    surfaceAlt: 'rgba(217,119,87,0.10)',
+                    text: '#2c2622',
+                    muted: 'rgba(44,38,34,0.72)',
+                    accent: '#D97757',
+                    accentText: '#ffffff',
+                    border: 'rgba(217,119,87,0.20)',
+                    backdrop: 'rgba(27,21,18,0.62)'
+                });
+                break;
+
+            case 'image-only':
+                var w0ImgAlign = c.align === 'left' ? 'flex-start' : c.align === 'right' ? 'flex-end' : 'center';
+                var w0ImgShadow = c.shadow === 'strong'
+                    ? '0 20px 60px rgba(0,0,0,0.42)'
+                    : c.shadow === 'none'
+                        ? 'none'
+                        : '0 12px 34px rgba(0,0,0,0.26)';
+                var w0Img = _escHtml(c.imageUrl || '');
+                var w0Alt = _escHtml(c.alt || '');
+                var w0Cap = _escHtml(c.caption || '');
+                var w0Link = String(c.linkUrl || '').trim();
+                var w0WrapStart = w0Link ? '<a href="' + _escHtml(w0Link) + '"' + (/^https?:/i.test(w0Link) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
+                var w0WrapEnd = w0Link ? '</a>' : '</div>';
+                el.style.padding = (parseInt(c.paddingTop, 10) || 40) + 'px 24px ' + (parseInt(c.paddingBottom, 10) || 40) + 'px';
+                el.innerHTML = '<div class="container" style="display:flex;justify-content:' + w0ImgAlign + ';">' +
+                    '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 960) + 'px);">' +
+                    w0WrapStart +
+                    '<img src="' + w0Img + '" alt="' + w0Alt + '" style="display:block;width:100%;max-width:100%;height:auto;max-height:72vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + w0ImgShadow + ';background:rgba(255,255,255,0.04);">' +
+                    (w0Cap ? '<p style="margin-top:14px;color:var(--text-dim);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + w0Cap + '</p>' : '') +
+                    w0WrapEnd +
+                    '</div></div>';
+                break;
+
+            case 'text-only':
+                var w0TextAlign = c.align || 'center';
+                var w0SurfaceStyle = c.surface === 'accent'
+                    ? 'background:rgba(217,119,87,0.12);border:1px solid rgba(217,119,87,0.3);box-shadow:0 18px 50px rgba(0,0,0,0.18);'
+                    : c.surface === 'card'
+                        ? 'background:var(--bg-card);border:1px solid var(--border);box-shadow:0 14px 40px rgba(0,0,0,0.18);'
+                        : 'background:transparent;border:none;box-shadow:none;';
+                var w0Label = c.sectionLabel ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.sectionLabel) : _escHtml(c.sectionLabel)) : '';
+                var w0Title = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : _escHtml(c.title)) : '';
+                var w0Body = c.body ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.body) : _escHtml(c.body)) : '';
+                var w0Btn = (c.ctaText || '').trim();
+                var w0BtnLink = _escHtml(c.ctaLink || '#');
+                el.style.padding = (parseInt(c.paddingTop, 10) || 44) + 'px 24px ' + (parseInt(c.paddingBottom, 10) || 44) + 'px';
+                el.innerHTML = '<div class="container" style="display:flex;justify-content:center;">' +
+                    '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 760) + 'px);padding:' + (c.surface === 'none' ? '0' : '32px') + ';border-radius:24px;text-align:' + w0TextAlign + ';' + w0SurfaceStyle + '">' +
+                    (w0Label ? '<div style="font-family:Courier Prime, monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;">' + w0Label + '</div>' : '') +
+                    (w0Title ? '<div style="font-size:clamp(28px,4vw,52px);line-height:1.12;font-weight:800;letter-spacing:-0.03em;">' + w0Title + '</div>' : '') +
+                    (w0Body ? '<div style="margin-top:16px;color:var(--text-dim);font-size:16px;line-height:1.8;">' + w0Body + '</div>' : '') +
+                    (w0Btn ? '<div style="margin-top:24px;"><a href="' + w0BtnLink + '" class="btn-primary">' + _escHtml(w0Btn) + '</a></div>' : '') +
+                    '</div></div>';
+                break;
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('#experience .lo-accordion-toggle');
+        if (!btn || btn.style.display === 'none') return;
+        var card = btn.closest('.lo-accordion-card');
+        if (!card) return;
+        var det = card.querySelector('.lo-card-details');
+        if (!det) return;
+        var open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        btn.classList.toggle('is-open', !open);
+        det.hidden = open;
+    });
+
+    (function initW0TestimonialLightbox() {
+        var lb = document.getElementById('w0-tm-lightbox');
+        if (!lb) return;
+        var img = lb.querySelector('.tm-lightbox-img');
+        var mainEl = document.getElementById('main-content');
+        function closeLb() {
+            lb.hidden = true;
+            if (img) {
+                img.removeAttribute('src');
+                img.alt = '';
+            }
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('click', function(e) {
+            var b = e.target.closest('.tm-slide-img-btn');
+            if (!b || !mainEl || !mainEl.contains(b)) return;
+            var sm = b.querySelector('img');
+            if (!sm || !sm.getAttribute('src')) return;
+            if (img) {
+                img.src = sm.currentSrc || sm.src;
+                img.alt = sm.alt || '';
+            }
+            lb.hidden = false;
+            document.body.style.overflow = 'hidden';
+        });
+        var closeBtn = lb.querySelector('.tm-lightbox-close');
+        var backdrop = lb.querySelector('.tm-lightbox-backdrop');
+        if (closeBtn) closeBtn.addEventListener('click', closeLb);
+        if (backdrop) backdrop.addEventListener('click', closeLb);
+        document.addEventListener('keydown', function(ev) {
+            if (ev.key === 'Escape' && !lb.hidden) closeLb();
+        });
+    })();
+
+    var _w0LogisticsUnsub = null;
+    window._w0LogisticsWsId = null;
+
+    function _w0LoadLogisticsFromWorkshop(wsId) {
+        if (_w0LogisticsUnsub) { _w0LogisticsUnsub(); _w0LogisticsUnsub = null; }
+        if (!wsId) return;
+        initFirebase(function() {
+            var db = firebase.firestore();
+            _w0LogisticsUnsub = db.collection('workshops').doc(wsId).onSnapshot(function(doc) {
+                if (!doc.exists) return;
+                _w0ApplyLogisticsData(doc.data(), wsId);
+            });
+        });
+    }
+
+    function _w0ApplyLogisticsData(d, wsId) {
+        document.getElementById('lDuration').textContent = d.duration || '待定';
+        var sessionsContainer = document.getElementById('lSessionsContainer');
+        var globalCap = d.capacity || 0;
+
+        function renderSessionBlocks(sessions) {
+            var html = '';
+            for (var i = 0; i < sessions.length; i++) {
+                var s = sessions[i];
+                var lbl = s.label || '';
+                var dt = (s.date || '待定') + (s.time ? '  ' + s.time : '');
+                var cap = s.capacity !== undefined ? s.capacity : globalCap;
+                var enrolled = s.enrolled || 0;
+                html += '<div class="logistics-session-block">';
+                html += '<div class="logistics-session-header">';
+                html += '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>';
+                if (lbl) html += '<div class="logistics-session-label">' + lbl + '</div>';
+                html += '<div class="logistics-session-datetime">' + dt + '</div>';
+                html += '</div>';
+                if (cap > 0) {
+                    html += '<div class="logistics-session-cap">' + buildCapacityBar(cap, enrolled, {
+                        barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect',
+                        textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true
+                    }) + '</div>';
+                }
+                html += '</div>';
+            }
+            sessionsContainer.innerHTML = html;
+        }
+
+        if (d.sessions && d.sessions.length) {
+            var sorted = sortSessionsList(d.sessions.filter(function(s) { return s.visible !== false; }));
+            renderSessionBlocks(sorted);
+        } else {
+            var dt = (d.date || '即將公佈') + (d.time ? '  ' + d.time : '');
+            sessionsContainer.innerHTML = '<div class="logistics-session-block"><div class="logistics-session-header">' +
+                '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
+                '<div class="logistics-session-datetime">' + dt + '</div></div>' +
+                (globalCap > 0 ? '<div class="logistics-session-cap">' + buildCapacityBar(globalCap, d.enrolled || 0, { barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect', textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true }) + '</div>' : '') +
+                '</div>';
+        }
+
+        var priceEl = document.getElementById('lPrice');
+        if (d.price) priceEl.textContent = d.price;
+        else if (d.priceHkd) priceEl.textContent = 'HKD ' + d.priceHkd;
+        else priceEl.textContent = '待定';
+
+        var modeEl = document.getElementById('lMode');
+        if (modeEl) {
+            var m = d.mode === 'online' ? '線上' : d.mode === 'both' ? '實體 + 線上' : '實體';
+            var displayLoc = d.district || d.location || '';
+            if (displayLoc && d.mode !== 'online') m += ' · ' + displayLoc;
+            modeEl.textContent = m;
+        }
+
+        var ctaEl = document.getElementById('w0-cta-link');
+        if (ctaEl) {
+            var rawCta = (d.ctaLink || '').trim();
+            var isSelf = !rawCta || rawCta === '#' || rawCta.indexOf(wsId) !== -1;
+            ctaEl.href = isSelf ? '/workshop-payment?id=' + wsId : rawCta;
         }
     }
 
@@ -1047,76 +1893,10 @@
 
     <script>
     initFirebase(function() {
-        var db = firebase.firestore();
-        db.collection('workshops').doc('workshop-0').onSnapshot(function(doc) {
-            if (!doc.exists) return;
-            var d = doc.data();
-
-            document.getElementById('lDuration').textContent = d.duration || '待定';
-
-            var sessionsContainer = document.getElementById('lSessionsContainer');
-            var globalCap = d.capacity || 0;
-
-            function renderSessionBlocks(sessions) {
-                var html = '';
-                for (var i = 0; i < sessions.length; i++) {
-                    var s = sessions[i];
-                    var lbl = s.label || '';
-                    var dt = (s.date || '待定') + (s.time ? '  ' + s.time : '');
-                    var cap = s.capacity !== undefined ? s.capacity : globalCap;
-                    var enrolled = s.enrolled || 0;
-                    html += '<div class="logistics-session-block">';
-                    html += '<div class="logistics-session-header">';
-                    html += '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>';
-                    if (lbl) html += '<div class="logistics-session-label">' + lbl + '</div>';
-                    html += '<div class="logistics-session-datetime">' + dt + '</div>';
-                    html += '</div>';
-                    if (cap > 0) {
-                        html += '<div class="logistics-session-cap">' + buildCapacityBar(cap, enrolled, {
-                            barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect',
-                            textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true
-                        }) + '</div>';
-                    }
-                    html += '</div>';
-                }
-                sessionsContainer.innerHTML = html;
-            }
-
-            if (d.sessions && d.sessions.length) {
-                var sorted = d.sessions.filter(function(s) { return s.visible !== false; }).slice().sort(function(a, b) {
-                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    if (da !== db2) return da < db2 ? -1 : 1;
-                    var ta = (a.time || '').replace(/[^0-9:]/g, '');
-                    var tb = (b.time || '').replace(/[^0-9:]/g, '');
-                    return ta < tb ? -1 : ta > tb ? 1 : 0;
-                });
-                renderSessionBlocks(sorted);
-            } else {
-                var dt = (d.date || '即將公佈') + (d.time ? '  ' + d.time : '');
-                sessionsContainer.innerHTML = '<div class="logistics-session-block"><div class="logistics-session-header">' +
-                    '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
-                    '<div class="logistics-session-datetime">' + dt + '</div></div>' +
-                    (globalCap > 0 ? '<div class="logistics-session-cap">' + buildCapacityBar(globalCap, d.enrolled || 0, { barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect', textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true }) + '</div>' : '') +
-                    '</div>';
-            }
-
-            var priceEl = document.getElementById('lPrice');
-            if (d.price) priceEl.textContent = d.price;
-            else if (d.priceHkd) priceEl.textContent = 'HKD ' + d.priceHkd;
-            else priceEl.textContent = '待定';
-
-            var rawCta = (d.ctaLink || '').trim();
-            var isSelf = !rawCta || rawCta === '#' || rawCta === '#waitlist'
-                || rawCta === '/workshop-0'
-                || rawCta.indexOf('workshop-0') !== -1;
-            var ctaLink = isSelf ? '/workshop-payment?id=workshop-0' : rawCta;
-            var ctaEl = document.getElementById('w0-cta-link');
-            if (ctaEl) ctaEl.href = ctaLink;
-
-        }, function(err) {
-            console.warn('Workshop 0 snapshot error:', err);
-        });
+        var wsId = window._w0LogisticsWsId || 'workshop-0';
+        if (!window._w0LogisticsUnsub) {
+            _w0LoadLogisticsFromWorkshop(wsId);
+        }
     });
     </script>
 

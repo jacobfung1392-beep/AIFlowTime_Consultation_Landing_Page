@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Elevator Action GB｜AIFlowTime</title>
+<meta name="description" content="AIFlowTime — Game Boy 風格《Elevator Action》網頁小遊戲">
+<meta name="theme-color" content="#2a2a2a">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Site nav (AIFlowTime) */
+#aft-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  background: rgba(15, 20, 15, 0.92);
+  border-bottom: 1px solid rgba(139, 172, 15, 0.35);
+  font-family: 'Noto Sans TC', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+}
+#aft-nav a {
+  color: #9bbc0f;
+  text-decoration: none;
+  font-weight: 600;
+}
+#aft-nav a:hover { color: #c8f076; }
+#aft-nav .aft-brand {
+  margin-left: auto;
+  color: rgba(255,255,255,0.45);
+  font-size: 11px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #2a2a2a;
+  font-family: 'Press Start 2P', monospace;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── DESKTOP LAYOUT ─────────────────────────────── */
+#game-wrapper {
+  margin-top: 40px;
+  height: calc(100vh - 40px);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#gb-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#screen-frame {
+  background: #8b956d;
+  border: 4px solid #4a4a4a;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+#gameCanvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #9bbc0f;
+}
+
+/* ── VIRTUAL CONTROLS (hidden on desktop) ───────── */
+#touch-controls {
+  display: none;
+}
+
+/* D-pad */
+#dpad {
+  position: relative;
+  width: 152px;
+  height: 152px;
+}
+
+.dpad-btn {
+  position: absolute;
+  background: rgba(60,60,60,0.85);
+  border: 2px solid rgba(100,100,100,0.7);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(200,200,200,0.8);
+  font-size: 18px;
+  touch-action: none;
+}
+.dpad-btn:active, .dpad-btn.pressed {
+  background: rgba(100,100,100,0.9);
+  border-color: rgba(140,140,140,0.9);
+}
+
+#dpad-up    { left: 46px; top: 0; width: 60px; height: 54px; }
+#dpad-down  { left: 46px; bottom: 0; width: 60px; height: 54px; }
+#dpad-left  { left: 0; top: 46px; width: 54px; height: 60px; }
+#dpad-right { right: 0; top: 46px; width: 54px; height: 60px; }
+#dpad-center { left: 46px; top: 46px; width: 60px; height: 60px; background: rgba(30,30,30,0.85); border-color: rgba(70,70,70,0.7); border-radius: 2px; }
+
+/* Action buttons (A/B) */
+.action-btn {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(139,34,82,0.85);
+  border: 3px solid rgba(160,48,96,0.8);
+  color: rgba(220,220,220,0.9);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+}
+.action-btn:active, .action-btn.pressed {
+  background: rgba(160,48,96,0.95);
+  border-color: rgba(192,64,128,0.95);
+}
+
+/* Start / Select */
+.menu-btn {
+  background: rgba(80,80,80,0.85);
+  border: 2px solid rgba(110,110,110,0.7);
+  border-radius: 12px;
+  color: rgba(180,180,180,0.9);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 10px 20px;
+  min-width: 80px;
+  min-height: 36px;
+  touch-action: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.menu-btn:active, .menu-btn.pressed {
+  background: rgba(120,120,120,0.95);
+  border-color: rgba(160,160,160,0.9);
+}
+
+/* ── PORTRAIT LAYOUT ────────────────────────────── */
+@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+  #game-wrapper {
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 4px;
+  }
+
+  #touch-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 28px 16px 0;
+  }
+
+  /* Main row: D-pad left, A/B right */
+  #controls-main {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 8px;
+  }
+
+  #ab-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  /* Offset B up and A down for the classic diagonal look */
+  #ab-group #btn-b { margin-top: -18px; }
+  #ab-group #btn-a { margin-top: 18px; }
+
+  /* Menu row centered below */
+  #controls-menu {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+  }
+}
+
+/* ── LANDSCAPE LAYOUT ───────────────────────────── */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  #game-wrapper {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+  }
+
+  #touch-controls {
+    display: contents; /* let children participate in the parent flex */
+  }
+
+  /* D-pad sits to the LEFT of the screen */
+  #controls-main {
+    display: contents;
+  }
+
+  #dpad {
+    position: fixed;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 110px;
+    height: 110px;
+    z-index: 100;
+  }
+  /* Adjust d-pad button sizes for landscape */
+  @media (orientation: landscape) {
+    #dpad-up    { left: 35px; top: 0; width: 40px; height: 36px; }
+    #dpad-down  { left: 35px; bottom: 0; width: 40px; height: 36px; }
+    #dpad-left  { left: 0; top: 35px; width: 36px; height: 40px; }
+    #dpad-right { right: 0; top: 35px; width: 36px; height: 40px; }
+    #dpad-center { left: 35px; top: 35px; width: 40px; height: 40px; }
+  }
+
+  /* A/B buttons sit to the RIGHT of the screen */
+  #ab-group {
+    position: fixed;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 100;
+  }
+  #ab-group #btn-b { margin-top: -16px; }
+  #ab-group #btn-a { margin-top: 16px; }
+
+  #ab-group .action-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 10px;
+  }
+
+  /* START / SELECT below the screen */
+  #controls-menu {
+    position: fixed;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+  }
+
+  #screen-frame { padding: 4px; }
+}
+
+/* ── DESKTOP KEYBOARD HINT ──────────────────────── */
+#keyboard-hint {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #aaa;
+  font-size: 8px;
+  font-family: 'Press Start 2P', monospace;
+  text-align: center;
+  line-height: 1.8;
+  background: rgba(0,0,0,0.5);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+/* Logo in control panel */
+#controls-logo {
+  display: none;
+}
+#gb-logo {
+  width: 56px;
+  height: auto;
+  border-radius: 8px;
+  opacity: 0.85;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  #keyboard-hint { display: none; }
+  #controls-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2px;
+  }
+}
+</style>
+</head>
+<body>
+
+<nav id="aft-nav" aria-label="網站選單">
+  <a href="/">← 主頁</a>
+  <a href="/linktree">連結樹</a>
+  <a href="/ai-beginner-workshop">工作坊</a>
+  <span class="aft-brand">AIFlowTime · Elevator Action</span>
+</nav>
+
+<div id="game-wrapper">
+  <div id="gb-shell">
+    <div id="screen-frame">
+      <canvas id="gameCanvas" width="160" height="144"></canvas>
+    </div>
+  </div>
+
+  <div id="touch-controls">
+    <div id="controls-logo">
+      <img src="/Landing-page-logo.png" alt="AIFlowTime" id="gb-logo" width="56" height="56" decoding="async" onerror="this.style.display='none'">
+    </div>
+    <div id="controls-main">
+      <div id="dpad">
+        <div class="dpad-btn" id="dpad-up">▲</div>
+        <div class="dpad-btn" id="dpad-down">▼</div>
+        <div class="dpad-btn" id="dpad-left">◀</div>
+        <div class="dpad-btn" id="dpad-right">▶</div>
+        <div id="dpad-center"></div>
+      </div>
+      <div id="ab-group">
+        <div class="action-btn" id="btn-b">B</div>
+        <div class="action-btn" id="btn-a">A</div>
+      </div>
+    </div>
+    <div id="controls-menu">
+      <div class="menu-btn" id="btn-select">SELECT</div>
+      <div class="menu-btn" id="btn-start">START</div>
+    </div>
+  </div>
+
+  <!-- Hidden text inputs for name entry -->
+  <input type="text" id="nameInput" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" style="position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;font-size:16px;">
+  <input type="text" id="igInput" maxlength="31" autocomplete="off" autocapitalize="none" spellcheck="false" style="position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;font-size:16px;">
+</div>
+
+<div id="keyboard-hint">
+  Arrows/Z: Move+Jump &nbsp; Down: Crouch &nbsp; X: Shoot &nbsp; Enter: Start &nbsp; Shift: Settings
+</div>
+
+<!-- Firebase SDK (compat v10) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<script>
+(function() {
+  try {
+    var result = initFirebase();
+    window._aftFirestore = result.db;
+  } catch(e) {
+    console.warn('Firebase init failed for game leaderboard:', e);
+    window._aftFirestore = null;
+  }
+})();
+</script>
+<script src="/elevator-action-gb/game.js"></script>
+
+<footer style="display:none;">
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">
+    Created with Perplexity Computer
+  </a>
+</footer>
+</body>
+</html>

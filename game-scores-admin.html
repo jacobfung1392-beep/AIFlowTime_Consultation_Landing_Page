@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲排行管理 | AIFLOWTIME CMS</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FAF9F7;
+            --bg-off: #E8E4DF;
+            --accent: #D97757;
+            --accent-dark: #C56A4B;
+            --text: #3B3B3B;
+            --text-light: #7A7A7A;
+            --white: #FFFFFF;
+            --green: #2E7D32;
+            --red: #C62828;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .cms-header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(229,231,235,0.5);
+            padding: 16px 24px;
+        }
+        .cms-header-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; gap: 8px; }
+        .cms-logo { font-size: 1.25rem; font-weight: 700; color: var(--text); text-decoration: none; }
+        .cms-logo span { color: var(--accent); }
+        .cms-user { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-light); }
+        .cms-user img { width: 32px; height: 32px; border-radius: 50%; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 24px;
+            background: var(--accent); color: var(--white); text-decoration: none; border-radius: 12px;
+            font-weight: 700; font-size: 15px; transition: all 0.3s ease; border: none; cursor: pointer;
+        }
+        .btn:hover { background: var(--accent-dark); transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+        .btn-outline:hover { background: var(--accent); color: var(--white); }
+        .btn-sm { height: 36px; padding: 0 16px; font-size: 13px; }
+        .btn-danger { background: var(--red); }
+        .btn-danger:hover { background: #B71C1C; }
+
+        .login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; text-align: center; }
+        .login-card {
+            background: var(--white); border-radius: 20px; padding: 48px 40px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08); max-width: 380px; width: 100%;
+        }
+        .login-card h2 { margin-bottom: 8px; }
+        .login-card p { color: var(--text-light); margin-bottom: 24px; font-size: 14px; }
+
+        #dashboard { display: none; }
+
+        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; }
+        .stats-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+        .stat-card {
+            background: var(--white); border-radius: 14px; padding: 16px 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); flex: 1; min-width: 140px;
+        }
+        .stat-card .label { font-size: 12px; color: var(--text-light); font-weight: 500; }
+        .stat-card .value { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+
+        .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+
+        table {
+            width: 100%; border-collapse: collapse; background: var(--white);
+            border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        th, td { padding: 10px 14px; text-align: left; font-size: 14px; border-bottom: 1px solid #f0eeeb; }
+        th { background: #f7f5f2; font-weight: 700; font-size: 13px; color: var(--text-light); position: sticky; top: 0; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #faf8f5; }
+
+        .ig-cell { font-family: monospace; font-size: 13px; color: var(--accent); }
+        .rank-cell { font-weight: 700; color: var(--accent); }
+        .del-btn {
+            background: none; border: 1px solid var(--red); color: var(--red); border-radius: 8px;
+            padding: 4px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .del-btn:hover { background: var(--red); color: #fff; }
+
+        .empty-msg { text-align: center; padding: 48px; color: var(--text-light); }
+
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            th, td { padding: 8px 8px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <h2>遊戲排行管理</h2>
+        <p>僅限管理員登入</p>
+        <button class="btn" onclick="doLogin()" id="loginBtn">使用 Google 登入</button>
+        <p id="loginError" style="color:var(--red);margin-top:12px;display:none;font-size:13px;"></p>
+    </div>
+</div>
+
+<div id="dashboard">
+    <header class="cms-header">
+        <div class="cms-header-inner">
+            <a href="/workshop-cms" class="cms-logo">AI<span>FLOW</span>TIME CMS</a>
+            <div class="cms-user">
+                <a href="/workshop-cms" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;">← 返回 CMS</a>
+                <a href="/elevator-action-gb" style="color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;" target="_blank">遊戲頁面 →</a>
+                <span id="userEmail"></span>
+                <img id="userAvatar" src="" alt="">
+                <button class="btn btn-sm btn-outline" onclick="doLogout()">登出</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">🎮 遊戲排行榜管理</h1>
+
+        <div class="stats-row">
+            <div class="stat-card"><div class="label">總分數記錄</div><div class="value" id="statTotal">-</div></div>
+            <div class="stat-card"><div class="label">最高分</div><div class="value" id="statTop">-</div></div>
+            <div class="stat-card"><div class="label">有 IG 的玩家</div><div class="value" id="statIg">-</div></div>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-sm" onclick="exportCSV()">📥 匯出 CSV</button>
+            <button class="btn btn-sm btn-outline" onclick="loadScores()">🔄 重新載入</button>
+        </div>
+
+        <div id="tableWrap">
+            <p class="empty-msg">載入中…</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="/js/firebase-init.js"></script>
+<script>
+var db, auth;
+var allScores = [];
+var ADMIN_EMAILS = ['jacobfung1392@gmail.com', 'jacobfung@aiflowtime.com'];
+
+initFirebase(function(app) {
+    db = app.firestore();
+    auth = app.auth();
+
+    auth.onAuthStateChanged(function(user) {
+        if (user && ADMIN_EMAILS.indexOf(user.email.toLowerCase()) !== -1) {
+            showDashboard(user);
+        } else if (user) {
+            document.getElementById('loginError').textContent = '此帳號無管理權限：' + user.email;
+            document.getElementById('loginError').style.display = 'block';
+            auth.signOut();
+        }
+    });
+});
+
+function doLogin() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(function(err) {
+        document.getElementById('loginError').textContent = err.message;
+        document.getElementById('loginError').style.display = 'block';
+    });
+}
+
+function doLogout() {
+    auth.signOut().then(function() { location.reload(); });
+}
+
+function showDashboard(user) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('userEmail').textContent = user.email;
+    if (user.photoURL) document.getElementById('userAvatar').src = user.photoURL;
+    loadScores();
+}
+
+function loadScores() {
+    document.getElementById('tableWrap').innerHTML = '<p class="empty-msg">載入中…</p>';
+    db.collection('gameScores').orderBy('score', 'desc').get().then(function(snap) {
+        allScores = [];
+        snap.forEach(function(doc) {
+            var d = doc.data();
+            d._id = doc.id;
+            allScores.push(d);
+        });
+        renderTable();
+        updateStats();
+    }).catch(function(err) {
+        document.getElementById('tableWrap').innerHTML = '<p class="empty-msg">載入失敗：' + err.message + '</p>';
+    });
+}
+
+function updateStats() {
+    document.getElementById('statTotal').textContent = allScores.length;
+    document.getElementById('statTop').textContent = allScores.length > 0 ? allScores[0].score : '-';
+    var igCount = allScores.filter(function(s) { return s.igHandle && s.igHandle.length > 1; }).length;
+    document.getElementById('statIg').textContent = igCount;
+}
+
+function renderTable() {
+    if (allScores.length === 0) {
+        document.getElementById('tableWrap').innerHTML = '<p class="empty-msg">暫無分數記錄</p>';
+        return;
+    }
+    var html = '<table><thead><tr>' +
+        '<th>#</th><th>名稱</th><th>分數</th><th>關卡</th><th>IG Handle</th><th>日期</th><th></th>' +
+        '</tr></thead><tbody>';
+    for (var i = 0; i < allScores.length; i++) {
+        var s = allScores[i];
+        var dateStr = '-';
+        if (s.createdAt && s.createdAt.toDate) {
+            var d = s.createdAt.toDate();
+            dateStr = d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+        html += '<tr>' +
+            '<td class="rank-cell">' + (i + 1) + '</td>' +
+            '<td>' + escHtml(s.name || '') + '</td>' +
+            '<td><strong>' + (s.score || 0) + '</strong></td>' +
+            '<td>' + (s.level != null ? s.level + 1 : '-') + '</td>' +
+            '<td class="ig-cell">' + escHtml(s.igHandle || '') + '</td>' +
+            '<td style="font-size:12px;color:var(--text-light)">' + dateStr + '</td>' +
+            '<td><button class="del-btn" onclick="deleteScore(\'' + s._id + '\')">刪除</button></td>' +
+            '</tr>';
+    }
+    html += '</tbody></table>';
+    document.getElementById('tableWrap').innerHTML = html;
+}
+
+function escHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function deleteScore(id) {
+    if (!confirm('確定要刪除此分數記錄？')) return;
+    db.collection('gameScores').doc(id).delete().then(function() {
+        allScores = allScores.filter(function(s) { return s._id !== id; });
+        renderTable();
+        updateStats();
+    }).catch(function(err) { alert('刪除失敗：' + err.message); });
+}
+
+function exportCSV() {
+    if (allScores.length === 0) { alert('沒有資料可匯出'); return; }
+    var rows = [['Rank', 'Name', 'Score', 'Level', 'IG Handle', 'Date']];
+    for (var i = 0; i < allScores.length; i++) {
+        var s = allScores[i];
+        var dateStr = '';
+        if (s.createdAt && s.createdAt.toDate) {
+            dateStr = s.createdAt.toDate().toISOString();
+        }
+        rows.push([i + 1, s.name || '', s.score || 0, s.level != null ? s.level + 1 : '', s.igHandle || '', dateStr]);
+    }
+    var csv = rows.map(function(r) {
+        return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\n');
+    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'game-scores-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

@@ -1,10 +1,14 @@
 {
+  "scripts": {
+    "optimize:images": "node scripts/optimize-images.js"
+  },
   "dependencies": {
-    "firebase-tools": "^15.8.0"
+    "firebase-tools": "^15.8.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "firebase-admin": "^13.7.0",
-    "googleapis": "^144.0.0",
-    "gifsicle": "^7.0.1"
+    "gifsicle": "^7.0.1",
+    "googleapis": "^144.0.0"
   }
 }

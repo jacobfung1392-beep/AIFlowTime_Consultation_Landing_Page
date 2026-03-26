@@ -255,6 +255,10 @@
             margin-bottom: 12px;
             color: var(--text);
         }
+        .hero-title b,
+        .hero-title strong {
+            font-weight: 900;
+        }
 
         .hero-title .accent { color: var(--accent); }
 
@@ -1148,7 +1152,7 @@
     <section class="video-section reveal" data-section-id="wc-video" data-section-type="video">
         <div class="section-label" style="text-align:center;margin-bottom:16px;">— 預覽 —</div>
         <div class="video-wrap" id="video-container">
-            <video src="/workshop-c-assets/ai-video.mp4" autoplay muted loop playsinline></video>
+            <video src="/workshop-c-assets/ai-video-compressed.mp4" autoplay muted loop playsinline></video>
         </div>
         <p class="video-caption">工作坊現場示範 — 從構思到成品，一次睇晒</p>
     </section>
@@ -1168,7 +1172,7 @@
             <!-- Card 1 — left -->
             <div class="chain-row left">
                 <div class="chain-card">
-                    <img src="/workshop-c-assets/Untitled_Ethereal_Butterfly_2026-02-22_17-56.png"
+                    <img src="/workshop-c-assets/Untitled_Ethereal_Butterfly_2026-02-22_17-56.webp"
                          alt="Ethereal Butterfly — AI商業圖像示例"
                          loading="lazy">
                     <div class="chain-card-label">品牌視覺 · Midjourney</div>
@@ -1189,7 +1193,7 @@
             <!-- Card 2 — right -->
             <div class="chain-row right">
                 <div class="chain-card">
-                    <img src="/workshop-c-assets/Untitled_Floating_Hourglass_2026-02-22_17-56.jpg"
+                    <img src="/workshop-c-assets/Untitled_Floating_Hourglass_2026-02-22_17-56.webp"
                          alt="Floating Hourglass — AI商業圖像示例"
                          loading="lazy">
                     <div class="chain-card-label">概念視覺 · FloraFauna</div>
@@ -1210,7 +1214,7 @@
             <!-- Card 3 — left -->
             <div class="chain-row left">
                 <div class="chain-card">
-                    <img src="/workshop-c-assets/Untitled_Surreal_Chess_Game_2026-02-22_17-56.png"
+                    <img src="/workshop-c-assets/Untitled_Surreal_Chess_Game_2026-02-22_17-56.webp"
                          alt="Surreal Chess — AI商業圖像示例"
                          loading="lazy">
                     <div class="chain-card-label">商業素材 · Higgsfield</div>
@@ -1672,6 +1676,14 @@ function applySections(rawSections) {
                 el = template.cloneNode(true);
                 el.setAttribute('data-section-id', sec.id);
                 main.appendChild(el);
+            } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download') {
+                el = document.createElement('section');
+                el.setAttribute('data-section-id', sec.id);
+                el.setAttribute('data-section-type', sec.type);
+                el.className = sec.type === 'image-only'
+                    ? 'sec-image-only reveal'
+                    : (sec.type === 'text-only' ? 'sec-text-only reveal' : 'sec-free-material reveal');
+                main.appendChild(el);
             }
         }
 
@@ -1688,13 +1700,17 @@ function applySections(rawSections) {
     });
 
     initScrollReveal('.reveal', { threshold: 0.12 });
+    // In layout-editor preview mode, force reveal elements visible immediately.
+    if (_isPreviewMode) {
+        document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
+    }
 }
 
 function applyContentToSection(el, type, c) {
     switch (type) {
         case 'hero':
             var h1 = el.querySelector('.hero-title');
-            if (h1 && c.title) h1.innerHTML = c.title;
+            if (h1) h1.innerHTML = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : String(c.title).replace(/\n/g, '<br>')) : '';
             var sub = el.querySelector('.hero-tagline');
             if (sub && c.subtitle) sub.innerHTML = c.subtitle;
             var badge = el.querySelector('.hero-badge');
@@ -1776,6 +1792,64 @@ function applyContentToSection(el, type, c) {
             if (ctaFc && c.ctaText) ctaFc.textContent = c.ctaText;
             if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
             break;
+
+        case 'free-material-download':
+            renderFreeMaterialSection(el, 'workshop-c', el.getAttribute('data-section-id') || 'free-material-download', c, {
+                surface: 'rgba(17,17,17,0.88)',
+                surfaceAlt: 'rgba(255,255,255,0.05)',
+                text: '#f6f1eb',
+                muted: 'rgba(246,241,235,0.72)',
+                accent: '#D97757',
+                accentText: '#ffffff',
+                border: 'rgba(255,255,255,0.10)',
+                backdrop: 'rgba(10,10,10,0.72)'
+            });
+            break;
+
+        case 'image-only':
+            var wcImgAlign = c.align === 'left' ? 'flex-start' : c.align === 'right' ? 'flex-end' : 'center';
+            var wcImgShadow = c.shadow === 'strong'
+                ? '0 22px 56px rgba(0,0,0,0.38)'
+                : c.shadow === 'none'
+                    ? 'none'
+                    : '0 12px 32px rgba(0,0,0,0.24)';
+            var wcImgUrl = _escHtml(c.imageUrl || '');
+            var wcAlt = _escHtml(c.alt || '');
+            var wcCap = _escHtml(c.caption || '');
+            var wcLink = String(c.linkUrl || '').trim();
+            var wcStart = wcLink ? '<a href="' + _escHtml(wcLink) + '"' + (/^https?:/i.test(wcLink) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
+            var wcEnd = wcLink ? '</a>' : '</div>';
+            el.style.padding = (parseInt(c.paddingTop, 10) || 40) + 'px 24px ' + (parseInt(c.paddingBottom, 10) || 40) + 'px';
+            el.innerHTML = '<div class="container" style="display:flex;justify-content:' + wcImgAlign + ';">' +
+                '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 960) + 'px);">' +
+                wcStart +
+                '<img src="' + wcImgUrl + '" alt="' + wcAlt + '" style="display:block;width:100%;height:auto;max-height:72vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + wcImgShadow + ';background:var(--bg-card);">' +
+                (wcCap ? '<p style="margin-top:12px;color:var(--text-dim);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + wcCap + '</p>' : '') +
+                wcEnd +
+                '</div></div>';
+            break;
+
+        case 'text-only':
+            var wcTextAlign = c.align || 'center';
+            var wcSurfaceStyle = c.surface === 'accent'
+                ? 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);box-shadow:0 18px 40px rgba(0,0,0,0.16);'
+                : c.surface === 'card'
+                    ? 'background:var(--bg-card);border:1px solid var(--border);box-shadow:0 18px 40px rgba(0,0,0,0.16);'
+                    : 'background:transparent;border:none;box-shadow:none;';
+            var wcLabel = c.sectionLabel ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.sectionLabel) : _escHtml(c.sectionLabel)) : '';
+            var wcTitle = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : _escHtml(c.title)) : '';
+            var wcBody = c.body ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.body) : _escHtml(c.body)) : '';
+            var wcBtn = (c.ctaText || '').trim();
+            var wcBtnLink = _escHtml(c.ctaLink || '#');
+            el.style.padding = (parseInt(c.paddingTop, 10) || 44) + 'px 24px ' + (parseInt(c.paddingBottom, 10) || 44) + 'px';
+            el.innerHTML = '<div class="container" style="display:flex;justify-content:center;">' +
+                '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 760) + 'px);padding:' + (c.surface === 'none' ? '0' : '32px') + ';border-radius:24px;text-align:' + wcTextAlign + ';' + wcSurfaceStyle + '">' +
+                (wcLabel ? '<div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px;">' + wcLabel + '</div>' : '') +
+                (wcTitle ? '<div style="font-size:clamp(28px,4vw,52px);line-height:1.12;font-weight:800;color:var(--text);">' + wcTitle + '</div>' : '') +
+                (wcBody ? '<div style="margin-top:16px;color:var(--text-dim);font-size:16px;line-height:1.8;">' + wcBody + '</div>' : '') +
+                (wcBtn ? '<div style="margin-top:24px;"><a href="' + wcBtnLink + '" class="btn-primary">' + _escHtml(wcBtn) + '</a></div>' : '') +
+                '</div></div>';
+            break;
     }
 }
 
@@ -1802,10 +1876,10 @@ initFirebase(function(app) {
             if (d.courseType === 'continuous' && d.rounds && d.rounds.length) {
                 var dateHtml = '', timeHtml = '';
                 var cSortedRounds = d.rounds.slice().sort(function(a, b) {
-                    var aDates = (a.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
-                    var bDates = (b.sessions || []).map(function(s) { return (s.date || '').replace(/[年月]/g, '-').replace(/日/g, ''); }).filter(Boolean).sort();
+                    var aDates = (a.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
+                    var bDates = (b.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
                     var aMin = aDates[0] || '', bMin = bDates[0] || '';
-                    return aMin > bMin ? -1 : aMin < bMin ? 1 : 0;
+                    return aMin < bMin ? -1 : aMin > bMin ? 1 : 0;
                 });
                 cSortedRounds.forEach(function(round) {
                     dateHtml += '<span class="session-line" style="font-weight:700;opacity:.7;font-size:13px;">' + (round.label || '') + '</span>';
@@ -1819,14 +1893,7 @@ initFirebase(function(app) {
                 dateEl.innerHTML = dateHtml;
                 timeEl.innerHTML = timeHtml;
             } else if (d.sessions && d.sessions.length) {
-                var sorted = d.sessions.filter(function(s) { return s.visible !== false; }).slice().sort(function(a, b) {
-                    var da = (a.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    var db2 = (b.date || '').replace(/[年月]/g, '-').replace(/日/g, '');
-                    if (da !== db2) return da > db2 ? -1 : 1;
-                    var ta = (a.time || '').replace(/[^0-9:]/g, '');
-                    var tb = (b.time || '').replace(/[^0-9:]/g, '');
-                    return ta > tb ? -1 : ta < tb ? 1 : 0;
-                });
+                var sorted = sortSessionsList(d.sessions.filter(function(s) { return s.visible !== false; }));
                 var dateHtml = '', timeHtml = '';
                 for (var i = 0; i < sorted.length; i++) {
                     var s = sorted[i];
@@ -1853,7 +1920,8 @@ initFirebase(function(app) {
             if (d.mode === 'online') modeLabel = '💻 線上';
             else if (d.mode === 'both') modeLabel = '🏢 實體 + 💻 線上';
             else modeLabel = '🏢 實體';
-            if (d.location && d.mode !== 'online') modeLabel += '　' + d.location;
+            var displayLoc = d.district || d.location || '';
+            if (displayLoc && d.mode !== 'online') modeLabel += '　' + displayLoc;
             modeEl.textContent = modeLabel;
 
             // Capacity bar

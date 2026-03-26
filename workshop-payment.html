@@ -176,6 +176,26 @@
         .screenshot-progress-bar{height:100%;background:var(--accent);border-radius:4px;width:0%;transition:width 0.3s;}
         .screenshot-success{display:none;margin-top:12px;padding:12px 16px;background:var(--green-bg);border-radius:10px;font-size:14px;font-weight:600;color:var(--green);text-align:center;}
 
+        .sticky-confirm-bar{position:fixed;left:0;right:0;bottom:0;z-index:950;background:rgba(250,249,247,0.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(0,0,0,0.08);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:none;box-shadow:0 -10px 30px rgba(0,0,0,0.08);}
+        .sticky-confirm-bar.show{display:block;}
+        .sticky-confirm-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+        .sticky-confirm-copy{flex:1;min-width:0;}
+        .sticky-confirm-title{font-size:14px;font-weight:700;color:var(--text);}
+        .sticky-confirm-sub{font-size:12px;color:var(--text-light);font-weight:500;line-height:1.5;}
+        .sticky-confirm-btn{height:48px;padding:0 24px;border:none;border-radius:14px;background:var(--accent);color:var(--white);font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+        .sticky-confirm-btn:hover{background:var(--accent-dark);transform:translateY(-1px);}
+        .sticky-confirm-btn.is-disabled{background:var(--bg-off);color:var(--text-light);}
+        .sticky-confirm-btn.is-done{background:var(--green);color:var(--white);cursor:default;}
+
+        .pay-popup-overlay{position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+        .pay-popup-overlay.open{display:flex;}
+        .pay-popup-modal{background:var(--white);border-radius:20px;padding:28px 24px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;animation:fpsSlideIn 0.25s ease;text-align:center;}
+        .pay-popup-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;background:var(--bg-pampas);border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-light);}
+        .pay-popup-icon{width:56px;height:56px;border-radius:18px;background:rgba(217,119,87,0.12);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;margin:0 auto 14px;}
+        .pay-popup-modal h3{font-size:20px;font-weight:700;margin-bottom:8px;}
+        .pay-popup-modal p{font-size:14px;color:var(--text-light);font-weight:500;line-height:1.7;margin-bottom:18px;}
+        .pay-popup-btn{height:44px;padding:0 22px;border:none;border-radius:12px;background:var(--accent);color:var(--white);font-size:15px;font-weight:700;cursor:pointer;}
+
         /* Terms & Conditions scrollable box */
         .tc-box{max-height:180px;overflow-y:auto;padding:16px 18px;border:1px solid var(--bg-off);border-radius:12px;background:rgba(0,0,0,0.015);margin-bottom:16px;font-size:12.5px;color:var(--text-light);line-height:1.8;font-weight:400;}
         .tc-box::-webkit-scrollbar{width:5px;}
@@ -223,7 +243,7 @@
         .cap-full-modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border:none;background:var(--bg-pampas);border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-light);transition:all 0.2s;}
         .cap-full-modal-close:hover{background:var(--bg-off);color:var(--text);}
 
-        .toast-container{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+        .toast-container{position:fixed;bottom:96px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
         .toast{padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;color:var(--white);box-shadow:0 4px 16px rgba(0,0,0,0.15);animation:toast-in 0.3s ease;max-width:360px;}
         .toast.success{background:var(--green);}
         .toast.error{background:var(--red);}
@@ -447,7 +467,7 @@
                     <input type="file" id="screenshotFile" accept="image/*" onchange="handleScreenshotUpload(this)">
                 </div>
                 <div class="screenshot-progress" id="ssProgress"><div class="screenshot-progress-bar" id="ssProgressBar"></div></div>
-                <div class="screenshot-success" id="ssSuccess">✓ 付款截圖已上傳成功！我們會盡快確認你的報名。</div>
+                <div class="screenshot-success" id="ssSuccess">✓ 付款截圖已上傳成功！請按下方「確認報名」提交申請。</div>
             </div>
 
         </div>
@@ -461,6 +481,16 @@
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<div class="sticky-confirm-bar" id="stickyConfirmBar">
+    <div class="sticky-confirm-inner">
+        <div class="sticky-confirm-copy">
+            <div class="sticky-confirm-title" id="stickyConfirmTitle">完成付款後，請確認報名</div>
+            <div class="sticky-confirm-sub" id="stickyConfirmSub">上傳付款截圖後，按此提交申請，我們才會開始人工確認。</div>
+        </div>
+        <button type="button" class="sticky-confirm-btn is-disabled" id="stickyConfirmBtn" onclick="confirmWorkshopApplication()">確認報名</button>
+    </div>
+</div>
 
 <!-- Upload Loading Overlay -->
 <div class="upload-overlay" id="uploadOverlay">
@@ -502,6 +532,16 @@
     </div>
 </div>
 
+<div class="pay-popup-overlay" id="submitReminderOverlay" onclick="if(event.target===this)closeSubmitReminderPopup()">
+    <div class="pay-popup-modal">
+        <button class="pay-popup-close" onclick="closeSubmitReminderPopup()" type="button">✕</button>
+        <div class="pay-popup-icon">📸</div>
+        <h3>請先上傳付款截圖</h3>
+        <p>完成付款後，請先在上方上傳付款證明，然後再按「確認報名」，我們才可以為你跟進確認。</p>
+        <button class="pay-popup-btn" onclick="focusScreenshotUpload()" type="button">去上傳截圖</button>
+    </div>
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -524,6 +564,8 @@ var _authResolved = false;
 var _registrationId = null;
 var _existingRegistration = null;
 var _verifiedPrice = null;
+var _applicationSubmitted = false;
+var _pendingPaymentScreenshotUrl = '';
 
 initFirebase(function() { initPayment(); });
 
@@ -535,6 +577,22 @@ function _sortSessionsList(sessions) {
     return sortSessionsList(sessions);
 }
 
+function _isSessionRegClosed(session, regCloseHours) {
+    if (!regCloseHours || regCloseHours <= 0) return false;
+    if (!session.date) return false;
+    var m = session.date.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+    if (!m) return false;
+    var dt = new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+    if (session.time) {
+        var tp = session.time.match(/(\d{1,2}):(\d{2})/);
+        if (tp) { dt.setHours(parseInt(tp[1]), parseInt(tp[2])); }
+    }
+    var cutoff = new Date(dt.getTime() - regCloseHours * 3600000);
+    return new Date() >= cutoff;
+}
+
+var _wsRegCloseHours = 3;
+
 function sessionStableId(s, fallbackIdx) {
     if (s && s.id && s.id.indexOf('session_') === 0 && !/^session_\d+$/.test(s.id)) return s.id;
     var d = (s && s.date || '').replace(/[年月]/g, '-').replace(/日.*/, '').replace(/\s/g, '');
@@ -545,7 +603,7 @@ function sessionStableId(s, fallbackIdx) {
 
 function _renderSessionLines(el, sessions) {
     if (sessions && sessions.length) {
-        var sorted = _sortSessionsList(sessions).filter(function(s) { return s.visible !== false; });
+        var sorted = _sortSessionsList(sessions).filter(function(s) { return s.visible !== false && !_isSessionRegClosed(s, _wsRegCloseHours); });
         var lines = sorted.map(function(s) {
             var txt = '';
             if (s.label) txt += s.label + '：';
@@ -604,7 +662,7 @@ function _buildVirtualRoundsFromSessions(d) {
     var sessionEnrolled = d._sessionEnrolled || {};
     var rounds = [];
     allSorted.forEach(function(s, i) {
-        if (s.visible === false) return;
+        if (s.visible === false || _isSessionRegClosed(s, _wsRegCloseHours)) return;
         var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
         var sid = s.id || sessionStableId(s, i);
         var enrolled = (s.enrolled !== undefined && s.enrolled !== null) ? s.enrolled : (sessionEnrolled[sid] || 0);
@@ -648,6 +706,7 @@ function selectRoundById(roundId) {
         }
         document.getElementById('soldOutState').style.display = 'none';
     }
+    updateConfirmApplicationState();
 }
 
 // buildCapacityBar is loaded from /js/shared-utils.js
@@ -744,6 +803,7 @@ function initPayment() {
                 return round;
             });
         }
+        _wsRegCloseHours = (_wsData.regCloseHours !== undefined && _wsData.regCloseHours !== null) ? _wsData.regCloseHours : 3;
         var d = _wsData;
         document.getElementById('wsBadge').textContent = d.levelBadge || '';
         document.getElementById('wsBadge').className = 'ws-badge ' + (d.levelType || 'beginner');
@@ -836,6 +896,7 @@ function initPayment() {
             }
             document.getElementById('soldOutState').style.display = 'none';
         }
+        updateConfirmApplicationState();
 
         // Restore round/date if auth resolved before onSnapshot
         _tryRestoreRound();
@@ -1036,7 +1097,18 @@ function autoFillFromProfile(profile) {
 // ============================================================
 // DUPLICATE REGISTRATION CHECK
 // ============================================================
+function normalizeRegistrationStatus(status) {
+    return String(status || 'pending').trim().toLowerCase();
+}
+
+function isBlockingExistingRegistration(reg) {
+    var status = normalizeRegistrationStatus(reg && reg.status);
+    return status !== 'cancelled' && status !== 'deleted';
+}
+
 function checkDuplicateRegistration(uid) {
+    _existingRegistration = null;
+    _registrationId = null;
     db.collection('registrations')
         .where('userId', '==', uid)
         .where('workshopId', '==', _wsId)
@@ -1045,19 +1117,25 @@ function checkDuplicateRegistration(uid) {
             var activeReg = null;
             snap.forEach(function(doc) {
                 var r = doc.data();
-                if (r.status !== 'cancelled') activeReg = { id: doc.id, data: r };
+                if (isBlockingExistingRegistration(r)) activeReg = { id: doc.id, data: r };
             });
             if (activeReg) {
                 _existingRegistration = activeReg;
                 _registrationId = activeReg.id;
                 showDuplicateBanner(activeReg.data);
+            } else {
+                var banner = document.getElementById('duplicateBanner');
+                if (banner) banner.style.display = 'none';
+                document.getElementById('personalInfoSection').style.display = '';
             }
         });
 }
 
 function showDuplicateBanner(reg) {
     var hasScreenshot = reg.paymentScreenshotUrl && reg.paymentScreenshotUrl.length > 0;
-    var statusText = reg.status === 'confirmed' ? '已確認付款' : (hasScreenshot ? '待確認' : '待付款');
+    var isSubmitted = !!reg.applicationSubmittedAt || reg._applicationSubmitted === true;
+    var status = normalizeRegistrationStatus(reg.status);
+    var statusText = status === 'confirmed' ? '已確認付款' : (isSubmitted ? '待確認' : (hasScreenshot ? '待完成確認' : '待付款'));
     var banner = document.getElementById('duplicateBanner');
     if (!banner) {
         banner = document.createElement('div');
@@ -1067,7 +1145,7 @@ function showDuplicateBanner(reg) {
         if (paymentContent) paymentContent.insertBefore(banner, paymentContent.firstChild);
     }
 
-    if (reg.status === 'confirmed' || hasScreenshot) {
+    if (status === 'confirmed' || isSubmitted) {
         // Confirmed or awaiting confirmation — show banner, hide form & payment
         banner.textContent = '';
         var iconDiv1 = document.createElement('div');
@@ -1105,7 +1183,7 @@ function showDuplicateBanner(reg) {
         var strong2 = document.createElement('strong');
         strong2.textContent = '你的報名尚未完成';
         var p2 = document.createElement('p');
-        p2.textContent = '你可以更新個人資料，然後完成付款並上傳付款截圖以確認報名。如需取消報名，請透過 ';
+        p2.textContent = hasScreenshot ? '你已上傳付款截圖，但仍未按「確認報名」。請完成最後一步後，我們才會開始跟進。如需取消報名，請透過 ' : '你可以更新個人資料，然後完成付款並上傳付款截圖以確認報名。如需取消報名，請透過 ';
         var waLink2 = document.createElement('a');
         waLink2.href = 'https://wa.me/85262880186';
         waLink2.target = '_blank';
@@ -1125,6 +1203,8 @@ function showDuplicateBanner(reg) {
         var pm = document.getElementById('paymentMethods');
         if (pm) pm.style.display = 'block';
     }
+    _applicationSubmitted = isSubmitted || reg.status === 'confirmed';
+    updateConfirmApplicationState();
 }
 
 function prefillFromRegistration(reg) {
@@ -1201,6 +1281,8 @@ function confirmPersonalInfo() {
     btn.textContent = '已確認 ✓';
 
     document.getElementById('paymentMethods').style.display = 'block';
+    _applicationSubmitted = false;
+    updateConfirmApplicationState();
     document.getElementById('paymentMethods').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
@@ -1263,7 +1345,7 @@ function createRegistration(name, age, phone, job) {
             regDate = sortedSess[0].date || regDate;
             regTime = sortedSess[0].time || regTime;
             sortedSess.forEach(function(s) {
-                if (s.visible !== false) allSessionDates.push({ date: s.date || '', time: s.time || '', label: s.label || '' });
+                if (s.visible !== false && !_isSessionRegClosed(s, _wsRegCloseHours)) allSessionDates.push({ date: s.date || '', time: s.time || '', label: s.label || '' });
             });
         }
     }
@@ -1290,9 +1372,14 @@ function createRegistration(name, age, phone, job) {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         db.collection('registrations').doc(_registrationId).update(updateData).then(function() {
-            _existingRegistration = { id: _registrationId, data: updateData };
+            _existingRegistration = {
+                id: _registrationId,
+                data: Object.assign({}, (_existingRegistration && _existingRegistration.data) || {}, updateData)
+            };
+            updateConfirmApplicationState();
         }).catch(function(err) {
             console.error('Registration update error:', err);
+            showInfoError('無法更新報名資料，請稍後再試或聯絡我們。錯誤：' + (err && err.message ? err.message : '未知錯誤'));
         });
     } else {
         var createData = {
@@ -1317,14 +1404,21 @@ function createRegistration(name, age, phone, job) {
             discountApplied: discountApplied,
             promoCode: promoCode,
             status: 'pending',
-            paymentScreenshotUrl: '',
+            paymentScreenshotUrl: _pendingPaymentScreenshotUrl || '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         db.collection('registrations').add(createData).then(function(docRef) {
             _registrationId = docRef.id;
-            _existingRegistration = { id: docRef.id, data: createData };
+            _existingRegistration = {
+                id: docRef.id,
+                data: Object.assign({}, createData, (_existingRegistration && _existingRegistration.data) || {})
+            };
+            syncPendingPaymentProofToRegistration().finally(function() {
+                updateConfirmApplicationState();
+            });
         }).catch(function(err) {
             console.error('Registration save error:', err);
+            showInfoError('無法儲存報名資料，請檢查網路後再試或聯絡我們。錯誤：' + (err && err.message ? err.message : '未知錯誤'));
         });
     }
 
@@ -1350,6 +1444,24 @@ function showInfoError(msg) {
     var el = document.getElementById('infoError');
     el.textContent = msg;
     el.style.display = 'block';
+}
+
+function syncPendingPaymentProofToRegistration() {
+    if (!_registrationId || !_pendingPaymentScreenshotUrl) return Promise.resolve(false);
+    var pendingUrl = _pendingPaymentScreenshotUrl;
+    return db.collection('registrations').doc(_registrationId).update({ paymentScreenshotUrl: pendingUrl }).then(function() {
+        if (_pendingPaymentScreenshotUrl === pendingUrl) _pendingPaymentScreenshotUrl = '';
+        if (!_existingRegistration) _existingRegistration = { id: _registrationId, data: {} };
+        if (!_existingRegistration.data) _existingRegistration.data = {};
+        _existingRegistration.data.paymentScreenshotUrl = pendingUrl;
+        _applicationSubmitted = false;
+        updateConfirmApplicationState();
+        return true;
+    }).catch(function(err) {
+        console.error('Pending payment proof sync error:', err);
+        showToast('付款截圖已上傳，但同步報名資料失敗，請稍後再試。', 'error');
+        return false;
+    });
 }
 
 // ============================================================
@@ -1396,12 +1508,126 @@ function updatePayBtnState() {
     document.getElementById('fpsBtn').classList.toggle('disabled', !checked);
     var ssArea = document.getElementById('screenshotArea');
     if (ssArea) ssArea.classList.toggle('disabled', !checked);
+    updateConfirmApplicationState();
 }
 
 function checkPayGate(el) {
     if (el.classList.contains('disabled')) return false;
     if (_isCapacityFull()) { showCapFullPopup(); return false; }
     return true;
+}
+
+function hasUploadedPaymentProof() {
+    var reg = _existingRegistration && _existingRegistration.data ? _existingRegistration.data : null;
+    return !!((reg && reg.paymentScreenshotUrl) || _pendingPaymentScreenshotUrl);
+}
+
+function updateConfirmApplicationState() {
+    var bar = document.getElementById('stickyConfirmBar');
+    var btn = document.getElementById('stickyConfirmBtn');
+    var title = document.getElementById('stickyConfirmTitle');
+    var sub = document.getElementById('stickyConfirmSub');
+    var paymentSection = document.getElementById('paymentMethods');
+    if (!bar || !btn || !title || !sub) return;
+
+    var isPaymentVisible = !!(paymentSection && paymentSection.style.display === 'block');
+    var shouldShow = isPaymentVisible && !_isCapacityFull();
+    bar.classList.toggle('show', shouldShow);
+    if (!shouldShow) return;
+
+    var checked = document.getElementById('tcCheck').checked;
+    var hasScreenshot = hasUploadedPaymentProof();
+    if (_applicationSubmitted) {
+        title.textContent = '報名已提交';
+        sub.textContent = '我們已收到你的申請，會在核對付款後盡快確認。';
+        btn.textContent = '已提交 ✓';
+        btn.className = 'sticky-confirm-btn is-done';
+        return;
+    }
+    title.textContent = '完成付款後，請確認報名';
+    if (!checked) {
+        sub.textContent = '請先閱讀並同意條款，然後完成付款及上傳截圖。';
+        btn.textContent = '確認報名';
+        btn.className = 'sticky-confirm-btn is-disabled';
+    } else if (!hasScreenshot) {
+        sub.textContent = '請先上傳付款截圖，然後按此提交申請。';
+        btn.textContent = '確認報名';
+        btn.className = 'sticky-confirm-btn is-disabled';
+    } else if (!_registrationId) {
+        sub.textContent = '付款截圖已上傳，正在儲存報名資料，完成後即可提交申請。';
+        btn.textContent = '確認報名';
+        btn.className = 'sticky-confirm-btn is-disabled';
+    } else {
+        sub.textContent = '付款截圖已上傳，按此提交申請，我們會盡快為你確認。';
+        btn.textContent = '確認報名';
+        btn.className = 'sticky-confirm-btn';
+    }
+}
+
+function closeSubmitReminderPopup() {
+    document.getElementById('submitReminderOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function focusScreenshotUpload() {
+    closeSubmitReminderPopup();
+    var ssSection = document.querySelector('.screenshot-section');
+    if (ssSection) ssSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openSubmitReminderPopup() {
+    document.getElementById('submitReminderOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function confirmWorkshopApplication() {
+    if (_applicationSubmitted) return false;
+    if (!document.getElementById('tcCheck').checked) {
+        showToast('請先閱讀並同意條款及細則。', 'error');
+        return false;
+    }
+    if (!hasUploadedPaymentProof()) {
+        openSubmitReminderPopup();
+        return false;
+    }
+    if (!_registrationId) {
+        showToast('請先確認個人資料。', 'error');
+        return false;
+    }
+    var btn = document.getElementById('stickyConfirmBtn');
+    btn.textContent = '提交中...';
+    btn.className = 'sticky-confirm-btn is-disabled';
+    var confirmUpload = functions.httpsCallable('confirmPaymentUpload');
+    var proceed = Promise.resolve(true);
+    if (_pendingPaymentScreenshotUrl) {
+        proceed = syncPendingPaymentProofToRegistration();
+    }
+    proceed.then(function(syncOk) {
+        if (_pendingPaymentScreenshotUrl || syncOk === false) {
+            _applicationSubmitted = false;
+            updateConfirmApplicationState();
+            showToast('付款截圖仍未成功同步到報名紀錄，請稍後再試。', 'error');
+            return;
+        }
+        confirmUpload({ registrationId: _registrationId, workshopId: _wsId }).then(function() {
+            _applicationSubmitted = true;
+            if (_existingRegistration && _existingRegistration.data) {
+                _existingRegistration.data.applicationSubmittedAt = new Date().toISOString();
+                _existingRegistration.data._applicationSubmitted = true;
+            }
+            updateConfirmApplicationState();
+            showToast('報名已提交，我們會盡快確認。');
+        }).catch(function(err) {
+            _applicationSubmitted = false;
+            updateConfirmApplicationState();
+            showToast('提交失敗：' + err.message, 'error');
+        });
+    }).catch(function(err) {
+        _applicationSubmitted = false;
+        updateConfirmApplicationState();
+        showToast('提交失敗：' + (err && err.message ? err.message : '未知錯誤'), 'error');
+    });
+    return false;
 }
 
 function updateFpsAmount() {}
@@ -1515,18 +1741,17 @@ function handleScreenshotUpload(input) {
                     area.appendChild(fileInput);
                     progressWrap.style.display = 'none';
                     document.getElementById('ssSuccess').style.display = 'block';
+                    _pendingPaymentScreenshotUrl = url;
+                    if (!_existingRegistration) _existingRegistration = { id: _registrationId || '', data: {} };
+                    if (!_existingRegistration.data) _existingRegistration.data = {};
+                    _existingRegistration.data.paymentScreenshotUrl = url;
+                    _applicationSubmitted = false;
+                    updateConfirmApplicationState();
 
-                    // Update registration if exists
+                    // Update registration if exists; otherwise the pending URL
+                    // will be synced as soon as the registration create finishes.
                     if (_registrationId) {
-                        db.collection('registrations').doc(_registrationId).update({ paymentScreenshotUrl: url }).then(function() {
-                            // Increment enrolled count via Cloud Function (server-side validation)
-                            if (_wsId && functions) {
-                                var confirmUpload = functions.httpsCallable('confirmPaymentUpload');
-                                confirmUpload({ registrationId: _registrationId, workshopId: _wsId }).catch(function(err) {
-                                    console.warn('confirmPaymentUpload error:', err.message);
-                                });
-                            }
-                        });
+                        syncPendingPaymentProofToRegistration();
                     }
                     if (uploadOverlay) uploadOverlay.classList.remove('active');
                     showToast('付款截圖已上傳');

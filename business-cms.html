@@ -232,12 +232,17 @@
             text-align:left; font-size:12px; font-weight:700; color:var(--text-light);
             padding:6px 8px; border-bottom:1.5px solid var(--bg-off); text-transform:uppercase; letter-spacing:0.5px;
         }
-        .line-items-table td { padding:6px 8px; vertical-align:middle; }
+        .line-items-table td { padding:6px 8px; vertical-align:top; }
         .line-items-table input {
             width:100%; height:36px; padding:0 10px; border:1.5px solid var(--bg-off);
             border-radius:8px; font-size:14px; font-family:inherit; background:var(--white);
         }
-        .line-items-table input:focus { outline:none; border-color:var(--accent); }
+        .line-items-table textarea {
+            width:100%; min-height:36px; height:auto; padding:8px 10px; border:1.5px solid var(--bg-off);
+            border-radius:8px; font-size:14px; font-family:inherit; background:var(--white);
+            resize:vertical; box-sizing:border-box;
+        }
+        .line-items-table input:focus, .line-items-table textarea:focus { outline:none; border-color:var(--accent); }
         .line-items-table .col-desc { width:60%; }
         .line-items-table .col-price { width:30%; }
         .line-items-table .col-action { width:10%; text-align:center; }
@@ -1435,14 +1440,19 @@ function fetchDefault(field) {
 /* ================================================================
    LINE ITEMS
    ================================================================ */
+function _escTextarea(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function renderLineItems(items) {
     var tbody = document.getElementById('deLineItems');
     tbody.innerHTML = '';
     items.forEach(function(item, i) {
+        var descSafe = _escTextarea(item.description || '');
         tbody.innerHTML +=
             '<tr>'
-            + '<td class="col-desc"><input type="text" value="' + escAttr(item.description || '') + '" data-li="desc" data-idx="' + i + '" oninput="recalculate()" placeholder="Service description..."></td>'
-            + '<td class="col-price"><input type="number" value="' + (item.price || '') + '" data-li="price" data-idx="' + i + '" oninput="recalculate()" step="any" min="0" placeholder="0.00"></td>'
+            + '<td class="col-desc"><textarea data-li="desc" data-idx="' + i + '" oninput="recalculate()" placeholder="Service description... (Shift+Enter for new line)">' + descSafe + '</textarea></td>'
+            + '<td class="col-price"><input type="number" value="' + escAttr(item.price != null ? item.price : '') + '" data-li="price" data-idx="' + i + '" oninput="recalculate()" step="any" min="0" placeholder="0.00"></td>'
             + '<td class="col-action"><button class="li-remove" onclick="removeLineItem(' + i + ')">✕</button></td>'
             + '</tr>';
     });
@@ -2156,7 +2166,7 @@ function esc(str) {
 }
 
 function escAttr(str) {
-    return (str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return String(str == null ? '' : str).replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function formatCurrency(amount, currency) {

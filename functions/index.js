@@ -12,9 +12,10 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { onRequest } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onDocumentWritten, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
+const { google } = require("googleapis");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -23,6 +24,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "20
 const RESERVATION_MINUTES = 10;
 const WORKSHOP_ID_DEFAULT = "ai-beginner-2026";
 const REGION = "asia-east2";
+const BOOKING_WEBHOOK_URL = "https://cloudy-low-potato-efficiency.trycloudflare.com/webhook/booking";
+const FREE_MATERIAL_COLLECTION = "freeMaterialLeads";
+const FREE_MATERIAL_ATTACHMENT_LIMIT = 7 * 1024 * 1024;
 
 /**
  * Create a pending reservation and Stripe Checkout Session.
@@ -316,18 +320,56 @@ exports.confirmPaymentUpload = onCall(
       throw new HttpsError("failed-precondition", "No payment screenshot uploaded");
     }
 
-    if (reg._enrollmentCounted) {
-      return { success: true, alreadyCounted: true };
+    if (reg.applicationSubmittedAt) {
+      return { success: true, alreadyCounted: true, alreadySubmitted: true };
     }
 
-    await regRef.update({ _enrollmentCounted: true });
-    return { success: true, alreadyCounted: false };
+    await regRef.update({
+      _enrollmentCounted: true,
+      applicationSubmittedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // Send webhook when user officially applies (confirm apply after payment proof)
+    const updatedSnap = await regRef.get();
+    const updatedReg = updatedSnap.exists ? updatedSnap.data() : {};
+    const payload = { id: registrationId, ...updatedReg };
+    try {
+      const response = await fetch(BOOKING_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const text = await response.text().catch(() => "");
+      if (!response.ok) {
+        console.error("confirmPaymentUpload webhook failed", { registrationId, status: response.status, body: text.slice(0, 500) });
+      } else {
+        console.log("confirmPaymentUpload webhook sent", { registrationId, status: response.status });
+      }
+    } catch (err) {
+      console.error("confirmPaymentUpload webhook error", { registrationId, message: err && err.message ? err.message : String(err) });
+    }
+
+    return { success: true, alreadyCounted: !!reg._enrollmentCounted, alreadySubmitted: false };
   }
 );
 
-function isEnrolledStatus(s) {
-  const t = (s || "pending").toString().toLowerCase();
-  return t === "pending" || t === "confirmed";
+/**
+ * Booking webhook is now sent from confirmPaymentUpload when user clicks "確認報名"
+ * (confirm apply after uploading payment proof). No longer triggered on document create.
+ */
+function isEnrolledStatus(reg) {
+  const t = ((reg && reg.status) || "pending").toString().toLowerCase();
+  if (t === "confirmed") return true;
+  if (t !== "pending") return false;
+  return !!(
+    reg &&
+    reg.paymentScreenshotUrl &&
+    (
+      reg.applicationSubmittedAt ||
+      reg._enrollmentCounted === true
+    )
+  );
 }
 
 function sortSessions(sessions) {
@@ -551,7 +593,7 @@ async function recomputeWorkshopEnrollmentCounts(workshopId) {
   regsSnap.forEach((doc) => {
     const reg = doc.data();
     reg._id = doc.id;
-    if (isEnrolledStatus(reg.status)) enrolled.push(reg);
+    if (isEnrolledStatus(reg)) enrolled.push(reg);
   });
 
   const updateData = { enrolled: enrolled.length };
@@ -642,7 +684,7 @@ async function inspectWorkshopEnrollmentMapping(workshopId) {
     registrations.push(reg);
   });
 
-  const enrolledRegs = registrations.filter((reg) => isEnrolledStatus(reg.status));
+  const enrolledRegs = registrations.filter((reg) => isEnrolledStatus(reg));
   const summary = {
     workshopId,
     courseType: workshop.courseType || "single",
@@ -773,7 +815,7 @@ async function forceWorkshopEnrollmentSync(workshopId) {
   regsSnap.forEach((doc) => {
     const reg = doc.data();
     reg._id = doc.id;
-    if (isEnrolledStatus(reg.status)) countedRegs.push(reg);
+    if (isEnrolledStatus(reg)) countedRegs.push(reg);
   });
 
   const updateData = { enrolled: countedRegs.length };
@@ -936,6 +978,93 @@ exports.forceWorkshopEnrollmentSync = onCall(
   }
 );
 
+exports.inspectRecentRegistrations = onCall(
+  { region: REGION, cors: true, invoker: "public" },
+  async (request) => {
+    const data = request.data || {};
+    const limit = Math.max(1, Math.min(Number(data.limit) || 10, 50));
+    const workshopId = (data.workshopId || "").toString().trim();
+    const userId = (data.userId || "").toString().trim();
+    const userEmail = (data.userEmail || "").toString().trim();
+
+    let query = db.collection("registrations");
+    if (workshopId) query = query.where("workshopId", "==", workshopId);
+    if (userId) query = query.where("userId", "==", userId);
+    if (userEmail) query = query.where("userEmail", "==", userEmail);
+
+    const snap = await query.orderBy("createdAt", "desc").limit(limit).get();
+    const registrations = snap.docs.map((doc) => {
+      const reg = doc.data() || {};
+      return {
+        id: doc.id,
+        workshopId: reg.workshopId || "",
+        userId: reg.userId || "",
+        userEmail: reg.userEmail || "",
+        name: reg.name || "",
+        status: reg.status || "",
+        selectedRound: reg.selectedRound || "",
+        selectedRoundLabel: reg.selectedRoundLabel || "",
+        workshopDate: reg.workshopDate || "",
+        workshopTime: reg.workshopTime || "",
+        hasPaymentScreenshot: !!reg.paymentScreenshotUrl,
+        hasApplicationSubmittedAt: !!reg.applicationSubmittedAt,
+        createdAt: reg.createdAt || null,
+        updatedAt: reg.updatedAt || null,
+      };
+    });
+
+    return {
+      success: true,
+      count: registrations.length,
+      filters: { workshopId, userId, userEmail, limit },
+      registrations,
+    };
+  }
+);
+
+exports.createWebhookTestRegistration = onCall(
+  { region: REGION, cors: true, invoker: "public" },
+  async () => {
+    const now = new Date();
+    const ref = db.collection("registrations").doc();
+    const payload = {
+      workshopId: "webhook-test",
+      workshopTitle: "Webhook Test Registration",
+      workshopDate: "2099年12月31日（星期四）",
+      workshopTime: "23:59",
+      selectedRound: "webhook-test-round",
+      selectedRoundLabel: "Webhook Test Round",
+      userId: "webhook-test-user",
+      userEmail: "webhook-test@aiflowtime.local",
+      name: "Webhook Test",
+      ageGroup: "25-34",
+      phone: "0000 0000",
+      jobType: "tech",
+      reasons: ["Webhook test"],
+      aiProblem: "Testing sendBookingWebhook logs",
+      expectation: "Verify trigger and response logs",
+      pricePaid: "HK$0",
+      discountApplied: false,
+      promoCode: "",
+      status: "pending",
+      paymentScreenshotUrl: "",
+      applicationSubmittedAt: null,
+      _webhookTest: true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      testCreatedAtIso: now.toISOString(),
+    };
+
+    await ref.set(payload);
+    return {
+      success: true,
+      id: ref.id,
+      workshopId: payload.workshopId,
+      userEmail: payload.userEmail,
+    };
+  }
+);
+
 /**
  * Image proxy — serves Firebase Storage files through the app domain.
  * Bypasses DNS issues with firebasestorage.googleapis.com.
@@ -1087,6 +1216,255 @@ exports.releaseExpiredReservations = onSchedule(
     const batch = db.batch();
     snap.docs.forEach((d) => batch.update(d.ref, { status: "expired" }));
     if (!snap.empty) await batch.commit();
+  }
+);
+
+function _escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function _cleanText(value, maxLen = 500) {
+  return String(value || "")
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLen);
+}
+
+function _cleanMultilineText(value, maxLen = 4000) {
+  return String(value || "").trim().slice(0, maxLen);
+}
+
+function _isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function _base64Url(buf) {
+  return Buffer.from(buf)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function _getFreeMaterialMailerConfig() {
+  return {
+    clientId: (process.env.GMAIL_CLIENT_ID || "").trim(),
+    clientSecret: (process.env.GMAIL_CLIENT_SECRET || "").trim(),
+    refreshToken: (process.env.GMAIL_REFRESH_TOKEN || "").trim(),
+    sender: (process.env.GMAIL_SENDER || "jacobfung@AIFLOWTIME.com").trim(),
+    replyTo: (process.env.GMAIL_REPLY_TO || process.env.GMAIL_SENDER || "jacobfung@AIFLOWTIME.com").trim(),
+  };
+}
+
+function _assertFreeMaterialMailerConfig() {
+  const cfg = _getFreeMaterialMailerConfig();
+  if (!cfg.clientId || !cfg.clientSecret || !cfg.refreshToken || !cfg.sender) {
+    throw new Error("Gmail API credentials are not configured. Set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, and GMAIL_SENDER.");
+  }
+  return cfg;
+}
+
+function _createGmailClient() {
+  const cfg = _assertFreeMaterialMailerConfig();
+  const auth = new google.auth.OAuth2(cfg.clientId, cfg.clientSecret);
+  auth.setCredentials({ refresh_token: cfg.refreshToken });
+  return { gmail: google.gmail({ version: "v1", auth }), cfg };
+}
+
+async function _prepareFreeMaterialAsset(pdfUrl, fileName, deliveryMode) {
+  const mode = (deliveryMode || "auto").toLowerCase();
+  const response = await fetch(pdfUrl, { redirect: "follow" });
+  if (!response.ok) {
+    throw new Error("Unable to fetch the configured PDF file.");
+  }
+  const contentType = (response.headers.get("content-type") || "application/pdf").split(";")[0].trim();
+  const arr = await response.arrayBuffer();
+  const buffer = Buffer.from(arr);
+  const safeFileName = _cleanText(fileName || "aiflowtime-free-material.pdf", 120) || "aiflowtime-free-material.pdf";
+  const canAttach = mode !== "link" && buffer.length > 0 && buffer.length <= FREE_MATERIAL_ATTACHMENT_LIMIT;
+  return {
+    downloadUrl: pdfUrl,
+    contentType,
+    safeFileName,
+    attach:
+      canAttach && (mode === "attachment" || mode === "auto")
+        ? { filename: safeFileName, contentType: contentType || "application/pdf", data: buffer }
+        : null,
+  };
+}
+
+function _buildFreeMaterialHtml({ recipientName, materialTitle, downloadUrl, pageTitle, attachInline }) {
+  const safeName = _escapeHtml(recipientName || "there");
+  const safeTitle = _escapeHtml(materialTitle || "your material");
+  const safePageTitle = _escapeHtml(pageTitle || "AIFlowTime");
+  const ctaHtml = downloadUrl
+    ? `<p style="margin:28px 0 0;"><a href="${_escapeHtml(downloadUrl)}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#D97757;color:#ffffff;text-decoration:none;font-weight:700;">Download now</a></p>`
+    : "";
+  const attachmentNote = attachInline
+    ? "<p style=\"margin:16px 0 0;\">The PDF is also attached directly to this email for convenience.</p>"
+    : "";
+  return `
+    <div style="font-family:Arial,sans-serif;background:#f6f2ee;padding:32px 16px;color:#231f20;">
+      <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:24px;padding:32px;border:1px solid rgba(35,31,32,0.08);">
+        <div style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#D97757;font-weight:700;">AIFLOWTIME</div>
+        <h1 style="margin:14px 0 0;font-size:30px;line-height:1.1;">Your free material is ready</h1>
+        <p style="margin:16px 0 0;line-height:1.8;">Hi ${safeName}, thanks for requesting <strong>${safeTitle}</strong> from ${safePageTitle}.</p>
+        <p style="margin:16px 0 0;line-height:1.8;">You can access it using the button below.</p>
+        ${ctaHtml}
+        ${attachmentNote}
+        <p style="margin:28px 0 0;line-height:1.8;color:rgba(35,31,32,0.72);">If the button does not work, copy and paste this link into your browser:<br>${_escapeHtml(downloadUrl || "")}</p>
+      </div>
+    </div>
+  `;
+}
+
+function _buildFreeMaterialEmail({ sender, replyTo, recipient, subject, html, attachment }) {
+  const boundary = `aiflowtime-${Date.now()}`;
+  const headers = [
+    `From: AIFLOWTIME <${sender}>`,
+    `To: ${recipient}`,
+    `Reply-To: ${replyTo}`,
+    `Subject: ${subject}`,
+    "MIME-Version: 1.0",
+  ];
+  let body = "";
+  if (attachment) {
+    headers.push(`Content-Type: multipart/mixed; boundary="${boundary}"`);
+    body =
+      `--${boundary}\r\n` +
+      "Content-Type: text/html; charset=UTF-8\r\n" +
+      "Content-Transfer-Encoding: 7bit\r\n\r\n" +
+      `${html}\r\n\r\n` +
+      `--${boundary}\r\n` +
+      `Content-Type: ${attachment.contentType}; name="${attachment.filename}"\r\n` +
+      `Content-Disposition: attachment; filename="${attachment.filename}"\r\n` +
+      "Content-Transfer-Encoding: base64\r\n\r\n" +
+      `${attachment.data.toString("base64")}\r\n\r\n` +
+      `--${boundary}--`;
+  } else {
+    headers.push("Content-Type: text/html; charset=UTF-8");
+    body = html;
+  }
+  return _base64Url(`${headers.join("\r\n")}\r\n\r\n${body}`);
+}
+
+exports.requestFreeMaterialDownload = onRequest(
+  { region: REGION, timeoutSeconds: 120, cors: true },
+  async (req, res) => {
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+    if (req.method !== "POST") {
+      res.status(405).json({ ok: false, error: "Method not allowed" });
+      return;
+    }
+
+    const data = req.body || {};
+    const name = _cleanText(data.name, 160);
+    const email = _cleanText(data.email, 200).toLowerCase();
+    const materialTitle = _cleanText(data.materialTitle || "AIFLOWTIME Free Material", 200);
+    const emailSubject = _cleanText(data.emailSubject || `${materialTitle} is ready`, 220);
+    const pdfUrl = String(data.pdfUrl || "").trim();
+    const fileName = _cleanText(data.fileName || "aiflowtime-free-material.pdf", 160);
+    const deliveryMode = _cleanText(data.deliveryMode || "auto", 40).toLowerCase();
+    const pageKey = _cleanText(data.pageKey, 120);
+    const pagePath = _cleanText(data.pagePath, 240);
+    const pageTitle = _cleanText(data.pageTitle, 240);
+    const sectionId = _cleanText(data.sectionId, 120);
+    const successMessage = _cleanMultilineText(data.successMessage, 500);
+    const consentText = _cleanMultilineText(data.consentText, 2000);
+    const consentAccepted = !!data.consentAccepted;
+
+    if (!name || !_isValidEmail(email)) {
+      res.status(400).json({ ok: false, error: "A valid name and email are required." });
+      return;
+    }
+    if (!pdfUrl) {
+      res.status(400).json({ ok: false, error: "This section does not have a PDF URL configured yet." });
+      return;
+    }
+    if (consentText && !consentAccepted) {
+      res.status(400).json({ ok: false, error: "Consent is required before sending the material." });
+      return;
+    }
+
+    const leadRef = db.collection(FREE_MATERIAL_COLLECTION).doc();
+    await leadRef.set({
+      type: "free-material-download",
+      name,
+      email,
+      materialTitle,
+      emailSubject,
+      pdfUrl,
+      fileName,
+      deliveryModeRequested: deliveryMode,
+      pageKey,
+      pagePath,
+      pageTitle,
+      sectionId,
+      consentText,
+      consentAccepted,
+      status: "queued",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    try {
+      const { gmail, cfg } = _createGmailClient();
+      const asset = await _prepareFreeMaterialAsset(pdfUrl, fileName, deliveryMode);
+      const html = _buildFreeMaterialHtml({
+        recipientName: name,
+        materialTitle,
+        downloadUrl: asset.downloadUrl,
+        pageTitle,
+        attachInline: !!asset.attach,
+      });
+      const raw = _buildFreeMaterialEmail({
+        sender: cfg.sender,
+        replyTo: cfg.replyTo,
+        recipient: email,
+        subject: emailSubject,
+        html,
+        attachment: asset.attach,
+      });
+      const response = await gmail.users.messages.send({
+        userId: "me",
+        requestBody: { raw },
+      });
+
+      await leadRef.set({
+        status: "sent",
+        gmailMessageId: response.data && response.data.id ? response.data.id : "",
+        deliveryModeResolved: asset.attach ? "attachment" : "link",
+        deliveredAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      res.status(200).json({
+        ok: true,
+        message: successMessage || "Your material is on the way. Please check your email.",
+      });
+    } catch (err) {
+      console.error("requestFreeMaterialDownload error:", err);
+      await leadRef.set({
+        status: "failed",
+        errorMessage: _cleanMultilineText(err && err.message ? err.message : String(err), 2000),
+        failedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      const message = /credentials are not configured/i.test(String(err && err.message))
+        ? "Email delivery is not configured yet. Add the Gmail API credentials and try again."
+        : "We couldn't send the material right now. Please try again shortly.";
+      res.status(500).json({ ok: false, error: message });
+    }
   }
 );
 

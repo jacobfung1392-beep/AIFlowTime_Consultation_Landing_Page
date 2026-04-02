@@ -34,7 +34,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js"></script>
+    <script src="/js/shared-utils.js?v=2"></script>
 
     <script>
     var db;
@@ -170,6 +170,7 @@
         var wsMode = ws.mode || 'offline';
         var qrDataUrl = null;
         function _resolvedReceiptMode() {
+            if (reg.attendanceMode) return reg.attendanceMode;
             if (sessionLines.length === 1 && sessionLines[0] && sessionLines[0].mode) return sessionLines[0].mode;
             return _safeText(wsMode).toLowerCase() || 'offline';
         }
@@ -226,8 +227,16 @@
         }
         function _meetingLinkForMode(mode, zoomLink) {
             var currentMode = _modeValue(mode);
-            if (currentMode !== 'online' && currentMode !== 'both') return '';
+            if (currentMode !== 'online') return '';
             return _safeText(zoomLink);
+        }
+        function _noticeForMode(mode) {
+            var currentMode = _modeValue(mode);
+            var legacy = _safeText(ws.notice);
+            var offline = _safeText(ws.offlineNotice) || legacy;
+            var online = _safeText(ws.onlineNotice);
+            if (currentMode === 'online') return online || legacy;
+            return offline || legacy;
         }
         function _addSessionItem(line, location, meetingLink, mode) {
             if (line) sessionLines.push({
@@ -486,7 +495,7 @@
         y += 16;
 
         // Notice — may contain Chinese
-        var safeNotice = _safeText(ws.notice);
+        var safeNotice = _noticeForMode(_resolvedReceiptMode());
         if (safeNotice) {
             doc.setDrawColor(220, 220, 220);
             doc.line(margin, y, W - margin, y);

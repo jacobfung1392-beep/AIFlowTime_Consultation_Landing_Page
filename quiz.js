@@ -1,84 +1,107 @@
+if (window.__USE_NEW_QUIZ_RUNTIME) {
+    // New layout-driven runtime is loaded from /js/quiz-runtime.js.
+} else {
 // ============================================================
 // AIFlowTime — 2-Minute AI Diagnostic
 // ============================================================
 
+var AXES = [
+    { key: 'communication', label: 'AI 溝通力', emoji: '🗣️', description: '同AI溝通嘅能力' },
+    { key: 'visual', label: '視覺創作力', emoji: '🎨', description: '用AI做設計同視覺內容' },
+    { key: 'efficiency', label: '效率槓桿力', emoji: '⚡', description: '用AI慳時間嘅程度' },
+    { key: 'automation', label: '自動化力', emoji: '🔄', description: '建立AI系統同workflow' },
+    { key: 'awareness', label: 'AI 認知力', emoji: '🧠', description: '對AI能力同工具嘅認知' },
+    { key: 'action', label: '行動力', emoji: '🚀', description: '學習同執行嘅意願' }
+];
+
+var MAX_SCORES = {
+    communication: 16,
+    visual: 9,
+    efficiency: 19,
+    automation: 17,
+    awareness: 20,
+    action: 20
+};
+
+function _emptyAxisScores() {
+    var out = {};
+    AXES.forEach(function(axis) { out[axis.key] = 0; });
+    return out;
+}
+
+function _emptyQuizScores() {
+    return {
+        avgScore: 0,
+        level: 0,
+        painTag: '',
+        desireTag: '',
+        recommendedProduct: '',
+        axisTotals: _emptyAxisScores(),
+        axisNormalized: _emptyAxisScores(),
+        lowestAxis: AXES[0].key,
+        highestAxis: AXES[0].key
+    };
+}
+
 var QUIZ_QUESTIONS = [
     {
         id: 1,
-        title: '你平時點樣用 AI？',
-        subtitle: '揀最貼近你真實情況嘅選項',
+        title: '你要寫一封重要嘅客戶回覆email，你會點做？',
+        subtitle: '揀最貼近你真實做法嘅選項',
         options: [
-            { text: '聽過但基本上未用過', scores: { explorer: 3, dabbler: 0, repeater: 0, creator: 0 } },
-            { text: '間中問下 ChatGPT，但成日覺得答案唔啱', scores: { explorer: 2, dabbler: 2, repeater: 0, creator: 0 } },
-            { text: '日常都會用，但每次都要重新諗點問', scores: { explorer: 0, dabbler: 3, repeater: 1, creator: 0 } },
-            { text: '已經有一套自己嘅用法，可以穩定出到嘢', scores: { explorer: 0, dabbler: 0, repeater: 2, creator: 2 } }
+            { text: '自己由零開始寫，逐字逐句諗', scores: { communication: 1, visual: 0, efficiency: 1, automation: 0, awareness: 1, action: 1 } },
+            { text: 'Google搵範本，然後改改佢', scores: { communication: 2, visual: 0, efficiency: 2, automation: 0, awareness: 2, action: 1 } },
+            { text: '叫ChatGPT幫你起稿，但要改好多先用得', scores: { communication: 3, visual: 0, efficiency: 2, automation: 0, awareness: 3, action: 2 } },
+            { text: '用設定好嘅prompt，AI出稿後微調就send', scores: { communication: 4, visual: 0, efficiency: 4, automation: 2, awareness: 4, action: 3 } },
+            { text: 'AI Agent自動draft好，approve就得', scores: { communication: 5, visual: 0, efficiency: 5, automation: 5, awareness: 5, action: 4 } }
         ]
     },
     {
         id: 2,
-        title: 'AI 俾你嘅結果，你通常要改幾多次？',
-        subtitle: '回想你最近一次用 AI 做嘢嘅經驗',
+        title: '老闆叫你出一張社交媒體宣傳圖，限今日交。你會？',
+        subtitle: '諗下你真實會點處理',
         options: [
-            { text: '改到唔想改，最後自己做算', scores: { explorer: 3, dabbler: 1, repeater: 0, creator: 0 } },
-            { text: '通常要改 3-5 次先收貨', scores: { explorer: 1, dabbler: 3, repeater: 0, creator: 0 } },
-            { text: '改 1-2 次就 OK，因為我知點問', scores: { explorer: 0, dabbler: 1, repeater: 2, creator: 1 } },
-            { text: '好少需要改，我嘅 prompt 已經好穩定', scores: { explorer: 0, dabbler: 0, repeater: 2, creator: 2 } }
+            { text: '開Canva慢慢砌，搵素材搵到天黑', scores: { communication: 0, visual: 1, efficiency: 1, automation: 0, awareness: 1, action: 1 } },
+            { text: '用Canva template改文字同顏色', scores: { communication: 0, visual: 2, efficiency: 2, automation: 0, awareness: 2, action: 1 } },
+            { text: '用AI生成圖片，但唔太識控制風格', scores: { communication: 1, visual: 3, efficiency: 2, automation: 0, awareness: 3, action: 2 } },
+            { text: '用Midjourney加品牌風格prompt，出幾個版本揀', scores: { communication: 3, visual: 4, efficiency: 3, automation: 1, awareness: 4, action: 3 } },
+            { text: '已經有AI設計workflow，10分鐘內出稿', scores: { communication: 3, visual: 5, efficiency: 5, automation: 4, awareness: 5, action: 4 } }
         ]
     },
     {
         id: 3,
-        title: '你上星期花咗幾多時間做重複嘅嘢？',
-        subtitle: '例如：覆訊息、搵檔案、填表、排版、整 IG post...',
+        title: '你收到一份50頁行業報告，要下午前做summary俾老闆。',
+        subtitle: '呢個情境考驗你用AI處理資訊嘅能力',
         options: [
-            { text: '唔太清楚，冇留意過', scores: { explorer: 2, dabbler: 1, repeater: 1, creator: 0 } },
-            { text: '應該超過一半時間都係重複嘅', scores: { explorer: 0, dabbler: 1, repeater: 3, creator: 1 } },
-            { text: '有啲重複，但我已經有方法處理部分', scores: { explorer: 0, dabbler: 0, repeater: 2, creator: 2 } },
-            { text: '好少，大部分重複嘢已經自動化', scores: { explorer: 0, dabbler: 0, repeater: 0, creator: 2 } }
+            { text: '硬啃，由頭睇到尾，慢慢寫重點', scores: { communication: 0, visual: 0, efficiency: 1, automation: 0, awareness: 1, action: 1 } },
+            { text: '睇目錄同結論，自己寫個大概', scores: { communication: 0, visual: 0, efficiency: 2, automation: 0, awareness: 2, action: 2 } },
+            { text: 'Upload去ChatGPT叫佢summarize，但唔太識點問', scores: { communication: 2, visual: 0, efficiency: 2, automation: 0, awareness: 3, action: 2 } },
+            { text: '用AI做structured summary，再追問細節', scores: { communication: 4, visual: 0, efficiency: 4, automation: 1, awareness: 4, action: 3 } },
+            { text: '有自動化flow，PDF入去自動出brief同action items', scores: { communication: 4, visual: 0, efficiency: 5, automation: 5, awareness: 5, action: 4 } }
         ]
     },
     {
         id: 4,
-        title: '你而家用緊幾多個 AI 工具？',
-        subtitle: '包括 ChatGPT、Canva、Notion AI、Midjourney 等',
+        title: '而家最困擾你嘅係咩？',
+        subtitle: '揀一個最令你「嗯⋯⋯係喎」嘅選項',
         options: [
-            { text: '0-1 個，主要係 ChatGPT', scores: { explorer: 3, dabbler: 1, repeater: 0, creator: 0 } },
-            { text: '2-3 個，但唔太確定邊個最適合自己', scores: { explorer: 1, dabbler: 3, repeater: 0, creator: 1 } },
-            { text: '3-5 個，各有各用途', scores: { explorer: 0, dabbler: 1, repeater: 2, creator: 2 } },
-            { text: '5 個以上，而且有啲已經互相連接', scores: { explorer: 0, dabbler: 0, repeater: 1, creator: 3 } }
+            { text: '資訊太多，唔知從何入手', scores: { communication: 1, visual: 1, efficiency: 1, automation: 1, awareness: 0, action: 1 }, painTag: 'foundations' },
+            { text: 'AI出嘅嘢成日唔啱，浪費時間', scores: { communication: 0, visual: 1, efficiency: 1, automation: 1, awareness: 2, action: 2 }, painTag: 'prompting' },
+            { text: '日日都好忙但好似冇乜進展', scores: { communication: 2, visual: 1, efficiency: 0, automation: 0, awareness: 2, action: 1 }, painTag: 'automation' },
+            { text: '想做靚啲嘅內容但冇時間／唔識', scores: { communication: 2, visual: 0, efficiency: 1, automation: 1, awareness: 2, action: 2 }, painTag: 'visual' },
+            { text: '其實都OK，想同人交流進步', scores: { communication: 3, visual: 3, efficiency: 3, automation: 2, awareness: 3, action: 3 }, painTag: 'community' }
         ]
     },
     {
         id: 5,
-        title: '而家最困擾你嘅係咩？',
-        subtitle: '揀一個最令你「嗯⋯⋯係喎」嘅選項',
+        title: '你最想AI幫你做到咩？',
+        subtitle: '想像下如果AI真係幫到你，你最想要邊個結果',
         options: [
-            { text: '資訊太多，唔知從何入手', scores: { explorer: 3, dabbler: 1, repeater: 0, creator: 0 } },
-            { text: 'AI 出嘅嘢成日唔啱，浪費時間', scores: { explorer: 1, dabbler: 3, repeater: 0, creator: 0 } },
-            { text: '日日都好忙但好似冇乜進展', scores: { explorer: 0, dabbler: 0, repeater: 3, creator: 1 } },
-            { text: '想做靚啲嘅內容但冇時間／唔識', scores: { explorer: 0, dabbler: 0, repeater: 1, creator: 3 } },
-            { text: '其實都 OK，想再進步多啲', scores: { explorer: 0, dabbler: 0, repeater: 1, creator: 1 } }
-        ]
-    },
-    {
-        id: 6,
-        title: '當你搵到一個好方法做嘢，之後會點？',
-        subtitle: '呢題反映你嘅系統化思維',
-        options: [
-            { text: '下次已經唔記得點做', scores: { explorer: 3, dabbler: 1, repeater: 0, creator: 0 } },
-            { text: '會記住，但冇特別記錄落嚟', scores: { explorer: 1, dabbler: 3, repeater: 0, creator: 0 } },
-            { text: '會寫低或者存起佢，之後可以再用', scores: { explorer: 0, dabbler: 1, repeater: 3, creator: 1 } },
-            { text: '會整成模板或流程，確保每次都用到', scores: { explorer: 0, dabbler: 0, repeater: 1, creator: 3 } }
-        ]
-    },
-    {
-        id: 7,
-        title: '如果有人教你每星期慳返 5 小時，你會？',
-        subtitle: '最後一題！呢題反映你嘅行動力',
-        options: [
-            { text: '聽下先，未必會即刻行動', scores: { explorer: 2, dabbler: 1, repeater: 0, creator: 0 } },
-            { text: '有興趣，但要睇下適唔適合自己', scores: { explorer: 1, dabbler: 2, repeater: 1, creator: 0 } },
-            { text: '會認真考慮，如果有清晰步驟就會跟', scores: { explorer: 0, dabbler: 1, repeater: 2, creator: 1 } },
-            { text: '即刻想知點做，我已經準備好', scores: { explorer: 0, dabbler: 0, repeater: 1, creator: 3 } }
+            { text: '幫我快啲完成日常工作', scores: { communication: 1, visual: 0, efficiency: 1, automation: 0, awareness: 1, action: 3 }, desireTag: 'efficiency' },
+            { text: '幫我做出專業級嘅視覺內容', scores: { communication: 0, visual: 1, efficiency: 0, automation: 0, awareness: 1, action: 3 }, desireTag: 'visual' },
+            { text: '幫我建立自動化系統唔使重複做嘢', scores: { communication: 0, visual: 0, efficiency: 1, automation: 1, awareness: 2, action: 4 }, desireTag: 'automation' },
+            { text: '幫我學識新技能保持競爭力', scores: { communication: 1, visual: 1, efficiency: 1, automation: 1, awareness: 1, action: 4 }, desireTag: 'learning' },
+            { text: '幫我開展副業或新收入來源', scores: { communication: 1, visual: 1, efficiency: 1, automation: 1, awareness: 2, action: 5 }, desireTag: 'business' }
         ]
     }
 ];
@@ -87,89 +110,83 @@ var QUIZ_QUESTIONS = [
 // Profile Definitions
 // ============================================================
 var PROFILES = {
-    explorer: {
-        key: 'explorer',
-        icon: '🌀',
-        name: 'The Overwhelmed Explorer',
-        nameCn: '資訊迷航者',
-        color: '#6B7280',
-        workshopId: 'workshop-0',
-        workshopName: 'Workshop 0 — Change Your Mind',
-        workshopLink: '/ai-beginner-workshop#workshops',
-        diagnosis: '你對 AI 充滿好奇，也看過不少相關內容，但一直停留在「知道」卻「用不出來」的階段。每次打開 ChatGPT 都不太確定該怎麼問，結果不是答非所問，就是太空泛沒辦法用。',
-        prediction: '如果繼續這樣下去，你會花越來越多時間看教學、存 Reels，但實際能力不會提升。資訊焦慮只會越來越重，而身邊的人已經開始用 AI 提升效率了。',
-        immediateFix: '今天就試一件事：打開 ChatGPT，把你今天最頭痛的一件工作，用「我想要 ___，背景是 ___，請用 ___ 格式回答」這個結構問一次。你會發現，問得清楚，AI 就答得準。',
-        workshopPitch: '這正是 Workshop 0 要解決的問題——不教工具，先教你「怎麼想、怎麼問」。90 分鐘後你會帶走一套屬於你的提問框架。'
+    observer: {
+        emoji: '🪑',
+        name: 'AI 旁觀者',
+        level: 1,
+        levelLabel: 'Level 1 / 5',
+        diagnosis: '你仲企喺AI時代嘅門口觀望。唔係你唔叻，係你未開始。好消息：而家開始，你可以用2小時追返人哋用咗半年先識嘅嘢。',
+        warning: '每遲一個月開始，你同識用AI嘅人之間嘅差距就大一個月。',
+        action: '你需要嘅係一個起點 — 學識同AI對話嘅基本功。',
+        color: '#ef4444'
     },
     dabbler: {
-        key: 'dabbler',
-        icon: '🔧',
-        name: 'The Prompt Dabbler',
-        nameCn: 'AI 試水者',
-        color: '#D97757',
-        workshopId: 'workshop-a',
-        workshopName: 'Workshop A — AI 原住民養成班',
-        workshopLink: '/ai-beginner-workshop#workshops',
-        diagnosis: '你已經在用 AI，但成果時好時壞。有時候 ChatGPT 給你驚喜，有時候又完全不對路。你知道 AI 很強，但總覺得自己沒有「用對」，也不確定該用哪個工具做哪件事。',
-        prediction: '如果繼續靠感覺用 AI，你的效率天花板會很快到頂。你會一直在「試 → 失敗 → 換工具 → 再試」的循環裡，花了時間卻沒有累積。',
-        immediateFix: '今天就做一件事：把你最常用 AI 做的那件事，寫下你的 prompt，然後加上這三個元素——角色（你是 ___）、背景（我的情況是 ___）、格式（請用 ___ 方式回答）。馬上再試一次，感受差別。',
-        workshopPitch: 'Workshop A 會幫你找到最適合你的 AI 工具組合，學會穩定出好結果的 prompt 結構，並在課堂上完成一件你真正需要做的事——不是示範，是你帶走的實際成果。'
+        emoji: '🏊',
+        name: 'AI 試水者',
+        level: 2,
+        levelLabel: 'Level 2 / 5',
+        diagnosis: '你已經濕咗腳趾，但仲未真正落水。你用過ChatGPT，但佢俾你嘅嘢成日唔啱用。問題唔係AI，係你未識點同佢溝通。',
+        warning: '你而家嘅用法，可能令你覺得AI冇用。但其實係方法未啱。',
+        action: '你需要掌握prompt嘅底層邏輯，先可以真正用AI慳時間。',
+        color: '#f97316'
     },
-    repeater: {
-        key: 'repeater',
-        icon: '⏰',
-        name: 'The Busy Repeater',
-        nameCn: '時間困局者',
-        color: '#2563EB',
-        workshopId: 'workshop-b',
-        workshopName: 'Workshop B — 時間回購術',
-        workshopLink: '/ai-beginner-workshop#workshops',
-        diagnosis: '你很努力，每天都在忙，但忙完回頭看，好像沒有真正推進什麼重要的事。你的時間被大量重複性的瑣事吃掉——覆訊息、排版、填表、找檔案⋯⋯你知道應該有更好的方法，但一直沒時間去想。',
-        prediction: '如果繼續這樣，你會越來越累，但產出不會等比增加。你的競爭對手已經開始用 AI 自動化這些瑣事，而你還在用最原始的方式硬撐。差距會越拉越大。',
-        immediateFix: '今天就做一件事：拿出紙筆，寫下你上星期做過最重複的 3 件事。然後問自己：「如果有個助手幫我做這件事，我只需要給他什麼指令？」這就是自動化的起點。',
-        workshopPitch: 'Workshop B 會教你識別「時間吸血鬼」，把低價值任務交給 AI，並在課堂上親手打造一個明天就能用的 Workflow。目標：每週回購 5-10 小時。'
+    tooluser: {
+        emoji: '🔧',
+        name: 'AI 工具人',
+        level: 3,
+        levelLabel: 'Level 3 / 5',
+        diagnosis: '你識用AI，但只限於基本任務。你仲未解鎖AI喺視覺、自動化、系統化方面嘅威力。你嘅下一步唔係學多啲工具，係學點樣用AI建立系統。',
+        warning: '你已經過咗起步階段，但小心停喺comfort zone。',
+        action: '係時候揀一個方向深入 — 視覺創作定自動化。',
+        color: '#eab308'
     },
-    creator: {
-        key: 'creator',
-        icon: '🎨',
-        name: 'The Visual Creator',
-        nameCn: '視覺突破者',
-        color: '#7C3AED',
-        workshopId: 'workshop-c',
-        workshopName: 'Workshop C — 下一級視覺',
-        workshopLink: '/ai-beginner-workshop#workshops',
-        diagnosis: '你已經有一定的 AI 基礎和系統思維，但在視覺內容上遇到瓶頸。你需要持續產出品牌一致的圖像和影片，但每次都花太多時間在設計、改稿、來回溝通上。',
-        prediction: '如果繼續手動處理每一張圖、每一條片，你的內容產出速度會成為增長的最大瓶頸。在這個視覺為王的時代，產出慢就是落後。',
-        immediateFix: '今天就試一件事：打開任何一個 AI 圖像工具（Canva AI、ChatGPT DALL-E），用「風格 + 主題 + 用途」的結構生成一張圖。例如：「簡約商務風格，主題是時間管理，用於 IG Story」。',
-        workshopPitch: 'Workshop C 會教你用 AI 快速生成一致風格的品牌素材，從構思到成品一條龍完成，並帶走一套可持續複製的視覺輸出流程。'
+    'semi-auto': {
+        emoji: '⚙️',
+        name: 'AI 半自動化者',
+        level: 4,
+        levelLabel: 'Level 4 / 5',
+        diagnosis: '你已經行得好前，但你仲係一個人戰鬥。你需要嘅唔係更多課程，係一個系統同一班同路人。',
+        warning: '單打獨鬥嘅天花板好快到。你需要社群同系統嚟突破。',
+        action: '加入一個識用AI嘅社群，交流自動化workflow同實戰經驗。',
+        color: '#3b82f6'
     },
-    advanced: {
-        key: 'advanced',
-        icon: '🚀',
-        name: 'The Optimization Seeker',
-        nameCn: '系統進化者',
-        color: '#059669',
-        workshopId: 'workshop-d',
-        workshopName: 'Workshop D — AI × 自我突破',
-        workshopLink: '/ai-beginner-workshop#workshops',
-        diagnosis: '你已經走在大多數人前面了。你有穩定的 AI 使用習慣，也建立了一些系統。但你知道自己還可以更好——你想要的不只是效率，而是一套能持續進化的個人成長系統。',
-        prediction: '你目前的瓶頸不是工具或技巧，而是方向和架構。如果沒有人幫你拉高視角，你可能會在現有水平上原地踏步，錯過真正的突破機會。',
-        immediateFix: '今天就做一件事：打開 ChatGPT，問它「Based on my current situation [描述你的現狀], what are the 3 highest-leverage changes I could make in the next 30 days?」讓 AI 做你的外部大腦。',
-        workshopPitch: 'Workshop D 用 AI 做自我整理、拆解卡點、制定行動路線。你會帶走一份 30 天可落地的行動計劃，不靠意志硬撐，靠系統推動改變。'
+    native: {
+        emoji: '🧬',
+        name: 'AI 原住民',
+        level: 5,
+        levelLabel: 'Level 5 / 5',
+        diagnosis: '你已經係AI Native。你唔需要基礎課程 — 你需要嘅係同level嘅人交流，同埋更進階嘅自動化系統。',
+        warning: '你嘅挑戰唔係學習，係搵到同頻嘅人一齊Build。',
+        action: '歡迎加入進階社群，一齊Build更大嘅嘢。',
+        color: '#a855f7'
+    }
+};
+
+var PRODUCT_CTA = {
+    starter: {
+        label: 'AI 起動班 — 2小時學識同AI對話',
+        url: '/workshop-0',
+        price: 'HKD 180'
     },
-    beginner: {
-        key: 'beginner',
-        icon: '📖',
-        name: 'The Fresh Starter',
-        nameCn: 'AI 新手村',
-        color: '#9CA3AF',
-        workshopId: null,
-        workshopName: null,
-        workshopLink: null,
-        diagnosis: '你對 AI 還很陌生，可能連 ChatGPT 都還沒怎麼用過。這完全沒問題——每個人都是從零開始的。重要的是你已經踏出了第一步，做了這個診斷。',
-        prediction: '好消息是：現在開始學 AI，你還來得及。壞消息是：如果再等下去，差距只會越來越大。AI 不會取代你，但會用 AI 的人會。',
-        immediateFix: '今天就做一件事：打開 chat.openai.com，註冊一個免費帳號，然後問它「我是一個 [你的職業]，我想用 AI 幫我 [你最想解決的一件事]，請給我 3 個具體建議」。就這樣，你已經開始了。',
-        workshopPitch: null
+    visual: {
+        label: 'AI 視覺創作營 — 3堂做出品牌設計語言',
+        url: '/workshop-c',
+        price: 'HKD 1,599'
+    },
+    bootcamp: {
+        label: 'AI 原住民修煉計劃 — 從零到AI自動化',
+        url: '/bootcamp',
+        price: '即將推出'
+    },
+    community: {
+        label: '加入 AIFLOWTIME 社群',
+        url: '/community',
+        price: '免費'
+    },
+    pro: {
+        label: 'AIFLOWTIME Pro 會員',
+        url: '/community-pro',
+        price: 'HKD 499/月'
     }
 };
 
@@ -179,17 +196,24 @@ var PROFILES = {
 var _quizState = {
     currentQ: 0,
     answers: [],
-    scores: { explorer: 0, dabbler: 0, repeater: 0, creator: 0 },
+    scores: _emptyQuizScores(),
     profile: null,
-    leadCaptured: false
+    leadCaptured: false,
+    activeAxisKey: AXES[0].key
 };
 
 // ============================================================
 // Init
 // ============================================================
 function initQuiz() {
-    _quizState = { currentQ: 0, answers: [], scores: { explorer: 0, dabbler: 0, repeater: 0, creator: 0 }, profile: null, leadCaptured: false };
+    _quizState = { currentQ: 0, answers: [], scores: _emptyQuizScores(), profile: null, leadCaptured: false, activeAxisKey: AXES[0].key };
     renderIntro();
+}
+
+function setQuizMainMode(mode) {
+    var node = document.getElementById('quizMain');
+    if (!node) return;
+    node.classList.toggle('is-result-mode', mode === 'result');
 }
 
 // ============================================================
@@ -197,11 +221,12 @@ function initQuiz() {
 // ============================================================
 function renderIntro() {
     var main = document.getElementById('quizMain');
+    setQuizMainMode('default');
     main.innerHTML =
         '<div class="q-intro fade-in visible">' +
             '<div class="q-intro-badge">2 分鐘 AI 診斷</div>' +
             '<h1 class="q-intro-title">你嘅 AI 能力<br>去到邊？</h1>' +
-            '<p class="q-intro-sub">7 條情境題，幫你搵出真正嘅瓶頸<br>同最適合你嘅下一步。</p>' +
+            '<p class="q-intro-sub">5 條情境題，幫你搵出真正嘅瓶頸<br>同最適合你嘅下一步。</p>' +
             '<div class="q-intro-points">' +
                 '<div class="q-intro-point"><span class="q-intro-point-icon">🎯</span><div><strong>診斷你嘅 AI 成熟度</strong><br><span>唔係考試，係幫你認清自己</span></div></div>' +
                 '<div class="q-intro-point"><span class="q-intro-point-icon">💡</span><div><strong>即場俾你一個可以做嘅行動</strong><br><span>唔使等，今日就用得著</span></div></div>' +
@@ -235,6 +260,7 @@ function renderQuestion() {
     updateProgress(num, total);
 
     var main = document.getElementById('quizMain');
+    setQuizMainMode('default');
     var optionsHtml = '';
     for (var i = 0; i < q.options.length; i++) {
         var opt = q.options[i];
@@ -271,7 +297,7 @@ function selectOption(btn, idx) {
             computeProfile();
             renderLeadCapture();
         }
-    }, 350);
+    }, 500);
 }
 
 function prevQuestion() {
@@ -285,40 +311,91 @@ function prevQuestion() {
 // Compute Profile
 // ============================================================
 function computeProfile() {
-    var totals = { explorer: 0, dabbler: 0, repeater: 0, creator: 0 };
+    var totals = _emptyAxisScores();
     for (var i = 0; i < _quizState.answers.length; i++) {
         var q = QUIZ_QUESTIONS[i];
         var chosen = _quizState.answers[i];
-        if (chosen === undefined || chosen === null) continue;
-        var scores = q.options[chosen].scores;
-        for (var k in scores) {
-            if (scores.hasOwnProperty(k)) totals[k] += scores[k];
-        }
+        if (chosen === undefined || chosen === null || !q || !q.options || !q.options[chosen]) continue;
+        var optionScores = q.options[chosen].scores || {};
+        AXES.forEach(function(axis) {
+            totals[axis.key] += optionScores[axis.key] || 0;
+        });
     }
 
-    var maxKey = 'explorer';
-    var maxVal = -1;
-    var totalAll = 0;
-    for (var k in totals) {
-        if (totals.hasOwnProperty(k)) {
-            totalAll += totals[k];
-            if (totals[k] > maxVal) { maxVal = totals[k]; maxKey = k; }
-        }
+    var normalized = _emptyAxisScores();
+    var normalizedSum = 0;
+    AXES.forEach(function(axis) {
+        var max = MAX_SCORES[axis.key] || 1;
+        normalized[axis.key] = Math.round((totals[axis.key] / max) * 100);
+        normalizedSum += normalized[axis.key];
+    });
+
+    var avgScore = Math.round(normalizedSum / AXES.length);
+    var level = 1;
+    var archetype = 'observer';
+    if (avgScore <= 25) {
+        level = 1;
+        archetype = 'observer';
+    } else if (avgScore <= 40) {
+        level = 2;
+        archetype = 'dabbler';
+    } else if (avgScore <= 60) {
+        level = 3;
+        archetype = 'tooluser';
+    } else if (avgScore <= 80) {
+        level = 4;
+        archetype = 'semi-auto';
+    } else {
+        level = 5;
+        archetype = 'native';
     }
 
-    // Very low total = complete beginner
-    if (totalAll <= 8) {
-        _quizState.profile = PROFILES.beginner;
-    }
-    // High creator + high repeater = advanced
-    else if (totals.creator >= 12 && totals.repeater >= 8) {
-        _quizState.profile = PROFILES.advanced;
-    }
-    else {
-        _quizState.profile = PROFILES[maxKey];
+    var painQuestion = QUIZ_QUESTIONS[3];
+    var desireQuestion = QUIZ_QUESTIONS[4];
+    var painOption = painQuestion && painQuestion.options ? painQuestion.options[_quizState.answers[3]] : null;
+    var desireOption = desireQuestion && desireQuestion.options ? desireQuestion.options[_quizState.answers[4]] : null;
+    var painTag = painOption && painOption.painTag ? painOption.painTag : '';
+    var desireTag = desireOption && desireOption.desireTag ? desireOption.desireTag : '';
+
+    var lowestAxis = AXES[0].key;
+    var highestAxis = AXES[0].key;
+    AXES.forEach(function(axis) {
+        if (normalized[axis.key] < normalized[lowestAxis]) lowestAxis = axis.key;
+        if (normalized[axis.key] > normalized[highestAxis]) highestAxis = axis.key;
+    });
+
+    var recommendedProduct = 'starter';
+    if (level <= 2) {
+        recommendedProduct = 'starter';
+    } else if (lowestAxis === 'visual') {
+        recommendedProduct = 'visual';
+    } else if (lowestAxis === 'automation') {
+        recommendedProduct = 'bootcamp';
+    } else if (level >= 4 && lowestAxis === 'action') {
+        recommendedProduct = 'community';
+    } else if (level >= 4 && (lowestAxis === 'communication' || lowestAxis === 'efficiency')) {
+        recommendedProduct = 'community';
+    } else if (level === 5) {
+        recommendedProduct = 'pro';
+    } else if (level === 3 && lowestAxis === 'communication') {
+        recommendedProduct = 'starter';
+    } else {
+        recommendedProduct = 'bootcamp';
     }
 
-    _quizState.scores = totals;
+    _quizState.profile = Object.assign({ key: archetype }, PROFILES[archetype]);
+    _quizState.activeAxisKey = lowestAxis;
+    _quizState.scores = {
+        avgScore: avgScore,
+        level: level,
+        painTag: painTag,
+        desireTag: desireTag,
+        recommendedProduct: recommendedProduct,
+        axisTotals: totals,
+        axisNormalized: normalized,
+        lowestAxis: lowestAxis,
+        highestAxis: highestAxis
+    };
 }
 
 // ============================================================
@@ -328,14 +405,15 @@ function renderLeadCapture() {
     hideProgress();
     var p = _quizState.profile;
     var main = document.getElementById('quizMain');
+    setQuizMainMode('default');
     main.innerHTML =
         '<div class="q-gate fade-in visible">' +
-            '<div class="q-gate-icon">' + p.icon + '</div>' +
-            '<h2 class="q-gate-title">你嘅 AI Profile 已經準備好</h2>' +
+            '<div class="q-gate-icon">' + p.emoji + '</div>' +
+            '<h2 class="q-gate-title">你嘅 AI 診斷結果已經準備好</h2>' +
             '<div class="q-gate-preview">' +
                 '<div class="q-gate-blur">' +
-                    '<div class="q-gate-profile-name" style="color:' + p.color + ';">' + escH(p.nameCn) + '</div>' +
-                    '<div class="q-gate-profile-sub">' + escH(p.name) + '</div>' +
+                    '<div class="q-gate-profile-name" style="color:' + p.color + ';">' + escH(p.name) + '</div>' +
+                    '<div class="q-gate-profile-sub">' + escH(p.levelLabel) + '</div>' +
                 '</div>' +
             '</div>' +
             '<p class="q-gate-desc">輸入你嘅資料，即刻解鎖個人化診斷報告<br>（包括即場可用嘅行動建議）</p>' +
@@ -432,8 +510,16 @@ function submitLead(e) {
     _quizState.leadCaptured = true;
 
     var profileKey = _quizState.profile ? _quizState.profile.key : 'unknown';
-    var profileNameCn = _quizState.profile ? _quizState.profile.nameCn : '';
-    var safeScores = _quizState.scores || { explorer: 0, dabbler: 0, repeater: 0, creator: 0 };
+    var profileNameCn = _quizState.profile ? _quizState.profile.name : '';
+    var safeScores = _quizState.scores || _emptyQuizScores();
+    var productMeta = PRODUCT_CTA[safeScores.recommendedProduct] || null;
+    var productLabel = productMeta ? productMeta.label : '';
+    var phoneValue = contactType === 'phone' ? ((countryCode ? '+' + countryCode + ' ' : '') + contact) : '';
+    var emailValue = contactType === 'email' ? contact : '';
+    var referrer = (typeof document !== 'undefined' && document.referrer) ? document.referrer : null;
+    var utmSource = getURLParam('utm_source');
+    var utmMedium = getURLParam('utm_medium');
+    var utmCampaign = getURLParam('utm_campaign');
     var safeAnswers = [];
     for (var i = 0; i < QUIZ_QUESTIONS.length; i++) {
         safeAnswers.push(_quizState.answers[i] != null ? _quizState.answers[i] : -1);
@@ -443,32 +529,106 @@ function submitLead(e) {
     try {
         if (typeof firebase !== 'undefined' && firebase.firestore) {
             var db = firebase.firestore();
-            db.collection('quizLeads').add({
+            var quizLeadRef = db.collection('quizLeads').doc();
+            var quizLeadData = {
                 name: name,
+                email: emailValue || null,
+                phone: phoneValue || null,
                 countryCode: countryCode,
                 contact: contact,
                 contactType: contactType,
                 profile: profileKey,
                 profileName: profileNameCn,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                avgScore: safeScores.avgScore || 0,
+                level: safeScores.level || 0,
+                archetype: profileKey,
+                axisTotals: safeScores.axisTotals || _emptyAxisScores(),
+                axisNormalized: safeScores.axisNormalized || _emptyAxisScores(),
+                lowestAxis: safeScores.lowestAxis || '',
+                highestAxis: safeScores.highestAxis || '',
+                painTag: safeScores.painTag || '',
+                desireTag: safeScores.desireTag || '',
+                recommendedProduct: safeScores.recommendedProduct || '',
+                referrer: referrer,
+                utm_source: utmSource || null,
+                utm_medium: utmMedium || null,
+                utm_campaign: utmCampaign || null,
                 scores: safeScores,
                 answers: safeAnswers,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 source: window.location.href
-            }).catch(function() {});
+            };
+            var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+                ? saveFormSubmissionMirror({
+                    formType: 'quiz-lead',
+                    sourceKey: 'quiz-diagnostic',
+                    sourceLabel: 'AI 診斷結果',
+                    sourcePage: '2分鐘AI診斷',
+                    sourcePath: window.location.pathname,
+                    sourceUrl: window.location.href,
+                    sourceCollection: 'quizLeads',
+                    sourceDocId: quizLeadRef.id,
+                    sheetTab: 'Other Submissions',
+                    contactName: name,
+                    phone: phoneValue,
+                    email: emailValue,
+                    answers: {
+                        contactType: contactType,
+                        profile: profileKey,
+                        profileName: profileNameCn,
+                        level: safeScores.level || 0,
+                        avgScore: safeScores.avgScore || 0,
+                        axisTotals: safeScores.axisTotals || _emptyAxisScores(),
+                        axisNormalized: safeScores.axisNormalized || _emptyAxisScores(),
+                        lowestAxis: safeScores.lowestAxis || '',
+                        highestAxis: safeScores.highestAxis || '',
+                        painTag: safeScores.painTag || '',
+                        desireTag: safeScores.desireTag || '',
+                        recommendedProduct: safeScores.recommendedProduct || '',
+                        recommendedProductLabel: productLabel,
+                        recommendedWorkshop: productLabel,
+                        referrer: referrer,
+                        utm_source: utmSource || null,
+                        utm_medium: utmMedium || null,
+                        utm_campaign: utmCampaign || null,
+                        scores: safeScores,
+                        answers: safeAnswers
+                    }
+                }, { db: db }).catch(function() {})
+                : Promise.resolve();
+            Promise.all([
+                quizLeadRef.set(quizLeadData),
+                mirrorPromise
+            ]).catch(function() {});
         }
     } catch(err) {}
 
     // Also send to Google Sheets (same sheet as consultation/workshop, new tab)
     try {
-        var workshopRec = _quizState.profile && _quizState.profile.workshopName ? _quizState.profile.workshopName : 'Free PDF / N/A';
         var sheetData = {
             name: name,
             countryCode: countryCode,
             contact: contact,
             contactType: contactType,
+            phone: phoneValue,
+            email: emailValue,
             profile: profileNameCn + ' (' + profileKey + ')',
-            recommendedWorkshop: workshopRec,
-            scores: 'E:' + safeScores.explorer + ' D:' + safeScores.dabbler + ' R:' + safeScores.repeater + ' C:' + safeScores.creator,
+            recommendedWorkshop: productLabel,
+            recommendedProduct: safeScores.recommendedProduct || '',
+            level: safeScores.level || 0,
+            avgScore: safeScores.avgScore || 0,
+            lowestAxis: safeScores.lowestAxis || '',
+            highestAxis: safeScores.highestAxis || '',
+            painTag: safeScores.painTag || '',
+            desireTag: safeScores.desireTag || '',
+            axisTotals: JSON.stringify(safeScores.axisTotals || _emptyAxisScores()),
+            axisNormalized: JSON.stringify(safeScores.axisNormalized || _emptyAxisScores()),
+            referrer: referrer,
+            utm_source: utmSource || '',
+            utm_medium: utmMedium || '',
+            utm_campaign: utmCampaign || '',
+            scores: 'Avg:' + (safeScores.avgScore || 0) + ' Level:' + (safeScores.level || 0) + ' Low:' + (safeScores.lowestAxis || '-') + ' High:' + (safeScores.highestAxis || '-') + ' Pain:' + (safeScores.painTag || '-') + ' Desire:' + (safeScores.desireTag || '-') + ' Product:' + (safeScores.recommendedProduct || '-'),
             timestamp: new Date().toISOString(),
             source: 'quiz-diagnostic',
             page: '2分鐘AI診斷'
@@ -488,65 +648,320 @@ function submitLead(e) {
 // ============================================================
 // Render: Result Page
 // ============================================================
-function renderResult() {
-    var p = _quizState.profile;
-    var main = document.getElementById('quizMain');
+var QUIZ_LEVEL_COLORS = ['#ef4444', '#f97316', '#eab308', '#3b82f6', '#a855f7'];
 
-    var workshopCta = '';
-    if (p.workshopPitch && p.workshopLink) {
-        workshopCta =
-            '<div class="q-result-section q-result-workshop">' +
-                '<div class="q-result-section-label">推薦學習路線</div>' +
-                '<h3 class="q-result-ws-name">' + escH(p.workshopName) + '</h3>' +
-                '<p>' + escH(p.workshopPitch) + '</p>' +
-                '<a href="' + p.workshopLink + '" class="q-btn-primary" style="display:inline-block;margin-top:16px;text-decoration:none;">了解工作坊詳情 →</a>' +
-            '</div>';
+function _quizHexToRgba(hex, alpha) {
+    var raw = String(hex || '').replace('#', '').trim();
+    if (!raw) return 'rgba(255,255,255,' + alpha + ')';
+    if (raw.length === 3) raw = raw.split('').map(function(ch) { return ch + ch; }).join('');
+    var intVal = parseInt(raw, 16);
+    if (isNaN(intVal)) return 'rgba(255,255,255,' + alpha + ')';
+    var r = (intVal >> 16) & 255;
+    var g = (intVal >> 8) & 255;
+    var b = intVal & 255;
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+function _quizLevelSegmentsHtml(level) {
+    return QUIZ_LEVEL_COLORS.map(function(color, idx) {
+        var filled = idx < level;
+        return '<span class="q-level-segment" style="background:' + (filled ? color : 'rgba(148,163,184,0.18)') + ';border-color:' + _quizHexToRgba(color, filled ? 0.65 : 0.18) + ';"></span>';
+    }).join('');
+}
+
+function _quizShareSegmentsHtml(level) {
+    return QUIZ_LEVEL_COLORS.map(function(color, idx) {
+        var filled = idx < level;
+        return '<span style="flex:1;height:18px;border-radius:999px;background:' + (filled ? color : 'rgba(255,255,255,0.12)') + ';border:1px solid ' + _quizHexToRgba(color, filled ? 0.9 : 0.22) + ';display:block;"></span>';
+    }).join('');
+}
+
+function _quizAxisMeta(key) {
+    for (var i = 0; i < AXES.length; i++) {
+        if (AXES[i].key === key) return AXES[i];
+    }
+    return AXES[0];
+}
+
+function _quizAxisRankCopy(key, scores) {
+    if (!scores) return '能力現況';
+    if (key === scores.lowestAxis && key === scores.highestAxis) return '目前整體相對平均';
+    if (key === scores.lowestAxis) return '目前最值得加強';
+    if (key === scores.highestAxis) return '目前最強項';
+    return '能力現況';
+}
+
+function _quizRadarPoint(idx, pct, radius, cx, cy) {
+    var angle = (-Math.PI / 2) + ((Math.PI * 2) / AXES.length) * idx;
+    var dist = radius * ((pct || 0) / 100);
+    return {
+        x: cx + Math.cos(angle) * dist,
+        y: cy + Math.sin(angle) * dist
+    };
+}
+
+function _quizRadarTextAnchor(x, cx) {
+    if (Math.abs(x - cx) < 12) return 'middle';
+    return x < cx ? 'end' : 'start';
+}
+
+function _quizRadarPolygonPoints(values, radius, cx, cy) {
+    return AXES.map(function(axis, idx) {
+        var point = _quizRadarPoint(idx, values[axis.key] || 0, radius, cx, cy);
+        return point.x.toFixed(2) + ',' + point.y.toFixed(2);
+    }).join(' ');
+}
+
+function _quizAxisChipsHtml(normalized, activeKey) {
+    normalized = normalized || _emptyAxisScores();
+    activeKey = activeKey || AXES[0].key;
+    return AXES.map(function(axis) {
+        var value = normalized[axis.key] || 0;
+        return '<button type="button" class="q-axis-chip' + (axis.key === activeKey ? ' is-active' : '') + '" data-axis-key="' + axis.key + '" data-axis-trigger="1">' +
+            '<span class="q-axis-chip-emoji">' + axis.emoji + '</span>' +
+            '<span class="q-axis-chip-copy"><strong>' + escH(axis.label) + '</strong><span>' + value + ' / 100</span></span>' +
+        '</button>';
+    }).join('');
+}
+
+function _quizRadarSvgHtml(normalized, color, activeKey) {
+    normalized = normalized || _emptyAxisScores();
+    activeKey = activeKey || AXES[0].key;
+    var cx = 180;
+    var cy = 148;
+    var maxRadius = 104;
+    var labelRadius = 144;
+    var ringValues = [20, 40, 60, 80, 100];
+    var ringHtml = ringValues.map(function(val) {
+        return '<polygon class="q-radar-ring" points="' + _quizRadarPolygonPoints({
+            communication: val,
+            visual: val,
+            efficiency: val,
+            automation: val,
+            awareness: val,
+            action: val
+        }, maxRadius, cx, cy) + '"></polygon>';
+    }).join('');
+    var maxPoints = AXES.map(function(axis, idx) { return _quizRadarPoint(idx, 100, maxRadius, cx, cy); });
+    var spokesHtml = AXES.map(function(axis, idx) {
+        return '<line class="q-radar-spoke" x1="' + cx + '" y1="' + cy + '" x2="' + maxPoints[idx].x.toFixed(2) + '" y2="' + maxPoints[idx].y.toFixed(2) + '"></line>';
+    }).join('');
+    var actualPoints = AXES.map(function(axis, idx) { return _quizRadarPoint(idx, normalized[axis.key] || 0, maxRadius, cx, cy); });
+    var areaPoints = actualPoints.map(function(point) {
+        return point.x.toFixed(2) + ',' + point.y.toFixed(2);
+    }).join(' ');
+    var labelsHtml = AXES.map(function(axis, idx) {
+        var point = _quizRadarPoint(idx, 100, labelRadius, cx, cy);
+        var anchor = _quizRadarTextAnchor(point.x, cx);
+        var labelY = point.y + (idx === 0 ? -8 : idx === 3 ? 16 : 4);
+        return '<g class="q-radar-label' + (axis.key === activeKey ? ' is-active' : '') + '" data-axis-key="' + axis.key + '" data-axis-trigger="1" transform="translate(' + point.x.toFixed(2) + ' ' + labelY.toFixed(2) + ')">' +
+            '<text text-anchor="' + anchor + '" class="q-radar-label-emoji">' + axis.emoji + '</text>' +
+            '<text y="16" text-anchor="' + anchor + '" class="q-radar-label-text">' + escH(axis.label) + '</text>' +
+        '</g>';
+    }).join('');
+    var pointsHtml = AXES.map(function(axis, idx) {
+        var point = actualPoints[idx];
+        return '<circle class="q-radar-point' + (axis.key === activeKey ? ' is-active' : '') + '" data-axis-key="' + axis.key + '" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="' + (axis.key === activeKey ? 6.5 : 5) + '"></circle>' +
+            '<circle class="q-radar-hit" data-axis-key="' + axis.key + '" data-axis-trigger="1" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="16"></circle>';
+    }).join('');
+    return '<svg class="q-radar-svg" viewBox="0 0 360 320" role="img" aria-label="AI 六維能力雷達圖">' +
+        '<defs><filter id="qRadarGlow"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="' + color + '" flood-opacity="0.28"></feDropShadow></filter></defs>' +
+        ringHtml +
+        spokesHtml +
+        '<polygon class="q-radar-area" points="' + areaPoints + '" style="fill:' + _quizHexToRgba(color, 0.24) + ';stroke:' + color + ';"></polygon>' +
+        pointsHtml +
+        labelsHtml +
+        '</svg>';
+}
+
+function _quizDistanceLabel(level) {
+    return '你距離 AI 原住民仲有 ' + Math.max(0, 5 - level) + ' 級';
+}
+
+function _quizLinkAttrs(url) {
+    return /^https?:/i.test(String(url || '')) ? ' target="_blank" rel="noopener noreferrer"' : '';
+}
+
+function downloadQuizShareCard() {
+    var p = _quizState.profile;
+    var scores = _quizState.scores || _emptyQuizScores();
+    if (!p) return;
+    if (typeof html2canvas !== 'function') {
+        alert('分享功能載入中，請稍後再試。');
+        return;
     }
 
-    var pdfCta =
-        '<div class="q-result-section q-result-pdf">' +
-            '<div class="q-result-pdf-inner">' +
-                '<span class="q-result-pdf-icon">📄</span>' +
+    var btn = document.getElementById('shareResultBtn');
+    var originalLabel = btn ? btn.textContent : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '製作分享圖中...';
+    }
+
+    var host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:-10000px;top:0;pointer-events:none;z-index:-1;';
+    host.innerHTML =
+        '<div style="width:900px;padding:48px;background:linear-gradient(160deg,#0f172a 0%,#111827 48%,#1f2937 100%);color:#F8FAFC;border-radius:40px;font-family:\'Noto Sans TC\',sans-serif;box-shadow:0 32px 90px rgba(15,23,42,0.46);">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:32px;">' +
                 '<div>' +
-                    '<strong>未準備好上課？</strong><br>' +
-                    '<span>免費 AI 入門指南即將推出，留意我哋嘅通知！</span>' +
+                    '<div style="font-size:18px;letter-spacing:0.18em;text-transform:uppercase;color:' + _quizHexToRgba(p.color, 0.92) + ';margin-bottom:12px;">AIFLOWTIME AI診斷</div>' +
+                    '<div style="font-size:72px;line-height:1;margin-bottom:12px;">' + p.emoji + '</div>' +
+                    '<div style="font-size:46px;font-weight:800;line-height:1.2;">' + escH(p.name) + '</div>' +
+                    '<div style="font-size:24px;color:rgba(248,250,252,0.82);margin-top:10px;">' + escH(p.levelLabel) + ' · 平均 ' + (scores.avgScore || 0) + '/100</div>' +
                 '</div>' +
+                '<div style="padding:14px 18px;border-radius:999px;background:' + _quizHexToRgba(p.color, 0.16) + ';border:1px solid ' + _quizHexToRgba(p.color, 0.35) + ';font-size:18px;font-weight:700;color:#fff;">' + escH(_quizDistanceLabel(p.level)) + '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:12px;margin-bottom:28px;">' + _quizShareSegmentsHtml(p.level) + '</div>' +
+            '<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:28px;padding:28px;">' +
+                '<div style="font-size:18px;color:' + _quizHexToRgba(p.color, 0.92) + ';font-weight:700;margin-bottom:12px;">你而家嘅狀態</div>' +
+                '<div style="font-size:26px;line-height:1.7;color:#F8FAFC;">' + escH(p.diagnosis) + '</div>' +
             '</div>' +
         '</div>';
 
+    document.body.appendChild(host);
+    var target = host.firstChild;
+
+    html2canvas(target, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true
+    }).then(function(canvas) {
+        var link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'aiflowtime-ai-diagnostic-level-' + (p.level || 0) + '.png';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }).catch(function() {
+        alert('生成分享圖失敗，請稍後再試。');
+    }).finally(function() {
+        if (host.parentNode) host.parentNode.removeChild(host);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+        }
+    });
+}
+
+function setActiveQuizAxis(key) {
+    var scores = _quizState.scores || _emptyQuizScores();
+    var axisMeta = _quizAxisMeta(key);
+    var root = document.getElementById('quizMain');
+    if (!root || !axisMeta) return;
+    _quizState.activeAxisKey = key;
+    root.querySelectorAll('[data-axis-key]').forEach(function(node) {
+        node.classList.toggle('is-active', node.getAttribute('data-axis-key') === key);
+    });
+    var kicker = root.querySelector('#qAxisDetailKicker');
+    var title = root.querySelector('#qAxisDetailTitle');
+    var desc = root.querySelector('#qAxisDetailDesc');
+    var value = root.querySelector('#qAxisDetailValue');
+    var bar = root.querySelector('#qAxisDetailBarFill');
+    var raw = root.querySelector('#qAxisDetailRaw');
+    var axisValue = scores.axisNormalized && scores.axisNormalized[key] != null ? scores.axisNormalized[key] : 0;
+    var axisRaw = scores.axisTotals && scores.axisTotals[key] != null ? scores.axisTotals[key] : 0;
+    if (kicker) kicker.textContent = _quizAxisRankCopy(key, scores);
+    if (title) title.textContent = axisMeta.emoji + ' ' + axisMeta.label;
+    if (desc) desc.textContent = axisMeta.description;
+    if (value) value.textContent = axisValue + ' / 100';
+    if (bar) bar.style.width = axisValue + '%';
+    if (raw) raw.textContent = '原始分數 ' + axisRaw + ' / ' + (MAX_SCORES[key] || 0);
+}
+
+function bindQuizRadarInteractions() {
+    var root = document.getElementById('quizMain');
+    if (!root) return;
+    root.querySelectorAll('[data-axis-trigger="1"]').forEach(function(node) {
+        var key = node.getAttribute('data-axis-key');
+        if (!key) return;
+        node.addEventListener('mouseenter', function() { setActiveQuizAxis(key); });
+        node.addEventListener('focus', function() { setActiveQuizAxis(key); });
+        node.addEventListener('click', function() { setActiveQuizAxis(key); });
+    });
+    setActiveQuizAxis(_quizState.activeAxisKey || ((_quizState.scores || {}).lowestAxis) || AXES[0].key);
+}
+
+function renderResult() {
+    var p = _quizState.profile;
+    var main = document.getElementById('quizMain');
+    var scores = _quizState.scores || _emptyQuizScores();
+    var cta = PRODUCT_CTA[scores.recommendedProduct] || PRODUCT_CTA.starter;
+    var lowestAxis = _quizAxisMeta(scores.lowestAxis);
+    var highestAxis = _quizAxisMeta(scores.highestAxis);
+    var activeAxis = _quizState.activeAxisKey || scores.lowestAxis || AXES[0].key;
+
+    setQuizMainMode('result');
     main.innerHTML =
         '<div class="q-result fade-in visible">' +
-            '<div class="q-result-badge" style="background:' + p.color + ';">' +
-                '<span class="q-result-badge-icon">' + p.icon + '</span>' +
-                '<div>' +
-                    '<div class="q-result-badge-cn">' + escH(p.nameCn) + '</div>' +
-                    '<div class="q-result-badge-en">' + escH(p.name) + '</div>' +
+            '<div class="q-result-hero">' +
+                '<div class="q-result-emoji-wrap" style="--profile-color:' + p.color + ';--profile-glow:' + _quizHexToRgba(p.color, 0.38) + ';">' + p.emoji + '</div>' +
+                '<div class="q-result-badge" style="background:' + p.color + ';">' +
+                    '<div>' +
+                        '<div class="q-result-badge-cn">' + escH(p.name) + '</div>' +
+                        '<div class="q-result-badge-en">' + escH(p.levelLabel) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="q-level-meter">' + _quizLevelSegmentsHtml(p.level) + '</div>' +
+                '<div class="q-level-distance">' + escH(_quizDistanceLabel(p.level)) + '</div>' +
+            '</div>' +
+
+            '<div class="q-result-section q-radar-section" style="--radar-color:' + p.color + ';--radar-glow:' + _quizHexToRgba(p.color, 0.16) + ';">' +
+                '<div class="q-result-section-label">AI 六維能力地圖</div>' +
+                '<div class="q-radar-layout">' +
+                    '<div class="q-radar-visual">' + _quizRadarSvgHtml(scores.axisNormalized || _emptyAxisScores(), p.color, activeAxis) + '</div>' +
+                    '<div class="q-radar-side">' +
+                        '<div class="q-radar-score-pill">平均 AI 能力值 ' + (scores.avgScore || 0) + ' / 100</div>' +
+                        '<div class="q-axis-detail">' +
+                            '<div class="q-axis-detail-kicker" id="qAxisDetailKicker"></div>' +
+                            '<div class="q-axis-detail-title" id="qAxisDetailTitle"></div>' +
+                            '<div class="q-axis-detail-value" id="qAxisDetailValue"></div>' +
+                            '<div class="q-axis-detail-bar"><span id="qAxisDetailBarFill"></span></div>' +
+                            '<p id="qAxisDetailDesc"></p>' +
+                            '<div class="q-axis-detail-raw" id="qAxisDetailRaw"></div>' +
+                        '</div>' +
+                        '<div class="q-axis-chip-grid">' + _quizAxisChipsHtml(scores.axisNormalized || _emptyAxisScores(), activeAxis) + '</div>' +
+                    '</div>' +
                 '</div>' +
             '</div>' +
 
             '<div class="q-result-section">' +
-                '<div class="q-result-section-label">你嘅現狀</div>' +
+                '<div class="q-result-section-label">你而家嘅狀態</div>' +
                 '<p>' + escH(p.diagnosis) + '</p>' +
             '</div>' +
 
+            '<div class="q-result-badge" style="background:' + p.color + ';">' +
+                '<span class="q-result-badge-icon">🎯</span>' +
+                '<div style="text-align:left;">' +
+                    '<div class="q-result-badge-cn">平均 AI 能力值 ' + (scores.avgScore || 0) + ' / 100</div>' +
+                    '<div class="q-result-badge-en">最強：' + escH(highestAxis.label) + ' · 最低：' + escH(lowestAxis.label) + '</div>' +
+                '</div>' +
+            '</div>' +
+
             '<div class="q-result-section q-result-warning">' +
-                '<div class="q-result-section-label">⚠️ 如果繼續這樣</div>' +
-                '<p>' + escH(p.prediction) + '</p>' +
+                '<div class="q-result-section-label">⚠️ 注意</div>' +
+                '<p>' + escH(p.warning) + '</p>' +
             '</div>' +
 
             '<div class="q-result-section q-result-fix">' +
-                '<div class="q-result-section-label">💡 今日就可以做嘅一件事</div>' +
-                '<p>' + escH(p.immediateFix) + '</p>' +
+                '<div class="q-result-section-label">💡 你而家最應該做嘅一步</div>' +
+                '<p>' + escH(p.action) + '</p>' +
             '</div>' +
 
-            workshopCta +
-            pdfCta +
+            '<div class="q-result-section q-result-workshop">' +
+                '<div class="q-result-section-label">推薦下一步</div>' +
+                '<h3 class="q-result-ws-name">' + escH(cta.label) + '</h3>' +
+                '<div class="q-result-cta-price">' + escH(cta.price) + '</div>' +
+                '<a href="' + cta.url + '" class="q-btn-primary q-result-main-cta"' + _quizLinkAttrs(cta.url) + '>立即了解 →</a>' +
+                '<button type="button" class="q-btn-secondary q-share-btn" id="shareResultBtn" onclick="downloadQuizShareCard()">分享你嘅AI等級</button>' +
+                '<a href="/ai-beginner-workshop#workshops" class="q-result-all-link">想睇晒所有工作坊？ →</a>' +
+            '</div>' +
 
             '<div class="q-result-actions">' +
                 '<button class="q-btn-secondary" onclick="restartQuiz()">重新診斷</button>' +
             '</div>' +
         '</div>';
 
+    bindQuizRadarInteractions();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -575,6 +990,15 @@ function updateProgress(current, total) {
 // ============================================================
 // Utility
 // ============================================================
+function getURLParam(name) {
+    try {
+        var params = new URLSearchParams((window.location && window.location.search) || '');
+        return params.get(name);
+    } catch (err) {
+        return null;
+    }
+}
+
 function escH(s) {
     if (!s) return '';
     var d = document.createElement('div');
@@ -586,3 +1010,4 @@ function escH(s) {
 // Boot
 // ============================================================
 document.addEventListener('DOMContentLoaded', initQuiz);
+}

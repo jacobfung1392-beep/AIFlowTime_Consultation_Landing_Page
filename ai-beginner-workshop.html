@@ -415,7 +415,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding: 120px 0 80px;
+            padding: 100px 0 60px;
             position: relative;
         }
 
@@ -465,7 +465,7 @@
         
         /* Section Styles */
         section {
-            padding: 100px 0;
+            padding: 60px 0;
         }
         
         .section-header {
@@ -476,16 +476,74 @@
         .section-header h2 {
             margin-bottom: 16px;
         }
-        
-        /* Pain Points */
-        .pain-points-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-            margin-bottom: 48px;
+        .workshops-subtitle-box {
+            max-width: 640px;
+            margin: 20px auto 0;
+            background: rgba(217,119,87,0.05);
+            border: 1.5px solid rgba(217,119,87,0.14);
+            border-radius: 16px;
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .workshops-subtitle-copy {
+            font-size: clamp(17px, 2.2vw, 20px);
+            color: var(--text);
+            font-weight: 700;
+            line-height: 1.7;
+            margin: 0 0 14px;
+        }
+        .workshops-subtitle-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 20px;
+            background: var(--white);
+            border: 1px solid rgba(0,0,0,0.06);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-text);
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+            box-shadow: 0 8px 18px rgba(35,31,32,0.08);
+        }
+        .workshops-subtitle-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(35,31,32,0.12);
+        }
+        .workshops-subtitle-badge:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+        .workshops-subtitle-badge[aria-disabled="true"] {
+            cursor: default;
+            pointer-events: none;
+            box-shadow: none;
         }
         
+        /* Pain Points — horizontal slider */
+        .pain-points-grid {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) transparent;
+        }
+        .pain-points-grid::-webkit-scrollbar { height: 6px; }
+        .pain-points-grid::-webkit-scrollbar-track { background: transparent; }
+        .pain-points-grid::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
         .pain-point-card {
+            flex: 0 0 85%;
+            max-width: 400px;
+            scroll-snap-align: start;
             background: var(--bg-pampas);
             border-radius: 16px;
             padding: 32px;
@@ -501,6 +559,26 @@
             color: var(--text);
             opacity: 0.9;
             font-weight: 700;
+        }
+
+        .pp-slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .pp-slider-dots .pp-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--bg-off, #ddd);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            padding: 0;
+        }
+        .pp-slider-dots .pp-dot.active {
+            background: var(--accent);
+            transform: scale(1.25);
         }
         
         .insight-box {
@@ -598,7 +676,7 @@
         }
         .data-expand-body.open { max-height: 1200px; opacity: 1; margin-top: 24px; }
         @media (max-width: 600px) {
-            .data-stats-grid { grid-template-columns: 1fr !important; }
+            .ds-stats-grid { grid-template-columns: 1fr !important; }
         }
 
         /* Workshops – single-column timeline */
@@ -1044,7 +1122,195 @@
             font-size: 14px;
             color: var(--text-light);
         }
-        
+
+        .testimonials-text-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        @media (min-width: 768px) {
+            .testimonials-text-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        }
+        .testimonials-text-grid:empty { display: none; }
+
+        /* Testimonial text collapse */
+        .tm-collapsible-wrap { margin-bottom: 0; }
+        .tm-collapsible-text.is-collapsed {
+            overflow: hidden;
+            max-height: 6.5em;
+        }
+        .tm-collapsible-text.is-expanded {
+            max-height: none;
+        }
+        .testimonials-text-grid .tm-collapsible-text.is-collapsed {
+            max-height: 6.75em;
+        }
+        .tm-slide-caption-wrap .tm-collapsible-text.is-collapsed {
+            max-height: 4.5em;
+        }
+        .tm-collapsible-text.is-collapsed .testimonial-text {
+            margin: 0;
+        }
+        .tm-collapse-toggle {
+            margin-top: 8px;
+            padding: 4px 0;
+            border: none;
+            background: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: inherit;
+        }
+        .tm-collapse-toggle:hover,
+        .tm-collapse-toggle:focus-visible {
+            opacity: 0.88;
+            outline: none;
+        }
+        .tm-slide-caption-wrap .tm-collapse-toggle {
+            margin-top: 4px;
+        }
+
+        /* Testimonial marquee (image carousel) */
+        .tm-viewport {
+            overflow: hidden;
+            width: 100%;
+            margin-top: 8px;
+            mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+            -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+        }
+        .tm-viewport:hover .tm-track { animation-play-state: paused; }
+        .tm-viewport.tm-touch-active .tm-track { animation-play-state: paused; }
+        .tm-track {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: clamp(16px, 3vw, 28px);
+            width: max-content;
+            animation: tm-marquee var(--tm-duration, 55s) linear infinite;
+        }
+        @keyframes tm-marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tm-track { animation: none; }
+        }
+        .tm-slide {
+            flex: 0 0 auto;
+            width: clamp(200px, 72vw, 320px);
+            max-width: 100%;
+        }
+        .tm-slide-caption {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            line-height: 1.45;
+            margin: 0;
+            min-height: 0;
+        }
+        .tm-slide-caption-wrap {
+            margin: 0 0 10px;
+        }
+        .tm-slide-img-btn {
+            display: block;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            border: 1px solid var(--bg-off);
+            border-radius: 12px;
+            background: var(--bg-pampas);
+            cursor: zoom-in;
+            overflow: hidden;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .tm-slide-video-wrap {
+            display: block;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            border: 1px solid var(--bg-off);
+            border-radius: 12px;
+            background: var(--bg-pampas);
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .tm-slide-video-wrap video {
+            display: block;
+            width: 100%;
+            height: min(60vh, 420px);
+            object-fit: cover;
+            background: #0a0a0a;
+        }
+        .tm-slide-img-btn:hover,
+        .tm-slide-img-btn:focus-visible,
+        .tm-slide-video-wrap:hover,
+        .tm-slide-video-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            outline: none;
+        }
+        .tm-slide-img-btn img {
+            display: block;
+            width: 100%;
+            height: min(60vh, 420px);
+            object-fit: cover;
+            background: var(--bg-pampas);
+        }
+        .tm-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .tm-lightbox[hidden] { display: none !important; }
+        .tm-lightbox-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            border: none;
+            cursor: zoom-out;
+        }
+        .tm-lightbox-dialog {
+            position: relative;
+            z-index: 1;
+            max-width: min(96vw, 1200px);
+            max-height: 92vh;
+        }
+        .tm-lightbox-img {
+            display: block;
+            max-width: 100%;
+            max-height: 88vh;
+            width: auto;
+            height: auto;
+            margin: 0 auto;
+            border-radius: 10px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.55);
+        }
+        .tm-lightbox-close {
+            position: absolute;
+            top: -44px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: var(--white);
+            color: var(--text);
+            font-size: 26px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .tm-lightbox-close:hover { color: var(--accent); }
+        .tm-intro { margin-top: 12px; font-size: 15px; color: var(--text-light); line-height: 1.65; max-width: 42rem; margin-left: auto; margin-right: auto; }
+        .tm-intro:empty { display: none !important; }
+
         /* FAQ Section */
         .faq-list {
             max-width: 800px;
@@ -1113,7 +1379,7 @@
         /* Final CTA */
         .final-cta {
             text-align: center;
-            padding: 120px 0;
+            padding: 80px 0;
         }
         
         .final-cta h2 {
@@ -1174,6 +1440,47 @@
             opacity: 0.8;
             font-weight: 700;
         }
+
+        .back-to-top-btn {
+            position: fixed;
+            right: 24px;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            width: 54px;
+            height: 54px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(217, 119, 87, 0.96);
+            color: var(--white);
+            box-shadow: 0 14px 28px rgba(217, 119, 87, 0.28);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 180;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateY(14px);
+            transition: opacity 0.22s ease, transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .back-to-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-top-btn:hover {
+            background: var(--accent-dark);
+            box-shadow: 0 18px 34px rgba(197, 106, 75, 0.34);
+        }
+
+        .back-to-top-btn svg {
+            width: 22px;
+            height: 22px;
+            display: block;
+        }
         
         /* Tablet */
         @media (min-width: 768px) {
@@ -1190,8 +1497,9 @@
                 display: none;
             }
             
-            .pain-points-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .pain-point-card {
+                flex: 0 0 38%;
+                max-width: 420px;
             }
             
             .trust-grid {
@@ -1217,6 +1525,13 @@
             }
             #about .glass-card > div:last-child {
                 order: -1;
+            }
+
+            .back-to-top-btn {
+                right: 16px;
+                bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+                width: 50px;
+                height: 50px;
             }
         }
 
@@ -1466,6 +1781,28 @@
             background: rgba(217,119,87,0.45);
             border-radius: 999px;
         }
+        .sec-transformation .tf-slider-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .sec-transformation .tf-slider-dot {
+            width: 9px;
+            height: 9px;
+            padding: 0;
+            border: none;
+            border-radius: 999px;
+            background: rgba(217,119,87,0.22);
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease, width 0.18s ease;
+        }
+        .sec-transformation .tf-slider-dot.active {
+            width: 28px;
+            background: var(--accent);
+            transform: scale(1.02);
+        }
         .sec-transformation .tf-card {
             background: #fff; border-radius: 16px; padding: 28px; border: 1px solid rgba(0,0,0,0.06);
             box-shadow: 0 2px 12px rgba(0,0,0,0.04);
@@ -1510,12 +1847,13 @@
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .sec-link-list .ll-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-        .sec-link-list .ll-card-body { flex: 1; }
-        .sec-link-list .ll-card-label { font-weight: 600; font-size: 1rem; }
-        .sec-link-list .ll-card-desc { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; }
+        .sec-link-list .ll-card-body { flex: 1; min-width: 0; }
+        .sec-link-list .ll-card-label { font-weight: 600; font-size: 1rem; white-space: normal; overflow-wrap: anywhere; }
+        .sec-link-list .ll-card-desc { font-size: 0.85rem; color: var(--text-light); margin-top: 2px; white-space: normal; overflow-wrap: anywhere; }
         .sec-link-list .ll-badge {
             font-size: 0.7rem; font-weight: 700; background: var(--accent); color: #fff;
-            padding: 2px 8px; border-radius: 20px; margin-left: 12px; white-space: nowrap;
+            padding: 2px 8px; border-radius: 20px; margin-left: 12px; white-space: normal;
+            overflow-wrap: anywhere; line-height: 1.25; text-align: center; flex: 0 1 auto; max-width: 45%;
         }
         .sec-link-list .ll-chevron { margin-left: 12px; color: var(--text-light); font-size: 1.2rem; }
 
@@ -1537,6 +1875,43 @@
         .sec-tools-grid .tg-badge {
             display: inline-block; font-size: 0.7rem; font-weight: 700; background: var(--accent); color: #fff;
             padding: 2px 8px; border-radius: 20px; align-self: flex-start;
+        }
+        .sec-tools-grid .tg-card--with-media {
+            flex-direction: row;
+            align-items: stretch;
+            padding: 0;
+            gap: 0;
+            overflow: hidden;
+        }
+        .sec-tools-grid .tg-card--with-media .tg-card-main {
+            flex: 1 1 50%;
+            min-width: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            justify-content: center;
+        }
+        .sec-tools-grid .tg-card--with-media .tg-card-media {
+            flex: 0 0 50%;
+            width: 50%;
+            max-width: 50%;
+            min-width: 0;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.04);
+            align-self: stretch;
+        }
+        .sec-tools-grid .tg-card--with-media .tg-card-media img,
+        .sec-tools-grid .tg-card--with-media .tg-card-media video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center;
         }
 
         /* =============================================
@@ -1714,48 +2089,34 @@
                     <p>試過 AI 但覺得結果不像樣？學會怎麼跟 AI 溝通之後，你會發現同一個工具，能交出完全不同等級的成果。</p>
                 </div>
             </div>
+            <div class="pp-slider-dots"></div>
             <p class="jacob-quote" style="text-align: center; font-size: clamp(16px, 2vw, 18px); font-weight: 600; color: var(--text); line-height: 1.6; margin-top: 32px; margin-bottom: 0; max-width: 640px; margin-left: auto; margin-right: auto;">Jacob 就是這樣靠AI，加速自己學習、整理，又可以拍片，仲由唔識coding 到整到好靚嘅landing page ，仲可以接到job！</p>
             <div style="text-align: center; margin-top: 24px;">
                 <div class="insight-box">
                     <p>AI不是未來，而是現在。學懂與AI協作，是未來3年能否轉營的關鍵。</p>
                 </div>
             </div>
-            
-            <!-- AI Data: Collapsible -->
-            <div class="data-expand-wrap" style="margin-top: 48px; text-align: center;">
+        </div>
+    </section>
+
+    <!-- Data Sharings Section (template for layout editor) -->
+    <section id="data-sharings-tpl" data-section-type="data-sharings" style="display:none;">
+        <div class="container">
+            <div style="text-align:center;">
                 <button class="data-expand-btn" onclick="toggleDataSection(this)">
                     <span class="data-expand-icon">📊</span>
-                    <span>香港 AI 應用率與全球比較 — 查看數據</span>
+                    <span class="ds-expand-label">香港 AI 應用率與全球比較 — 查看數據</span>
                     <span class="data-expand-arrow">▼</span>
                 </button>
-                <div class="data-expand-body" id="dataExpandBody">
-                    <div style="background: var(--bg-pampas); border-radius: 20px; padding: 32px; margin-bottom: 24px;">
-                        <h4 style="margin-bottom: 24px; font-size: 18px; text-align: left;">世界各地AI普及率比較 (2025下半年)</h4>
-                        <div style="display: flex; flex-direction: column; gap: 14px;">
-                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">美國</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 28.3%; background: linear-gradient(90deg, #E8A88C, #D97757); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">28.3%</div></div></div>
-                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">台灣</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 28.4%; background: linear-gradient(90deg, #E8A88C, #D97757); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">28.4%</div></div></div>
-                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 600; font-size: 14px; color: var(--accent);">香港</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 26.4%; background: linear-gradient(90deg, #D97757, #C45A3A); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">26.4%</div></div></div>
-                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">日本</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 19.1%; background: linear-gradient(90deg, #F5C4B0, #E8A88C); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">19.1%</div></div></div>
-                            <div style="display: flex; align-items: center; gap: 14px;"><span style="min-width: 70px; font-weight: 500; font-size: 14px;">全球平均</span><div style="flex: 1; background: rgba(0,0,0,0.08); border-radius: 8px; height: 28px; overflow: hidden;"><div style="width: 16.3%; background: linear-gradient(90deg, #F5C4B0, #E8A88C); height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-weight: 700; font-size: 13px;">16.3%</div></div></div>
-                        </div>
-                        <p style="margin-top: 14px; font-size: 12px; color: var(--text-light); text-align: center;">數據來源：Microsoft AI Economy Institute, 2025</p>
+                <div class="data-expand-body">
+                    <div style="background:var(--bg-pampas);border-radius:20px;padding:32px;margin-bottom:24px;">
+                        <h4 class="ds-chart-title" style="margin-bottom:24px;font-size:18px;text-align:left;">世界各地AI普及率比較 (2025下半年)</h4>
+                        <div class="ds-bars-wrap" style="display:flex;flex-direction:column;gap:14px;"></div>
+                        <p class="ds-source" style="margin-top:14px;font-size:12px;color:var(--text-light);text-align:center;">數據來源：Microsoft AI Economy Institute, 2025</p>
                     </div>
-                    <div class="data-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
-                        <div style="background: var(--bg-pampas); border-radius: 14px; padding: 20px; text-align: center;">
-                            <div style="font-size: 36px; font-weight: 700; color: var(--accent);">55%</div>
-                            <div style="font-size: 13px; color: var(--text); margin-top: 4px;">香港中小企已使用或計劃使用AI</div>
-                        </div>
-                        <div style="background: var(--bg-pampas); border-radius: 14px; padding: 20px; text-align: center;">
-                            <div style="font-size: 36px; font-weight: 700; color: var(--accent);">88%</div>
-                            <div style="font-size: 13px; color: var(--text); margin-top: 4px;">香港企業員工已在工作中使用AI</div>
-                        </div>
-                        <div style="background: var(--bg-pampas); border-radius: 14px; padding: 20px; text-align: center;">
-                            <div style="font-size: 36px; font-weight: 700; color: var(--accent);">22%</div>
-                            <div style="font-size: 13px; color: var(--text); margin-top: 4px;">香港員工每日使用AI（落後亞太29%）</div>
-                        </div>
-                    </div>
-                    <div style="background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); color: white; border-radius: 14px; padding: 20px; text-align: center;">
-                        <p style="font-size: 15px; line-height: 1.7; margin: 0;"><strong>關鍵洞察：</strong>香港雖有88%企業員工接觸過AI，但僅22%每日使用。在30個全球市場中，香港AI準備度排名最末。這正是你需要的起跑優勢——現在學懂AI，就能超越同儕。</p>
+                    <div class="ds-stats-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;"></div>
+                    <div class="ds-insight" style="background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark) 100%);color:white;border-radius:14px;padding:20px;text-align:center;">
+                        <p style="font-size:15px;line-height:1.7;margin:0;"><strong>關鍵洞察：</strong><span class="ds-insight-text"></span></p>
                     </div>
                 </div>
             </div>
@@ -1854,38 +2215,36 @@
         </div>
     </section>
 
-    <!-- Testimonial Section -->
+    <!-- Testimonial Section (unified: text quotes + image marquee) -->
     <section id="testimonials" data-section-id="testimonials_default" data-section-type="testimonials">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal" style="text-align:center;margin-bottom:24px;">
+                <p class="section-label tm-label" style="display:none;"></p>
                 <h2>學員怎麼說</h2>
+                <div class="tm-intro"></div>
             </div>
-            <div class="testimonial-card fade-in">
-                <div class="testimonial-quote">"</div>
-                <blockquote class="testimonial-text">
-                    好多謝Jacob 咁用心解答我無論係AI定係自媒體上嘅問題。你好明白到我喺自媒體經營上嘅難處，仲同我講應該出啲咩內容先至會多人睇，同埋點樣玩IG咁。呢啲內容遠遠超過AI 知識，你仲分享埋少少design嘅技巧。真心感覺到你係研究咗自媒體好耐先至有而家嘅成績，亦都好感謝你可以咁真誠大方地share你嘅經驗俾我~<br><br>當然consultation過程都有講AI，原來AI指令都要畫公仔畫出腸好仔細咁講佢先會明白我講咩。你都有好細緻咁樣講AI嘅合適指令同埋適合我嘅AI工作流應該係點。<br><br>超推薦Jacob嘅consultation 俾有用AI但未用得好流暢同埋係自媒體有卡點嘅朋友🙏🏻😍
-                </blockquote>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">H</div>
-                    <div>
-                        <div class="testimonial-name">Heidi</div>
-                        <div class="testimonial-role">1-on-1 諮詢客戶</div>
-                    </div>
-                </div>
-            </div>
+            <div class="testimonials-text-grid"></div>
+        </div>
+        <div class="tm-viewport reveal reveal-delay-1" style="display:none;">
+            <div class="tm-track"></div>
         </div>
     </section>
+    <div class="tm-lightbox" hidden>
+        <button type="button" class="tm-lightbox-backdrop" aria-label="關閉放大檢視"></button>
+        <div class="tm-lightbox-dialog" role="dialog" aria-modal="true" aria-label="學員分享圖片">
+            <button type="button" class="tm-lightbox-close" aria-label="關閉">&times;</button>
+            <img src="" alt="" class="tm-lightbox-img">
+        </div>
+    </div>
 
     <!-- Workshops Section -->
     <section id="workshops" data-section-id="workshops_default" data-section-type="workshops">
         <div class="container">
             <div class="section-header">
                 <h2>工作坊一覽</h2>
-                <div style="max-width:640px; margin:20px auto 0; background:rgba(217,119,87,0.05); border:1.5px solid rgba(217,119,87,0.14); border-radius:16px; padding:28px 32px; text-align:center;">
-                    <p style="font-size:clamp(17px, 2.2vw, 20px); color:var(--text); font-weight:700; line-height:1.7; margin:0 0 14px;">零基礎也能上手。學會用 AI 的思維，<br>不管你的背景是什麼，這裡都能開始。</p>
-                    <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:20px; background:var(--white); border:1px solid rgba(0,0,0,0.06); font-size:13px; font-weight:700; color:var(--accent-text);">
-                        <span style="font-size:15px;">✦</span> 不需要任何技術背景
-                    </div>
+                <div class="workshops-subtitle-box">
+                    <p class="workshops-subtitle-copy">零基礎也能上手。學會用 AI 的思維，<br>不管你的背景是什麼，這裡都能開始。</p>
+                    <a class="workshops-subtitle-badge" aria-disabled="true">✦ 不需要任何技術背景</a>
                 </div>
             </div>
             <div class="workshops-grid" id="workshopsGrid">
@@ -2191,6 +2550,7 @@
         <div class="container">
             <h2 class="tf-title section-header"><span></span></h2>
             <div class="tf-grid"></div>
+            <div class="tf-slider-dots" aria-label="Transformation slider navigation"></div>
         </div>
     </section>
 
@@ -2297,12 +2657,19 @@
         </div>
     </footer>
 
+    <button type="button" class="back-to-top-btn" id="backToTopBtn" aria-label="回到頁面頂部" title="Back to top">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 18V6M12 6l-5 5M12 6l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </button>
+
     <!-- Firebase SDK (compat) for Firestore reads + Auth -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js"></script>
+    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/page-background-runtime.js"></script>
     <script>
         var _initWorkshopPageRetries = 0;
         initFirebase(function() { window.setTimeout(initWorkshopPage, 0); }, { waitForAuthPersistence: false });
@@ -2653,7 +3020,8 @@
         
         // FAQ accordion
         function toggleDataSection(btn) {
-            var body = document.getElementById('dataExpandBody');
+            var body = btn ? btn.nextElementSibling : null;
+            if (!body || !body.classList.contains('data-expand-body')) return;
             btn.classList.toggle('open');
             body.classList.toggle('open');
         }
@@ -2712,6 +3080,28 @@
                 };
 
                 var googleScriptURL = 'https://script.google.com/macros/s/AKfycbxE8KP5ohNSbHIFOWxl-JoWgu9_my8N8ofkTEXaeU0b7QB6K-s3qx4KE-5bOz7Qj4_miQ/exec';
+                var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+                    ? saveFormSubmissionMirror({
+                        formType: 'workshop-waitlist',
+                        sourceKey: 'workshop-waitlist',
+                        sourceLabel: '工作坊等候名單',
+                        sourcePage: data.page,
+                        sourcePath: window.location.pathname,
+                        sourceUrl: window.location.href,
+                        sheetTab: 'Workshops',
+                        contactName: data.name,
+                        whatsapp: data.whatsapp,
+                        email: data.email,
+                        answers: {
+                            workshopEvent: data.workshopEvent,
+                            painPoint: data.painPoint,
+                            painPointOther: data.painPointOther
+                        },
+                        timestamp: data.timestamp
+                    }).catch(function(err) {
+                        console.error('Form mirror write failed:', err);
+                    })
+                    : Promise.resolve();
 
                 try {
                     await fetch(googleScriptURL, {
@@ -2720,6 +3110,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
+                    await mirrorPromise;
                     document.getElementById('formSuccess').style.display = 'block';
                     document.getElementById('formError').style.display = 'none';
                     e.target.reset();
@@ -2783,21 +3174,82 @@
             applyParallax(); // initial position
         }
 
+        function initBackToTopButton() {
+            if (window._workshopBackToTopInit) return;
+            window._workshopBackToTopInit = true;
+            var btn = document.getElementById('backToTopBtn');
+            if (!btn) return;
+
+            var isPreview = false;
+            try {
+                isPreview = new URLSearchParams(window.location.search).has('preview');
+            } catch (err) {}
+            if (isPreview) {
+                btn.style.display = 'none';
+                return;
+            }
+
+            function syncBackToTopButton() {
+                var scrollY = window.scrollY || window.pageYOffset || 0;
+                var doc = document.documentElement;
+                var scrollable = (doc && doc.scrollHeight ? doc.scrollHeight : 0) > (window.innerHeight + 120);
+                btn.classList.toggle('show', scrollable && scrollY > Math.max(420, window.innerHeight * 0.6));
+            }
+
+            btn.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            window.addEventListener('scroll', syncBackToTopButton, { passive: true });
+            window.addEventListener('resize', syncBackToTopButton);
+            syncBackToTopButton();
+        }
+
         // Initialize on DOM ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
                 initScrollAnimations();
                 initWorkshopParallax();
+                initBackToTopButton();
             });
         } else {
             initScrollAnimations();
             initWorkshopParallax();
+            initBackToTopButton();
         }
 
         // ============================================================
         // LAYOUT CONFIG LOADER
         // ============================================================
-        var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
+        var _layoutQuery = new URLSearchParams(window.location.search);
+        var _isPreviewMode = _layoutQuery.has('preview');
+        var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'workshop-main';
+
+        function _normalizeLayoutPageStatus(status) {
+            var raw = String(status || '').trim().toLowerCase();
+            if (raw === 'unpublished') return 'unpublished';
+            if (raw === 'archived') return 'archived';
+            return 'published';
+        }
+
+        function _layoutAllowsPublicView(data) {
+            if (_isPreviewMode) return true;
+            return _normalizeLayoutPageStatus(data && data.pageStatus) === 'published';
+        }
+
+        function _showLayoutUnavailableState() {
+            if (document.getElementById('layoutUnavailableState')) return;
+            var overlay = document.createElement('div');
+            overlay.id = 'layoutUnavailableState';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(245,244,242,0.98);';
+            overlay.innerHTML = '<div style="max-width:420px;padding:32px 28px;border-radius:24px;background:#fff;box-shadow:0 16px 48px rgba(0,0,0,0.12);text-align:center;font-family:inherit;">' +
+                '<div style="font-size:34px;margin-bottom:12px;">🚧</div>' +
+                '<h2 style="margin:0 0 10px;font-size:24px;">Page Unavailable</h2>' +
+                '<p style="margin:0;color:#666;line-height:1.7;">此頁面目前未發佈或已封存，暫時不對外開放。</p>' +
+            '</div>';
+            document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
+        }
 
         function revealHeroMedia() {
             document.querySelectorAll('.hero-gif-wrap.hero-media-pending').forEach(function(wrap) {
@@ -2808,26 +3260,37 @@
 
         function applyLayoutConfig() {
             if (_isPreviewMode) {
-                window.addEventListener('message', function(e) {
-                    if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
-                        applySections(e.data.sections);
+                initLayoutPreviewBridge({
+                    onLayoutPreview: function(sections) {
+                        var scrollY = window.scrollY || window.pageYOffset || 0;
+                        applySections(sections);
                         revealHeroMedia();
+                        window.scrollTo(0, scrollY);
                     }
                 });
+
                 return;
             }
 
             var db = firebase.firestore();
-            db.collection('pageLayouts').doc('workshop-main').get().then(function(doc) {
-                if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) {
+            db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
+                var data = doc.exists ? (doc.data() || {}) : null;
+                if (!_layoutAllowsPublicView(data)) {
+                    _showLayoutUnavailableState();
+                    return;
+                }
+                if (typeof applyFirestorePageMeta === 'function') {
+                    applyFirestorePageMeta(data, { fallbackTitle: document.title });
+                }
+                if (!doc.exists || !data.sections || data.sections.length === 0) {
                     revealHeroMedia();
                     return;
                 }
-                console.log('[Layout] Loaded workshop-main layout from Firestore (' + doc.data().sections.length + ' sections)');
-                applySections(doc.data().sections);
+                console.log('[Layout] Loaded ' + _layoutDocId + ' layout from Firestore (' + data.sections.length + ' sections)');
+                applySections(data.sections);
                 revealHeroMedia();
             }).catch(function(err) {
-                console.log('[Layout] No layout config found for workshop-main.', err);
+                console.log('[Layout] No layout config found for ' + _layoutDocId + '.', err);
                 revealHeroMedia();
             });
         }
@@ -2836,6 +3299,9 @@
             var sections = rawSections.slice().sort(function(a, b) {
                 return (a.order || 0) - (b.order || 0);
             });
+            if (typeof syncPageBackgroundFromSections === 'function') {
+                syncPageBackgroundFromSections(sections, { wrapperId: 'layout-page-bg' });
+            }
             var main = document.getElementById('main-content');
             if (!main) return;
 
@@ -2852,6 +3318,7 @@
             });
 
             sections.forEach(function(sec) {
+                if (!sec || sec.type === 'page-background') return;
                 var el = existingEls[sec.id];
 
                 if (!el && sec.visible !== false) {
@@ -2892,6 +3359,19 @@
         }
 
         function _escHtml(str) { return escHtml(str); }
+        function _richTextHtml(value) {
+            return typeof aiflowRenderRichTextHtml === 'function'
+                ? aiflowRenderRichTextHtml(value)
+                : (typeof sanitizeHeroTitleHtml === 'function'
+                    ? sanitizeHeroTitleHtml(value == null ? '' : String(value))
+                    : _escHtml(value || '').replace(/\n/g, '<br>'));
+        }
+        function _setRichText(el, value) {
+            if (!el) return '';
+            var html = _richTextHtml(value);
+            el.innerHTML = html;
+            return html;
+        }
 
         function _isVideoMediaUrl(url) {
             var s = String(url || '');
@@ -3033,42 +3513,448 @@
             });
         }
 
+        function syncPainPointDots(section) {
+            if (!section) return;
+            var grid = section.querySelector('.pain-points-grid');
+            var dotsWrap = section.querySelector('.pp-slider-dots');
+            if (!grid || !dotsWrap) return;
+            var cards = Array.prototype.slice.call(grid.querySelectorAll('.pain-point-card'));
+            if (cards.length <= 1) { dotsWrap.innerHTML = ''; dotsWrap.style.display = 'none'; return; }
+            dotsWrap.style.display = 'flex';
+            dotsWrap.innerHTML = cards.map(function(_, idx) {
+                return '<button type="button" class="pp-dot' + (idx === 0 ? ' active' : '') + '" data-pp-idx="' + idx + '" aria-label="查看第 ' + (idx + 1) + ' 張卡片"></button>';
+            }).join('');
+            var dots = Array.prototype.slice.call(dotsWrap.querySelectorAll('.pp-dot'));
+            dots.forEach(function(dot) {
+                dot.addEventListener('click', function() {
+                    var idx = parseInt(dot.getAttribute('data-pp-idx'), 10) || 0;
+                    if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                });
+            });
+            function updateActive() {
+                var center = grid.scrollLeft + (grid.clientWidth / 2);
+                var activeIdx = 0;
+                cards.forEach(function(c, i) { if (c.offsetLeft + c.offsetWidth / 2 <= center) activeIdx = i; });
+                dots.forEach(function(d, i) { d.classList.toggle('active', i === activeIdx); });
+            }
+            grid.addEventListener('scroll', updateActive, { passive: true });
+            updateActive();
+        }
+
+        function syncTransformationDots(section) {
+            if (!section) return;
+            var grid = section.querySelector('.tf-grid');
+            var dotsWrap = section.querySelector('.tf-slider-dots');
+            if (!grid || !dotsWrap) return;
+            var cards = Array.prototype.slice.call(grid.querySelectorAll('.tf-card'));
+            if (cards.length <= 1) {
+                dotsWrap.innerHTML = '';
+                dotsWrap.style.display = 'none';
+                return;
+            }
+            dotsWrap.style.display = 'flex';
+            dotsWrap.innerHTML = cards.map(function(_, idx) {
+                return '<button type="button" class="tf-slider-dot' + (idx === 0 ? ' active' : '') + '" data-tf-dot-index="' + idx + '" aria-label="查看第 ' + (idx + 1) + ' 張卡片"></button>';
+            }).join('');
+            var dots = Array.prototype.slice.call(dotsWrap.querySelectorAll('.tf-slider-dot'));
+            dots.forEach(function(dot) {
+                dot.addEventListener('click', function() {
+                    var idx = parseInt(dot.getAttribute('data-tf-dot-index'), 10) || 0;
+                    var target = cards[idx];
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                });
+            });
+            function updateActiveDot() {
+                var center = grid.scrollLeft + (grid.clientWidth / 2);
+                var activeIdx = 0;
+                var minDistance = Infinity;
+                cards.forEach(function(card, idx) {
+                    var cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+                    var distance = Math.abs(cardCenter - center);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        activeIdx = idx;
+                    }
+                });
+                dots.forEach(function(dot, idx) {
+                    dot.classList.toggle('active', idx === activeIdx);
+                });
+            }
+            if (grid._tfDotsScrollHandler) grid.removeEventListener('scroll', grid._tfDotsScrollHandler);
+            grid._tfDotsScrollHandler = function() { window.requestAnimationFrame(updateActiveDot); };
+            grid.addEventListener('scroll', grid._tfDotsScrollHandler, { passive: true });
+            updateActiveDot();
+        }
+
+        function _isTmSlideVideoUrl(url) {
+            var s = String(url || '').trim();
+            if (!s) return false;
+            if (/\.(mp4|mov|webm)(?:[?#]|$)/i.test(s)) return true;
+            var m = s.match(/\/o\/([^?]+)/);
+            if (m) {
+                try { return /\.(mp4|mov|webm)$/i.test(decodeURIComponent(m[1])); } catch (e) { return false; }
+            }
+            m = s.match(/[?&]path=([^&]+)/);
+            if (m) {
+                try { return /\.(mp4|mov|webm)$/i.test(decodeURIComponent(m[1])); } catch (e) { return false; }
+            }
+            return false;
+        }
+
+        function _initTmSlideVideos(viewport) {
+            if (!viewport || viewport._tmSlideVidUiBound) return;
+            viewport._tmSlideVidUiBound = true;
+            viewport.addEventListener('mouseover', function(e) {
+                var wrap = e.target.closest('.tm-slide-video-wrap');
+                if (!wrap || !viewport.contains(wrap)) return;
+                var vid = wrap.querySelector('video');
+                if (!vid) return;
+                if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
+                vid.pause();
+            });
+            viewport.addEventListener('mouseout', function(e) {
+                var wrap = e.target.closest('.tm-slide-video-wrap');
+                if (!wrap || !viewport.contains(wrap)) return;
+                var vid = wrap.querySelector('video');
+                if (!vid) return;
+                if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
+                vid.play().catch(function() {});
+            });
+            viewport.addEventListener('click', function(e) {
+                var vid = e.target.closest('.tm-slide-video-wrap video');
+                if (!vid || !viewport.contains(vid.closest('.tm-slide-video-wrap'))) return;
+                if (vid.paused) vid.play().catch(function() {}); else vid.pause();
+            });
+        }
+
+        function _initTmSlideVideoTouch(track) {
+            if (!track || track._tmSlideVidTouchBound) return;
+            track._tmSlideVidTouchBound = true;
+            track.addEventListener('touchstart', function(e) {
+                if (e.target.closest('.tm-slide-video-wrap')) e.stopPropagation();
+            }, false);
+        }
+
+        function _applyUnifiedTestimonials(el, c) {
+            if (!el || !c) return;
+            var label = el.querySelector('.tm-label');
+            var h2 = el.querySelector('.section-header h2');
+            var intro = el.querySelector('.tm-intro');
+            var viewport = el.querySelector('.tm-viewport');
+            var track = el.querySelector('.tm-track');
+            var textGrid = el.querySelector('.testimonials-text-grid');
+
+            if (label) {
+                if (c.sectionLabel) { _setRichText(label, c.sectionLabel); label.style.display = ''; }
+                else { label.innerHTML = ''; label.style.display = 'none'; }
+            }
+            if (h2) _setRichText(h2, c.sectionTitle || '');
+            if (intro) {
+                if (c.intro) { _setRichText(intro, c.intro); intro.style.display = ''; }
+                else { intro.innerHTML = ''; intro.style.display = 'none'; }
+            }
+
+            if (textGrid && c.items && c.items.length) {
+                textGrid.innerHTML = '';
+                c.items.forEach(function(item) {
+                    var card = document.createElement('div');
+                    card.className = 'testimonial-card fade-in visible';
+                    card.innerHTML =
+                        '<div class="testimonial-quote">"</div>' +
+                        '<div class="tm-collapsible-wrap">' +
+                            '<div class="tm-collapsible-text is-collapsed">' +
+                                '<blockquote class="testimonial-text">' + _richTextHtml(item.quote || '') + '</blockquote>' +
+                            '</div>' +
+                            '<button type="button" class="tm-collapse-toggle" aria-expanded="false">顯示更多</button>' +
+                        '</div>' +
+                        '<div class="testimonial-author">' +
+                            '<div class="testimonial-avatar">' + _escHtml(item.avatarLetter || '') + '</div>' +
+                            '<div>' +
+                                '<div class="testimonial-name">' + _escHtml(item.name || '') + '</div>' +
+                                '<div class="testimonial-role">' + _escHtml(item.role || '') + '</div>' +
+                            '</div>' +
+                        '</div>';
+                    var qTrim = (item.quote || '').trim();
+                    if (!qTrim) {
+                        var cb = card.querySelector('.tm-collapse-toggle');
+                        var cw = card.querySelector('.tm-collapsible-text');
+                        if (cb) cb.style.display = 'none';
+                        if (cw) { cw.classList.remove('is-collapsed'); }
+                    }
+                    textGrid.appendChild(card);
+                });
+            } else if (textGrid) {
+                textGrid.innerHTML = '';
+            }
+
+            var dur = parseFloat(c.durationSec);
+            if (!isFinite(dur) || dur < 12) dur = 55;
+            el.style.setProperty('--tm-duration', dur + 's');
+
+            if (!track) return;
+            var slides = Array.isArray(c.slides) ? c.slides.filter(function(s) {
+                return s && String(s.imageUrl || '').trim();
+            }) : [];
+            track.innerHTML = '';
+            if (!slides.length) {
+                if (viewport) viewport.style.display = 'none';
+                return;
+            }
+            if (viewport) viewport.style.display = '';
+
+            function buildSlide(s) {
+                var slide = document.createElement('div');
+                slide.className = 'tm-slide';
+                var capWrap = document.createElement('div');
+                capWrap.className = 'tm-collapsible-wrap tm-slide-caption-wrap';
+                var cap = document.createElement('p');
+                cap.className = 'tm-slide-caption tm-collapsible-text is-collapsed';
+                cap.textContent = s.textAbove != null ? String(s.textAbove) : '';
+                var capBtn = document.createElement('button');
+                capBtn.type = 'button';
+                capBtn.className = 'tm-collapse-toggle';
+                capBtn.setAttribute('aria-expanded', 'false');
+                capBtn.textContent = '顯示更多';
+                capWrap.appendChild(cap);
+                capWrap.appendChild(capBtn);
+                var capTxt = s.textAbove != null ? String(s.textAbove) : '';
+                if (!capTxt.trim()) {
+                    capWrap.style.display = 'none';
+                }
+                var rawMedia = String(s.imageUrl || '').trim();
+                var mediaUrl = rawMedia ? fixStorageUrl(rawMedia) : '';
+                var isVideo = _isTmSlideVideoUrl(rawMedia) || _isTmSlideVideoUrl(mediaUrl);
+                if (isVideo && mediaUrl) {
+                    var vw = document.createElement('div');
+                    vw.className = 'tm-slide-video-wrap';
+                    vw.setAttribute('role', 'group');
+                    vw.setAttribute('aria-label', (String(s.imageAlt || '').trim() || '學員分享影片'));
+                    var vid = document.createElement('video');
+                    vid.className = 'tm-slide-video';
+                    vid.src = mediaUrl;
+                    vid.muted = true;
+                    vid.defaultMuted = true;
+                    vid.setAttribute('muted', '');
+                    vid.loop = true;
+                    vid.playsInline = true;
+                    vid.setAttribute('playsinline', '');
+                    vid.setAttribute('webkit-playsinline', '');
+                    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        vid.autoplay = true;
+                    }
+                    vw.appendChild(vid);
+                    slide.appendChild(capWrap);
+                    slide.appendChild(vw);
+                    return slide;
+                }
+                var ibtn = document.createElement('button');
+                ibtn.type = 'button';
+                ibtn.className = 'tm-slide-img-btn';
+                ibtn.setAttribute('aria-label', (String(s.imageAlt || '').trim() || '放大檢視圖片'));
+                var im = document.createElement('img');
+                if (mediaUrl) im.src = mediaUrl;
+                im.alt = s.imageAlt != null ? String(s.imageAlt) : '';
+                im.loading = 'lazy';
+                im.decoding = 'async';
+                ibtn.appendChild(im);
+                slide.appendChild(capWrap);
+                slide.appendChild(ibtn);
+                return slide;
+            }
+
+            var built = [];
+            slides.forEach(function(s) {
+                var sl = buildSlide(s);
+                track.appendChild(sl);
+                built.push(sl);
+            });
+            built.forEach(function(sl) {
+                track.appendChild(sl.cloneNode(true));
+            });
+
+            _initTmSlideVideos(viewport);
+            _initTmSlideVideoTouch(track);
+            _initTmTouch(viewport);
+            track.querySelectorAll('video.tm-slide-video').forEach(function(v) {
+                v.play().catch(function() {});
+            });
+        }
+
+        (function _initTmCollapseToggle() {
+            if (window._tmCollapseBound) return;
+            window._tmCollapseBound = true;
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.tm-collapse-toggle');
+                if (!btn) return;
+                var wrap = btn.closest('.tm-collapsible-wrap');
+                if (!wrap) return;
+                var text = wrap.querySelector('.tm-collapsible-text');
+                if (!text) return;
+                var expanded = text.classList.contains('is-expanded');
+                if (expanded) {
+                    text.classList.remove('is-expanded');
+                    text.classList.add('is-collapsed');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.textContent = '顯示更多';
+                } else {
+                    text.classList.add('is-expanded');
+                    text.classList.remove('is-collapsed');
+                    btn.setAttribute('aria-expanded', 'true');
+                    btn.textContent = '顯示較少';
+                }
+            });
+        })();
+
+        function _initTmTouch(viewport) {
+            if (!viewport || viewport._tmTouchBound) return;
+            viewport._tmTouchBound = true;
+            var startX = 0, scrollStart = 0, dragging = false;
+            var track = viewport.querySelector('.tm-track');
+            viewport.addEventListener('touchstart', function(e) {
+                viewport.classList.add('tm-touch-active');
+                dragging = true;
+                startX = e.touches[0].clientX;
+                scrollStart = viewport.scrollLeft;
+            }, { passive: true });
+            viewport.addEventListener('touchmove', function(e) {
+                if (!dragging) return;
+                viewport.scrollLeft = scrollStart - (e.touches[0].clientX - startX);
+            }, { passive: true });
+            viewport.addEventListener('touchend', function() {
+                dragging = false;
+                setTimeout(function() { viewport.classList.remove('tm-touch-active'); }, 3000);
+            }, { passive: true });
+        }
+
+        (function _initTmLightbox() {
+            document.addEventListener('click', function(e) {
+                var b = e.target.closest('.tm-slide-img-btn');
+                if (!b) return;
+                var sm = b.querySelector('img');
+                if (!sm || !sm.getAttribute('src')) return;
+                var lb = document.querySelector('.tm-lightbox');
+                if (!lb) return;
+                var img = lb.querySelector('.tm-lightbox-img');
+                if (img) { img.src = sm.currentSrc || sm.src; img.alt = sm.alt || ''; }
+                lb.hidden = false;
+                document.body.style.overflow = 'hidden';
+            });
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.tm-lightbox-close') || e.target.closest('.tm-lightbox-backdrop')) {
+                    var lb = document.querySelector('.tm-lightbox');
+                    if (lb) {
+                        lb.hidden = true;
+                        var img = lb.querySelector('.tm-lightbox-img');
+                        if (img) { img.removeAttribute('src'); img.alt = ''; }
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+            document.addEventListener('keydown', function(ev) {
+                if (ev.key === 'Escape') {
+                    var lb = document.querySelector('.tm-lightbox');
+                    if (lb && !lb.hidden) {
+                        lb.hidden = true;
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+        })();
+
+        function _normalizeWorkshopsBoxColor(color) {
+            var raw = String(color || '').trim();
+            var match = raw.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+            if (!match) return '';
+            var hex = match[1];
+            if (hex.length === 3) hex = hex.split('').map(function(ch) { return ch + ch; }).join('');
+            return '#' + hex.toUpperCase();
+        }
+
+        function _workshopsBoxRgba(color, alpha) {
+            var hex = _normalizeWorkshopsBoxColor(color);
+            if (!hex) return '';
+            var intVal = parseInt(hex.slice(1), 16);
+            var r = (intVal >> 16) & 255;
+            var g = (intVal >> 8) & 255;
+            var b = intVal & 255;
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+        }
+
+        function _applyWorkshopsSubtitleBoxStyles(boxEl, badgeEl, cfg) {
+            if (!boxEl) return;
+            cfg = cfg || {};
+            var normalized = _normalizeWorkshopsBoxColor(cfg.subtitleBoxColor);
+            boxEl.style.background = normalized ? _workshopsBoxRgba(normalized, 0.05) : 'rgba(217,119,87,0.05)';
+            boxEl.style.borderColor = normalized ? _workshopsBoxRgba(normalized, 0.18) : 'rgba(217,119,87,0.14)';
+            if (badgeEl) {
+                var badgeTextColor = _normalizeWorkshopsBoxColor(cfg.badgeTextColor);
+                var badgeBgColor = _normalizeWorkshopsBoxColor(cfg.badgeBgColor);
+                var badgeBorderColor = _normalizeWorkshopsBoxColor(cfg.badgeBorderColor);
+                badgeEl.style.color = badgeTextColor || normalized || 'var(--accent-text)';
+                badgeEl.style.borderColor = badgeBorderColor || (normalized ? _workshopsBoxRgba(normalized, 0.16) : 'rgba(0,0,0,0.06)');
+                badgeEl.style.background = badgeBgColor || (normalized ? _workshopsBoxRgba(normalized, 0.08) : 'var(--white)');
+            }
+        }
+
+        function _applyWorkshopsBadgeLink(badgeEl, href) {
+            if (!badgeEl) return;
+            var link = String(href || '').trim();
+            if (!link) {
+                badgeEl.removeAttribute('href');
+                badgeEl.removeAttribute('target');
+                badgeEl.removeAttribute('rel');
+                badgeEl.setAttribute('aria-disabled', 'true');
+                return;
+            }
+            badgeEl.setAttribute('href', link);
+            badgeEl.removeAttribute('aria-disabled');
+            if (/^https?:/i.test(link)) {
+                badgeEl.setAttribute('target', '_blank');
+                badgeEl.setAttribute('rel', 'noopener noreferrer');
+            } else {
+                badgeEl.removeAttribute('target');
+                badgeEl.removeAttribute('rel');
+            }
+        }
+
         function applyContentToSection(el, type, c) {
             var h2 = el.querySelector('.section-header h2');
 
             switch (type) {
                 case 'hero':
                     var h1 = el.querySelector('h1');
-                    if (h1) h1.innerHTML = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : (_escHtml(c.title).replace(/\n/g, '<br>'))) : '';
+                    if (h1) _setRichText(h1, c.title || '');
                     var sub = el.querySelector('.hero-subtitle');
-                    if (sub && c.subtitle) sub.textContent = c.subtitle;
+                    if (sub) _setRichText(sub, c.subtitle || '');
                     var cta = el.querySelector('.hero-cta .btn');
-                    if (cta && c.ctaText) cta.textContent = c.ctaText;
+                    if (cta) cta.innerHTML = _richTextHtml(c.ctaText || '');
                     if (cta && c.ctaLink) cta.href = c.ctaLink;
                     if (c.gifUrl) _swapMediaElement(el, '.hero-gif', c.gifUrl, c.title || 'Hero media');
                     break;
 
                 case 'pain-points':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
-                    if (c.cards) {
-                        var cards = el.querySelectorAll('.pain-point-card');
-                        c.cards.forEach(function(card, i) {
-                            if (cards[i]) {
-                                var ct = cards[i].querySelector('h4');
-                                var cp = cards[i].querySelector('p');
-                                if (ct && card.title) ct.textContent = card.title;
-                                if (cp && card.description) cp.textContent = card.description;
-                            }
-                        });
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
+                    if (c.cards && c.cards.length) {
+                        var ppGrid = el.querySelector('.pain-points-grid');
+                        if (ppGrid) {
+                            ppGrid.innerHTML = '';
+                            c.cards.forEach(function(card) {
+                                var d = document.createElement('div');
+                                d.className = 'pain-point-card fade-in visible';
+                                d.innerHTML = '<h4>' + _richTextHtml(card.title || '') + '</h4><p>' + _richTextHtml(card.description || '') + '</p>';
+                                ppGrid.appendChild(d);
+                            });
+                            syncPainPointDots(el);
+                        }
                     }
                     var insight = el.querySelector('.insight-box p');
-                    if (insight && c.insightQuote) insight.textContent = c.insightQuote;
+                    if (insight) _setRichText(insight, c.insightQuote || '');
                     break;
 
                 case 'how-it-works':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
                     var hiwSub = el.querySelector('.section-header p');
-                    if (hiwSub && c.subtitle !== undefined) hiwSub.textContent = c.subtitle || '';
+                    if (hiwSub) _setRichText(hiwSub, c.subtitle || '');
                     if (c.steps) {
                         var steps = el.querySelectorAll('.hiw-step');
                         c.steps.forEach(function(step, i) {
@@ -3083,7 +3969,7 @@
                     break;
 
                 case 'trust':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
                     if (c.cards) {
                         var tcards = el.querySelectorAll('.trust-card');
                         c.cards.forEach(function(card, i) {
@@ -3112,47 +3998,28 @@
                     break;
 
                 case 'testimonials':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
-                    if (c.items && c.items.length) {
-                        var tContainer = el.querySelector('.container');
-                        if (tContainer) {
-                            var existingCards = tContainer.querySelectorAll('.testimonial-card');
-                            var templateCard = existingCards[0];
-                            for (var ti = existingCards.length - 1; ti > 0; ti--) existingCards[ti].remove();
-                            c.items.forEach(function(item, idx) {
-                                var card;
-                                if (idx === 0 && templateCard) {
-                                    card = templateCard;
-                                } else if (templateCard) {
-                                    card = templateCard.cloneNode(true);
-                                    tContainer.appendChild(card);
-                                } else { return; }
-                                var tText = card.querySelector('.testimonial-text');
-                                if (tText && item.quote) tText.textContent = item.quote;
-                                var tName = card.querySelector('.testimonial-name');
-                                if (tName && item.name) tName.textContent = item.name;
-                                var tRole = card.querySelector('.testimonial-role');
-                                if (tRole && item.role) tRole.textContent = item.role;
-                                var tAvatar = card.querySelector('.testimonial-avatar');
-                                if (tAvatar && item.avatarLetter) tAvatar.textContent = item.avatarLetter;
-                            });
-                        }
-                    }
+                case 'testimonial-marquee':
+                    _applyUnifiedTestimonials(el, c);
                     break;
 
                 case 'workshops':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
-                    var wsSubBox = el.querySelector('.section-header > div');
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
+                    var wsSubBox = el.querySelector('.workshops-subtitle-box');
                     if (wsSubBox) {
-                        var wsSubP = wsSubBox.querySelector('p');
-                        if (wsSubP && c.subtitle !== undefined) wsSubP.textContent = c.subtitle;
-                        var wsBadge = wsSubBox.querySelector('div');
-                        if (wsBadge && c.badgeText !== undefined) wsBadge.innerHTML = '<span style="font-size:15px;">✦</span> ' + _escHtml(c.badgeText || '');
+                        wsSubBox.style.display = c.subtitleBox_visible === false ? 'none' : '';
+                        var wsSubP = wsSubBox.querySelector('.workshops-subtitle-copy');
+                        if (wsSubP) _setRichText(wsSubP, c.subtitle || '');
+                        var wsBadge = wsSubBox.querySelector('.workshops-subtitle-badge');
+                        if (wsBadge) {
+                            _setRichText(wsBadge, c.badgeText || '');
+                            _applyWorkshopsBadgeLink(wsBadge, c.badgeLink);
+                        }
+                        _applyWorkshopsSubtitleBoxStyles(wsSubBox, wsBadge, c);
                     }
                     break;
 
                 case 'about':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
                     var aboutCard = el.querySelector('.glass-card');
                     if (aboutCard) {
                         var aboutImg = aboutCard.querySelector('img');
@@ -3165,12 +4032,12 @@
                         }
                         if (aboutBtnLink && !aboutBtnLink.querySelector('img')) {
                             if (c.linkUrl) aboutBtnLink.href = c.linkUrl;
-                            if (c.linkText) aboutBtnLink.innerHTML = _escHtml(c.linkText);
+                            aboutBtnLink.innerHTML = _richTextHtml(c.linkText || '');
                         }
                         var aboutH3 = aboutCard.querySelector('h3');
-                        if (aboutH3 && c.name) aboutH3.textContent = c.name;
+                        if (aboutH3) _setRichText(aboutH3, c.name || '');
                         var aboutRole = aboutH3 ? aboutH3.nextElementSibling : null;
-                        if (aboutRole && aboutRole.tagName === 'P' && c.role) aboutRole.textContent = c.role;
+                        if (aboutRole && aboutRole.tagName === 'P') _setRichText(aboutRole, c.role || '');
                         var badgeWrap = aboutCard.querySelector('div[style*="flex-wrap: wrap"][style*="gap: 8px"]');
                         if (badgeWrap && c.badges !== undefined) {
                             var badgeArr = (c.badges || '').split(',').map(function(b) { return b.trim(); }).filter(Boolean);
@@ -3178,32 +4045,34 @@
                             badgeArr.forEach(function(b) {
                                 var span = document.createElement('span');
                                 span.style.cssText = 'padding:6px 16px;border-radius:20px;font-size:14px;background:rgba(217,119,87,0.1);color:var(--accent);';
-                                span.textContent = b;
+                                span.innerHTML = _richTextHtml(b);
                                 badgeWrap.appendChild(span);
                             });
                         }
                         var infDiv = aboutCard.querySelector('div[style*="flex: 1"]');
                         if (infDiv && c.bio !== undefined) {
                             var bioPs = infDiv.querySelectorAll('p[style*="line-height: 1.7"]');
-                            var bioLines = (c.bio || '').split('\n').filter(Boolean);
+                            var bioRaw = String(c.bio || '');
+                            var bioLines = bioRaw ? bioRaw.split(/\s*<br\s*\/?>\s*/i).filter(Boolean) : [];
+                            if (!bioLines.length && bioRaw) bioLines = [bioRaw];
                             bioPs.forEach(function(p, i) {
-                                if (bioLines[i] !== undefined) p.textContent = bioLines[i];
-                                else p.textContent = '';
+                                p.innerHTML = _richTextHtml(bioLines[i] || '');
+                                p.style.display = bioLines[i] ? '' : 'none';
                             });
                         }
                         var tagBox = aboutCard.querySelector('div[style*="border-radius: 12px"][style*="background: var(--bg-pampas)"]');
                         if (tagBox && c.tagline !== undefined) {
                             var tagP = tagBox.querySelector('p');
-                            if (tagP) tagP.textContent = c.tagline;
+                            if (tagP) _setRichText(tagP, c.tagline || '');
                         }
                     }
                     break;
 
                 case 'countdown':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
                     var ctaEl = el.querySelector('.cd-cta');
                     if (ctaEl) {
-                        if (c.ctaText) ctaEl.textContent = c.ctaText;
+                        ctaEl.innerHTML = _richTextHtml(c.ctaText || '');
                         var link = c.ctaLink || '/workshop-payment';
                         ctaEl.href = link;
                     }
@@ -3248,7 +4117,7 @@
                     break;
 
                 case 'faq':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
                     if (c.items) {
                         var faqItems = el.querySelectorAll('.faq-item');
                         c.items.forEach(function(item, i) {
@@ -3263,18 +4132,18 @@
                     break;
 
                 case 'waitlist':
-                    if (h2 && c.sectionTitle) h2.textContent = c.sectionTitle;
+                    if (h2) _setRichText(h2, c.sectionTitle || '');
                     var wlSub = el.querySelector('.section-header p');
-                    if (wlSub && c.subtitle !== undefined) wlSub.textContent = c.subtitle || '';
+                    if (wlSub) _setRichText(wlSub, c.subtitle || '');
                     break;
 
                 case 'final-cta':
                     var ctaH2 = el.querySelector('h2');
-                    if (ctaH2 && c.title) ctaH2.innerHTML = c.title;
+                    if (ctaH2) _setRichText(ctaH2, c.title || '');
                     var ctaP = el.querySelector('p');
-                    if (ctaP && c.subtitle) ctaP.innerHTML = c.subtitle;
+                    if (ctaP) _setRichText(ctaP, c.subtitle || '');
                     var ctaBtn = el.querySelector('.btn');
-                    if (ctaBtn && c.ctaText) ctaBtn.textContent = c.ctaText;
+                    if (ctaBtn) ctaBtn.innerHTML = _richTextHtml(c.ctaText || '');
                     if (ctaBtn && c.ctaLink) ctaBtn.href = c.ctaLink;
                     var contactLinks = el.querySelectorAll('.contact-info a');
                     if (contactLinks.length >= 1) {
@@ -3292,12 +4161,12 @@
                     if (vid && c.videoUrl) { vid.src = c.videoUrl; }
                     if (vid && c.posterUrl) { vid.poster = c.posterUrl; }
                     var vcap = el.querySelector('.tpl-video-caption');
-                    if (vcap) vcap.textContent = c.caption || '';
+                    if (vcap) _setRichText(vcap, c.caption || '');
                     break;
 
                 case 'image-chain':
                     var chainTitle = el.querySelector('.chain-title span');
-                    if (chainTitle && c.sectionTitle) chainTitle.textContent = c.sectionTitle;
+                    if (chainTitle) _setRichText(chainTitle, c.sectionTitle || '');
                     if (c.cards) {
                         var chainList = el.querySelector('.chain-list');
                         if (chainList) {
@@ -3319,22 +4188,22 @@
                     var shBefore = el.querySelector('.shift-before');
                     var shAfter = el.querySelector('.shift-after');
                     var shDesc = el.querySelector('.shift-desc');
-                    if (shBefore && c.beforeText) shBefore.textContent = c.beforeText;
-                    if (shAfter && c.afterText) shAfter.textContent = c.afterText;
-                    if (shDesc) shDesc.textContent = c.description || '';
+                    if (shBefore) _setRichText(shBefore, c.beforeText || '');
+                    if (shAfter) _setRichText(shAfter, c.afterText || '');
+                    if (shDesc) _setRichText(shDesc, c.description || '');
                     break;
 
                 case 'learning-outcomes':
                     var loTitle = el.querySelector('.lo-title span');
-                    if (loTitle && c.sectionTitle) loTitle.innerHTML = c.sectionTitle;
+                    if (loTitle) _setRichText(loTitle, c.sectionTitle || '');
                     if (c.items) {
                         var loList = el.querySelector('.lo-list');
                         if (loList) {
                             loList.innerHTML = '';
                             c.items.forEach(function(item, idx) {
-                                var safeTitle = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.title || '') : _escHtml(item.title || '');
-                                var safeDesc = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.description || '') : _escHtml(item.description || '');
-                                var safeMore = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.moreText || '') : _escHtml(item.moreText || '');
+                                var safeTitle = _richTextHtml(item.title || '');
+                                var safeDesc = _richTextHtml(item.description || '');
+                                var safeMore = _richTextHtml(item.moreText || '');
                                 var div = document.createElement('div');
                                 div.className = 'lo-item';
                                 div.innerHTML = '<div class="lo-num">' + (idx + 1) + '</div>' +
@@ -3357,21 +4226,21 @@
                         });
                     }
                     var loDemo = el.querySelector('.lo-demo-box');
-                    if (loDemo) loDemo.textContent = c.demoText || '';
+                    if (loDemo) _setRichText(loDemo, c.demoText || '');
                     if (loDemo) loDemo.style.display = c.demoText ? '' : 'none';
                     break;
 
                 case 'audience-fit':
                     var afForTitle = el.querySelector('.af-for-title');
-                    if (afForTitle && c.forTitle) afForTitle.textContent = c.forTitle;
+                    if (afForTitle) _setRichText(afForTitle, c.forTitle || '');
                     var afNotForTitle = el.querySelector('.af-notfor-title');
-                    if (afNotForTitle && c.notForTitle) afNotForTitle.textContent = c.notForTitle;
+                    if (afNotForTitle) _setRichText(afNotForTitle, c.notForTitle || '');
                     var afForList = el.querySelector('.af-for-list');
                     if (afForList && c.forItems) {
                         afForList.innerHTML = '';
                         c.forItems.forEach(function(item) {
                             var li = document.createElement('li');
-                            li.textContent = item.text || '';
+                            li.innerHTML = _richTextHtml(item.text || '');
                             afForList.appendChild(li);
                         });
                     }
@@ -3380,7 +4249,7 @@
                         afNotForList.innerHTML = '';
                         c.notForItems.forEach(function(item) {
                             var li = document.createElement('li');
-                            li.textContent = item.text || '';
+                            li.innerHTML = _richTextHtml(item.text || '');
                             afNotForList.appendChild(li);
                         });
                     }
@@ -3394,50 +4263,158 @@
 
                 case 'transformation':
                     var tfTitle = el.querySelector('.tf-title span');
-                    if (tfTitle && c.sectionTitle) tfTitle.innerHTML = c.sectionTitle;
+                    if (tfTitle) _setRichText(tfTitle, c.sectionTitle || '');
                     if (c.cards) {
                         var tfGrid = el.querySelector('.tf-grid');
                         if (tfGrid) {
                             tfGrid.innerHTML = '';
                             c.cards.forEach(function(card) {
+                                var safeTheme = _richTextHtml(card.theme || '');
+                                var safeBefore = _richTextHtml(card.beforeText || '');
+                                var safeAfter = _richTextHtml(card.afterText || '');
                                 var div = document.createElement('div');
                                 div.className = 'tf-card';
                                 if (c.colorCardBg) div.style.background = c.colorCardBg;
                                 if (c.colorCardBorder) div.style.borderColor = c.colorCardBorder;
                                 div.innerHTML =
-                                    '<div class="tf-theme">' + _escHtml(card.theme || '') + '</div>' +
+                                    '<div class="tf-theme">' + safeTheme + '</div>' +
                                     '<div class="tf-before-label">之前</div>' +
-                                    '<div class="tf-before">' + _escHtml(card.beforeText || '') + '</div>' +
+                                    '<div class="tf-before">' + safeBefore + '</div>' +
                                     '<div class="tf-after-label">之後</div>' +
-                                    '<div class="tf-after">' + _escHtml(card.afterText || '') + '</div>';
+                                    '<div class="tf-after">' + safeAfter + '</div>';
                                 if (c.colorTitle) { var th = div.querySelector('.tf-theme'); if (th) th.style.color = c.colorTitle; }
                                 if (c.colorBeforeLabel) { var bl = div.querySelector('.tf-before-label'); if (bl) bl.style.color = c.colorBeforeLabel; }
                                 if (c.colorAfterLabel) { var al = div.querySelector('.tf-after-label'); if (al) al.style.color = c.colorAfterLabel; }
                                 if (c.colorBodyText) { var bps = div.querySelectorAll('.tf-before, .tf-after'); bps.forEach(function(p) { p.style.color = c.colorBodyText; }); }
                                 tfGrid.appendChild(div);
                             });
+                            syncTransformationDots(el);
                         }
                     }
                     break;
 
                 case 'link-list':
                     var llTitle = el.querySelector('.ll-title');
-                    if (llTitle) llTitle.textContent = c.sectionTitle || '';
+                    if (llTitle) _setRichText(llTitle, c.sectionTitle || '');
                     var llList = el.querySelector('.ll-list');
                     if (llList && c.links) {
                         llList.innerHTML = '';
+                        var existingPopup = el.querySelector('.ll-popup-overlay');
+                        if (existingPopup) existingPopup.remove();
+                        var popupOverlay = document.createElement('div');
+                        popupOverlay.className = 'll-popup-overlay';
+                        popupOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.56);display:none;align-items:center;justify-content:center;padding:20px;z-index:10000;';
+                        popupOverlay.innerHTML =
+                            '<div style="position:relative;width:min(100%,520px);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,0.2);">' +
+                                '<button type="button" class="ll-popup-close" style="position:absolute;top:14px;right:14px;border:none;background:transparent;font-size:28px;line-height:1;cursor:pointer;color:#8A7F74;">&times;</button>' +
+                                '<img class="ll-popup-image" src="" alt="" style="display:none;width:min(100%,220px);border-radius:16px;margin:0 auto 18px;box-shadow:0 12px 30px rgba(0,0,0,0.12);">' +
+                                '<h3 class="ll-popup-title" style="margin:0 0 10px;font-size:1.45rem;color:var(--text);"></h3>' +
+                                '<div class="ll-popup-desc" style="margin-bottom:18px;color:var(--text-light);line-height:1.7;"></div>' +
+                                '<form class="ll-popup-form" style="display:flex;flex-direction:column;gap:12px;">' +
+                                    '<div class="ll-popup-fields" style="display:flex;flex-direction:column;gap:12px;"></div>' +
+                                    '<button type="submit" class="ll-popup-submit" style="border:none;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;padding:14px 18px;cursor:pointer;">提交</button>' +
+                                '</form>' +
+                            '</div>';
+                        el.appendChild(popupOverlay);
+                        var popupClose = popupOverlay.querySelector('.ll-popup-close');
+                        var popupImage = popupOverlay.querySelector('.ll-popup-image');
+                        var popupTitle = popupOverlay.querySelector('.ll-popup-title');
+                        var popupDesc = popupOverlay.querySelector('.ll-popup-desc');
+                        var popupFields = popupOverlay.querySelector('.ll-popup-fields');
+                        var popupSubmit = popupOverlay.querySelector('.ll-popup-submit');
+                        var popupForm = popupOverlay.querySelector('.ll-popup-form');
+                        var popupRedirectUrl = '';
+
+                        function closeLinkListPopup() {
+                            popupOverlay.style.display = 'none';
+                            document.body.style.overflow = '';
+                            popupRedirectUrl = '';
+                        }
+
+                        function openLinkListPopup(config) {
+                            var titleHtml = config.titleHtml || '';
+                            var descHtml = config.descriptionHtml || '';
+                            var imageUrl = config.imageUrl || '';
+                            var fields = Array.isArray(config.formFields) && config.formFields.length
+                                ? config.formFields
+                                : [{ label: '姓名', type: 'text' }, { label: 'WhatsApp / Email', type: 'text' }];
+                            popupTitle.innerHTML = titleHtml;
+                            popupDesc.innerHTML = descHtml;
+                            popupDesc.style.display = descHtml ? '' : 'none';
+                            if (imageUrl) {
+                                popupImage.src = typeof fixStorageUrl === 'function' ? fixStorageUrl(imageUrl) : imageUrl;
+                                popupImage.alt = config.titleText || 'Lead Magnet';
+                                popupImage.style.display = 'block';
+                            } else {
+                                popupImage.src = '';
+                                popupImage.alt = '';
+                                popupImage.style.display = 'none';
+                            }
+                            popupFields.innerHTML = '';
+                            fields.forEach(function(fieldDef) {
+                                var input = document.createElement('input');
+                                input.type = fieldDef.type || 'text';
+                                input.placeholder = fieldDef.label || '';
+                                input.style.cssText = 'width:100%;padding:12px 14px;border:1px solid rgba(0,0,0,0.12);border-radius:12px;font-size:15px;font-family:inherit;';
+                                popupFields.appendChild(input);
+                            });
+                            popupSubmit.textContent = config.submitText || '提交';
+                            popupRedirectUrl = config.redirectUrl || '';
+                            popupOverlay.style.display = 'flex';
+                            document.body.style.overflow = 'hidden';
+                        }
+
+                        if (popupClose) popupClose.addEventListener('click', closeLinkListPopup);
+                        popupOverlay.addEventListener('click', function(evt) {
+                            if (evt.target === popupOverlay) closeLinkListPopup();
+                        });
+                        if (popupForm) {
+                            popupForm.addEventListener('submit', function(evt) {
+                                evt.preventDefault();
+                                var nextUrl = popupRedirectUrl;
+                                closeLinkListPopup();
+                                if (nextUrl) window.location.href = nextUrl;
+                            });
+                        }
+
                         c.links.forEach(function(lnk) {
+                            var safeLabel = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(lnk.label || '') : _escHtml(lnk.label || '').replace(/\n/g, '<br>');
+                            var safeDesc = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(lnk.description || '') : _escHtml(lnk.description || '').replace(/\n/g, '<br>');
+                            var safeBadge = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(lnk.badgeText || '') : _escHtml(lnk.badgeText || '').replace(/\n/g, '<br>');
+                            var popup = lnk.leadMagnet || {};
+                            var popupEnabled = popup.enabled === true || String(popup.enabled || '').toLowerCase() === 'true';
                             var a = document.createElement('a');
                             a.className = 'll-card';
                             a.href = lnk.url || '#';
                             a.target = '_blank';
                             a.rel = 'noopener';
-                            var body = '<div class="ll-card-body"><div class="ll-card-label">' + _escHtml(lnk.label || '') + '</div>';
-                            if (lnk.description) body += '<div class="ll-card-desc">' + _escHtml(lnk.description) + '</div>';
+                            var body = '<div class="ll-card-body"><div class="ll-card-label">' + safeLabel + '</div>';
+                            if (lnk.description) body += '<div class="ll-card-desc">' + safeDesc + '</div>';
                             body += '</div>';
-                            if (lnk.badgeText) body += '<span class="ll-badge">' + _escHtml(lnk.badgeText) + '</span>';
+                            if (lnk.badgeText) body += '<span class="ll-badge">' + safeBadge + '</span>';
                             body += '<span class="ll-chevron">›</span>';
                             a.innerHTML = body;
+                            if (popupEnabled) {
+                                a.removeAttribute('target');
+                                a.removeAttribute('rel');
+                                a.addEventListener('click', function(evt) {
+                                    evt.preventDefault();
+                                    var redirectUrl = String(popup.redirectUrl || '').trim();
+                                    if (!redirectUrl) {
+                                        var cardUrl = String(lnk.url || '').trim();
+                                        redirectUrl = cardUrl && cardUrl !== '#' ? cardUrl : '';
+                                    }
+                                    openLinkListPopup({
+                                        titleHtml: typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(popup.title || lnk.label || '') : _escHtml(popup.title || lnk.label || '').replace(/\n/g, '<br>'),
+                                        titleText: String(popup.title || lnk.label || '').replace(/<[^>]+>/g, ' ').trim(),
+                                        descriptionHtml: typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(popup.description || lnk.description || '') : _escHtml(popup.description || lnk.description || '').replace(/\n/g, '<br>'),
+                                        imageUrl: String(popup.imageUrl || '').trim(),
+                                        submitText: String(popup.submitText || '').trim() || '提交',
+                                        redirectUrl: redirectUrl,
+                                        formFields: Array.isArray(popup.formFields) ? popup.formFields : []
+                                    });
+                                });
+                            }
                             llList.appendChild(a);
                         });
                     }
@@ -3445,22 +4422,41 @@
 
                 case 'tools-grid':
                     var tgTitle = el.querySelector('.tg-title');
-                    if (tgTitle) tgTitle.textContent = c.sectionTitle || '';
+                    if (tgTitle) _setRichText(tgTitle, c.sectionTitle || '');
                     var tgGrid = el.querySelector('.tg-grid');
                     if (tgGrid && c.tools) {
                         tgGrid.innerHTML = '';
                         c.tools.forEach(function(tool) {
                             var a = document.createElement('a');
-                            a.className = 'tg-card';
+                            var cardMediaRaw = String(tool.cardMediaUrl || '').trim();
+                            var hasCardMedia = !!cardMediaRaw;
+                            a.className = 'tg-card' + (hasCardMedia ? ' tg-card--with-media' : '');
                             a.href = tool.url || '#';
                             a.target = '_blank';
                             a.rel = 'noopener';
+                            var safeName = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(tool.name || '') : _escHtml(tool.name || '').replace(/\n/g, '<br>');
+                            var safeDesc = tool.description
+                                ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(tool.description) : _escHtml(tool.description).replace(/\n/g, '<br>'))
+                                : '';
+                            var safeBadge = tool.badgeText
+                                ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(tool.badgeText) : _escHtml(tool.badgeText).replace(/\n/g, '<br>'))
+                                : '';
+                            var namePlain = String(tool.name || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
                             var inner = '';
-                            if (tool.logoUrl) inner += '<img class="tg-logo" src="' + _escHtml(tool.logoUrl) + '" alt="">';
-                            inner += '<div class="tg-name">' + _escHtml(tool.name || '') + '</div>';
-                            if (tool.description) inner += '<div class="tg-desc">' + _escHtml(tool.description) + '</div>';
-                            if (tool.badgeText) inner += '<span class="tg-badge">' + _escHtml(tool.badgeText) + '</span>';
-                            a.innerHTML = inner;
+                            if (tool.logoUrl) inner += '<img class="tg-logo" src="' + _escHtml(tool.logoUrl) + '" alt="' + _escHtml(namePlain || 'Tool') + '">';
+                            inner += '<div class="tg-name">' + safeName + '</div>';
+                            if (safeDesc) inner += '<div class="tg-desc">' + safeDesc + '</div>';
+                            if (safeBadge) inner += '<span class="tg-badge">' + safeBadge + '</span>';
+                            if (hasCardMedia) {
+                                var cmFixed = typeof fixStorageUrl === 'function' ? fixStorageUrl(cardMediaRaw) : cardMediaRaw;
+                                var isVid = _isTmSlideVideoUrl(cardMediaRaw) || _isTmSlideVideoUrl(cmFixed);
+                                var mediaHtml = isVid
+                                    ? '<video src="' + _escHtml(cmFixed) + '" autoplay muted loop playsinline></video>'
+                                    : '<img src="' + _escHtml(cmFixed) + '" alt="" loading="lazy">';
+                                a.innerHTML = '<div class="tg-card-main">' + inner + '</div><div class="tg-card-media">' + mediaHtml + '</div>';
+                            } else {
+                                a.innerHTML = inner;
+                            }
                             tgGrid.appendChild(a);
                         });
                     }
@@ -3468,30 +4464,30 @@
 
                 case 'section-divider':
                     var sdTitle = el.querySelector('.sd-title');
-                    if (sdTitle) sdTitle.textContent = c.title || '';
+                    if (sdTitle) _setRichText(sdTitle, c.title || '');
                     var sdSub = el.querySelector('.sd-subtitle');
                     if (sdSub) {
-                        sdSub.textContent = c.subtitle || '';
+                        _setRichText(sdSub, c.subtitle || '');
                         sdSub.style.display = c.subtitle ? '' : 'none';
                     }
                     break;
 
                 case 'lead-magnet':
                     var lmTitle = el.querySelector('.lm-title');
-                    if (lmTitle) lmTitle.textContent = c.title || '';
+                    if (lmTitle) _setRichText(lmTitle, c.title || '');
                     var lmDesc = el.querySelector('.lm-desc');
-                    if (lmDesc) lmDesc.textContent = c.description || '';
+                    if (lmDesc) _setRichText(lmDesc, c.description || '');
                     var lmImg = el.querySelector('.lm-img');
                     if (lmImg) {
                         if (c.imageUrl) { lmImg.src = c.imageUrl; lmImg.style.display = ''; }
                         else { lmImg.style.display = 'none'; }
                     }
                     var lmTrigger = el.querySelector('.lm-trigger');
-                    if (lmTrigger) lmTrigger.textContent = c.triggerText || '立即領取';
+                    if (lmTrigger) lmTrigger.innerHTML = _richTextHtml(c.triggerText || '立即領取');
                     var lmModalTitle = el.querySelector('.lm-modal-title');
-                    if (lmModalTitle) lmModalTitle.textContent = c.title || '';
+                    if (lmModalTitle) _setRichText(lmModalTitle, c.title || '');
                     var lmSubmit = el.querySelector('.lm-submit');
-                    if (lmSubmit) lmSubmit.textContent = c.submitText || '提交';
+                    if (lmSubmit) lmSubmit.innerHTML = _richTextHtml(c.submitText || '提交');
                     var lmFields = el.querySelector('.lm-form-fields');
                     if (lmFields && c.formFields) {
                         lmFields.innerHTML = '';
@@ -3513,10 +4509,10 @@
 
                 case 'origin-story':
                     var osTitle = el.querySelector('.os-title');
-                    if (osTitle) osTitle.textContent = c.sectionTitle || '';
+                    if (osTitle) _setRichText(osTitle, c.sectionTitle || '');
                     var osIntro = el.querySelector('.os-intro');
                     if (osIntro) {
-                        osIntro.textContent = c.introText || '';
+                        _setRichText(osIntro, c.introText || '');
                         osIntro.style.display = c.introText ? '' : 'none';
                     }
                     var osTl = el.querySelector('.os-timeline');
@@ -3535,10 +4531,10 @@
 
                 case 'tools-tags':
                     var ttTitle = el.querySelector('.tt-title');
-                    if (ttTitle) ttTitle.textContent = c.sectionTitle || '';
+                    if (ttTitle) _setRichText(ttTitle, c.sectionTitle || '');
                     var ttDesc = el.querySelector('.tt-desc');
                     if (ttDesc) {
-                        ttDesc.textContent = c.description || '';
+                        _setRichText(ttDesc, c.description || '');
                         ttDesc.style.display = c.description ? '' : 'none';
                     }
                     var ttCloud = el.querySelector('.tt-cloud');
@@ -3553,7 +4549,7 @@
                     }
                     var ttCallout = el.querySelector('.tt-callout');
                     if (ttCallout) {
-                        if (c.calloutText) { ttCallout.textContent = c.calloutText; ttCallout.style.display = ''; }
+                        if (c.calloutText) { _setRichText(ttCallout, c.calloutText); ttCallout.style.display = ''; }
                         else { ttCallout.style.display = 'none'; }
                     }
                     break;
@@ -3566,7 +4562,7 @@
                     }
                     var pbCap = el.querySelector('.pb-caption');
                     if (pbCap) {
-                        pbCap.textContent = c.caption || '';
+                        _setRichText(pbCap, c.caption || '');
                         pbCap.style.display = c.caption ? '' : 'none';
                     }
                     break;
@@ -3580,7 +4576,7 @@
                             : '0 10px 28px rgba(0,0,0,0.10)';
                     var aboImgUrl = _escHtml(c.imageUrl || '');
                     var aboAlt = _escHtml(c.alt || '');
-                    var aboCap = _escHtml(c.caption || '');
+                    var aboCap = _richTextHtml(c.caption || '');
                     var aboLink = String(c.linkUrl || '').trim();
                     var aboStart = aboLink ? '<a href="' + _escHtml(aboLink) + '"' + (/^https?:/i.test(aboLink) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
                     var aboEnd = aboLink ? '</a>' : '</div>';
@@ -3615,7 +4611,65 @@
                         (aboBtn ? '<div style="margin-top:24px;"><a href="' + aboBtnLink + '" class="btn btn-shimmer">' + _escHtml(aboBtn) + '</a></div>' : '') +
                         '</div></div>';
                     break;
+
+                case 'data-sharings':
+                    var dsLabel = el.querySelector('.ds-expand-label');
+                    if (dsLabel) _setRichText(dsLabel, c.expandLabel || '');
+                    var dsChartTitle = el.querySelector('.ds-chart-title');
+                    if (dsChartTitle) _setRichText(dsChartTitle, c.chartTitle || '');
+                    var dsSource = el.querySelector('.ds-source');
+                    if (dsSource) _setRichText(dsSource, c.sourceText || '');
+                    var dsInsightText = el.querySelector('.ds-insight-text');
+                    if (dsInsightText) _setRichText(dsInsightText, c.insightText || '');
+                    if (c.bars && c.bars.length) {
+                        var barsWrap = el.querySelector('.ds-bars-wrap');
+                        if (barsWrap) {
+                            barsWrap.innerHTML = '';
+                            c.bars.forEach(function(bar) {
+                                var pct = parseFloat(bar.value) || 0;
+                                var hl = bar.highlighted === true || bar.highlighted === 'true';
+                                var grad = hl ? 'linear-gradient(90deg,#D97757,#C45A3A)' : 'linear-gradient(90deg,#E8A88C,#D97757)';
+                                var labelStyle = hl ? 'font-weight:600;color:var(--accent);' : 'font-weight:500;';
+                                barsWrap.innerHTML += '<div style="display:flex;align-items:center;gap:14px;">' +
+                                    '<span style="min-width:70px;font-size:14px;' + labelStyle + '">' + _escHtml(bar.region || '') + '</span>' +
+                                    '<div style="flex:1;background:rgba(0,0,0,0.08);border-radius:8px;height:28px;overflow:hidden;">' +
+                                    '<div style="width:' + pct + '%;background:' + grad + ';height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:white;font-weight:700;font-size:13px;">' + pct + '%</div>' +
+                                    '</div></div>';
+                            });
+                        }
+                    }
+                    if (c.stats && c.stats.length) {
+                        var statsGrid = el.querySelector('.ds-stats-grid');
+                        if (statsGrid) {
+                            statsGrid.innerHTML = '';
+                            c.stats.forEach(function(st) {
+                                statsGrid.innerHTML += '<div style="background:var(--bg-pampas);border-radius:14px;padding:20px;text-align:center;">' +
+                                    '<div style="font-size:36px;font-weight:700;color:var(--accent);">' + _richTextHtml(st.number || '') + '</div>' +
+                                    '<div style="font-size:13px;color:var(--text);margin-top:4px;">' + _richTextHtml(st.caption || '') + '</div>' +
+                                    '</div>';
+                            });
+                        }
+                    }
+                    break;
             }
+
+            if (h2 && c.sectionTitle_visible === false) h2.style.display = 'none';
+            else if (h2 && c.sectionTitle_visible !== false && c.sectionTitle) h2.style.display = '';
+
+            var subEl = el.querySelector('.section-header p, .section-header > div > p');
+            if (subEl && c.subtitle_visible === false) subEl.style.display = 'none';
+            else if (subEl && c.subtitle_visible !== false) subEl.style.display = '';
+
+            var badgeEl = el.querySelector('.section-header .badge, .workshops-subtitle-badge, .section-header > div > div, .section-header > div > a');
+            if (badgeEl) {
+                var badgeHasText = String(c.badgeText || '').replace(/<[^>]+>/g, '').trim() !== '';
+                if (c.badgeText_visible === false || !badgeHasText) badgeEl.style.display = 'none';
+                else badgeEl.style.display = '';
+            }
+
+            var subtitleBoxEl = el.querySelector('.workshops-subtitle-box');
+            if (subtitleBoxEl && c.subtitleBox_visible === false) subtitleBoxEl.style.display = 'none';
+            else if (subtitleBoxEl && c.subtitleBox_visible !== false) subtitleBoxEl.style.display = '';
         }
 
         // Lock pinch/double-tap zoom on mobile browsers

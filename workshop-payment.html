@@ -74,6 +74,13 @@
         .capacity-rect{width:100%;aspect-ratio:3/4;max-width:24px;border-radius:6px;background:#D1D5DB;transition:background 0.3s ease;}
         .capacity-rect.filled{background:var(--accent);}
         .capacity-text{font-size:13px;color:var(--text-light);font-weight:600;}
+        .attendance-mode-pills{display:flex;gap:8px;}
+        .att-mode-pill{flex:1;padding:12px 16px;border:2px solid var(--bg-off);border-radius:12px;background:var(--white);font-size:14px;font-weight:700;color:var(--text-light);cursor:pointer;transition:all 0.18s;text-align:center;}
+        .att-mode-pill:hover{border-color:var(--accent);color:var(--accent);}
+        .att-mode-pill.active{border-color:var(--accent);background:rgba(217,119,87,0.06);color:var(--accent);}
+        .att-mode-seats-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-light);font-weight:600;margin-bottom:4px;}
+        .att-mode-seats-row .att-seat-icon{font-size:14px;}
+        .att-mode-seats-row.att-full{color:#ef4444;}
 
         .divider{height:1px;background:var(--bg-off);margin:28px 0;}
 
@@ -290,6 +297,16 @@
             <div id="roundSelectorWrap" style="display:none;margin-top:16px;">
                 <p id="roundSelectorLabel" style="font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:10px;">選擇期數</p>
                 <div id="roundSelector" class="round-selector"></div>
+            </div>
+
+            <!-- Attendance mode picker (for 'both' sessions) -->
+            <div id="attendanceModePicker" style="display:none;margin-top:16px;">
+                <p style="font-size:13px;font-weight:700;color:var(--text-light);margin-bottom:10px;">選擇參加模式</p>
+                <div class="attendance-mode-pills">
+                    <button type="button" class="att-mode-pill" data-mode="offline" onclick="pickAttendanceMode('offline')">🏢 實體參加</button>
+                    <button type="button" class="att-mode-pill" data-mode="online" onclick="pickAttendanceMode('online')">💻 線上參加</button>
+                </div>
+                <div id="attModeSeats" style="margin-top:10px;"></div>
             </div>
 
             <!-- Discount Code -->
@@ -549,13 +566,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js"></script>
+<script src="/js/shared-utils.js?v=2"></script>
 
 <script>
 var db, auth, storage, functions;
 var _wsData = null;
 var _wsId = '';
 var _selectedRound = null;
+var _selectedAttendanceMode = null;
 var _pendingRoundRestore = null;
 var _currentUser = null;
 var _userProfile = null;
@@ -666,15 +684,95 @@ function _buildVirtualRoundsFromSessions(d) {
         var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
         var sid = s.id || sessionStableId(s, i);
         var enrolled = (s.enrolled !== undefined && s.enrolled !== null) ? s.enrolled : (sessionEnrolled[sid] || 0);
-        rounds.push({
+        var r = {
             id: sid,
             label: dateLabel,
             capacity: s.capacity !== undefined ? s.capacity : globalCap,
             enrolled: enrolled,
             sessions: [s]
-        });
+        };
+        if (s.offlineCapacity !== undefined) r.offlineCapacity = s.offlineCapacity;
+        if (s.onlineCapacity !== undefined) r.onlineCapacity = s.onlineCapacity;
+        if (s.offlineEnrolled !== undefined) r.offlineEnrolled = s.offlineEnrolled;
+        if (s.onlineEnrolled !== undefined) r.onlineEnrolled = s.onlineEnrolled;
+        rounds.push(r);
     });
     return rounds;
+}
+
+function _resolveRoundMode(round) {
+    if (!round || !round.sessions || !round.sessions.length) return _wsData ? (_wsData.mode || 'offline') : 'offline';
+    var modes = {};
+    round.sessions.forEach(function(s) { modes[s.mode || 'offline'] = true; });
+    if (modes['both']) return 'both';
+    if (modes['online'] && modes['offline']) return 'both';
+    if (modes['online']) return 'online';
+    return 'offline';
+}
+
+function _updateAttendanceModePicker(round) {
+    var picker = document.getElementById('attendanceModePicker');
+    var seatsEl = document.getElementById('attModeSeats');
+    var resolvedMode = round ? _resolveRoundMode(round) : (_wsData ? (_wsData.mode || 'offline') : 'offline');
+    if (resolvedMode !== 'both') {
+        _selectedAttendanceMode = (resolvedMode === 'online') ? 'online' : 'offline';
+        picker.style.display = 'none';
+        return;
+    }
+    picker.style.display = '';
+    _selectedAttendanceMode = null;
+    picker.querySelectorAll('.att-mode-pill').forEach(function(b) { b.classList.remove('active'); });
+    _renderDualSeats(round || _wsData, seatsEl);
+}
+
+function _renderDualSeats(source, container) {
+    if (!source || !container) return;
+    var s = (source.sessions && source.sessions.length === 1) ? source.sessions[0] : source;
+    var offCap = s.offlineCapacity || 0;
+    var onCap = s.onlineCapacity || 0;
+    var offEnr = s.offlineEnrolled || 0;
+    var onEnr = s.onlineEnrolled || 0;
+    var offRem = Math.max(0, offCap - offEnr);
+    var onRem = Math.max(0, onCap - onEnr);
+    var html = '';
+    html += '<div class="att-mode-seats-row' + (offRem <= 0 && offCap > 0 ? ' att-full' : '') + '"><span class="att-seat-icon">🏢</span> 實體：' + (offCap > 0 ? (offRem > 0 ? '剩餘 ' + offRem + '/' + offCap + ' 個名額' : '已滿') : '未設名額') + '</div>';
+    html += '<div class="att-mode-seats-row' + (onRem <= 0 && onCap > 0 ? ' att-full' : '') + '"><span class="att-seat-icon">💻</span> 線上：' + (onCap > 0 ? (onRem > 0 ? '剩餘 ' + onRem + '/' + onCap + ' 個名額' : '已滿') : '未設名額') + '</div>';
+    container.innerHTML = html;
+}
+
+function pickAttendanceMode(mode) {
+    _selectedAttendanceMode = mode;
+    var picker = document.getElementById('attendanceModePicker');
+    picker.querySelectorAll('.att-mode-pill').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    _refreshSeatsForMode();
+}
+
+function _refreshSeatsForMode() {
+    var source = _selectedRound || _wsData;
+    if (!source) return;
+    var s = (source.sessions && source.sessions.length === 1) ? source.sessions[0] : source;
+    var resolvedMode = _resolveRoundMode(_selectedRound || { sessions: _wsData ? (_wsData.sessions || []) : [] });
+    if (resolvedMode === 'both' && _selectedAttendanceMode) {
+        var cap = _selectedAttendanceMode === 'online' ? (s.onlineCapacity || 0) : (s.offlineCapacity || 0);
+        var enr = _selectedAttendanceMode === 'online' ? (s.onlineEnrolled || 0) : (s.offlineEnrolled || 0);
+        var rem = Math.max(0, cap - enr);
+        var modeLabel = _selectedAttendanceMode === 'online' ? '線上' : '實體';
+        document.getElementById('wsSeatsText').textContent = rem > 0 ? (modeLabel + '：已有 ' + enr + '/' + cap + ' 人報名') : (modeLabel + '：已滿');
+        document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(cap, enr);
+        if (rem <= 0 && cap > 0) {
+            if (!_existingRegistration) {
+                document.getElementById('personalInfoSection').style.display = 'none';
+                document.getElementById('paymentMethods').style.display = 'none';
+                document.getElementById('soldOutState').style.display = 'block';
+            }
+        } else {
+            if (!_existingRegistration) document.getElementById('personalInfoSection').style.display = '';
+            document.getElementById('soldOutState').style.display = 'none';
+        }
+    }
+    updateConfirmApplicationState();
 }
 
 function selectRoundById(roundId) {
@@ -694,7 +792,11 @@ function selectRoundById(roundId) {
     var rem = Math.max(0, (round.capacity || 0) - (round.enrolled || 0));
     document.getElementById('wsSeatsText').textContent = rem > 0 ? ('已有 ' + (round.enrolled || 0) + '/' + (round.capacity || 0) + ' 人報名') : '已滿';
     document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(round.capacity, round.enrolled);
-    if (rem <= 0 && (round.capacity || 0) > 0) {
+    _updateAttendanceModePicker(round);
+    var resolvedMode = _resolveRoundMode(round);
+    if (resolvedMode === 'both') {
+        // Don't show sold-out state until mode is chosen
+    } else if (rem <= 0 && (round.capacity || 0) > 0) {
         if (!_existingRegistration) {
             document.getElementById('personalInfoSection').style.display = 'none';
             document.getElementById('paymentMethods').style.display = 'none';
@@ -864,6 +966,7 @@ function initPayment() {
             remaining = Math.max(0, (d.capacity || 0) - (d.enrolled || 0));
             document.getElementById('wsSeatsText').textContent = remaining > 0 ? ('已有 ' + (d.enrolled || 0) + '/' + (d.capacity || 0) + ' 人報名') : '已滿';
             document.getElementById('wsCapacityBar').innerHTML = buildCapacityBar(d.capacity, d.enrolled);
+            _updateAttendanceModePicker(null);
         }
         document.getElementById('wsDuration').textContent = d.duration || '';
         document.getElementById('wsDesc').textContent = d.description || '';
@@ -1269,6 +1372,14 @@ function confirmPersonalInfo() {
     if (!phone) { showInfoError('請輸入你的 WhatsApp 電話號碼。'); return; }
     if (!job) { showInfoError('請選擇你的職業類型。'); return; }
 
+    var resolvedMode = _resolveRoundMode(_selectedRound || { sessions: (_wsData && _wsData.sessions) || [] });
+    if (resolvedMode === 'both' && !_selectedAttendanceMode) {
+        showInfoError('請選擇參加模式（實體或線上）。');
+        var picker = document.getElementById('attendanceModePicker');
+        if (picker) picker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+
     if (_isCapacityFull()) { showCapFullPopup(); return; }
 
     createRegistration(name, age, phone, job);
@@ -1350,6 +1461,8 @@ function createRegistration(name, age, phone, job) {
         }
     }
 
+    var attMode = _selectedAttendanceMode || 'offline';
+
     if (_registrationId) {
         var updateData = {
             name: name,
@@ -1366,6 +1479,7 @@ function createRegistration(name, age, phone, job) {
             workshopDescription: _wsData ? (_wsData.description || '') : '',
             selectedRound: roundId,
             selectedRoundLabel: roundLabel,
+            attendanceMode: attMode,
             pricePaid: pricePaid,
             discountApplied: discountApplied,
             promoCode: promoCode,
@@ -1391,6 +1505,7 @@ function createRegistration(name, age, phone, job) {
             workshopDescription: _wsData ? (_wsData.description || '') : '',
             selectedRound: roundId,
             selectedRoundLabel: roundLabel,
+            attendanceMode: attMode,
             userId: _currentUser ? _currentUser.uid : null,
             userEmail: _currentUser ? _currentUser.email : null,
             name: name,
@@ -1470,14 +1585,21 @@ function syncPendingPaymentProofToRegistration() {
 function _isCapacityFull() {
     if (!_wsData) return false;
     if (_existingRegistration) return false;
-    var cap = 0, enrolled = 0;
-    if (_selectedRound) {
-        cap = _selectedRound.capacity || 0;
-        enrolled = _selectedRound.enrolled || 0;
-    } else {
-        cap = _wsData.capacity || 0;
-        enrolled = _wsData.enrolled || 0;
+    var source = _selectedRound || _wsData;
+    var s = (source.sessions && source.sessions.length === 1) ? source.sessions[0] : source;
+    var resolvedMode = _resolveRoundMode(_selectedRound || { sessions: _wsData.sessions || [] });
+    if (resolvedMode === 'both' && _selectedAttendanceMode) {
+        var cap = _selectedAttendanceMode === 'online' ? (s.onlineCapacity || 0) : (s.offlineCapacity || 0);
+        var enr = _selectedAttendanceMode === 'online' ? (s.onlineEnrolled || 0) : (s.offlineEnrolled || 0);
+        return cap > 0 && enr >= cap;
     }
+    if (resolvedMode === 'both' && !_selectedAttendanceMode) {
+        var offFull = (s.offlineCapacity || 0) > 0 && (s.offlineEnrolled || 0) >= (s.offlineCapacity || 0);
+        var onFull = (s.onlineCapacity || 0) > 0 && (s.onlineEnrolled || 0) >= (s.onlineCapacity || 0);
+        return offFull && onFull;
+    }
+    var cap = source.capacity || 0;
+    var enrolled = source.enrolled || 0;
     return cap > 0 && enrolled >= cap;
 }
 

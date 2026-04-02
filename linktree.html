@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIFlowTime - 連結</title>
     <meta name="description" content="AIFlowTime 的所有連結 - 諮詢、工作坊、內容">
-    <meta name="theme-color" content="#020111">
+    <meta name="theme-color" content="#0b2a63">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23D97757'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif'>A</text></svg>">
@@ -39,7 +39,7 @@
             font-family: 'Noto Sans TC', 'Inter', sans-serif;
             color: var(--text-primary);
             line-height: 1.6;
-            background: #020111;
+            background: #071b42;
             transition: background-color 0.7s ease;
             min-height: 100vh;
             overflow-x: hidden;
@@ -48,7 +48,7 @@
         }
         
         body.dark-mode {
-            background: #020111;
+            background: linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%);
             color: #ffffff;
         }
         
@@ -61,7 +61,10 @@
             height: 100vh;
             z-index: -2;
             pointer-events: none;
-            background: #020111;
+            background:
+                radial-gradient(circle at 22% 18%, rgba(41, 98, 255, 0.34), transparent 28%),
+                radial-gradient(circle at 78% 24%, rgba(56, 189, 248, 0.22), transparent 24%),
+                linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%);
             overflow: hidden;
         }
         
@@ -88,7 +91,10 @@
         }
         
         body.dark-mode::before {
-            background: transparent;
+            background:
+                radial-gradient(circle at 18% 16%, rgba(59, 130, 246, 0.22), transparent 24%),
+                radial-gradient(circle at 72% 18%, rgba(103, 232, 249, 0.12), transparent 22%),
+                linear-gradient(180deg, rgba(8, 32, 74, 0.2) 0%, rgba(4, 13, 33, 0.05) 100%);
         }
         
         /* Background Grid */
@@ -354,6 +360,165 @@
         body.dark-mode .profile-bio {
             color: rgba(255, 255, 255, 0.7);
         }
+
+        .btn-primary,
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.2;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, color 0.22s ease, background 0.22s ease;
+        }
+
+        .btn-primary {
+            background: #D97757;
+            color: #ffffff;
+            box-shadow: 0 0 28px rgba(217, 119, 87, 0.28);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 42px rgba(217, 119, 87, 0.34);
+        }
+
+        .btn-outline {
+            background: rgba(8, 32, 74, 0.32);
+            color: rgba(247, 239, 228, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .btn-outline:hover {
+            transform: translateY(-2px);
+            border-color: rgba(103, 232, 249, 0.55);
+            color: #ffffff;
+        }
+
+        .linktree-header.linktree-hero {
+            min-height: calc(100svh - 60px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 76px 24px 42px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .linktree-hero .hero-media-wrap {
+            width: min(100%, 480px);
+            margin-bottom: 24px;
+        }
+
+        .linktree-hero .hero-media-wrap.hero-media-pending {
+            opacity: 0;
+        }
+
+        .linktree-hero .hero-media-wrap.hero-media-ready {
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .linktree-hero .hero-media-wrap img.hero-media,
+        .linktree-hero .hero-media-wrap video.hero-media {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .linktree-hero .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(103, 232, 249, 0.28);
+            background: rgba(7, 27, 66, 0.62);
+            color: #7dd3fc;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .linktree-hero .hero-title {
+            font-size: clamp(36px, 7vw, 72px);
+            font-weight: 700;
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+            margin: 0 0 16px;
+            color: #ffffff;
+        }
+
+        .linktree-hero .hero-title b,
+        .linktree-hero .hero-title strong {
+            font-weight: 900;
+        }
+
+        .linktree-hero .hero-tagline {
+            font-size: clamp(16px, 2.4vw, 22px);
+            color: rgba(255, 255, 255, 0.78);
+            max-width: 620px;
+            margin: 0 auto 34px;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .linktree-hero .cta-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .linktree-hero .scroll-hint {
+            margin-top: 34px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .linktree-hero .scroll-hint-pill {
+            width: 28px;
+            height: 44px;
+            border-radius: 999px;
+            border: 1px solid currentColor;
+            display: flex;
+            justify-content: center;
+            padding-top: 7px;
+        }
+
+        .linktree-hero .scroll-hint-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #D97757;
+            animation: linktreeScrollHintFloat 1.35s ease-in-out infinite;
+        }
+
+        .linktree-hero .scroll-hint span {
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        @keyframes linktreeScrollHintFloat {
+            0%, 100% { transform: translateY(0); opacity: 0.25; }
+            50% { transform: translateY(14px); opacity: 1; }
+        }
         
         /* Links Container */
         .links-container {
@@ -456,6 +621,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 1rem;
         }
         
         /* Link item with optional top image (16:9) */
@@ -472,7 +638,8 @@
             border-radius: 0.75rem 0.75rem 0 0;
             background: rgba(0, 0, 0, 0.1);
         }
-        .link-item--with-image .link-item-image-wrap img {
+        .link-item--with-image .link-item-image-wrap img,
+        .link-item--with-image .link-item-image-wrap video {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -484,6 +651,7 @@
         
         .link-text {
             flex: 1;
+            min-width: 0;
         }
         
         .link-title {
@@ -491,6 +659,23 @@
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 0.25rem;
+        }
+
+        .link-title-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .link-title-text {
+            display: block;
+            flex: 1 1 14rem;
+            min-width: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         
         body.dark-mode .link-title {
@@ -500,6 +685,8 @@
         .link-description {
             font-size: 0.875rem;
             color: var(--text-secondary);
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         
         body.dark-mode .link-description {
@@ -508,12 +695,18 @@
         
         /* Pixelated text style */
         .pixelated-text {
+            display: inline-flex;
+            align-items: center;
+            max-width: 100%;
             font-family: 'Courier New', monospace;
             font-size: 0.7rem;
             font-weight: 700;
             letter-spacing: 0.05em;
             color: var(--brand-orange);
             text-transform: uppercase;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            line-height: 1.25;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
@@ -530,6 +723,10 @@
                 1px 1px 0px rgba(0, 0, 0, 0.5),
                 -1px -1px 0px rgba(255, 255, 255, 0.1);
         }
+
+        .link-badge {
+            flex: 0 1 auto;
+        }
         
         .link-icon {
             width: 24px;
@@ -537,6 +734,72 @@
             margin-left: 1rem;
             opacity: 0.5;
             transition: opacity 0.3s;
+        }
+
+        /* Tools grid (🧰): optional right-half media; no chevron */
+        .link-item--tools-grid.link-item--tools-grid-with-media {
+            padding: 0;
+            overflow: hidden;
+        }
+        /* 🧰 tools-grid: logo stacked above 名稱 (not beside) */
+        .link-item--tools-grid .link-tools-grid-logo-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            width: 100%;
+            min-width: 0;
+        }
+        .link-item--tools-grid .link-tools-grid-logo {
+            height: 28px;
+            width: auto;
+            max-width: 100%;
+            flex-shrink: 0;
+            display: block;
+        }
+        /* Logo block is a column flex; .link-title-text uses flex:1 1 14rem for *row* link-title-row.
+           As a direct flex child here, 14rem becomes height and blows up card — reset. */
+        .link-item--tools-grid .link-tools-grid-logo-block > .link-title-text {
+            flex: 0 1 auto;
+            flex-basis: auto;
+        }
+        .link-item--tools-grid .link-tools-grid-body {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            width: 100%;
+            min-height: 0;
+        }
+        .link-item--tools-grid .link-tools-grid-text {
+            flex: 1 1 50%;
+            min-width: 0;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+        }
+        .link-item--tools-grid-with-media .link-tools-grid-media {
+            flex: 0 0 50%;
+            width: 50%;
+            max-width: 50%;
+            min-width: 0;
+            min-height: 0;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.06);
+            align-self: stretch;
+        }
+        body.dark-mode .link-item--tools-grid-with-media .link-tools-grid-media {
+            background: rgba(0, 0, 0, 0.28);
+        }
+        .link-item--tools-grid-with-media .link-tools-grid-media img,
+        .link-item--tools-grid-with-media .link-tools-grid-media video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center;
         }
         
         .link-item:hover .link-icon {
@@ -686,6 +949,11 @@
             .linktree-header {
                 padding: 1.5rem 1rem 1rem;
             }
+
+            .linktree-header.linktree-hero {
+                min-height: auto;
+                padding: 54px 18px 28px;
+            }
             
             .profile-avatar {
                 width: 100px;
@@ -694,6 +962,20 @@
             
             .profile-name {
                 font-size: 1.25rem;
+            }
+
+            .linktree-hero .hero-title {
+                font-size: clamp(30px, 10vw, 46px);
+            }
+
+            .linktree-hero .hero-tagline {
+                font-size: 16px;
+                margin-bottom: 26px;
+            }
+
+            .btn-primary,
+            .btn-outline {
+                width: min(100%, 320px);
             }
             
             .links-container {
@@ -720,7 +1002,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            filter: url(#threshold);
             position: relative;
             width: 100%;
             height: 200px;
@@ -1053,7 +1334,7 @@
 </head>
 <body class="layout-pending">
     <!-- Safari Theme Color Helper - Must be at top for Safari to detect -->
-    <div style="position: fixed; top: 0; left: 0; right: 0; height: 100vh; width: 100%; background: #020111; pointer-events: none; z-index: -3;"></div>
+    <div style="position: fixed; top: 0; left: 0; right: 0; height: 100vh; width: 100%; background: linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%); pointer-events: none; z-index: -3;"></div>
     
     <!-- Cosmic Canvas Background -->
     <div id="cosmic-canvas-container"></div>
@@ -1073,38 +1354,17 @@
     <!-- Dark Mode Toggle - REMOVED FOR LINKTREE PAGE (Always Night Mode) -->
     
     <!-- Safari Color Detection Bar - Visible deep space area for Safari to sample -->
-    <div style="width: 100%; height: 60px; background: #020111; position: relative; z-index: 10;"></div>
+    <div style="width: 100%; height: 60px; background: linear-gradient(90deg, #0b2a63 0%, #123879 48%, #0a2250 100%); position: relative; z-index: 10;"></div>
     
     <!-- Header (content from layout editor) -->
-    <header class="linktree-header fade-in" data-section-id="lt-header" data-section-type="hero" style="padding-top: 1rem;"></header>
+    <header class="linktree-header hero linktree-hero fade-in" data-section-id="lt-header" data-section-type="hero"></header>
     
     <!-- Links Container -->
     <div class="links-container">
         <!-- Flow With AI Animation -->
-        <section class="gooey-text-container fade-in">
-            <!-- SVG Filter for Gooey Effect -->
-            <svg class="gooey-text-svg" aria-hidden="true" focusable="false">
-                <defs>
-                    <filter id="threshold">
-                        <feColorMatrix
-                            in="SourceGraphic"
-                            type="matrix"
-                            values="1 0 0 0 0
-                                    0 1 0 0 0
-                                    0 0 1 0 0
-                                    0 0 0 255 -140"
-                        />
-                    </filter>
-                </defs>
-            </svg>
-            
-            <div class="gooey-text-wrapper">
-                <span id="gooeyText1" class="gooey-text-span"></span>
-                <span id="gooeyText2" class="gooey-text-span"></span>
-            </div>
-        </section>
+        <section class="gooey-text-container fade-in" data-section-id="lt-flow-ai" data-section-type="gooey-flow"></section>
         
-        <div data-section-id="lt-services" data-section-type="link-list"></div>
+        <div id="lt-services" data-section-id="lt-services" data-section-type="link-list"></div>
 
         <div class="linktree-divider-block fade-in" data-section-id="lt-divider-tools" data-section-type="section-divider">
             <div class="linktree-divider"></div>
@@ -1136,7 +1396,8 @@
         <div data-section-id="_tpl_link-list" data-section-type="link-list" style="display:none !important;"></div>
         <div data-section-id="_tpl_tools-grid" data-section-type="tools-grid" style="display:none !important;"></div>
         <div class="linktree-divider-block fade-in" data-section-id="_tpl_section-divider" data-section-type="section-divider" style="display:none !important;"><div class="linktree-divider"></div><div class="profile-name linktree-section-title"></div><div class="profile-bio linktree-section-subtitle" style="display:none;"></div></div>
-        <header class="linktree-header fade-in" data-section-id="_tpl_hero" data-section-type="hero" style="display:none !important;"></header>
+        <header class="linktree-header hero linktree-hero fade-in" data-section-id="_tpl_hero" data-section-type="hero" style="display:none !important;"></header>
+        <section class="gooey-text-container fade-in" data-section-id="_tpl_gooey-flow" data-section-type="gooey-flow" style="display:none !important;"></section>
     </div>
     
     <!-- Footer -->
@@ -1145,14 +1406,14 @@
     </footer>
     
     <!-- WhatsApp Modal -->
-    <div id="whatsappModal" class="whatsapp-modal-overlay" data-section-id="lt-lead-magnet" data-section-type="lead-magnet" onclick="closeWhatsAppModalOnOverlay(event)">
+    <div id="whatsappModal" class="whatsapp-modal-overlay" onclick="closeWhatsAppModalOnOverlay(event)">
         <div class="whatsapp-modal" onclick="event.stopPropagation()">
-            <img src="Working Hard Capy.png" alt="Working Hard Capy" class="whatsapp-modal-image" width="100" height="100" loading="eager" decoding="async">
+            <img id="whatsappModalImage" src="" alt="" class="whatsapp-modal-image" width="100" height="100" loading="eager" decoding="async" style="display:none;">
             <button class="whatsapp-modal-close" onclick="closeWhatsAppModal()" aria-label="Close">&times;</button>
             <div class="whatsapp-modal-content">
                 <div class="whatsapp-modal-header">
-                    <h3>領取免費2026年AI指南</h3>
-                    <p>想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！</p>
+                    <h3 id="whatsappModalTitle">領取免費2026年AI指南</h3>
+                    <p id="whatsappModalDescription">想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！</p>
                 </div>
                 <form class="whatsapp-modal-form" onsubmit="handleWhatsAppSubmit(event)">
                     <input 
@@ -1441,12 +1702,12 @@
                 canvas.width = size;
                 canvas.height = size;
                 const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#020111';
+                ctx.fillStyle = '#071b42';
                 ctx.fillRect(0, 0, size, size);
                 const gradient = ctx.createRadialGradient(size / 2, size / 2, size / 4, size / 2, size / 2, size);
-                gradient.addColorStop(0, 'rgba(60, 70, 120, 0.2)');
-                gradient.addColorStop(0.5, 'rgba(100, 120, 180, 0.1)'); 
-                gradient.addColorStop(1, 'rgba(10, 20, 40, 0)');
+                gradient.addColorStop(0, 'rgba(67, 126, 255, 0.26)');
+                gradient.addColorStop(0.5, 'rgba(84, 192, 255, 0.14)'); 
+                gradient.addColorStop(1, 'rgba(8, 32, 74, 0)');
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, size, size);
                 for (let i = 0; i < 50; i++) {
@@ -1485,6 +1746,309 @@
                 return new THREE.CanvasTexture(canvas);
             }
 
+            function createSunShaderOverlay(parentEl) {
+                const overlay = document.createElement('div');
+                overlay.style.position = 'absolute';
+                overlay.style.left = '0';
+                overlay.style.top = '0';
+                overlay.style.width = '0';
+                overlay.style.height = '0';
+                overlay.style.transform = 'translate(-50%, -50%)';
+                overlay.style.pointerEvents = 'none';
+                overlay.style.zIndex = '1';
+                overlay.style.opacity = '0';
+
+                const canvas = document.createElement('canvas');
+                canvas.setAttribute('aria-hidden', 'true');
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+                canvas.style.display = 'block';
+                overlay.appendChild(canvas);
+                parentEl.appendChild(overlay);
+
+                const gl = canvas.getContext('webgl', {
+                    alpha: true,
+                    premultipliedAlpha: true,
+                    antialias: false,
+                    powerPreference: 'high-performance'
+                });
+
+                if (!gl) {
+                    overlay.remove();
+                    return {
+                        isReady: false,
+                        update: function() {},
+                        destroy: function() {}
+                    };
+                }
+
+                const vertexShaderSource = `
+                    attribute vec2 position;
+                    void main() {
+                        gl_Position = vec4(position, 0.0, 1.0);
+                    }
+                `;
+
+                const fragmentShaderSource = `
+                    precision highp float;
+
+                    uniform vec2 u_resolution;
+                    uniform float u_time;
+                    uniform float u_pitch;
+                    uniform float u_yaw;
+
+                    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                    vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+                    float snoise(vec3 v) {
+                        const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
+                        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                        vec3 i = floor(v + dot(v, C.yyy));
+                        vec3 x0 = v - i + dot(i, C.xxx);
+                        vec3 g = step(x0.yzx, x0.xyz);
+                        vec3 l = 1.0 - g;
+                        vec3 i1 = min(g.xyz, l.zxy);
+                        vec3 i2 = max(g.xyz, l.zxy);
+                        vec3 x1 = x0 - i1 + C.xxx;
+                        vec3 x2 = x0 - i2 + C.yyy;
+                        vec3 x3 = x0 - D.yyy;
+                        i = mod289(i);
+                        vec4 p = permute(permute(permute(
+                                    i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                                + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                                + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                        float n_ = 0.142857142857;
+                        vec3 ns = n_ * D.wyz - D.xzx;
+                        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                        vec4 x_ = floor(j * ns.z);
+                        vec4 y_ = floor(j - 7.0 * x_);
+                        vec4 x = x_ * ns.x + ns.yyyy;
+                        vec4 y = y_ * ns.x + ns.yyyy;
+                        vec4 h = 1.0 - abs(x) - abs(y);
+                        vec4 b0 = vec4(x.xy, y.xy);
+                        vec4 b1 = vec4(x.zw, y.zw);
+                        vec4 s0 = floor(b0) * 2.0 + 1.0;
+                        vec4 s1 = floor(b1) * 2.0 + 1.0;
+                        vec4 sh = -step(h, vec4(0.0));
+                        vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+                        vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+                        vec3 p0 = vec3(a0.xy, h.x);
+                        vec3 p1 = vec3(a0.zw, h.y);
+                        vec3 p2 = vec3(a1.xy, h.z);
+                        vec3 p3 = vec3(a1.zw, h.w);
+                        vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+                        p0 *= norm.x;
+                        p1 *= norm.y;
+                        p2 *= norm.z;
+                        p3 *= norm.w;
+                        vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
+                        m = m * m;
+                        return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+                    }
+
+                    float fbm(vec3 x) {
+                        float v = 0.0;
+                        float a = 0.5;
+                        for (int i = 0; i < 4; ++i) {
+                            v += a * (snoise(x) * 0.5 + 0.5);
+                            x = x * 2.0;
+                            a *= 0.5;
+                        }
+                        return v;
+                    }
+
+                    vec3 rotate3D(vec3 p, float pitch, float yaw) {
+                        float cy = cos(pitch);
+                        float sy = sin(pitch);
+                        float y = p.y * cy - p.z * sy;
+                        float z = p.y * sy + p.z * cy;
+
+                        float cx = cos(yaw);
+                        float sx = sin(yaw);
+                        float x = p.x * cx + z * sx;
+                        float nz = -p.x * sx + z * cx;
+
+                        return vec3(x, y, nz);
+                    }
+
+                    vec3 getSunColor(float t) {
+                        t = clamp(t, 0.0, 1.0);
+                        vec3 c1 = vec3(0.18, 0.07, 0.05);
+                        vec3 c2 = vec3(0.48, 0.11, 0.04);
+                        vec3 c3 = vec3(0.75, 0.21, 0.05);
+                        vec3 c4 = vec3(0.90, 0.29, 0.10);
+                        vec3 c5 = vec3(1.0, 0.44, 0.26);
+                        vec3 c6 = vec3(1.0, 0.76, 0.03);
+                        vec3 c7 = vec3(1.0, 1.0, 1.0);
+
+                        if (t < 0.16) return mix(c1, c2, t / 0.16);
+                        if (t < 0.33) return mix(c2, c3, (t - 0.16) / 0.17);
+                        if (t < 0.50) return mix(c3, c4, (t - 0.33) / 0.17);
+                        if (t < 0.66) return mix(c4, c5, (t - 0.50) / 0.16);
+                        if (t < 0.83) return mix(c5, c6, (t - 0.66) / 0.17);
+                        return mix(c6, c7, (t - 0.83) / 0.17);
+                    }
+
+                    void main() {
+                        vec2 uv = (gl_FragCoord.xy / u_resolution.xy - 0.5) * 2.8;
+                        float r = length(uv);
+                        vec4 finalColor = vec4(0.0);
+
+                        if (r < 1.0) {
+                            float z = sqrt(1.0 - r * r);
+                            vec3 rotated = rotate3D(vec3(uv.x, uv.y, z), u_pitch, u_yaw);
+
+                            float n = fbm(rotated * 2.5 - vec3(0.0, u_time * 0.4, -u_time * 0.2));
+                            float pulse = 1.0 + sin(u_time * 1.5) * 0.05;
+
+                            n *= pow(z, 0.4) * pulse;
+                            finalColor = vec4(getSunColor(n), 1.0);
+                        } else {
+                            float dist = r - 1.0;
+                            float glow = exp(-dist * 8.0) * 0.4;
+                            glow *= (1.0 - smoothstep(1.1, 1.4, r));
+
+                            vec4 glowColor = vec4(vec3(1.0, 0.4, 0.05) * glow, glow);
+                            vec4 flareColor = vec4(0.0);
+
+                            if (r < 1.25) {
+                                float flareZ = sqrt(max(0.0, 1.56 - r * r));
+                                vec3 rotatedFlare = rotate3D(vec3(uv.x, uv.y, flareZ), u_pitch, u_yaw);
+                                float flareNoise = fbm(rotatedFlare * 5.0 - vec3(0.0, u_time * 1.5, -u_time * 0.8));
+
+                                float flareThreshold = 0.65 + dist * 1.8;
+                                if (flareNoise > flareThreshold) {
+                                    float alpha = smoothstep(0.0, 0.15, flareNoise - flareThreshold);
+                                    alpha *= smoothstep(0.25, 0.0, dist);
+
+                                    vec3 flareCol = mix(vec3(0.9, 0.2, 0.0), vec3(1.0, 0.8, 0.1), (flareNoise - flareThreshold) * 3.0);
+                                    flareColor = vec4(flareCol * alpha, alpha);
+                                }
+                            }
+
+                            finalColor = flareColor + glowColor * (1.0 - flareColor.a);
+                        }
+
+                        gl_FragColor = finalColor;
+                    }
+                `;
+
+                function compileShader(type, source) {
+                    const shader = gl.createShader(type);
+                    gl.shaderSource(shader, source);
+                    gl.compileShader(shader);
+                    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                        console.error('Cosmic sun shader compile error:', gl.getShaderInfoLog(shader));
+                        gl.deleteShader(shader);
+                        return null;
+                    }
+                    return shader;
+                }
+
+                const vertexShader = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
+                const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+                if (!vertexShader || !fragmentShader) {
+                    overlay.remove();
+                    return {
+                        isReady: false,
+                        update: function() {},
+                        destroy: function() {}
+                    };
+                }
+
+                const program = gl.createProgram();
+                gl.attachShader(program, vertexShader);
+                gl.attachShader(program, fragmentShader);
+                gl.linkProgram(program);
+
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    console.error('Cosmic sun shader link error:', gl.getProgramInfoLog(program));
+                    overlay.remove();
+                    return {
+                        isReady: false,
+                        update: function() {},
+                        destroy: function() {}
+                    };
+                }
+
+                gl.useProgram(program);
+
+                const positionBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+                    -1, -1,  1, -1, -1,  1,
+                    -1,  1,  1, -1,  1,  1
+                ]), gl.STATIC_DRAW);
+
+                const positionLocation = gl.getAttribLocation(program, 'position');
+                gl.enableVertexAttribArray(positionLocation);
+                gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+                const uResolution = gl.getUniformLocation(program, 'u_resolution');
+                const uTime = gl.getUniformLocation(program, 'u_time');
+                const uPitch = gl.getUniformLocation(program, 'u_pitch');
+                const uYaw = gl.getUniformLocation(program, 'u_yaw');
+
+                let time = 0;
+                let yaw = 0;
+                let pitch = 0;
+                let velocityYaw = 0.005;
+                let velocityPitch = 0;
+
+                function resizeCanvas(sizePx) {
+                    const cssSize = Math.max(96, Math.round(sizePx));
+                    overlay.style.width = cssSize + 'px';
+                    overlay.style.height = cssSize + 'px';
+
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const displaySize = Math.max(96, Math.round(cssSize * dpr));
+                    if (canvas.width !== displaySize || canvas.height !== displaySize) {
+                        canvas.width = displaySize;
+                        canvas.height = displaySize;
+                        gl.viewport(0, 0, canvas.width, canvas.height);
+                    }
+                }
+
+                return {
+                    isReady: true,
+                    update: function(centerX, centerY, sizePx) {
+                        if (!Number.isFinite(centerX) || !Number.isFinite(centerY) || !Number.isFinite(sizePx)) {
+                            overlay.style.opacity = '0';
+                            return;
+                        }
+
+                        resizeCanvas(sizePx);
+                        overlay.style.left = centerX + 'px';
+                        overlay.style.top = centerY + 'px';
+                        overlay.style.opacity = '1';
+
+                        time += 0.02;
+                        yaw += velocityYaw;
+                        pitch += velocityPitch;
+                        velocityYaw *= 0.985;
+                        velocityPitch += (-pitch) * 0.02;
+                        velocityPitch *= 0.96;
+
+                        if (Math.abs(velocityYaw) < 0.0035) {
+                            velocityYaw = 0.0035 * Math.sign(velocityYaw || 1);
+                        }
+
+                        gl.uniform2f(uResolution, canvas.width, canvas.height);
+                        gl.uniform1f(uTime, time);
+                        gl.uniform1f(uPitch, pitch);
+                        gl.uniform1f(uYaw, yaw);
+                        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+                        gl.clear(gl.COLOR_BUFFER_BIT);
+                        gl.drawArrays(gl.TRIANGLES, 0, 6);
+                    },
+                    destroy: function() {
+                        overlay.remove();
+                    }
+                };
+            }
+
             // --- Scene Setup ---
             const container = document.getElementById('cosmic-canvas-container');
             if (!container) return;
@@ -1496,11 +2060,11 @@
             container.style.top = '0';
             container.style.left = '0';
             container.style.zIndex = '-2';
-            container.style.backgroundColor = '#020111';
+            container.style.background = 'radial-gradient(circle at 22% 18%, rgba(41, 98, 255, 0.34), transparent 28%), radial-gradient(circle at 78% 24%, rgba(56, 189, 248, 0.22), transparent 24%), linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%)';
             
             const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x020111);
-            scene.fog = new THREE.FogExp2(0x0a1a2a, 0.02);
+            scene.background = new THREE.Color(0x071b42);
+            scene.fog = new THREE.FogExp2(0x0f2348, 0.02);
             
             // Get proper dimensions
             const width = window.innerWidth;
@@ -1523,7 +2087,7 @@
                     alpha: false, // Set to false to ensure background shows
                     powerPreference: "high-performance"
                 });
-                renderer.setClearColor(0x020111, 1); // Deep space background
+                renderer.setClearColor(0x071b42, 1); // Deep space background
             } catch (e) {
                 console.error('WebGL not supported:', e);
                 // Try with different settings
@@ -1532,7 +2096,7 @@
                         antialias: false,
                         alpha: false
                     });
-                    renderer.setClearColor(0x020111, 1);
+                    renderer.setClearColor(0x071b42, 1);
                 } catch (e2) {
                     console.error('WebGL completely failed:', e2);
                     return;
@@ -1550,6 +2114,7 @@
             renderer.domElement.style.display = 'block';
             
             container.appendChild(renderer.domElement);
+            const sunOverlay = createSunShaderOverlay(container);
 
             // --- Lighting ---
             const ambientLight = new THREE.AmbientLight(0x404060, 0.7); 
@@ -1602,6 +2167,16 @@
             });
             const sunGlow = new THREE.Mesh(sunGlowGeo, sunGlowMat);
             scene.add(sunGlow);
+            const SUN_OVERLAY_RADIUS = 4.8;
+            const SUN_OVERLAY_SCALE = 1.18;
+            const sunWorldCenter = new THREE.Vector3(0, 0, 0);
+            const sunWorldEdge = new THREE.Vector3(SUN_OVERLAY_RADIUS, 0, 0);
+            const sunScreenCenter = new THREE.Vector3();
+            const sunScreenEdge = new THREE.Vector3();
+            if (sunOverlay.isReady) {
+                sun.visible = false;
+                sunGlow.visible = false;
+            }
 
             const planetsData = [
                 { name: "Mercury", size: 0.8, color: 0xA5A5A5, distance: 9, speed: 2.5, type: 'rocky' },
@@ -1932,7 +2507,9 @@
                         p.group.userData.moonGroup.rotation.y += 0.02;
                     }
                 });
-                sunGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.03);
+                if (!sunOverlay.isReady) {
+                    sunGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.03);
+                }
                 if (frameCount % CONFIG.cometInterval === 0 && Math.random() > 0.4) spawnComet();
                 if (frameCount % CONFIG.ufoInterval === 0 && Math.random() > 0.3) spawnUFO();
                 if (typeof transientObjects !== 'undefined') {
@@ -1971,6 +2548,22 @@
                 }
                 starsMesh.rotation.y += 0.00005;
                 updateCameraLogic();
+                if (sunOverlay.isReady) {
+                    const viewWidth = renderer.domElement.clientWidth || window.innerWidth;
+                    const viewHeight = renderer.domElement.clientHeight || window.innerHeight;
+                    sunScreenCenter.copy(sunWorldCenter).project(camera);
+                    sunScreenEdge.copy(sunWorldEdge).project(camera);
+                    if (sunScreenCenter.z >= -1 && sunScreenCenter.z <= 1) {
+                        const centerX = (sunScreenCenter.x * 0.5 + 0.5) * viewWidth;
+                        const centerY = (-sunScreenCenter.y * 0.5 + 0.5) * viewHeight;
+                        const edgeX = (sunScreenEdge.x * 0.5 + 0.5) * viewWidth;
+                        const edgeY = (-sunScreenEdge.y * 0.5 + 0.5) * viewHeight;
+                        const diameter = Math.max(96, Math.hypot(edgeX - centerX, edgeY - centerY) * 2 * SUN_OVERLAY_SCALE);
+                        sunOverlay.update(centerX, centerY, diameter);
+                    } else {
+                        sunOverlay.update(NaN, NaN, NaN);
+                    }
+                }
                 renderer.render(scene, camera);
             }
 
@@ -2012,13 +2605,90 @@
             setTimeout(initCosmicBackgroundDelayed, 1500);
         }
         
-        // WhatsApp Modal Functions
-        function openWhatsAppModal() {
+        // WhatsApp / Lead Magnet Modal Functions
+        let activeWhatsAppModalConfig = null;
+
+        function _plainModalText(value) {
+            return String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function _escHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function _richTextHtml(value) {
+            var raw = value == null ? '' : String(value);
+            if (!raw.trim()) return '';
+            if (typeof sanitizeHeroTitleHtml === 'function') return sanitizeHeroTitleHtml(raw);
+            return _escHtml(raw).replace(/\n/g, '<br>');
+        }
+
+        function _getLinkLeadMagnetConfig(lnk) {
+            var popup = lnk && lnk.leadMagnet;
+            var enabled = popup && (popup.enabled === true || String(popup.enabled || '').toLowerCase() === 'true');
+            if (!enabled) return null;
+            var linkUrl = String((lnk && lnk.url) || '').trim();
+            var redirectUrl = String((popup && popup.redirectUrl) || '').trim();
+            if (!redirectUrl && linkUrl && linkUrl !== '#') redirectUrl = linkUrl;
+            return {
+                titleHtml: _richTextHtml((popup && popup.title) || lnk.label || '領取免費資源'),
+                descriptionHtml: _richTextHtml((popup && popup.description) || lnk.description || ''),
+                imageUrl: String((popup && popup.imageUrl) || '').trim(),
+                submitText: String((popup && popup.submitText) || '提交').trim() || '提交',
+                redirectUrl: redirectUrl,
+                sourceLabel: _plainModalText((popup && popup.title) || lnk.label || 'Lead Magnet'),
+                triggerLabel: _plainModalText((lnk && lnk.label) || ''),
+                triggerUrl: linkUrl
+            };
+        }
+
+        function _applyWhatsAppModalConfig(config) {
+            var titleEl = document.getElementById('whatsappModalTitle');
+            var descEl = document.getElementById('whatsappModalDescription');
+            var imageEl = document.getElementById('whatsappModalImage');
+            var submitButton = document.getElementById('whatsappModalSubmit');
+            if (titleEl) titleEl.innerHTML = (config && config.titleHtml) || '領取免費資源';
+            if (descEl) {
+                var descHtml = (config && config.descriptionHtml) || '';
+                descEl.innerHTML = descHtml;
+                descEl.style.display = descHtml ? '' : 'none';
+            }
+            if (imageEl) {
+                var imgUrl = String((config && config.imageUrl) || '').trim();
+                if (imgUrl) {
+                    imageEl.src = typeof fixStorageUrl === 'function' ? fixStorageUrl(imgUrl) : imgUrl;
+                    imageEl.alt = config && config.sourceLabel ? config.sourceLabel : 'Lead Magnet';
+                    imageEl.style.display = '';
+                } else {
+                    imageEl.src = '';
+                    imageEl.alt = '';
+                    imageEl.style.display = 'none';
+                }
+            }
+            if (submitButton) submitButton.textContent = (config && config.submitText) || '提交';
+        }
+
+        function openWhatsAppModal(config) {
             const modal = document.getElementById('whatsappModal');
             if (modal) {
+                activeWhatsAppModalConfig = config || activeWhatsAppModalConfig || {
+                    titleHtml: '領取免費2026年AI指南',
+                    descriptionHtml: '想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！',
+                    imageUrl: '',
+                    submitText: '領取免費指南',
+                    redirectUrl: 'ai-guide-2026.html',
+                    sourceLabel: '免費 AI 指南',
+                    triggerLabel: '免費 AI 指南',
+                    triggerUrl: ''
+                };
+                _applyWhatsAppModalConfig(activeWhatsAppModalConfig);
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                // Reset form
                 const nameInput = document.getElementById('whatsappNameInput');
                 const numberInput = document.getElementById('whatsappNumberInput');
                 const checkbox = document.getElementById('whatsappConsentCheckbox');
@@ -2059,13 +2729,14 @@
             }
         }
         
-        function handleWhatsAppSubmit(event) {
+        async function handleWhatsAppSubmit(event) {
             event.preventDefault();
             console.log('handleWhatsAppSubmit called');
             
             const nameInput = document.getElementById('whatsappNameInput');
             const numberInput = document.getElementById('whatsappNumberInput');
             const consentCheckbox = document.getElementById('whatsappConsentCheckbox');
+            const modalConfig = activeWhatsAppModalConfig || {};
             
             if (!nameInput || !numberInput || !consentCheckbox) {
                 console.error('Form inputs not found!');
@@ -2078,7 +2749,6 @@
             
             console.log('Form values:', { name, whatsapp, consent });
             
-            // Validate WhatsApp number is exactly 8 digits
             if (!/^[0-9]{8}$/.test(whatsapp)) {
                 alert('請輸入8位數字WhatsApp號碼');
                 numberInput.focus();
@@ -2086,24 +2756,27 @@
             }
             
             if (name && whatsapp && consent) {
-                // Send data to Google Sheets for Lead Magnet (Free AI Guide)
+                const timestamp = new Date().toISOString();
+                const sourceLabel = modalConfig.sourceLabel || modalConfig.triggerLabel || 'Lead Magnet';
+                const sourceKeySuffix = (modalConfig.triggerLabel || sourceLabel || 'lead-magnet')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '') || 'lead-magnet';
                 const formData = {
                     name: name,
                     whatsapp: whatsapp,
-                    timestamp: new Date().toISOString(),
-                    source: 'linktree-lead-magnet',
-                    page: '領取免費2026年AI指南'
+                    timestamp: timestamp,
+                    source: 'linktree-link-list-' + sourceKeySuffix,
+                    page: sourceLabel
                 };
                 
                 console.log('Submitting lead magnet form:', formData);
                 
-                // Lead Magnet Google Script URL
                 const googleScriptURL = 'https://script.google.com/macros/s/AKfycbwcEjkz6roPWxKFyap-Jdn-q87F3Y7tOmhbLWH3HHgywuKsWP9z8oAaupjEhJLrPQDiew/exec';
                 
                 console.log('Sending POST request to:', googleScriptURL);
                 
-                // Submit form data
-                fetch(googleScriptURL, {
+                const sheetPromise = fetch(googleScriptURL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -2115,15 +2788,37 @@
                 }).catch(err => {
                     console.error('❌ Error submitting form:', err);
                 });
+                const mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+                    ? saveFormSubmissionMirror({
+                        formType: 'lead-magnet',
+                        sourceKey: formData.source,
+                        sourceLabel: sourceLabel,
+                        sourcePage: formData.page,
+                        sourcePath: window.location.pathname,
+                        sourceUrl: window.location.href,
+                        sheetTab: 'AIFlowTime Leads',
+                        contactName: name,
+                        whatsapp: whatsapp,
+                        answers: {
+                            consentAccepted: consent,
+                            triggerLabel: modalConfig.triggerLabel || ''
+                        },
+                        timestamp: timestamp
+                    }).catch(err => {
+                        console.error('❌ Error mirroring lead magnet form:', err);
+                    })
+                    : Promise.resolve();
                 
-                // Close modal
                 closeWhatsAppModal();
+                await Promise.allSettled([sheetPromise, mirrorPromise]);
                 
-                // Small delay before redirect to allow logs to appear
-                setTimeout(() => {
-                    console.log('Redirecting to guide page...');
-                    window.location.href = 'ai-guide-2026.html';
-                }, 500);
+                var nextUrl = String(modalConfig.redirectUrl || '').trim();
+                if (nextUrl) {
+                    setTimeout(() => {
+                        console.log('Redirecting after lead magnet submit...');
+                        window.location.href = nextUrl;
+                    }, 500);
+                }
             } else {
                 console.warn('Form validation failed:', { name: !!name, whatsapp: !!whatsapp, consent: consent });
             }
@@ -2156,160 +2851,14 @@
             });
         });
         
-        // Flow With AI Gooey Text Morphing Animation (OPTIMIZED)
-        // Optimizations: 30fps throttle, visibility check, reduced blur range
-        function initGooeyTextMorphing() {
-            const texts = ["Flow", "With", "AI", ":)"];
-            const morphTime = 1; // seconds
-            const cooldownTime = 0.25; // seconds
-            
-            const text1Ref = document.getElementById('gooeyText1');
-            const text2Ref = document.getElementById('gooeyText2');
-            
-            if (!text1Ref || !text2Ref) {
-                console.warn('Gooey text elements not found, skipping initialization.');
-                return;
+        function disposeSectionBehavior(sectionEl) {
+            if (!sectionEl || typeof sectionEl.__disposeSection !== 'function') return;
+            try {
+                sectionEl.__disposeSection();
+            } catch (err) {
+                console.warn('Section cleanup failed:', err);
             }
-            
-            let textIndex = texts.length - 1;
-            let time = performance.now(); // Use performance.now() for accuracy
-            let morph = 0;
-            let cooldown = cooldownTime;
-            
-            // Performance optimizations
-            const targetFPS = 30; // Match Three.js at 30fps
-            const frameInterval = 1000 / targetFPS;
-            let lastFrameTime = performance.now();
-            let isPageVisible = !document.hidden;
-            let animationId = null;
-            
-            // Pause when page is not visible (save battery/CPU)
-            document.addEventListener('visibilitychange', () => {
-                isPageVisible = !document.hidden;
-                if (isPageVisible) {
-                    // Reset time to prevent jump after returning
-                    time = performance.now();
-                    lastFrameTime = performance.now();
-                    if (!animationId) {
-                        animate();
-                    }
-                }
-            });
-            
-            // Optimized setMorph with reduced blur range (max 30px instead of 100px)
-            const setMorph = (fraction) => {
-                if (text1Ref && text2Ref) {
-                    // Reduced blur range: max 30px instead of 100px (less CPU work)
-                    const blur2 = Math.min(8 / fraction - 8, 30);
-                    const opacity2 = Math.pow(fraction, 0.4) * 100;
-                    
-                    text2Ref.style.filter = `blur(${blur2}px)`;
-                    text2Ref.style.opacity = `${opacity2}%`;
-                    
-                    fraction = 1 - fraction;
-                    
-                    const blur1 = Math.min(8 / fraction - 8, 30);
-                    const opacity1 = Math.pow(fraction, 0.4) * 100;
-                    
-                    text1Ref.style.filter = `blur(${blur1}px)`;
-                    text1Ref.style.opacity = `${opacity1}%`;
-                }
-            };
-            
-            const doCooldown = () => {
-                morph = 0;
-                if (text1Ref && text2Ref) {
-                    text2Ref.style.filter = "";
-                    text2Ref.style.opacity = "100%";
-                    text1Ref.style.filter = "";
-                    text1Ref.style.opacity = "0%";
-                }
-            };
-            
-            const doMorph = () => {
-                morph -= cooldown;
-                cooldown = 0;
-                let fraction = morph / morphTime;
-                
-                if (fraction > 1) {
-                    cooldown = cooldownTime;
-                    fraction = 1;
-                }
-                
-                setMorph(fraction);
-            };
-            
-            function animate() {
-                animationId = requestAnimationFrame(animate);
-                
-                // Skip if page is not visible (save CPU/battery)
-                if (!isPageVisible) {
-                    return;
-                }
-                
-                // Frame rate limiting: 30fps instead of 60fps
-                const now = performance.now();
-                const elapsed = now - lastFrameTime;
-                
-                if (elapsed < frameInterval) {
-                    return; // Skip this frame
-                }
-                
-                lastFrameTime = now - (elapsed % frameInterval);
-                
-                // Animation logic
-                const dt = Math.min((now - time) / 1000, 0.1); // Cap dt to prevent jumps
-                time = now;
-                
-                cooldown -= dt;
-                
-                if (cooldown <= 0) {
-                    const shouldIncrementIndex = morph === 0;
-                    
-                    if (shouldIncrementIndex) {
-                        textIndex = (textIndex + 1) % texts.length;
-                        
-                        if (text1Ref && text2Ref) {
-                            const text1 = texts[textIndex % texts.length];
-                            const text2 = texts[(textIndex + 1) % texts.length];
-                            
-                            // Wrap "AI" in a span with special color
-                            text1Ref.innerHTML = text1 === 'AI' ? '<span class="ai-text">AI</span>' : text1;
-                            text2Ref.innerHTML = text2 === 'AI' ? '<span class="ai-text">AI</span>' : text2;
-                        }
-                    }
-                    
-                    doMorph();
-                } else {
-                    doCooldown();
-                }
-            }
-            
-            // Initialize with first text
-            if (text1Ref && text2Ref) {
-                const text1 = texts[textIndex % texts.length];
-                const text2 = texts[(textIndex + 1) % texts.length];
-                
-                // Wrap "AI" in a span with special color
-                text1Ref.innerHTML = text1 === 'AI' ? '<span class="ai-text">AI</span>' : text1;
-                text2Ref.innerHTML = text2 === 'AI' ? '<span class="ai-text">AI</span>' : text2;
-                text1Ref.style.opacity = "0%";
-                text2Ref.style.opacity = "100%";
-            }
-            
-            // Start animation only if page is visible
-            if (isPageVisible) {
-                animate();
-            }
-        }
-        
-        // Initialize gooey text animation (delayed slightly for better page load)
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(initGooeyTextMorphing, 500); // Delay 0.5s for smoother page load
-            });
-        } else {
-            setTimeout(initGooeyTextMorphing, 500);
+            sectionEl.__disposeSection = null;
         }
     </script>
 
@@ -2317,19 +2866,157 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js"></script>
+    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/page-background-runtime.js"></script>
 
     <!-- Layout Engine (Preview + Public) -->
     <script>
     (function() {
-        var _isPreview = new URLSearchParams(window.location.search).has('preview');
+        var _layoutQuery = new URLSearchParams(window.location.search);
+        var _isPreview = _layoutQuery.has('preview');
+        var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'linktree';
+
+        function _normalizeLayoutPageStatus(status) {
+            var raw = String(status || '').trim().toLowerCase();
+            if (raw === 'unpublished') return 'unpublished';
+            if (raw === 'archived') return 'archived';
+            return 'published';
+        }
+
+        function _layoutAllowsPublicView(data) {
+            if (_isPreview) return true;
+            return _normalizeLayoutPageStatus(data && data.pageStatus) === 'published';
+        }
+
+        function _showLayoutUnavailableState() {
+            if (document.getElementById('layoutUnavailableState')) return;
+            var overlay = document.createElement('div');
+            overlay.id = 'layoutUnavailableState';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(245,244,242,0.98);';
+            overlay.innerHTML = '<div style="max-width:420px;padding:32px 28px;border-radius:24px;background:#fff;box-shadow:0 16px 48px rgba(0,0,0,0.12);text-align:center;font-family:inherit;">' +
+                '<div style="font-size:34px;margin-bottom:12px;">🚧</div>' +
+                '<h2 style="margin:0 0 10px;font-size:24px;">Page Unavailable</h2>' +
+                '<p style="margin:0;color:#666;line-height:1.7;">此頁面目前未發佈或已封存，暫時不對外開放。</p>' +
+            '</div>';
+            document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
+        }
+
+        var LINKTREE_DEFAULT_GOOEY_WORDS = 'Flow|With|AI|:)';
+
+        function createDefaultGooeyFlowSection() {
+            return { id: 'lt-flow-ai', type: 'gooey-flow', visible: true, content: { wordsText: LINKTREE_DEFAULT_GOOEY_WORDS } };
+        }
+
+        function _ltIsIncompletePaymentLink(url) {
+            var raw = String(url || '').trim();
+            return !raw || /^\/workshop-payment\?id=?$/i.test(raw);
+        }
+
+        function _ltDefaultHeroPaymentLink() {
+            return '/workshop-payment?id=workshop-0';
+        }
+
+        function _ltHeroOptionIdFromLabel(label, idx) {
+            var slug = String(label || '')
+                .toLowerCase()
+                .replace(/<[^>]+>/g, ' ')
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '');
+            return slug || ('option-' + idx);
+        }
+
+        function _ltNormalizeHeroButtonOptions(sectionId, content) {
+            var defaults = [
+                { id: 'go-to-payment', label: 'Go to payment / 立即報名', url: _ltDefaultHeroPaymentLink() },
+                { id: 'book-appointment', label: 'Book appointment / 預約諮詢', url: '/consultation' },
+                { id: 'learn-more', label: 'Learn more / 了解更多', url: sectionId === 'lt-header' ? '#lt-services' : '#experience' }
+            ];
+            var raw = Array.isArray(content && content.buttonOptions) ? JSON.parse(JSON.stringify(content.buttonOptions)) : [];
+            var seen = {};
+            var merged = defaults.map(function(def, idx) {
+                var match = null;
+                for (var i = 0; i < raw.length; i++) {
+                    if (String((raw[i] && raw[i].id) || '') === def.id) {
+                        match = raw[i];
+                        break;
+                    }
+                }
+                var next = Object.assign({}, def, match || {});
+                next.id = String(next.id || '').trim() || _ltHeroOptionIdFromLabel(next.label, idx);
+                next.label = String(next.label || '').trim();
+                next.url = String(next.url || '').trim();
+                if (next.id === 'go-to-payment' && _ltIsIncompletePaymentLink(next.url)) next.url = _ltDefaultHeroPaymentLink();
+                if (next.id === 'book-appointment' && !next.url) next.url = '/consultation';
+                if (next.id === 'learn-more' && !next.url) next.url = sectionId === 'lt-header' ? '#lt-services' : '#experience';
+                seen[next.id] = true;
+                return next;
+            });
+            raw.forEach(function(opt, idx) {
+                var next = Object.assign({ id: '', label: '', url: '' }, opt || {});
+                next.id = String(next.id || '').trim() || _ltHeroOptionIdFromLabel(next.label, idx + defaults.length);
+                next.label = String(next.label || '').trim();
+                next.url = String(next.url || '').trim();
+                if (seen[next.id] || (!next.label && !next.url)) return;
+                seen[next.id] = true;
+                merged.push(next);
+            });
+            return merged;
+        }
+
+        function _ltResolveHeroButtonUrl(sectionId, content, actionId, fallbackLink) {
+            var options = _ltNormalizeHeroButtonOptions(sectionId, content);
+            var targetId = String(actionId || '').trim();
+            for (var i = 0; i < options.length; i++) {
+                if (options[i].id === targetId && String(options[i].url || '').trim()) return String(options[i].url || '').trim();
+            }
+            var fallback = String(fallbackLink || '').trim();
+            if (_ltIsIncompletePaymentLink(fallback)) return _ltDefaultHeroPaymentLink();
+            return fallback;
+        }
+
+        function _ltNormalizeHeroContent(sectionId, content) {
+            var raw = content && typeof content === 'object' ? content : {};
+            var next = JSON.parse(JSON.stringify(raw || {}));
+            next.ctaVisible = raw.ctaVisible !== false;
+            if (!String(next.title || '').replace(/<[^>]+>/g, ' ').trim() && sectionId === 'lt-header') {
+                next.title = 'AIFlowTime的世界';
+            }
+            next.buttonOptions = _ltNormalizeHeroButtonOptions(sectionId, next);
+            if (!String(next.ctaActionId || '').trim()) next.ctaActionId = 'go-to-payment';
+            if (sectionId === 'lt-header') {
+                if (!String(next.secondaryCtaText || '').trim()) next.secondaryCtaText = '了解更多';
+                next.secondaryCtaVisible = raw.secondaryCtaVisible === undefined ? true : raw.secondaryCtaVisible !== false;
+                if (!String(next.secondaryCtaActionId || '').trim()) next.secondaryCtaActionId = 'learn-more';
+            } else {
+                next.secondaryCtaVisible = raw.secondaryCtaVisible === true || (raw.secondaryCtaVisible !== false && !!String(next.secondaryCtaText || '').trim());
+            }
+            next.ctaLink = _ltResolveHeroButtonUrl(sectionId, next, next.ctaActionId, raw.ctaLink || next.ctaLink);
+            next.secondaryCtaLink = _ltResolveHeroButtonUrl(sectionId, next, next.secondaryCtaActionId, raw.secondaryCtaLink || next.secondaryCtaLink);
+            return next;
+        }
+
+        function _ltHeroButtonStyle(colors, includeBorder) {
+            var styles = [];
+            if (colors && colors.bg) styles.push('background:' + colors.bg);
+            if (colors && colors.text) styles.push('color:' + colors.text);
+            if (includeBorder && colors && colors.border) styles.push('border-color:' + colors.border);
+            return styles.length ? ' style="' + _escHtml(styles.join(';')) + '"' : '';
+        }
+
+        function _ltHeroButtonAttrs(url) {
+            var href = String(url || '').trim() || '#';
+            if (/^https?:/i.test(href)) return ' href="' + _escHtml(href) + '" target="_blank" rel="noopener noreferrer"';
+            return ' href="' + _escHtml(href) + '"';
+        }
 
         var LINKTREE_DEFAULT_SECTIONS = [
-            { id: 'lt-header', type: 'hero', visible: true, content: { title: 'AIFlowTime的世界', subtitle: '用 AI 換時間｜建立會自己跑的工作系統\n專為斜槓族、AI 新手、小生意老闆而設', gifUrl: 'Landing-page-logo.png' } },
+            { id: 'lt-header', type: 'hero', visible: true, content: { title: 'AIFlowTime的世界', subtitle: '用 AI 換時間｜建立會自己跑的工作系統\n專為斜槓族、AI 新手、小生意老闆而設', ctaVisible: true, ctaText: '立即預留名額', ctaActionId: 'go-to-payment', secondaryCtaVisible: true, secondaryCtaText: '了解更多', secondaryCtaActionId: 'learn-more', gifUrl: 'Landing-page-logo.png' } },
+            createDefaultGooeyFlowSection(),
             { id: 'lt-services', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
                 { label: '有唔識嘅AI問題？將你嘅問題話我知！', url: '/consultation', description: '了解更多諮詢內容與流程', badgeText: '', imageUrl: '' },
                 { label: '👩‍🏫 AI 課程工作坊', url: '/ai-beginner-workshop', description: '專為斜槓族、小生意老闆、AI 新手而設', badgeText: '立即報名！', imageUrl: '' },
-                { label: '📚 2026年5個必學AI指南', url: '#', description: '免費領取AI工作流指南', badgeText: '', imageUrl: '' },
+                { label: '📚 2026年5個必學AI指南', url: '#', description: '免費領取AI工作流指南', badgeText: '', imageUrl: '', leadMagnet: { enabled: true, title: '領取免費2026年AI指南', description: '想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！', imageUrl: '', submitText: '領取免費指南', redirectUrl: 'ai-guide-2026.html' } },
                 { label: '🎯 2分鐘AI能力診斷', url: '/quiz', description: '搵出你嘅 AI 瓶頸，獲取個人化學習建議', badgeText: '免費！', imageUrl: '' },
                 { label: '👤 關於 Jacob', url: '/about-jacob', description: '了解更多關於創辦人的故事', badgeText: '', imageUrl: '' }
             ]}},
@@ -2352,8 +3039,7 @@
             { id: 'lt-social', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
                 { label: 'Home', url: '/', description: '', badgeText: '', imageUrl: '' },
                 { label: 'Instagram', url: 'https://www.instagram.com/aiflowtime', description: '', badgeText: '', imageUrl: '' }
-            ]}},
-            { id: 'lt-lead-magnet', type: 'lead-magnet', visible: true, content: { title: '領取免費2026年AI指南', description: '想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！', imageUrl: '', formFields: [{ label: '姓名', type: 'text' }, { label: 'WhatsApp 號碼', type: 'tel' }], submitText: '免費領取指南', triggerText: '📚 領取免費AI指南' } }
+            ]}}
         ];
 
         var MANAGEMENT_QR_SECTIONS = [
@@ -2363,31 +3049,267 @@
             ]}}
         ];
 
-        function ensureManagementSections(sections) {
-            if (!sections || !sections.length) return LINKTREE_DEFAULT_SECTIONS;
-            var hasManagement = sections.some(function(s) { return s.id === 'lt-management'; });
-            if (hasManagement) return sections;
-            var idx = -1;
-            for (var i = 0; i < sections.length; i++) {
-                if (sections[i].id === 'lt-coming-soon') { idx = i; break; }
+        function migrateStandaloneLeadMagnetSections(sections) {
+            var list = JSON.parse(JSON.stringify(Array.isArray(sections) ? sections : []));
+            var popupLinks = [];
+            var changed = false;
+            list = list.filter(function(sec) {
+                if (!sec || sec.type !== 'lead-magnet') return true;
+                changed = true;
+                var c = sec.content || {};
+                popupLinks.push({
+                    label: c.triggerText || c.title || '立即領取',
+                    url: '#',
+                    description: c.description || '',
+                    badgeText: '',
+                    imageUrl: c.imageUrl || '',
+                    leadMagnet: {
+                        enabled: true,
+                        title: c.title || '',
+                        description: c.description || '',
+                        imageUrl: c.imageUrl || '',
+                        submitText: c.submitText || '提交',
+                        redirectUrl: 'ai-guide-2026.html'
+                    }
+                });
+                return false;
+            });
+            popupLinks.forEach(function(popupLink, idx) {
+                var attached = false;
+                list.some(function(sec) {
+                    if (!sec || sec.type !== 'link-list') return false;
+                    if (!sec.content) sec.content = {};
+                    if (!Array.isArray(sec.content.links)) sec.content.links = [];
+                    for (var i = 0; i < sec.content.links.length; i++) {
+                        var link = sec.content.links[i];
+                        var isCandidate = _getLinkLeadMagnetConfig(link) || String((link && link.url) || '').trim() === '#';
+                        if (!isCandidate) continue;
+                        if (!link.leadMagnet) link.leadMagnet = {};
+                        if (link.leadMagnet.enabled !== true) link.leadMagnet.enabled = true;
+                        if (!String(link.leadMagnet.title || '').trim()) link.leadMagnet.title = popupLink.leadMagnet.title;
+                        if (!String(link.leadMagnet.description || '').trim()) link.leadMagnet.description = popupLink.leadMagnet.description;
+                        if (!String(link.leadMagnet.imageUrl || '').trim()) link.leadMagnet.imageUrl = popupLink.leadMagnet.imageUrl;
+                        if (!String(link.leadMagnet.submitText || '').trim()) link.leadMagnet.submitText = popupLink.leadMagnet.submitText;
+                        if (!String(link.leadMagnet.redirectUrl || '').trim()) link.leadMagnet.redirectUrl = popupLink.leadMagnet.redirectUrl;
+                        if (!String(link.imageUrl || '').trim() && popupLink.imageUrl) link.imageUrl = popupLink.imageUrl;
+                        attached = true;
+                        return true;
+                    }
+                    return false;
+                });
+                if (!attached) {
+                    for (var secIdx = 0; secIdx < list.length; secIdx++) {
+                        var target = list[secIdx];
+                        if (target && target.type === 'link-list') {
+                            if (!target.content) target.content = {};
+                            if (!Array.isArray(target.content.links)) target.content.links = [];
+                            target.content.links.push(JSON.parse(JSON.stringify(popupLink)));
+                            attached = true;
+                            break;
+                        }
+                    }
+                }
+                if (!attached) {
+                    list.push({
+                        id: 'lt-link-popup-' + idx,
+                        type: 'link-list',
+                        visible: true,
+                        content: {
+                            sectionTitle: '',
+                            links: [JSON.parse(JSON.stringify(popupLink))]
+                        }
+                    });
+                }
+            });
+            if (changed) {
+                list.forEach(function(sec, idx) {
+                    if (sec) sec.order = idx;
+                });
             }
-            var next = sections.slice(0, idx + 1).concat(MANAGEMENT_QR_SECTIONS).concat(sections.slice(idx + 1));
-            return next;
+            return list;
+        }
+
+        function ensureLinktreeManagedSections(sections) {
+            var next = Array.isArray(sections) && sections.length ? sections.slice() : LINKTREE_DEFAULT_SECTIONS.slice();
+            next = migrateStandaloneLeadMagnetSections(next);
+            if (!next.some(function(s) { return s && s.id === 'lt-flow-ai'; })) {
+                var flowSection = createDefaultGooeyFlowSection();
+                var headerIdx = -1;
+                for (var i = 0; i < next.length; i++) {
+                    if (next[i] && next[i].id === 'lt-header') { headerIdx = i; break; }
+                }
+                if (headerIdx >= 0) next = next.slice(0, headerIdx + 1).concat([flowSection]).concat(next.slice(headerIdx + 1));
+                else next = [flowSection].concat(next);
+            }
+            if (next.some(function(s) { return s && s.id === 'lt-management'; })) return next;
+            var idx = -1;
+            for (var j = 0; j < next.length; j++) {
+                if (next[j] && next[j].id === 'lt-coming-soon') { idx = j; break; }
+            }
+            return idx >= 0
+                ? next.slice(0, idx + 1).concat(MANAGEMENT_QR_SECTIONS).concat(next.slice(idx + 1))
+                : next.concat(MANAGEMENT_QR_SECTIONS);
         }
 
         function _escHtml(s) { return escHtml(s); }
+        function _richTextHtml(value) {
+            var raw = value == null ? '' : String(value);
+            if (!raw.trim()) return '';
+            if (typeof sanitizeHeroTitleHtml === 'function') return sanitizeHeroTitleHtml(raw);
+            return _escHtml(raw).replace(/\n/g, '<br>');
+        }
+
+        function _getGooeyWords(value) {
+            var words = String(value || LINKTREE_DEFAULT_GOOEY_WORDS)
+                .split('|')
+                .map(function(part) { return part.trim(); })
+                .filter(Boolean);
+            return words.length ? words : ['Flow', 'With', 'AI', ':)'];
+        }
+
+        function _renderGooeyWord(word) {
+            var safe = word == null ? '' : String(word);
+            return safe.toUpperCase() === 'AI'
+                ? '<span class="ai-text">' + _escHtml(safe) + '</span>'
+                : _escHtml(safe);
+        }
+
+        function _gooeySectionMarkup(filterId) {
+            return '<svg class="gooey-text-svg" aria-hidden="true" focusable="false"><defs><filter id="' + _escHtml(filterId) + '"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 255 -140"></feColorMatrix></filter></defs></svg>' +
+                '<div class="gooey-text-wrapper" style="filter:url(#' + _escHtml(filterId) + ');">' +
+                    '<span class="gooey-text-span gooey-text-primary"></span>' +
+                    '<span class="gooey-text-span gooey-text-secondary"></span>' +
+                '</div>';
+        }
+
+        function _initGooeyTextSection(sectionEl, texts) {
+            var text1Ref = sectionEl.querySelector('.gooey-text-primary');
+            var text2Ref = sectionEl.querySelector('.gooey-text-secondary');
+            if (!text1Ref || !text2Ref) return;
+            var words = Array.isArray(texts) && texts.length ? texts.slice() : ['Flow', 'With', 'AI', ':)'];
+            if (words.length === 1) {
+                text1Ref.style.opacity = '0%';
+                text2Ref.style.opacity = '100%';
+                text2Ref.innerHTML = _renderGooeyWord(words[0]);
+                return;
+            }
+            var morphTime = 1;
+            var cooldownTime = 0.25;
+            var textIndex = words.length - 1;
+            var time = performance.now();
+            var morph = 0;
+            var cooldown = cooldownTime;
+            var frameInterval = 1000 / 30;
+            var lastFrameTime = performance.now();
+            var isPageVisible = !document.hidden;
+            var animationId = null;
+            var disposed = false;
+
+            function setPair() {
+                text1Ref.innerHTML = _renderGooeyWord(words[textIndex % words.length]);
+                text2Ref.innerHTML = _renderGooeyWord(words[(textIndex + 1) % words.length]);
+            }
+
+            function setMorph(fraction) {
+                var nextFraction = Math.max(0.0001, Math.min(fraction, 0.9999));
+                var blur2 = Math.min(8 / nextFraction - 8, 30);
+                var opacity2 = Math.pow(nextFraction, 0.4) * 100;
+                text2Ref.style.filter = 'blur(' + blur2 + 'px)';
+                text2Ref.style.opacity = opacity2 + '%';
+
+                nextFraction = 1 - nextFraction;
+                var blur1 = Math.min(8 / Math.max(nextFraction, 0.0001) - 8, 30);
+                var opacity1 = Math.pow(nextFraction, 0.4) * 100;
+                text1Ref.style.filter = 'blur(' + blur1 + 'px)';
+                text1Ref.style.opacity = opacity1 + '%';
+            }
+
+            function doCooldown() {
+                morph = 0;
+                text2Ref.style.filter = '';
+                text2Ref.style.opacity = '100%';
+                text1Ref.style.filter = '';
+                text1Ref.style.opacity = '0%';
+            }
+
+            function doMorph() {
+                morph -= cooldown;
+                cooldown = 0;
+                var fraction = morph / morphTime;
+                if (fraction > 1) {
+                    cooldown = cooldownTime;
+                    fraction = 1;
+                }
+                setMorph(fraction);
+            }
+
+            function handleVisibility() {
+                isPageVisible = !document.hidden;
+                if (isPageVisible) {
+                    time = performance.now();
+                    lastFrameTime = performance.now();
+                }
+            }
+
+            function animate() {
+                if (disposed) {
+                    animationId = null;
+                    return;
+                }
+                animationId = requestAnimationFrame(animate);
+                if (!isPageVisible) return;
+                var now = performance.now();
+                var elapsed = now - lastFrameTime;
+                if (elapsed < frameInterval) return;
+                lastFrameTime = now - (elapsed % frameInterval);
+                var dt = Math.min((now - time) / 1000, 0.1);
+                time = now;
+                cooldown -= dt;
+                if (cooldown <= 0) {
+                    if (morph === 0) {
+                        textIndex = (textIndex + 1) % words.length;
+                        setPair();
+                    }
+                    doMorph();
+                } else {
+                    doCooldown();
+                }
+            }
+
+            setPair();
+            doCooldown();
+            document.addEventListener('visibilitychange', handleVisibility);
+            animate();
+            sectionEl.__disposeSection = function() {
+                disposed = true;
+                if (animationId) cancelAnimationFrame(animationId);
+                animationId = null;
+                document.removeEventListener('visibilitychange', handleVisibility);
+                sectionEl.__disposeSection = null;
+            };
+        }
 
         function applySections(sections) {
+            if (typeof syncPageBackgroundFromSections === 'function') {
+                syncPageBackgroundFromSections(sections || [], { wrapperId: 'layout-page-bg' });
+            }
             var allSecs = document.querySelectorAll('[data-section-id]');
-            allSecs.forEach(function(el) { el.style.display = 'none'; el.style.order = ''; el.style.opacity = ''; });
+            allSecs.forEach(function(el) {
+                disposeSectionBehavior(el);
+                el.style.display = 'none';
+                el.style.order = '';
+                el.style.opacity = '';
+            });
 
             if (!sections || !sections.length) {
                 sections = LINKTREE_DEFAULT_SECTIONS;
             }
+            sections = ensureLinktreeManagedSections(sections);
 
             var matched = 0;
             var order = 0;
             sections.forEach(function(sec) {
+                if (!sec || sec.type === 'page-background') return;
                 if (sec.visible === false) return;
                 if (sec.type === 'floating-icon') return;
                 var el = document.querySelector('[data-section-id="' + sec.id + '"]');
@@ -2435,13 +3357,52 @@
 
             switch (type) {
                 case 'hero':
-                    var title = c.title || '';
-                    var titleHtml = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(title) : _escHtml(title).replace(/\n/g, '<br>');
-                    var subtitle = (c.subtitle || '').replace(/\n/g, '<br>');
-                    var avatarSrc = c.gifUrl ? _escHtml(c.gifUrl) : 'Landing-page-logo.png';
-                    el.innerHTML = '<img src="' + avatarSrc + '" alt="AIFlowTime" class="profile-avatar" id="profileAvatar" width="100" height="100" loading="eager" decoding="async">' +
-                        '<h1 class="profile-name">' + titleHtml + '</h1>' +
-                        '<p class="profile-bio" style="font-size:1.1em;">' + subtitle + '</p>';
+                    var heroCfg = _ltNormalizeHeroContent(sec.id, c);
+                    var titleHtml = _richTextHtml(heroCfg.title || '');
+                    var subtitleHtml = _richTextHtml(heroCfg.subtitle || '');
+                    var badgeText = _richTextHtml(heroCfg.badge || '');
+                    var mediaHtml = '';
+                    if (heroCfg.gifUrl) {
+                        var heroSrc = _escHtml(heroCfg.gifUrl);
+                        var heroIsVideo = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(heroCfg.gifUrl);
+                        mediaHtml = '<div class="hero-media-wrap hero-media-ready">' +
+                            (heroIsVideo
+                                ? '<video class="hero-media" src="' + heroSrc + '" autoplay loop muted playsinline></video>'
+                                : '<img class="hero-media" src="' + heroSrc + '" alt="' + _escHtml(String(heroCfg.title || 'AIFlowTime').replace(/<[^>]+>/g, ' ').trim() || 'AIFlowTime') + '">') +
+                            '</div>';
+                    }
+                    var ctaHtml = _richTextHtml(heroCfg.ctaText || '');
+                    var ctaVisible = heroCfg.ctaVisible !== false && String(ctaHtml || '').replace(/<[^>]+>/g, ' ').trim();
+                    var learnHtml = _richTextHtml(heroCfg.secondaryCtaText || '');
+                    var learnVisible = heroCfg.secondaryCtaVisible !== false && String(learnHtml || '').replace(/<[^>]+>/g, ' ').trim();
+                    var buttons = [];
+                    if (ctaVisible) {
+                        buttons.push('<a class="btn-primary"' + _ltHeroButtonAttrs(heroCfg.ctaLink) + _ltHeroButtonStyle({ bg: heroCfg.ctaBgColor, text: heroCfg.ctaTextColor }, false) + '>' + ctaHtml + '</a>');
+                    }
+                    if (learnVisible) {
+                        buttons.push('<a class="btn-outline"' + _ltHeroButtonAttrs(heroCfg.secondaryCtaLink) + _ltHeroButtonStyle({ bg: heroCfg.secondaryCtaBgColor, text: heroCfg.secondaryCtaTextColor, border: heroCfg.secondaryCtaBorderColor }, true) + '>' + learnHtml + '</a>');
+                    }
+                    var scrollHintHtml = '';
+                    if (heroCfg.showScrollHint !== false) {
+                        scrollHintHtml = '<div class="scroll-hint"' + (heroCfg.scrollHintColor ? ' style="color:' + _escHtml(heroCfg.scrollHintColor) + ';"' : '') + '>' +
+                            '<div class="scroll-hint-pill"' + (heroCfg.scrollHintColor ? ' style="border-color:' + _escHtml(heroCfg.scrollHintColor) + ';"' : '') + '>' +
+                                '<div class="scroll-hint-dot"' + (heroCfg.scrollHintDotColor ? ' style="background:' + _escHtml(heroCfg.scrollHintDotColor) + ';"' : '') + '></div>' +
+                            '</div>' +
+                            '<span>SCROLL</span>' +
+                        '</div>';
+                    }
+                    el.innerHTML = mediaHtml +
+                        (String(badgeText || '').replace(/<[^>]+>/g, ' ').trim() ? '<div class="hero-badge">' + badgeText + '</div>' : '') +
+                        '<h1 class="hero-title">' + titleHtml + '</h1>' +
+                        (subtitleHtml ? '<p class="hero-tagline">' + subtitleHtml + '</p>' : '') +
+                        (buttons.length ? '<div class="cta-group">' + buttons.join('') + '</div>' : '') +
+                        scrollHintHtml;
+                    break;
+
+                case 'gooey-flow':
+                    var filterId = 'gooey-filter-' + String(el.getAttribute('data-section-id') || 'flow').replace(/[^a-z0-9_-]+/gi, '-').toLowerCase();
+                    el.innerHTML = _gooeySectionMarkup(filterId);
+                    _initGooeyTextSection(el, _getGooeyWords(c.wordsText));
                     break;
 
                 case 'link-list':
@@ -2463,26 +3424,41 @@
                         } else {
                         c.links.forEach(function(lnk) {
                             var a = document.createElement('a');
+                            var popupConfig = _getLinkLeadMagnetConfig(lnk);
                             a.className = 'link-item fade-in' + (lnk.imageUrl ? ' link-item--with-image' : '');
                             a.href = lnk.url || '#';
                             if (lnk.url && lnk.url.indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
                             var inner = '';
                             if (lnk.imageUrl) {
-                                inner += '<div class="link-item-image-wrap"><img src="' + _escHtml(lnk.imageUrl) + '" alt="" loading="lazy"></div>';
+                                var _rawMedia = String(lnk.imageUrl);
+                                var _mediaFixed = typeof fixStorageUrl === 'function' ? fixStorageUrl(_rawMedia) : _rawMedia;
+                                var _isVid = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(_rawMedia);
+                                if (!_isVid) { var _pm = _rawMedia.match(/[?&]path=([^&]+)/); if (_pm) _isVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_pm[1])); }
+                                if (!_isVid) { var _om = _rawMedia.match(/\/o\/([^?]+)/); if (_om) _isVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_om[1])); }
+                                if (_isVid) {
+                                    inner += '<div class="link-item-image-wrap"><video src="' + _escHtml(_mediaFixed) + '" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video></div>';
+                                } else {
+                                    inner += '<div class="link-item-image-wrap"><img src="' + _escHtml(_mediaFixed) + '" alt="" loading="lazy"></div>';
+                                }
                             }
                             inner += '<div class="link-content"><div class="link-text">';
                             inner += '<div class="link-title">';
                             if (lnk.badgeText) {
-                                inner += '<span style="display:flex;align-items:center;gap:0.75rem;"><span>' + _escHtml(lnk.label) + '</span><span class="pixelated-text">' + _escHtml(lnk.badgeText) + '</span></span>';
+                                inner += '<span class="link-title-row"><span class="link-title-text">' + _richTextHtml(lnk.label) + '</span><span class="pixelated-text link-badge">' + _richTextHtml(lnk.badgeText) + '</span></span>';
                             } else {
-                                inner += _escHtml(lnk.label);
+                                inner += '<span class="link-title-text">' + _richTextHtml(lnk.label) + '</span>';
                             }
                             inner += '</div>';
-                            if (lnk.description) inner += '<div class="link-description">' + _escHtml(lnk.description) + '</div>';
+                            if (lnk.description) inner += '<div class="link-description">' + _richTextHtml(lnk.description) + '</div>';
                             inner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';
                             a.innerHTML = inner;
-                            if ((lnk.url || '') === '#') {
-                                a.addEventListener('click', function(e) { e.preventDefault(); if (typeof openWhatsAppModal === 'function') openWhatsAppModal(); });
+                            if (popupConfig) {
+                                a.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    if (typeof openWhatsAppModal === 'function') openWhatsAppModal(popupConfig);
+                                });
+                            } else if ((lnk.url || '') === '#') {
+                                a.addEventListener('click', function(e) { e.preventDefault(); });
                             }
                             el.appendChild(a);
                         });
@@ -2492,10 +3468,10 @@
 
                 case 'section-divider':
                     var titleEl = el.querySelector('.linktree-section-title');
-                    if (titleEl && c.title) titleEl.textContent = c.title;
+                    if (titleEl) titleEl.innerHTML = _richTextHtml(c.title || '');
                     var subEl = el.querySelector('.linktree-section-subtitle');
                     if (subEl) {
-                        if (c.subtitle) { subEl.textContent = c.subtitle; subEl.style.display = ''; }
+                        if (c.subtitle) { subEl.innerHTML = _richTextHtml(c.subtitle || ''); subEl.style.display = ''; }
                         else { subEl.style.display = 'none'; }
                     }
                     break;
@@ -2505,22 +3481,51 @@
                         el.innerHTML = '';
                         c.tools.forEach(function(tool) {
                             var a = document.createElement('a');
-                            a.className = 'link-item fade-in';
+                            var cardMediaRaw = String(tool.cardMediaUrl || '').trim();
+                            var hasCardMedia = !!cardMediaRaw;
+                            a.className = 'link-item fade-in link-item--tools-grid' + (hasCardMedia ? ' link-item--tools-grid-with-media' : '');
                             a.href = tool.url || '#';
                             a.target = '_blank';
                             a.rel = 'noopener noreferrer';
-                            var inner = '<div class="link-content"><div class="link-text">';
+                            var inner = '';
                             inner += '<div class="link-title">';
+                            var nameHtml = _richTextHtml(tool.name || '');
+                            var descHtml = tool.description ? _richTextHtml(tool.description) : '';
+                            var badgeHtml = tool.badgeText ? _richTextHtml(tool.badgeText) : '';
+                            var namePlain = String(tool.name || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
                             if (tool.logoUrl) {
-                                inner += '<img src="' + _escHtml(tool.logoUrl) + '" alt="' + _escHtml(tool.name) + '" style="height:28px;width:auto;display:block;">';
+                                inner += '<span class="link-tools-grid-logo-block">' +
+                                    '<img class="link-tools-grid-logo" src="' + _escHtml(tool.logoUrl) + '" alt="' + _escHtml(namePlain || 'Tool') + '">';
+                                if (badgeHtml) {
+                                    inner += '<span class="link-title-row"><span class="link-title-text">' + nameHtml + '</span><span class="pixelated-text link-badge">' + badgeHtml + '</span></span>';
+                                } else {
+                                    inner += '<span class="link-title-text">' + nameHtml + '</span>';
+                                }
+                                inner += '</span>';
+                            } else if (badgeHtml) {
+                                inner += '<span class="link-title-row"><span class="link-title-text">' + nameHtml + '</span><span class="pixelated-text link-badge">' + badgeHtml + '</span></span>';
                             } else {
-                                inner += _escHtml(tool.name);
+                                inner += '<span class="link-title-text">' + nameHtml + '</span>';
                             }
-                            if (tool.badgeText) inner += ' <span class="pixelated-text">' + _escHtml(tool.badgeText) + '</span>';
                             inner += '</div>';
-                            if (tool.description) inner += '<div class="link-description">' + _escHtml(tool.description) + '</div>';
-                            inner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';
-                            a.innerHTML = inner;
+                            if (descHtml) inner += '<div class="link-description">' + descHtml + '</div>';
+                            var textCol = '<div class="link-text">' + inner + '</div>';
+                            if (hasCardMedia) {
+                                var _cm = cardMediaRaw;
+                                var _cmFixed = typeof fixStorageUrl === 'function' ? fixStorageUrl(_cm) : _cm;
+                                var _cmVid = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(_cm);
+                                if (!_cmVid) { var _p = _cm.match(/[?&]path=([^&]+)/); if (_p) _cmVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_p[1])); }
+                                if (!_cmVid) { var _o = _cm.match(/\/o\/([^?]+)/); if (_o) _cmVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_o[1])); }
+                                var mediaInner = _cmVid
+                                    ? '<video src="' + _escHtml(_cmFixed) + '" autoplay loop muted playsinline></video>'
+                                    : '<img src="' + _escHtml(_cmFixed) + '" alt="" loading="lazy">';
+                                a.innerHTML = '<div class="link-tools-grid-body">' +
+                                    '<div class="link-tools-grid-text">' + textCol + '</div>' +
+                                    '<div class="link-tools-grid-media">' + mediaInner + '</div>' +
+                                    '</div>';
+                            } else {
+                                a.innerHTML = '<div class="link-content"><div class="link-text">' + inner + '</div></div>';
+                            }
                             el.appendChild(a);
                         });
                     }
@@ -2752,24 +3757,33 @@
         }
 
         if (_isPreview) {
-            window.addEventListener('message', function(e) {
-                if (!e.data || e.data.type !== 'layoutPreview') return;
-                applySections(e.data.sections);
+            initLayoutPreviewBridge({
+                onLayoutPreview: function(sections) {
+                    applySections(sections);
+                }
             });
         } else {
             initFirebase(function() {
                 var db = firebase.firestore();
-                db.collection('pageLayouts').doc('linktree').get().then(function(doc) {
-                    var sections = (doc.exists && doc.data().sections && doc.data().sections.length > 0)
-                        ? doc.data().sections
+                db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
+                    var data = doc.exists ? (doc.data() || {}) : null;
+                    if (!_layoutAllowsPublicView(data)) {
+                        _showLayoutUnavailableState();
+                        return;
+                    }
+                    if (typeof applyFirestorePageMeta === 'function') {
+                        applyFirestorePageMeta(data, { fallbackTitle: document.title });
+                    }
+                    var sections = (doc.exists && data.sections && data.sections.length > 0)
+                        ? data.sections
                         : LINKTREE_DEFAULT_SECTIONS;
-                    sections = ensureManagementSections(sections);
+                    sections = ensureLinktreeManagedSections(sections);
                     sections = _ensureFloatingIcons(sections);
-                    if (sections.length > 0 && doc.exists) console.log('[Layout] Loaded linktree layout from Firestore');
+                    if (sections.length > 0 && doc.exists) console.log('[Layout] Loaded ' + _layoutDocId + ' layout from Firestore');
                     applySections(sections);
                 }).catch(function(err) {
-                    console.log('[Layout] No layout config found for linktree, using default.', err);
-                    var fallback = ensureManagementSections(LINKTREE_DEFAULT_SECTIONS);
+                    console.log('[Layout] No layout config found for ' + _layoutDocId + ', using default.', err);
+                    var fallback = ensureLinktreeManagedSections(LINKTREE_DEFAULT_SECTIONS);
                     fallback = _ensureFloatingIcons(fallback);
                     applySections(fallback);
                 });

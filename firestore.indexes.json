@@ -23,6 +23,14 @@
         { "fieldPath": "workshopId", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "pageLayouts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isCustomPage", "order": "ASCENDING" },
+        { "fieldPath": "pageSlug", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

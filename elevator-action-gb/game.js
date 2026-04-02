@@ -387,12 +387,13 @@ function generateBuilding(level) {
     const baseShaftCount = cfg.shafts;
     const segPerShaft = Math.min(2 + Math.floor(level / 2), Math.ceil(numFloors / 3));
     const totalShaftsNeeded = baseShaftCount * segPerShaft;
-    // Forbidden: walls, escalator cols (1-5 left, 14-18 right), and spawn area (1-5)
+    // Forbidden: walls, escalator cols (1-5 left, 14-18 right), and a wider
+    // spawn corridor so Level 2+ doesn't open a shaft too close to the start.
     const forbidden = new Set();
-    for (var fi = 0; fi <= 6; fi++) forbidden.add(fi);
+    for (var fi = 0; fi <= 8; fi++) forbidden.add(fi);
     for (var fi = buildingW - 6; fi < buildingW; fi++) forbidden.add(fi);
-    // Place shafts in the middle zone (7 to buildingW-7)
-    var minShaftX = 7, maxShaftX = buildingW - 7;
+    // Place shafts in the middle zone (9 to buildingW-7)
+    var minShaftX = 9, maxShaftX = buildingW - 7;
     var range = maxShaftX - minShaftX;
     for (let i = 0; i < totalShaftsNeeded; i++) {
       let sx = minShaftX + Math.round((i + 0.5) * range / totalShaftsNeeded);
@@ -848,10 +849,12 @@ function initLevel() {
           }
         }
 
-        // Place floor caps at top and bottom of this shaft segment
+        // Place floor caps at top and bottom of this shaft segment.
+        // If a segment starts on the top floor, don't add a top cap:
+        // it sits at the player's head height and blocks the opening.
         const capTopTy = Math.max(0, tileMinY - 1);
         const capBotTy = Math.min(b.height - 1, tileMaxY + 1);
-        if (b.map[capTopTy] && b.map[capTopTy][sx] !== T.WALL) {
+        if (fStart > 0 && b.map[capTopTy] && b.map[capTopTy][sx] !== T.WALL) {
           b.map[capTopTy][sx] = T.FLOOR;
         }
         if (b.map[capBotTy] && b.map[capBotTy][sx] !== T.WALL) {

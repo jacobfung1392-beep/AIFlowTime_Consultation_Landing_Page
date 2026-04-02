@@ -524,7 +524,11 @@
 
     </div><!-- end .page-content -->
 
-    <script src="/js/shared-utils.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-init.js"></script>
+    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/page-background-runtime.js"></script>
     <script>
         // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
@@ -584,6 +588,39 @@
             resize();
             drawNoise();
             window.addEventListener('resize', resize);
+        })();
+
+        (function() {
+            var query = new URLSearchParams(window.location.search);
+            var isPreview = query.has('preview');
+            var layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || query.get('layoutDoc') || 'consultation';
+
+            function applyConsultationBackground(sections) {
+                if (typeof syncPageBackgroundFromSections === 'function') {
+                    syncPageBackgroundFromSections(sections || [], { wrapperId: 'consultation-page-bg' });
+                }
+            }
+
+            if (isPreview && typeof initLayoutPreviewBridge === 'function') {
+                initLayoutPreviewBridge({
+                    onLayoutPreview: function(sections) {
+                        applyConsultationBackground(sections || []);
+                    }
+                });
+            }
+
+            if (typeof initFirebase !== 'function' || typeof firebase === 'undefined' || !firebase.firestore) return;
+            initFirebase(function() {
+                firebase.firestore().collection('pageLayouts').doc(layoutDocId).get().then(function(doc) {
+                    var data = doc.exists ? (doc.data() || {}) : null;
+                    if (typeof applyFirestorePageMeta === 'function') {
+                        applyFirestorePageMeta(data, { fallbackTitle: document.title });
+                    }
+                    applyConsultationBackground(data && Array.isArray(data.sections) ? data.sections : []);
+                }).catch(function() {
+                    applyConsultationBackground([]);
+                });
+            });
         })();
     </script>
 </body>

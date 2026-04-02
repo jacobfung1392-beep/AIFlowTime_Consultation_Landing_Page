@@ -72,15 +72,24 @@
     "rewrites": [
       {
         "source": "/linktree",
-        "destination": "/linktree.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/about-jacob",
-        "destination": "/about-jacob.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/consultation",
-        "destination": "/consultation.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/ai-guide-2026",
@@ -88,11 +97,17 @@
       },
       {
         "source": "/quiz",
-        "destination": "/quiz.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/ai-beginner-workshop",
-        "destination": "/ai-beginner-workshop.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/workshop-thank-you",
@@ -100,11 +115,17 @@
       },
       {
         "source": "/workshop-0",
-        "destination": "/Kimi_Agent_AI Workshop Landing Page/index.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/workshop-c",
-        "destination": "/workshop-c.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/workshop-cms",
@@ -144,7 +165,10 @@
       },
       {
         "source": "/countdown",
-        "destination": "/countdown.html"
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       },
       {
         "source": "/doc",
@@ -157,6 +181,13 @@
       {
         "source": "/game-scores-admin",
         "destination": "/game-scores-admin.html"
+      },
+      {
+        "source": "**",
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
       }
     ],
     "headers": [
@@ -203,7 +234,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
+            "value": "no-cache"
           }
         ]
       },

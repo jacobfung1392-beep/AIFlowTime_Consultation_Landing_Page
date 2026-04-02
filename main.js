@@ -713,7 +713,7 @@ function closeEmailModalOnOverlay(event) {
     }
 }
 
-function handleEmailSubmit(event) {
+async function handleEmailSubmit(event) {
     event.preventDefault();
     const nameInput = document.getElementById('nameInput');
     const whatsappInput = document.getElementById('whatsappInput');
@@ -745,7 +745,7 @@ function handleEmailSubmit(event) {
         
         console.log('Sending POST request to:', googleScriptURL);
         
-        fetch(googleScriptURL, {
+        const sheetPromise = fetch(googleScriptURL, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
@@ -757,6 +757,25 @@ function handleEmailSubmit(event) {
         }).catch((error) => {
             console.error('❌ Error submitting form:', error);
         });
+        const mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+            ? saveFormSubmissionMirror({
+                formType: 'lead-magnet',
+                sourceKey: 'home-page-lead-magnet',
+                sourceLabel: '免費 AI 指南',
+                sourcePage: formData.page,
+                sourcePath: window.location.pathname,
+                sourceUrl: window.location.href,
+                sheetTab: 'AIFlowTime Leads',
+                contactName: name,
+                whatsapp: whatsapp,
+                answers: {
+                    consentAccepted: true
+                },
+                timestamp: formData.timestamp
+            }).catch((error) => {
+                console.error('❌ Error mirroring lead magnet form:', error);
+            })
+            : Promise.resolve();
         
         // Also save to localStorage as backup
         const submissions = JSON.parse(localStorage.getItem('aiflowtime_submissions') || '[]');
@@ -764,6 +783,7 @@ function handleEmailSubmit(event) {
         localStorage.setItem('aiflowtime_submissions', JSON.stringify(submissions));
         
         console.log('Form submitted:', formData);
+        await Promise.allSettled([sheetPromise, mirrorPromise]);
         
         // Close modal and reset form
         closeEmailModal();

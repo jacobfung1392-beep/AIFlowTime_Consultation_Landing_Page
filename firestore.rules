@@ -1,6 +1,69 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    function isValidFormSubmissionCreate() {
+      return request.resource.data.keys().hasOnly([
+          'formType',
+          'sourceKey',
+          'sourceLabel',
+          'sourcePage',
+          'sourcePath',
+          'sourceUrl',
+          'sourceCollection',
+          'sourceDocId',
+          'sheetTab',
+          'importSource',
+          'contactName',
+          'phone',
+          'whatsapp',
+          'email',
+          'instagram',
+          'clientSubmittedAt',
+          'submittedAt',
+          'createdAt',
+          'updatedAt',
+          'answers',
+          'searchText'
+        ])
+        && request.resource.data.formType is string
+        && request.resource.data.formType in [
+          'consultation',
+          'workshop-waitlist',
+          'lead-magnet',
+          'quiz-lead',
+          'free-material'
+        ]
+        && request.resource.data.importSource == 'live-form'
+        && request.resource.data.answers is map
+        && request.resource.data.clientSubmittedAt is string
+        && request.resource.data.submittedAt is timestamp
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.searchText is string
+        && (!request.resource.data.keys().hasAny(['sourceKey']) || request.resource.data.sourceKey is string)
+        && (!request.resource.data.keys().hasAny(['sourceLabel']) || request.resource.data.sourceLabel is string)
+        && (!request.resource.data.keys().hasAny(['sourcePage']) || request.resource.data.sourcePage is string)
+        && (!request.resource.data.keys().hasAny(['sourcePath']) || request.resource.data.sourcePath is string)
+        && (!request.resource.data.keys().hasAny(['sourceUrl']) || request.resource.data.sourceUrl is string)
+        && (!request.resource.data.keys().hasAny(['sourceCollection']) || request.resource.data.sourceCollection is string)
+        && (!request.resource.data.keys().hasAny(['sourceDocId']) || request.resource.data.sourceDocId is string)
+        && (!request.resource.data.keys().hasAny(['sheetTab']) || request.resource.data.sheetTab is string)
+        && (!request.resource.data.keys().hasAny(['contactName']) || request.resource.data.contactName is string)
+        && (!request.resource.data.keys().hasAny(['phone']) || request.resource.data.phone is string)
+        && (!request.resource.data.keys().hasAny(['whatsapp']) || request.resource.data.whatsapp is string)
+        && (!request.resource.data.keys().hasAny(['email']) || request.resource.data.email is string)
+        && (!request.resource.data.keys().hasAny(['instagram']) || request.resource.data.instagram is string);
+    }
+
     // Workshops: public read; full write only for authorised CMS admins
     // Enrollment counting is now handled server-side via Cloud Functions
     match /workshops/{workshopId} {
@@ -77,6 +140,12 @@ service cloud.firestore {
         ];
     }
 
+    // Unified forms inbox: public create for allowed lead fields; admin manages inbox metadata
+    match /formSubmissions/{docId} {
+      allow create: if isValidFormSubmissionCreate();
+      allow read, update, delete: if isAdmin();
+    }
+
     // Reservations: backend only (Functions use Admin SDK)
     match /reservations/{reservationId} {
       allow read, write: if false;
@@ -115,6 +184,16 @@ service cloud.firestore {
 
     // Workshop settings: admin only
     match /workshopSettings/{docId} {
+      allow read, write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // CMS settings: admin only
+    match /cmsSettings/{docId} {
       allow read, write: if request.auth != null
         && request.auth.token.email_verified == true
         && request.auth.token.email in [

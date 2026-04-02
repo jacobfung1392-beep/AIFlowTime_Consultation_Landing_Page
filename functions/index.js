@@ -432,6 +432,8 @@ function sameRoundCounters(currentRounds, nextRounds) {
     const nextId = next[i] && next[i].id ? next[i].id : "";
     if (currentId !== nextId) return false;
     if ((current[i] && current[i].enrolled || 0) !== (next[i] && next[i].enrolled || 0)) return false;
+    if ((current[i] && current[i].onlineEnrolled || 0) !== (next[i] && next[i].onlineEnrolled || 0)) return false;
+    if ((current[i] && current[i].offlineEnrolled || 0) !== (next[i] && next[i].offlineEnrolled || 0)) return false;
   }
   return true;
 }
@@ -440,15 +442,21 @@ function sameSessionCounters(currentSessions, nextSessions) {
   const current = sortSessions(currentSessions || []).map((session, index) => ({
     id: session.id || sessionStableId(session, index),
     enrolled: session.enrolled || 0,
+    onlineEnrolled: session.onlineEnrolled || 0,
+    offlineEnrolled: session.offlineEnrolled || 0,
   }));
   const next = sortSessions(nextSessions || []).map((session, index) => ({
     id: session.id || sessionStableId(session, index),
     enrolled: session.enrolled || 0,
+    onlineEnrolled: session.onlineEnrolled || 0,
+    offlineEnrolled: session.offlineEnrolled || 0,
   }));
   if (current.length !== next.length) return false;
   for (let i = 0; i < current.length; i++) {
     if (current[i].id !== next[i].id) return false;
     if (current[i].enrolled !== next[i].enrolled) return false;
+    if (current[i].onlineEnrolled !== next[i].onlineEnrolled) return false;
+    if (current[i].offlineEnrolled !== next[i].offlineEnrolled) return false;
   }
   return true;
 }
@@ -601,8 +609,13 @@ async function recomputeWorkshopEnrollmentCounts(workshopId) {
 
   if (workshop.courseType === "continuous" && Array.isArray(workshop.rounds) && workshop.rounds.length) {
     const perRound = {};
+    const perRoundOnline = {};
+    const perRoundOffline = {};
     workshop.rounds.forEach((round) => {
-      perRound[round.id || round] = 0;
+      const rid = round.id || round;
+      perRound[rid] = 0;
+      perRoundOnline[rid] = 0;
+      perRoundOffline[rid] = 0;
     });
     enrolled.forEach((reg) => {
       const matchedRound = resolveLegacyRoundMatch(reg, workshop.rounds);
@@ -610,6 +623,15 @@ async function recomputeWorkshopEnrollmentCounts(workshopId) {
 
       const roundId = matchedRound.id || matchedRound;
       if (perRound[roundId] !== undefined) perRound[roundId]++;
+
+      const attMode = reg.attendanceMode || "";
+      if (attMode === "online") { perRoundOnline[roundId] = (perRoundOnline[roundId] || 0) + 1; }
+      else if (attMode === "offline") { perRoundOffline[roundId] = (perRoundOffline[roundId] || 0) + 1; }
+      else {
+        const rMode = (matchedRound.sessions && matchedRound.sessions[0] && matchedRound.sessions[0].mode) || "offline";
+        if (rMode === "online") perRoundOnline[roundId] = (perRoundOnline[roundId] || 0) + 1;
+        else perRoundOffline[roundId] = (perRoundOffline[roundId] || 0) + 1;
+      }
 
       if (reg._id && roundId && roundId !== (reg.selectedRound || "")) {
         registrationNormalizations.push(
@@ -621,19 +643,32 @@ async function recomputeWorkshopEnrollmentCounts(workshopId) {
     });
     updateData.rounds = workshop.rounds.map((round) => {
       const id = round.id || round;
-      return { ...round, enrolled: perRound[id] ?? 0 };
+      return { ...round, enrolled: perRound[id] ?? 0, onlineEnrolled: perRoundOnline[id] ?? 0, offlineEnrolled: perRoundOffline[id] ?? 0 };
     });
   } else if (Array.isArray(workshop.sessions) && workshop.sessions.length > 1) {
     const sortedSessions = sortSessions(workshop.sessions);
     const perSession = {};
+    const perSessionOnline = {};
+    const perSessionOffline = {};
     sortedSessions.forEach((session, index) => {
       if (!session.id) session.id = sessionStableId(session, index);
       perSession[session.id] = 0;
+      perSessionOnline[session.id] = 0;
+      perSessionOffline[session.id] = 0;
     });
     enrolled.forEach((reg) => {
       const matchedSession = resolveLegacySessionMatch(reg, sortedSessions);
       if (!matchedSession) return;
       perSession[matchedSession.id] = (perSession[matchedSession.id] || 0) + 1;
+
+      const attMode = reg.attendanceMode || "";
+      if (attMode === "online") { perSessionOnline[matchedSession.id] = (perSessionOnline[matchedSession.id] || 0) + 1; }
+      else if (attMode === "offline") { perSessionOffline[matchedSession.id] = (perSessionOffline[matchedSession.id] || 0) + 1; }
+      else {
+        const sMode = matchedSession.mode || "offline";
+        if (sMode === "online") perSessionOnline[matchedSession.id] = (perSessionOnline[matchedSession.id] || 0) + 1;
+        else perSessionOffline[matchedSession.id] = (perSessionOffline[matchedSession.id] || 0) + 1;
+      }
 
       if (reg._id && matchedSession.id !== (reg.selectedRound || "")) {
         registrationNormalizations.push(
@@ -646,6 +681,8 @@ async function recomputeWorkshopEnrollmentCounts(workshopId) {
     updateData.sessions = sortedSessions.map((session) => ({
       ...session,
       enrolled: perSession[session.id] ?? 0,
+      onlineEnrolled: perSessionOnline[session.id] ?? 0,
+      offlineEnrolled: perSessionOffline[session.id] ?? 0,
     }));
   }
 
@@ -1464,6 +1501,276 @@ exports.requestFreeMaterialDownload = onRequest(
         ? "Email delivery is not configured yet. Add the Gmail API credentials and try again."
         : "We couldn't send the material right now. Please try again shortly.";
       res.status(500).json({ ok: false, error: message });
+    }
+  }
+);
+
+/**
+ * CMS-managed public page routes.
+ *
+ * Keep the managed doc/slugs in sync with layout-editor.html:
+ * - MANAGED_PUBLIC_PAGE_DEFAULT_SLUGS
+ * - RESERVED_SYSTEM_PUBLIC_URL_SLUGS
+ */
+const MANAGED_PUBLIC_PAGE_ROUTES = {
+  "workshop-main": {
+    defaultSlug: "ai-beginner-workshop",
+    previewTemplateUrl: "/ai-beginner-workshop",
+    templatePath: "/ai-beginner-workshop.html",
+  },
+  "linktree": {
+    defaultSlug: "linktree",
+    previewTemplateUrl: "/linktree",
+    templatePath: "/linktree.html",
+  },
+  "about-jacob": {
+    defaultSlug: "about-jacob",
+    previewTemplateUrl: "/about-jacob",
+    templatePath: "/about-jacob.html",
+  },
+  "countdown": {
+    defaultSlug: "countdown",
+    previewTemplateUrl: "/countdown",
+    templatePath: "/countdown.html",
+  },
+  "consultation": {
+    defaultSlug: "consultation",
+    previewTemplateUrl: "/consultation",
+    templatePath: "/consultation.html",
+  },
+  "quiz": {
+    defaultSlug: "quiz",
+    previewTemplateUrl: "/quiz",
+    templatePath: "/quiz.html",
+  },
+  "workshop-c": {
+    defaultSlug: "workshop-c",
+    previewTemplateUrl: "/workshop-c",
+    templatePath: "/workshop-c.html",
+  },
+  "workshop-0": {
+    defaultSlug: "workshop-0",
+    previewTemplateUrl: "/workshop-0",
+    templatePath: "/Kimi_Agent_AI%20Workshop%20Landing%20Page/index.html",
+  },
+};
+
+const MANAGED_PUBLIC_DOC_ID_BY_SLUG = Object.keys(MANAGED_PUBLIC_PAGE_ROUTES).reduce((acc, docId) => {
+  acc[MANAGED_PUBLIC_PAGE_ROUTES[docId].defaultSlug] = docId;
+  return acc;
+}, {});
+
+const SYSTEM_RESERVED_PAGE_SLUGS = new Set([
+  "ai-guide-2026",
+  "workshop-thank-you",
+  "workshop-cms",
+  "workshop-payment",
+  "profile",
+  "checkin",
+  "receipt",
+  "business-cms",
+  "layout-editor",
+  "qr-display",
+  "qr-submit",
+  "doc",
+  "elevator-action-gb",
+  "game-scores-admin",
+  "ig-consultation",
+  "index",
+  "js",
+  "css",
+  "fonts",
+  "img",
+  "images",
+  "assets",
+  "media",
+  "extensions",
+]);
+
+function _normalizePublicSlug(slug) {
+  return String(slug || "").trim().toLowerCase();
+}
+
+function _defaultSlugForDocId(docId) {
+  const route = MANAGED_PUBLIC_PAGE_ROUTES[String(docId || "").trim()];
+  return route ? route.defaultSlug : "";
+}
+
+function _normalizePreviewTemplatePath(previewTemplateUrl) {
+  let p = String(previewTemplateUrl || "").trim() || "/ai-beginner-workshop";
+  try {
+    if (p.startsWith("http://") || p.startsWith("https://")) {
+      p = new URL(p).pathname || "/ai-beginner-workshop";
+    }
+  } catch (_) {
+    p = "/ai-beginner-workshop";
+  }
+  if (!p.startsWith("/")) p = `/${p}`;
+  if (/\.html$/i.test(p)) p = p.replace(/\.html$/i, "");
+  return p;
+}
+
+function _normalizePublicPageStatus(status, docId) {
+  const raw = String(status || "").trim().toLowerCase();
+  if (raw === "archived" && MANAGED_PUBLIC_PAGE_ROUTES[docId]) return "unpublished";
+  if (raw === "unpublished") return "unpublished";
+  if (raw === "archived") return "archived";
+  return "published";
+}
+
+function _resolveTemplatePath(docId, data) {
+  const route = MANAGED_PUBLIC_PAGE_ROUTES[String(docId || "").trim()];
+  if (route && route.templatePath) return route.templatePath;
+  const previewTemplateUrl = (data && data.previewTemplateUrl) || (route && route.previewTemplateUrl) || "/ai-beginner-workshop";
+  const normalized = _normalizePreviewTemplatePath(previewTemplateUrl);
+  if (normalized === "/workshop-0") return MANAGED_PUBLIC_PAGE_ROUTES["workshop-0"].templatePath;
+  if (/\/index$/i.test(normalized)) return `${normalized}.html`;
+  return `${normalized}.html`;
+}
+
+function _templateBaseHref(templatePath) {
+  const normalized = String(templatePath || "").trim() || "/";
+  const slash = normalized.lastIndexOf("/");
+  if (slash <= 0) return "/";
+  return normalized.slice(0, slash + 1);
+}
+
+function _injectResolvedRouteContext(html, context) {
+  const injections = [
+    `<base href="${String(context.baseHref || "/").replace(/"/g, "&quot;")}">`,
+    context.canonicalHref ? `<link rel="canonical" href="${String(context.canonicalHref).replace(/"/g, "&quot;")}">` : "",
+    `<script>window.__AIFLOWTIME_LAYOUT_DOC=${JSON.stringify(context.layoutDoc || "")};window.__AIFLOWTIME_PAGE_SLUG=${JSON.stringify(context.pageSlug || "")};</script>`,
+  ].filter(Boolean).join("");
+  if (/<head[^>]*>/i.test(html)) {
+    return html.replace(/<head([^>]*)>/i, `<head$1>${injections}`);
+  }
+  return injections + html;
+}
+
+async function _findResolvedPageForSlug(slug) {
+  const normalized = _normalizePublicSlug(slug);
+  if (!normalized) return null;
+
+  const exactSnap = await db.collection("pageLayouts").where("pageSlug", "==", normalized).limit(2).get();
+  if (!exactSnap.empty) {
+    if (exactSnap.size > 1) console.warn("resolvePageSlug: multiple docs for canonical slug", normalized);
+    return { docId: exactSnap.docs[0].id, data: exactSnap.docs[0].data() || {}, matchType: "canonical" };
+  }
+
+  const legacySnap = await db.collection("pageLayouts").where("legacySlugs", "array-contains", normalized).limit(2).get();
+  if (!legacySnap.empty) {
+    if (legacySnap.size > 1) console.warn("resolvePageSlug: multiple docs for legacy slug", normalized);
+    return { docId: legacySnap.docs[0].id, data: legacySnap.docs[0].data() || {}, matchType: "legacy" };
+  }
+
+  const managedDocId = MANAGED_PUBLIC_DOC_ID_BY_SLUG[normalized];
+  if (!managedDocId) return null;
+  const doc = await db.collection("pageLayouts").doc(managedDocId).get();
+  return {
+    docId: managedDocId,
+    data: doc.exists ? (doc.data() || {}) : {},
+    matchType: "managed-default",
+  };
+}
+
+exports.resolvePageSlug = onRequest(
+  { region: REGION, timeoutSeconds: 15, cors: false, invoker: "public" },
+  async (req, res) => {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+
+    const host = req.get("x-forwarded-host") || req.get("host") || "localhost";
+    const incoming = new URL(req.url || "/", `https://${host}`);
+    let pathname = incoming.pathname || "/";
+    if (pathname !== "/" && pathname.endsWith("/")) pathname = pathname.replace(/\/+$/, "") || "/";
+
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length !== 1) {
+      res.status(404).send("Not Found");
+      return;
+    }
+
+    const slug = _normalizePublicSlug(segments[0]);
+    if (!slug || !/^[a-z0-9-]+$/.test(slug) || slug.length > 120) {
+      res.status(404).send("Not Found");
+      return;
+    }
+
+    if (SYSTEM_RESERVED_PAGE_SLUGS.has(slug)) {
+      res.status(404).send("Not Found");
+      return;
+    }
+
+    try {
+      const resolved = await _findResolvedPageForSlug(slug);
+      if (!resolved) {
+        res.status(404).send("Not Found");
+        return;
+      }
+
+      const docId = resolved.docId;
+      const data = resolved.data || {};
+      const canonicalSlug = _normalizePublicSlug(data.pageSlug) || _defaultSlugForDocId(docId);
+      const isPreview = incoming.searchParams.get("preview") === "1";
+
+      if (!canonicalSlug || SYSTEM_RESERVED_PAGE_SLUGS.has(canonicalSlug)) {
+        res.status(404).send("Not Found");
+        return;
+      }
+
+      if (!isPreview && _normalizePublicPageStatus(data.pageStatus, docId) !== "published") {
+        res.status(404).send("Not Found");
+        return;
+      }
+
+      if (slug !== canonicalSlug) {
+        const redirectUrl = new URL(`/${canonicalSlug}`, `https://${host}`);
+        incoming.searchParams.forEach((value, key) => {
+          redirectUrl.searchParams.set(key, value);
+        });
+        res.redirect(301, `${redirectUrl.pathname}${redirectUrl.search}`);
+        return;
+      }
+
+      const templatePath = _resolveTemplatePath(docId, data);
+      const upstreamUrl = new URL(templatePath, `https://${host}`);
+      incoming.searchParams.forEach((value, key) => {
+        upstreamUrl.searchParams.set(key, value);
+      });
+
+      const upstream = await fetch(upstreamUrl.toString(), {
+        method: req.method,
+        redirect: "follow",
+      });
+
+      if (!upstream.ok) {
+        console.error("resolvePageSlug upstream error", { slug, docId, templatePath, status: upstream.status });
+        res.status(upstream.status === 404 ? 404 : 502).send(upstream.status === 404 ? "Not Found" : "Upstream page unavailable");
+        return;
+      }
+
+      res.set("Cache-Control", "no-cache");
+      res.set("Content-Type", upstream.headers.get("content-type") || "text/html; charset=utf-8");
+
+      if (req.method === "HEAD") {
+        res.status(200).send("");
+        return;
+      }
+
+      const html = await upstream.text();
+      const body = _injectResolvedRouteContext(html, {
+        layoutDoc: docId,
+        pageSlug: canonicalSlug,
+        canonicalHref: `https://${host}/${canonicalSlug}`,
+        baseHref: _templateBaseHref(templatePath),
+      });
+
+      res.status(200).send(body);
+    } catch (err) {
+      console.error("resolvePageSlug error:", err);
+      res.status(500).send("Server error");
     }
   }
 );

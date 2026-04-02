@@ -388,9 +388,116 @@
         .image-upload-area img { width: 100%; height: auto; max-height: 200px; object-fit: cover; display: block; border-radius: 10px; }
         .image-upload-area .upload-text { font-size: 14px; color: var(--text-light); font-weight: 600; }
         .image-upload-area .upload-icon { font-size: 32px; color: var(--bg-off); }
-        .image-upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .image-upload-note { margin-top: 8px; font-size: 12px; line-height: 1.6; color: var(--text-light); }
         .upload-progress { margin-top: 8px; height: 4px; background: var(--bg-off); border-radius: 4px; overflow: hidden; display: none; }
         .upload-progress-bar { height: 100%; background: var(--accent); border-radius: 4px; width: 0%; transition: width 0.3s; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--white); border-radius: 20px; padding: 28px;
+            max-width: 920px; width: min(920px, 100%); max-height: 86vh; overflow-y: auto;
+            box-shadow: 0 16px 60px rgba(0,0,0,0.15);
+        }
+        .modal-box h3 { font-size: 18px; margin-bottom: 16px; }
+        .modal-close {
+            float: right; width: 36px; height: 36px; border: none; background: transparent;
+            font-size: 28px; line-height: 1; color: var(--text-light); cursor: pointer;
+        }
+        .media-picker-intro {
+            color: var(--text-light);
+            font-size: 14px;
+            margin: -6px 0 14px;
+            line-height: 1.6;
+        }
+        .media-picker-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .media-picker-search {
+            flex: 1;
+            min-width: 200px;
+        }
+        .media-picker-select {
+            min-width: 140px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1.5px solid var(--bg-off);
+            background: var(--bg-pampas);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .media-picker-status {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            min-height: 18px;
+        }
+        .media-picker-status.error { color: var(--red); }
+        .media-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+        .media-picker-item {
+            border: 1.5px solid var(--bg-off);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .media-picker-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+        }
+        .media-picker-thumb {
+            height: 116px;
+            background: var(--bg-pampas);
+            overflow: hidden;
+        }
+        .media-picker-thumb img,
+        .media-picker-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .media-picker-meta {
+            padding: 10px 12px 12px;
+        }
+        .media-picker-name {
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.45;
+            color: var(--text);
+            word-break: break-word;
+        }
+        .media-picker-sub {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        .media-picker-empty {
+            grid-column: 1 / -1;
+            padding: 22px 16px;
+            border: 1.5px dashed var(--bg-off);
+            border-radius: 14px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-light);
+            background: rgba(0,0,0,0.015);
+        }
 
         /* Details list editor */
         .details-editor { margin-top: 8px; }
@@ -486,9 +593,13 @@
         .session-row.session-hidden .session-top input,
         .session-row.session-hidden .session-bottom { opacity: 0.5; }
         .session-cap-row { display: flex; align-items: center; gap: 8px; padding-left: 2px; }
-        .session-cap-row .session-cap-label { font-size: 11px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+        .session-cap-row .session-cap-label { font-size: 11px; color: var(--text-light); font-weight: 600; white-space: nowrap; min-width: 72px; }
         .session-cap-row .session-cap-input { width: 70px; padding: 4px 8px; border: 1.5px solid var(--bg-off); border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--white); text-align: center; }
         .session-cap-row .session-cap-enrolled { font-size: 11px; color: var(--text-light); font-weight: 500; }
+        .session-cap-dual { margin-top: 2px; }
+        .applicant-mode-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-left: 6px; vertical-align: middle; }
+        .applicant-mode-badge.mode-offline { background: rgba(59,130,246,0.1); color: #3b82f6; }
+        .applicant-mode-badge.mode-online { background: rgba(139,92,246,0.1); color: #8b5cf6; }
 
         /* Course type picker */
         .course-type-picker { display: flex; gap: 6px; padding: 6px 0; margin-bottom: 12px; }
@@ -761,6 +872,150 @@
         .members-subtab { padding: 8px 20px; font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--bg-off); background: var(--white); color: var(--text-light); transition: all 0.2s; }
         .members-subtab:hover { border-color: var(--accent); color: var(--accent); }
         .members-subtab.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .forms-filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center; }
+        .forms-type-pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; }
+        .forms-type-pill {
+            padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 700;
+            cursor: pointer; border: 1.5px solid var(--bg-off); background: var(--white);
+            color: var(--text-light); transition: all 0.2s; font-family: inherit; white-space: nowrap;
+        }
+        .forms-type-pill:hover { border-color: var(--accent); color: var(--accent); }
+        .forms-type-pill.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .forms-status-multi-wrap { position: relative; display: inline-block; }
+        .forms-status-multi-btn {
+            height: 32px; padding: 0 28px 0 10px; border-radius: 8px; border: 1.5px solid var(--bg-off);
+            font-family: 'Noto Sans TC', sans-serif; font-size: 12px; font-weight: 600; color: var(--text);
+            background: var(--white); cursor: pointer; white-space: nowrap; position: relative;
+            display: inline-flex; align-items: center; gap: 6px; transition: border-color 0.2s;
+        }
+        .forms-status-multi-btn:hover,
+        .forms-status-multi-btn.open { border-color: var(--accent); }
+        .forms-status-multi-btn::after {
+            content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            font-size: 10px; color: var(--text-light); pointer-events: none;
+        }
+        .forms-status-multi-dropdown {
+            display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 60;
+            background: var(--white); border: 1px solid var(--bg-off); border-radius: 12px;
+            box-shadow: 0 8px 24px var(--shadow); padding: 8px 0; min-width: 180px;
+        }
+        .forms-status-multi-dropdown.open { display: block; }
+        .forms-status-multi-option {
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text);
+            transition: background 0.15s; user-select: none;
+        }
+        .forms-status-multi-option:hover { background: var(--bg-pampas); }
+        .forms-status-multi-option input[type="checkbox"] {
+            width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+        }
+        .forms-status-multi-option .fso-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .forms-date-input {
+            height: 32px; padding: 0 10px; border-radius: 8px; border: 1.5px solid var(--bg-off);
+            font-family: 'Noto Sans TC', sans-serif; font-size: 12px; font-weight: 600; color: var(--text); background: var(--white);
+        }
+        .forms-date-input:focus { outline: none; border-color: var(--accent); }
+        .forms-date-sep { font-size: 12px; color: var(--text-light); font-weight: 600; }
+        .forms-view-toggle-wrap { display: flex; gap: 0; border: 1.5px solid var(--bg-off); border-radius: 10px; overflow: hidden; margin-left: auto; }
+        .forms-view-toggle-btn {
+            padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+            border: none; background: var(--white); color: var(--text-light);
+            font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .forms-view-toggle-btn:not(:last-child) { border-right: 1.5px solid var(--bg-off); }
+        .forms-view-toggle-btn:hover { color: var(--accent); }
+        .forms-view-toggle-btn.active { background: var(--accent); color: var(--white); }
+        .forms-grid-table-wrap {
+            overflow-x: auto; border: 1px solid var(--bg-off); border-radius: 14px;
+            background: var(--white); margin-bottom: 16px;
+        }
+        .forms-grid-table {
+            width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap;
+        }
+        .forms-grid-table th {
+            position: sticky; top: 0; z-index: 2; background: var(--bg-pampas);
+            padding: 10px 14px; text-align: left; font-weight: 700; font-size: 12px;
+            color: var(--text-light); border-bottom: 2px solid var(--bg-off); white-space: nowrap;
+        }
+        .forms-grid-table td {
+            padding: 10px 14px; border-bottom: 1px solid var(--bg-off); color: var(--text);
+            max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-weight: 500; vertical-align: top;
+        }
+        .forms-grid-table tr:hover td { background: rgba(217,119,87,0.03); }
+        .forms-grid-table td.fgt-name { font-weight: 700; white-space: nowrap; }
+        .forms-grid-table td.fgt-actions { white-space: nowrap; }
+        .forms-grid-table td.fgt-actions button { margin-right: 4px; }
+        .forms-inbox-card {
+            background: var(--white); border: 1px solid var(--bg-off); border-radius: 16px;
+            padding: 20px 24px; margin-bottom: 16px; transition: all 0.2s; cursor: pointer;
+        }
+        .forms-inbox-card:hover { box-shadow: 0 4px 20px var(--shadow); }
+        .forms-inbox-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+        .forms-inbox-topline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+        .forms-type-badge,
+        .forms-source-badge {
+            display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px;
+            border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.01em;
+        }
+        .forms-type-badge { background: rgba(217,119,87,0.12); color: var(--accent); }
+        .forms-type-badge.type-consultation { background: rgba(33,150,243,0.12); color: #1565C0; }
+        .forms-type-badge.type-workshop-waitlist { background: rgba(255,152,0,0.14); color: #E65100; }
+        .forms-type-badge.type-lead-magnet { background: rgba(76,175,80,0.12); color: #2E7D32; }
+        .forms-type-badge.type-quiz-lead { background: rgba(156,39,176,0.12); color: #7B1FA2; }
+        .forms-type-badge.type-free-material { background: rgba(0,150,136,0.12); color: #00796B; }
+        .forms-source-badge { background: rgba(0,0,0,0.06); color: var(--text-light); }
+        .forms-inbox-name { font-size: 18px; font-weight: 800; color: var(--text); margin: 0; }
+        .forms-inbox-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
+        .forms-inbox-meta span { display: inline-flex; align-items: center; gap: 4px; }
+        .forms-inbox-summary { font-size: 14px; color: var(--text); line-height: 1.6; font-weight: 500; }
+        .forms-inbox-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+        .forms-action-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px; border: 1.5px solid var(--bg-off);
+            background: var(--white); color: var(--text); font-size: 12px; font-weight: 700; text-decoration: none;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .forms-action-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(217,119,87,0.05); }
+        .forms-action-btn.is-mail { border-color: rgba(33,150,243,0.2); color: #1565C0; background: rgba(33,150,243,0.05); }
+        .forms-action-btn.is-copy { border-color: rgba(0,0,0,0.1); }
+        .forms-status-badge {
+            display: inline-block; padding: 3px 12px; border-radius: 8px;
+            font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .forms-status-new { background: rgba(76,175,80,0.12); color: #2E7D32; }
+        .forms-status-contacted { background: rgba(33,150,243,0.12); color: #1565C0; }
+        .forms-status-completed { background: rgba(158,158,158,0.15); color: #616161; }
+        .forms-status-archived { background: rgba(217,119,87,0.12); color: var(--accent); }
+        .forms-inbox-fields { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bg-off); }
+        .forms-inbox-card.expanded .forms-inbox-fields { display: block; }
+        .forms-answer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 16px; }
+        .forms-answer-grid .consult-field { margin-bottom: 0; }
+        .forms-notes-wrap {
+            margin-top: 16px; padding: 16px; border-radius: 14px;
+            background: var(--bg-pampas); border: 1px solid var(--bg-off);
+        }
+        .forms-notes-wrap label { display: block; font-size: 12px; font-weight: 700; color: var(--text-light); margin-bottom: 8px; }
+        .forms-notes-wrap textarea {
+            width: 100%; min-height: 100px; padding: 10px 14px; border-radius: 10px;
+            border: 1.5px solid var(--bg-off); font-family: 'Noto Sans TC', sans-serif; font-size: 14px;
+            color: var(--text); background: var(--white); resize: vertical;
+        }
+        .forms-notes-wrap textarea:focus { outline: none; border-color: var(--accent); }
+        .forms-notes-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .forms-followup-meta { font-size: 12px; color: var(--text-light); font-weight: 600; }
+        .forms-provenance {
+            margin-top: 14px; font-size: 12px; color: var(--text-light); line-height: 1.7;
+            padding-top: 12px; border-top: 1px dashed var(--bg-off);
+        }
+        .forms-provenance code {
+            background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; font-size: 11px;
+        }
+        .forms-empty-answer {
+            font-size: 13px; color: var(--text-light); font-style: italic; margin-top: 12px;
+        }
 
         /* Archive badge on workshop card header */
         .ws-archive-badge { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 8px; background: #FFF3E0; color: #E65100; }
@@ -1616,6 +1871,232 @@
         .dash-range-input:focus { outline: none; border-color: var(--accent); }
         .dash-range-sep { color: var(--text-light); font-weight: 500; }
 
+        .quiz-section-divider {
+            margin: 10px 0 28px;
+            padding-top: 36px;
+            border-top: 1px solid rgba(59,59,59,0.08);
+        }
+        .quiz-section-panel {
+            margin: 0 0 28px;
+            padding-top: 0;
+            border-top: none;
+        }
+        .quiz-section-head {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+        .quiz-section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.25;
+        }
+        .quiz-section-subtitle {
+            font-size: 13px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .quiz-kpi-row { grid-template-columns: repeat(3, 1fr); }
+        .quiz-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .quiz-card-header h3 { margin-bottom: 0; }
+        .quiz-loading-card {
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 14px;
+            text-align: center;
+        }
+        .quiz-loading-card .cms-loading-spinner {
+            position: static;
+            width: 38px;
+            height: 38px;
+            border-width: 3px;
+        }
+        .quiz-loading-card .cms-loading-text {
+            font-size: 13px;
+        }
+        .quiz-radar-layout {
+            display: grid;
+            grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+        .quiz-radar-stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+        }
+        .quiz-radar-svg {
+            width: 100%;
+            max-width: 420px;
+            overflow: visible;
+        }
+        .quiz-radar-ring {
+            fill: none;
+            stroke: rgba(148, 163, 184, 0.2);
+            stroke-width: 1;
+        }
+        .quiz-radar-spoke {
+            stroke: rgba(148, 163, 184, 0.22);
+            stroke-width: 1;
+        }
+        .quiz-radar-area {
+            fill: rgba(217,119,87,0.16);
+            stroke: var(--accent);
+            stroke-width: 2.4;
+        }
+        .quiz-radar-point {
+            fill: var(--accent);
+            stroke: var(--white);
+            stroke-width: 2;
+        }
+        .quiz-radar-label {
+            fill: var(--text-light);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .quiz-radar-value {
+            fill: var(--accent-text);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .quiz-axis-summary-wrap,
+        .quiz-matrix-wrap,
+        .quiz-recent-table-wrap {
+            overflow-x: auto;
+        }
+        .quiz-axis-summary-wrap .action-table,
+        .quiz-recent-table-wrap .action-table {
+            min-width: 680px;
+        }
+        .quiz-axis-summary-wrap .action-table tr.is-gap-row td {
+            background: rgba(217,119,87,0.1);
+            color: var(--accent-text);
+            font-weight: 700;
+        }
+        .quiz-axis-summary-wrap .action-table tr.is-gap-row:hover td {
+            background: rgba(217,119,87,0.14);
+        }
+        .quiz-matrix-table {
+            width: 100%;
+            min-width: 560px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .quiz-matrix-table th {
+            text-align: center;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--bg-off);
+            white-space: nowrap;
+        }
+        .quiz-matrix-table th:first-child,
+        .quiz-matrix-table td:first-child {
+            text-align: left;
+        }
+        .quiz-matrix-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--bg-off);
+            text-align: center;
+            font-weight: 600;
+        }
+        .quiz-matrix-table tr:last-child td { border-bottom: none; }
+        .quiz-matrix-table td.is-max {
+            background: rgba(217,119,87,0.12);
+            color: var(--accent-text);
+            font-weight: 700;
+            border-radius: 10px;
+        }
+        .quiz-lead-row {
+            cursor: pointer;
+        }
+        .quiz-lead-row td {
+            transition: background 0.16s ease;
+        }
+        .quiz-lead-row.is-open td {
+            background: rgba(217,119,87,0.06);
+        }
+        .quiz-lead-detail-row { display: none; }
+        .quiz-lead-detail-row.open { display: table-row; }
+        .quiz-lead-detail-cell {
+            padding: 0 !important;
+            background: transparent !important;
+        }
+        .quiz-lead-detail-panel {
+            padding: 18px 20px;
+            background: var(--bg-pampas);
+            border-top: 1px solid var(--bg-off);
+        }
+        .quiz-lead-detail-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .quiz-lead-detail-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .quiz-lead-detail-meta {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        .quiz-axis-chip-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .quiz-axis-chip {
+            border-radius: 12px;
+            border: 1px solid var(--bg-off);
+            background: var(--white);
+            padding: 12px 14px;
+        }
+        .quiz-axis-chip-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .quiz-axis-chip-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .quiz-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(217,119,87,0.08);
+            color: var(--accent-text);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
         /* Range calendar: highlight range between start and end */
         .cal-day.range-start { background: var(--accent); color: var(--white); font-weight: 700; border-radius: 8px 0 0 8px; }
         .cal-day.range-end { background: var(--accent); color: var(--white); font-weight: 700; border-radius: 0 8px 8px 0; }
@@ -1626,6 +2107,9 @@
         /* Responsive */
         @media (max-width: 900px) {
             .kpi-row { grid-template-columns: repeat(3, 1fr); }
+            .quiz-kpi-row { grid-template-columns: repeat(3, 1fr); }
+            .quiz-radar-layout { grid-template-columns: 1fr; }
+            .quiz-radar-stage { min-height: 340px; }
         }
         @media (max-width: 600px) {
             .cms-header-inner { flex-direction: column; gap: 8px; }
@@ -1637,6 +2121,7 @@
             .kpi-row { grid-template-columns: repeat(2, 1fr); }
             .kpi-value { font-size: 22px; }
             .dash-grid { grid-template-columns: 1fr; }
+            .quiz-kpi-row { grid-template-columns: 1fr; }
             .funnel-steps { flex-direction: column; gap: 8px; }
             .funnel-arrow { transform: rotate(90deg); padding-bottom: 0; margin: 0; }
             .action-table { font-size: 13px; }
@@ -1644,6 +2129,9 @@
             .insight-card { padding: 18px 16px; gap: 14px; }
             .insight-icon { width: 44px; height: 44px; font-size: 26px; border-radius: 10px; }
             .insight-value { font-size: 22px; }
+            .quiz-section-title { font-size: 20px; }
+            .quiz-axis-chip-grid { grid-template-columns: 1fr; }
+            .quiz-card-header .btn { width: 100%; }
             .applicant-card-inner { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
             .applicant-info { flex-basis: 100%; }
             .applicant-meta { font-size: 11px; gap: 4px 10px; }
@@ -1770,6 +2258,7 @@
         <div class="mega-section active" id="sectionWorkshop">
         <div class="cms-tabs">
             <button class="cms-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">數據總覽</button>
+            <button class="cms-tab" data-tab="quiz-dashboard" onclick="switchTab('quiz-dashboard')">AI 能力測驗</button>
             <button class="cms-tab" data-tab="workshops" onclick="switchTab('workshops')">工作坊管理</button>
             <button class="cms-tab" data-tab="members" onclick="switchTab('members')">會員管理</button>
             <button class="cms-tab" data-tab="attendance" onclick="switchTab('attendance')">出席管理</button>
@@ -1888,6 +2377,96 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tabQuizDashboard">
+            <div class="quiz-section-divider quiz-section-panel" id="quizDashboardSection">
+                <div class="quiz-section-head">
+                    <div class="quiz-section-title">📊 AI 能力測驗數據</div>
+                    <div class="quiz-section-subtitle">來自 /quiz 嘅用戶診斷數據</div>
+                </div>
+
+                <div class="dash-date-bar quiz-date-bar" id="quizDashDateBar">
+                    <button class="dash-date-btn active" data-range="all" onclick="setDashRange('all',this)">全部</button>
+                    <button class="dash-date-btn" data-range="7" onclick="setDashRange('7',this)">近 7 天</button>
+                    <button class="dash-date-btn" data-range="30" onclick="setDashRange('30',this)">近 30 天</button>
+                    <button class="dash-date-btn" data-range="90" onclick="setDashRange('90',this)">近 90 天</button>
+                    <span class="dash-range-sep">｜</span>
+                    <div style="position:relative;display:inline-block;">
+                        <input type="text" class="dash-range-input" id="dashRangeFromQuiz" placeholder="開始日期" readonly>
+                        <div class="calendar-dropdown" id="dashCalFromQuiz"></div>
+                    </div>
+                    <span class="dash-range-sep">至</span>
+                    <div style="position:relative;display:inline-block;">
+                        <input type="text" class="dash-range-input" id="dashRangeToQuiz" placeholder="結束日期" readonly>
+                        <div class="calendar-dropdown" id="dashCalToQuiz"></div>
+                    </div>
+                </div>
+
+                <div class="action-table-wrap quiz-loading-card" id="quizDashLoading">
+                    <div class="cms-loading-spinner"></div>
+                    <div class="cms-loading-text">正在讀取測驗數據...</div>
+                </div>
+
+                <div id="quizDashContent" style="display:none;">
+                    <div class="kpi-row quiz-kpi-row">
+                        <div class="kpi-card" id="quizKpiCompleted"><div class="kpi-label">測驗完成數</div><div class="kpi-value">—</div><div class="kpi-sub">已完成測驗人數</div></div>
+                        <div class="kpi-card accent" id="quizKpiAvgLevel"><div class="kpi-label">平均 AI 等級</div><div class="kpi-value">—</div><div class="kpi-sub">1=旁觀者 · 5=原住民</div></div>
+                        <div class="kpi-card" id="quizKpiConversion"><div class="kpi-label">測驗→報名轉換率</div><div class="kpi-value">—</div><div class="kpi-sub">0 人測驗後報名了工作坊</div></div>
+                    </div>
+
+                    <div class="dash-grid">
+                        <div class="chart-card">
+                            <h3>等級分佈</h3>
+                            <canvas id="chartQuizLevels"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>推薦產品分佈</h3>
+                            <canvas id="chartQuizProducts"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dash-grid">
+                        <div class="chart-card">
+                            <h3>痛點分佈</h3>
+                            <canvas id="chartQuizPain"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>渴望分佈</h3>
+                            <canvas id="chartQuizDesire"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dash-grid full">
+                        <div class="chart-card">
+                            <h3>六維能力雷達 (全體平均)</h3>
+                            <div class="quiz-radar-layout">
+                                <div class="quiz-radar-stage" id="quizRadarStage"></div>
+                                <div class="quiz-axis-summary-wrap" id="quizAxisSummaryWrap"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dash-grid">
+                        <div class="chart-card">
+                            <h3 id="chartQuizTrendTitle">測驗完成趨勢（近 30 天）</h3>
+                            <canvas id="chartQuizTrend"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>等級 × 產品推薦 交叉表</h3>
+                            <div class="quiz-matrix-wrap" id="quizMatrixWrap"></div>
+                        </div>
+                    </div>
+
+                    <div class="action-table-wrap">
+                        <div class="quiz-card-header">
+                            <h3>最近測驗用戶</h3>
+                            <button class="btn" type="button" onclick="exportQuizDashboardExcel()">匯出 Excel</button>
+                        </div>
+                        <div class="quiz-recent-table-wrap" id="quizRecentTableBody"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TAB: Workshops -->
         <div class="tab-content" id="tabWorkshops">
             <div class="dashboard-header">
@@ -1948,10 +2527,11 @@
                 <h1>會員管理</h1>
             </div>
             <div class="members-subtabs">
-                <button class="members-subtab" onclick="switchMemberView('byMember')">By Member</button>
-                <button class="members-subtab active" onclick="switchMemberView('byWorkshop')">By Workshop</button>
+                <button class="members-subtab" data-member-view="byMember" onclick="switchMemberView('byMember')">By Member</button>
+                <button class="members-subtab active" data-member-view="byWorkshop" onclick="switchMemberView('byWorkshop')">By Workshop</button>
+                <button class="members-subtab" data-member-view="forms" onclick="switchMemberView('forms')">Forms</button>
             </div>
-            <div class="search-row">
+            <div class="search-row" id="memberSearchRow">
                 <input type="text" class="search-input" id="memberSearch" placeholder="搜尋全部欄位..." oninput="filterMembers()">
                 <div class="search-field-pills" id="searchFieldPills">
                     <button class="search-field-pill active" data-field="all" onclick="setSearchField('all', this)">全部</button>
@@ -2031,6 +2611,69 @@
             </div>
             <div id="memberViewByWorkshop">
                 <div class="empty-state">載入中...</div>
+            </div>
+            <div id="memberViewForms" style="display:none;">
+                <div class="consult-kpi-row">
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="fKpiTotal">0</div><div class="consult-kpi-label">總提交</div></div>
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="fKpiNew">0</div><div class="consult-kpi-label">新提交</div></div>
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="fKpiContacted">0</div><div class="consult-kpi-label">跟進中</div></div>
+                    <div class="consult-kpi"><div class="consult-kpi-num" id="fKpiCompleted">0</div><div class="consult-kpi-label">已完成</div></div>
+                </div>
+                <div class="consult-search-wrap">
+                    <input type="text" class="consult-search-input" id="formsSearchInput" placeholder="搜尋姓名、電話、Email、IG…" oninput="renderFormsInbox()">
+                </div>
+                <div class="forms-type-pills" id="formsTypePills">
+                    <button class="forms-type-pill active" data-type="all" onclick="setFormsInboxTypeFilter('all', this)">全部</button>
+                    <button class="forms-type-pill" data-type="consultation" onclick="setFormsInboxTypeFilter('consultation', this)">Consultation</button>
+                    <button class="forms-type-pill" data-type="workshop-waitlist" onclick="setFormsInboxTypeFilter('workshop-waitlist', this)">Workshop Waitlist</button>
+                    <button class="forms-type-pill" data-type="lead-magnet" onclick="setFormsInboxTypeFilter('lead-magnet', this)">Lead Magnet</button>
+                    <button class="forms-type-pill" data-type="quiz-lead" onclick="setFormsInboxTypeFilter('quiz-lead', this)">Quiz Lead</button>
+                    <button class="forms-type-pill" data-type="free-material" onclick="setFormsInboxTypeFilter('free-material', this)">Free Material</button>
+                </div>
+                <div class="forms-filter-bar">
+                    <div class="forms-status-multi-wrap" id="formsStatusMultiWrap">
+                        <button type="button" class="forms-status-multi-btn" id="formsStatusMultiBtn" onclick="toggleFormsStatusDropdown()">狀態：全部</button>
+                        <div class="forms-status-multi-dropdown" id="formsStatusMultiDropdown">
+                            <label class="forms-status-multi-option" onclick="event.stopPropagation()">
+                                <input type="checkbox" value="new" checked onchange="onFormsStatusCheckboxChange()">
+                                <span class="fso-dot" style="background:#2E7D32;"></span> 新提交
+                            </label>
+                            <label class="forms-status-multi-option" onclick="event.stopPropagation()">
+                                <input type="checkbox" value="contacted" checked onchange="onFormsStatusCheckboxChange()">
+                                <span class="fso-dot" style="background:#1565C0;"></span> 跟進中
+                            </label>
+                            <label class="forms-status-multi-option" onclick="event.stopPropagation()">
+                                <input type="checkbox" value="completed" checked onchange="onFormsStatusCheckboxChange()">
+                                <span class="fso-dot" style="background:#616161;"></span> 已完成
+                            </label>
+                            <label class="forms-status-multi-option" onclick="event.stopPropagation()">
+                                <input type="checkbox" value="archived" onchange="onFormsStatusCheckboxChange()">
+                                <span class="fso-dot" style="background:var(--accent);"></span> 已封存
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mf-group">
+                        <span class="mf-label">來源頁面</span>
+                        <select class="mf-select" id="formsSourceFilter" onchange="renderFormsInbox()">
+                            <option value="all">全部</option>
+                        </select>
+                    </div>
+                    <div class="mf-group">
+                        <span class="mf-label">日期</span>
+                        <input type="date" class="forms-date-input" id="formsDateFrom" onchange="renderFormsInbox()">
+                        <span class="forms-date-sep">至</span>
+                        <input type="date" class="forms-date-input" id="formsDateTo" onchange="renderFormsInbox()">
+                    </div>
+                    <button class="consult-sort-btn" id="formsSortBtn" onclick="toggleFormsInboxSortOrder()" title="按日期排序">日期：新→舊 ▼</button>
+                    <div class="forms-view-toggle-wrap">
+                        <button type="button" class="forms-view-toggle-btn active" data-view="card" onclick="setFormsInboxView('card', this)" title="卡片檢視">☰ 卡片</button>
+                        <button type="button" class="forms-view-toggle-btn" data-view="grid" onclick="setFormsInboxView('grid', this)" title="表格檢視">▦ 表格</button>
+                    </div>
+                    <button class="mf-reset" onclick="resetFormsInboxFilters()">重設篩選</button>
+                </div>
+                <div id="formsInboxList"></div>
+                <div id="formsInboxGrid" style="display:none;"></div>
+                <div id="formsInboxEmptyState" style="display:none;text-align:center;padding:48px 24px;color:var(--text-light);font-size:15px;">尚未有表單提交</div>
             </div>
         </div>
 
@@ -2162,8 +2805,12 @@
                     <code style="background:rgba(217,119,87,0.1);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:11px;">{receiptLink}</code>
                 </div>
                 <div class="form-group" style="margin-bottom:16px;">
-                    <label>已確認付款 Confirmed — 發送給已確認的學員</label>
+                    <label>Offline 已確認付款 Confirmed — 發送給已確認的（實體）學員</label>
                     <textarea id="stWaTplConfirmed" rows="6" style="min-height:120px;font-family:monospace;font-size:13px;"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>Online 已確認付款 Confirmed — 發送給已確認的學員</label>
+                    <textarea id="stWaTplConfirmedOnline" rows="6" style="min-height:120px;font-family:monospace;font-size:13px;"></textarea>
                 </div>
                 <div class="form-group" style="margin-bottom:16px;">
                     <label>待確認 Pending — 發送給已上傳截圖但尚未確認的學員</label>
@@ -2253,6 +2900,28 @@
     <div class="cms-loading-overlay" id="cmsLoadingOverlay">
         <div class="cms-loading-spinner"></div>
         <div class="cms-loading-text" id="cmsLoadingText">正在更新狀態...</div>
+    </div>
+
+    <div class="modal-overlay" id="wsMediaPickerModal" onclick="if(event.target===this) closeWorkshopImagePicker()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeWorkshopImagePicker()">&times;</button>
+            <h3>選擇媒體</h3>
+            <p class="media-picker-intro">重用 page layout editor 的媒體池，或直接上傳新圖片到工作坊封面。</p>
+            <div class="media-picker-toolbar">
+                <button type="button" class="btn" onclick="workshopImagePickerChooseUpload()">上傳新圖片</button>
+                <button type="button" class="btn btn-outline" onclick="loadWorkshopImageLibrary(true)">重新整理媒體庫</button>
+                <select id="wsMediaPickerSort" class="media-picker-select" onchange="renderWorkshopImageLibrary()">
+                    <option value="newest">最新上傳</option>
+                    <option value="oldest">最早上傳</option>
+                    <option value="name-asc">名稱 A → Z</option>
+                    <option value="name-desc">名稱 Z → A</option>
+                </select>
+                <input type="text" id="wsMediaPickerSearch" class="media-picker-search" placeholder="搜尋檔名..." oninput="renderWorkshopImageLibrary()">
+                <input type="file" id="wsMediaPickerUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" style="display:none" onchange="workshopImagePickerUploadSelected(this)">
+            </div>
+            <div class="media-picker-status" id="wsMediaPickerStatus">載入媒體庫中...</div>
+            <div class="media-picker-grid" id="wsMediaPickerGrid"></div>
+        </div>
     </div>
 
     <!-- Screenshot Modal -->
@@ -2446,7 +3115,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js"></script>
+<script src="/js/shared-utils.js?v=2"></script>
 
 <script>
 // Fallback definitions in case shared-utils.js fails to load on Safari/iOS
@@ -3968,6 +4637,21 @@ function loadAllWorkshops() {
 // ============================================================
 // BUILD WORKSHOP ITEM
 // ============================================================
+function buildWorkshopImageUploadField(workshopId, imageUrl) {
+    var rawUrl = String(imageUrl || '').trim();
+    var safeUrl = rawUrl ? fixStorageUrl(rawUrl) : '';
+    var safeId = String(workshopId || '').replace(/'/g, "\\'");
+    return '<div class="image-upload-area' + (safeUrl ? ' has-image' : '') + '" data-workshop-id="' + escHtml(workshopId || '') + '" data-image-url="' + escHtml(rawUrl) + '" onclick="openWorkshopImagePicker(this, \'' + safeId + '\')">' +
+        (safeUrl
+            ? '<img src="' + escHtml(safeUrl) + '" alt="cover">'
+            : '<span class="upload-icon">&#x1F5BC;</span><span class="upload-text">點擊打開媒體池</span>') +
+    '</div>' +
+    '<div class="image-upload-note">' + (safeUrl
+        ? '點擊圖片可打開媒體池，重用已上傳圖片或再上傳新圖片。'
+        : '點擊上方圖片區即可打開與版面編輯器相同的媒體池，選擇現有圖片或上傳新圖片。') + '</div>' +
+    '<div class="upload-progress"><div class="upload-progress-bar"></div></div>';
+}
+
 function buildWorkshopItem(id, d) {
     var el = document.createElement('div');
     el.className = 'ws-item';
@@ -4100,8 +4784,9 @@ function _renderWsBody(item) {
             '<div class="form-row full">' +
                 '<div class="form-group"><label>簡介</label><textarea name="description" rows="3" placeholder="工作坊簡介...">' + escHtml(d.description || '') + '</textarea></div>' +
             '</div>' +
-            '<div class="form-row full">' +
-                '<div class="form-group"><label>參加者注意事項 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，僅顯示於收據）</span></label><textarea name="notice" rows="3" placeholder="例：請自備手提電腦、請提早 10 分鐘到場...">' + escHtml(d.notice || '') + '</textarea></div>' +
+            '<div class="form-row">' +
+                '<div class="form-group"><label>參加者注意事項 Offline / 實體 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，顯示於收據及 WhatsApp）</span></label><textarea name="offlineNotice" rows="3" placeholder="例：請提早 10 分鐘到場、請帶備手提電腦...">' + escHtml(d.offlineNotice || d.notice || '') + '</textarea></div>' +
+                '<div class="form-group"><label>參加者注意事項 Online / 線上 <span style="font-size:11px;color:var(--text-light);font-weight:500;">（不會公開顯示，顯示於收據及 WhatsApp）</span></label><textarea name="onlineNotice" rows="3" placeholder="例：請預先安裝 Zoom、開課前 5 分鐘進入會議室...">' + escHtml(d.onlineNotice || '') + '</textarea></div>' +
             '</div>' +
             '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📝</span> 課後資料</div></div>' +
             '<div class="form-row">' +
@@ -4213,11 +4898,7 @@ function _renderWsBody(item) {
             '<div class="form-row full">' +
                 '<div class="form-group">' +
                     '<label>封面圖片</label>' +
-                    '<div class="image-upload-area' + (d.imageUrl ? ' has-image' : '') + '" onclick="this.querySelector(\'input\').click()">' +
-                        (d.imageUrl ? '<img src="' + fixStorageUrl(d.imageUrl) + '" alt="cover">' : '<span class="upload-icon">&#x1F5BC;</span><span class="upload-text">點擊或拖放上傳圖片</span>') +
-                        '<input type="file" accept="image/*" onchange="handleImageUpload(this, \'' + id + '\')">' +
-                    '</div>' +
-                    '<div class="upload-progress"><div class="upload-progress-bar"></div></div>' +
+                    buildWorkshopImageUploadField(id, d.imageUrl) +
                 '</div>' +
             '</div>' +
             '<div class="form-row full">' +
@@ -4916,6 +5597,29 @@ function syncSessionModeDependentFields(row) {
     if (zoomRow) {
         zoomRow.classList.toggle('is-hidden', !(mode === 'online' || mode === 'both'));
     }
+    _syncSessionCapRowForMode(row, mode);
+}
+
+function _syncSessionCapRowForMode(row, mode) {
+    var existingRows = row.querySelectorAll('.session-cap-row');
+    if (!existingRows.length) return;
+    var isDual = row.querySelector('.session-cap-dual');
+    var needsDual = (mode === 'both');
+    if (needsDual === !!isDual) return;
+    var oldCap = 0;
+    var capInput = row.querySelector('.session-cap-input');
+    if (capInput) oldCap = parseInt(capInput.value) || 0;
+    existingRows.forEach(function(r) { r.remove(); });
+    var fakeSession = { mode: mode, capacity: oldCap, offlineCapacity: oldCap, onlineCapacity: oldCap, enrolled: 0, offlineEnrolled: 0, onlineEnrolled: 0 };
+    var newHtml = _sessionCapRow(fakeSession, oldCap);
+    var zoomRow = row.querySelector('.session-zoom-row');
+    if (zoomRow) {
+        zoomRow.insertAdjacentHTML('afterend', newHtml);
+    } else {
+        var locRow = row.querySelector('.session-location-row');
+        if (locRow) locRow.insertAdjacentHTML('afterend', newHtml);
+        else row.insertAdjacentHTML('beforeend', newHtml);
+    }
 }
 
 function pickSessionMode(btn) {
@@ -4959,6 +5663,23 @@ function toggleSessionVis(cb) {
 }
 
 function _sessionCapRow(s, globalCap) {
+    var mode = s.mode || 'offline';
+    if (mode === 'both') {
+        var offCap = (s.offlineCapacity !== undefined) ? s.offlineCapacity : ((s.capacity !== undefined && s.capacity !== null) ? s.capacity : (globalCap || 0));
+        var onCap = (s.onlineCapacity !== undefined) ? s.onlineCapacity : ((s.capacity !== undefined && s.capacity !== null) ? s.capacity : (globalCap || 0));
+        var offEnr = s.offlineEnrolled || 0;
+        var onEnr = s.onlineEnrolled || 0;
+        return '<div class="session-cap-row session-cap-dual">' +
+            '<span class="session-cap-label">🏢 實體名額</span>' +
+            '<input type="number" class="session-cap-input session-cap-offline" value="' + offCap + '" min="0">' +
+            '<span class="session-cap-enrolled">已報名：' + offEnr + '</span>' +
+        '</div>' +
+        '<div class="session-cap-row session-cap-dual">' +
+            '<span class="session-cap-label">💻 線上名額</span>' +
+            '<input type="number" class="session-cap-input session-cap-online" value="' + onCap + '" min="0">' +
+            '<span class="session-cap-enrolled">已報名：' + onEnr + '</span>' +
+        '</div>';
+    }
     var cap = (s.capacity !== undefined && s.capacity !== null) ? s.capacity : (globalCap || 0);
     var enr = s.enrolled || 0;
     return '<div class="session-cap-row">' +
@@ -5085,7 +5806,23 @@ function collectSessions(form) {
         if (label || date || time) {
             var s = { label: label, date: date, time: time, mode: mode, visible: visible, location: location };
             if ((mode === 'online' || mode === 'both') && zoomLink) s.zoomLink = zoomLink;
-            if (capInput) s.capacity = parseInt(capInput.value) || 0;
+            if (mode === 'both') {
+                var offCapInput = row.querySelector('.session-cap-offline');
+                var onCapInput = row.querySelector('.session-cap-online');
+                s.offlineCapacity = offCapInput ? (parseInt(offCapInput.value) || 0) : 0;
+                s.onlineCapacity = onCapInput ? (parseInt(onCapInput.value) || 0) : 0;
+                s.capacity = s.offlineCapacity + s.onlineCapacity;
+            } else if (mode === 'online') {
+                var oCap = capInput ? (parseInt(capInput.value) || 0) : 0;
+                s.onlineCapacity = oCap;
+                s.offlineCapacity = 0;
+                s.capacity = oCap;
+            } else {
+                var fCap = capInput ? (parseInt(capInput.value) || 0) : 0;
+                s.offlineCapacity = fCap;
+                s.onlineCapacity = 0;
+                s.capacity = fCap;
+            }
             sessions.push(s);
         }
     });
@@ -5288,49 +6025,325 @@ function sessionStableId(s, fallbackIdx) {
 // ============================================================
 // IMAGE UPLOAD
 // ============================================================
-function handleImageUpload(input, workshopId) {
-    var file = input.files[0];
-    if (!file) return;
-    var area = input.closest('.image-upload-area');
-    var progressWrap = area.parentElement.querySelector('.upload-progress');
-    var progressBar = progressWrap.querySelector('.upload-progress-bar');
-    progressWrap.style.display = 'block';
-    progressBar.style.width = '0%';
+var _wsImagePickerActiveArea = null;
+var _wsImagePickerActiveWorkshopId = '';
+var _wsImageLibraryCache = [];
+var _wsImageLibraryLoaded = false;
+var _wsImageLibraryLoading = false;
 
-    var ext = file.name.split('.').pop();
+function _wsImagePickerStatus(msg, cls) {
+    var status = document.getElementById('wsMediaPickerStatus');
+    if (!status) return;
+    status.className = 'media-picker-status' + (cls ? ' ' + cls : '');
+    status.textContent = msg || '';
+}
+
+function _wsImageSortKey(asset) {
+    var raw = asset && (asset.updated || asset.timeCreated || '');
+    var ts = Date.parse(raw || '');
+    return isNaN(ts) ? 0 : ts;
+}
+
+function _wsImageType(asset) {
+    var type = String(asset && asset.contentType || '').toLowerCase();
+    var name = String(asset && (asset.name || asset.path || asset.url) || '').toLowerCase();
+    if (type.indexOf('image/') === 0 || /\.(png|jpe?g|webp|gif|svg)(?:[?#]|$)/i.test(name)) return 'image';
+    if (type.indexOf('video/') === 0 || /\.(mp4|mov|webm)(?:[?#]|$)/i.test(name)) return 'video';
+    return 'other';
+}
+
+function _wsImageLibraryUpsert(asset) {
+    if (!asset || !asset.path) return;
+    var next = [];
+    for (var i = 0; i < _wsImageLibraryCache.length; i++) {
+        if (_wsImageLibraryCache[i] && _wsImageLibraryCache[i].path !== asset.path) next.push(_wsImageLibraryCache[i]);
+    }
+    next.unshift(asset);
+    next.sort(function(a, b) { return _wsImageSortKey(b) - _wsImageSortKey(a); });
+    _wsImageLibraryCache = next;
+    _wsImageLibraryLoaded = true;
+}
+
+function _wsImageListAllRecursive(ref) {
+    return ref.listAll().then(function(result) {
+        var jobs = [];
+        var items = (result.items || []).slice();
+        (result.prefixes || []).forEach(function(prefix) {
+            jobs.push(_wsImageListAllRecursive(prefix));
+        });
+        return Promise.all(jobs).then(function(nested) {
+            nested.forEach(function(arr) {
+                if (Array.isArray(arr)) items = items.concat(arr);
+            });
+            return items;
+        });
+    }).catch(function() {
+        return [];
+    });
+}
+
+function _wsImageLoadFolderAssets(folderPath) {
+    if (!storage) return Promise.resolve([]);
+    return _wsImageListAllRecursive(storage.ref(folderPath)).then(function(items) {
+        return Promise.all((items || []).map(function(itemRef) {
+            return Promise.all([
+                itemRef.getDownloadURL(),
+                itemRef.getMetadata().catch(function() { return null; })
+            ]).then(function(results) {
+                var url = results[0];
+                var meta = results[1] || {};
+                var custom = meta.customMetadata || {};
+                return {
+                    path: itemRef.fullPath || '',
+                    name: custom.displayName || custom.originalName || meta.name || itemRef.name || '',
+                    url: url,
+                    contentType: meta.contentType || '',
+                    timeCreated: meta.timeCreated || '',
+                    updated: meta.updated || ''
+                };
+            }).catch(function() {
+                return null;
+            });
+        }));
+    });
+}
+
+function _wsImageFindAsset(path) {
+    for (var i = 0; i < _wsImageLibraryCache.length; i++) {
+        if (_wsImageLibraryCache[i] && _wsImageLibraryCache[i].path === path) return _wsImageLibraryCache[i];
+    }
+    return null;
+}
+
+function _renderWorkshopImageArea(area, workshopId, url) {
+    if (!area) return;
+    var rawUrl = String(url || '').trim();
+    var safeUrl = rawUrl ? fixStorageUrl(rawUrl) : '';
+    area.setAttribute('data-workshop-id', workshopId || '');
+    area.setAttribute('data-image-url', rawUrl);
+    area.classList.toggle('has-image', !!safeUrl);
+    area.innerHTML = safeUrl
+        ? '<img src="' + escHtml(safeUrl) + '" alt="cover">'
+        : '<span class="upload-icon">&#x1F5BC;</span><span class="upload-text">點擊打開媒體池</span>';
+    var note = area.parentElement ? area.parentElement.querySelector('.image-upload-note') : null;
+    if (note) {
+        note.textContent = safeUrl
+            ? '點擊圖片可打開媒體池，重用已上傳圖片或再上傳新圖片。'
+            : '點擊上方圖片區即可打開與版面編輯器相同的媒體池，選擇現有圖片或上傳新圖片。';
+    }
+}
+
+function _syncWorkshopImageCache(workshopId, url) {
+    if (_allWorkshopsCache && _allWorkshopsCache[workshopId]) _allWorkshopsCache[workshopId].imageUrl = url || '';
+    var item = document.querySelector('.ws-item[data-id="' + workshopId + '"]');
+    if (item && item._wsData) item._wsData.imageUrl = url || '';
+}
+
+function _persistWorkshopImageUrl(workshopId, url, area, successMessage) {
+    if (!workshopId || !db) {
+        showToast('資料庫尚未載入，請稍後再試', 'error');
+        return;
+    }
+    showLoadingOverlay(url ? '正在更新封面圖片...' : '正在移除封面圖片...');
+    db.collection('workshops').doc(workshopId).update({
+        imageUrl: url || '',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        hideLoadingOverlay();
+        _renderWorkshopImageArea(area, workshopId, url || '');
+        _syncWorkshopImageCache(workshopId, url || '');
+        showToast(successMessage || (url ? '封面圖片已更新' : '封面圖片已移除'));
+    }).catch(function(err) {
+        hideLoadingOverlay();
+        showToast('更新封面圖片失敗：' + err.message, 'error');
+    });
+}
+
+function openWorkshopImagePicker(area, workshopId) {
+    if (!area) return;
+    _wsImagePickerActiveArea = area;
+    _wsImagePickerActiveWorkshopId = String(workshopId || area.getAttribute('data-workshop-id') || '');
+    var modal = document.getElementById('wsMediaPickerModal');
+    if (!modal) return;
+    var search = document.getElementById('wsMediaPickerSearch');
+    if (search) search.value = '';
+    _wsImagePickerStatus('載入媒體庫中...');
+    modal.classList.add('show');
+    loadWorkshopImageLibrary(false);
+}
+
+function closeWorkshopImagePicker() {
+    var modal = document.getElementById('wsMediaPickerModal');
+    if (modal) modal.classList.remove('show');
+}
+
+function workshopImagePickerChooseUpload() {
+    var input = document.getElementById('wsMediaPickerUploadInput');
+    if (!input) return;
+    input.value = '';
+    input.click();
+}
+
+function workshopImagePickerUploadSelected(inp) {
+    var file = inp && inp.files && inp.files[0];
+    if (!file || !_wsImagePickerActiveWorkshopId || !_wsImagePickerActiveArea) return;
+    closeWorkshopImagePicker();
+    _uploadWorkshopImageFile(file, _wsImagePickerActiveWorkshopId, _wsImagePickerActiveArea);
+    inp.value = '';
+}
+
+function loadWorkshopImageLibrary(forceReload) {
+    if (_wsImageLibraryLoading) return;
+    if (_wsImageLibraryLoaded && !forceReload) {
+        renderWorkshopImageLibrary();
+        return;
+    }
+    if (!storage) {
+        _wsImagePickerStatus('媒體庫尚未載入，請重新整理後再試。', 'error');
+        return;
+    }
+    _wsImageLibraryLoading = true;
+    _wsImagePickerStatus('載入媒體庫中...');
+    Promise.all([
+        _wsImageLoadFolderAssets('layout-images'),
+        _wsImageLoadFolderAssets('workshop-images')
+    ]).then(function(groups) {
+        var merged = [];
+        groups.forEach(function(arr) {
+            (arr || []).forEach(function(asset) {
+                if (asset && asset.url && _wsImageType(asset) === 'image') merged.push(asset);
+            });
+        });
+        var seen = {};
+        _wsImageLibraryCache = merged.filter(function(asset) {
+            if (!asset || !asset.path || seen[asset.path]) return false;
+            seen[asset.path] = true;
+            return true;
+        }).sort(function(a, b) {
+            return _wsImageSortKey(b) - _wsImageSortKey(a);
+        });
+        _wsImageLibraryLoaded = true;
+        _wsImageLibraryLoading = false;
+        renderWorkshopImageLibrary();
+    }).catch(function(err) {
+        _wsImageLibraryLoading = false;
+        _wsImagePickerStatus('載入媒體庫失敗：' + (err && err.message ? err.message : 'Unknown error'), 'error');
+        var grid = document.getElementById('wsMediaPickerGrid');
+        if (grid) grid.innerHTML = '';
+    });
+}
+
+function renderWorkshopImageLibrary() {
+    var grid = document.getElementById('wsMediaPickerGrid');
+    if (!grid) return;
+    var search = document.getElementById('wsMediaPickerSearch');
+    var sortSel = document.getElementById('wsMediaPickerSort');
+    var term = String(search && search.value || '').trim().toLowerCase();
+    var sortVal = String(sortSel && sortSel.value || 'newest');
+    var filtered = (_wsImageLibraryCache || []).filter(function(asset) {
+        if (!term) return true;
+        return String(asset.name || '').toLowerCase().indexOf(term) !== -1 ||
+            String(asset.path || '').toLowerCase().indexOf(term) !== -1;
+    });
+    filtered.sort(function(a, b) {
+        if (sortVal === 'oldest') return _wsImageSortKey(a) - _wsImageSortKey(b);
+        if (sortVal === 'name-asc') return String(a.name || a.path || '').localeCompare(String(b.name || b.path || ''), 'zh-Hant');
+        if (sortVal === 'name-desc') return String(b.name || b.path || '').localeCompare(String(a.name || a.path || ''), 'zh-Hant');
+        return _wsImageSortKey(b) - _wsImageSortKey(a);
+    });
+    if (!filtered.length) {
+        grid.innerHTML = '<div class="media-picker-empty">' + (term ? '找不到符合的圖片。' : '暫時未找到已上傳圖片，請先上傳第一張圖片。') + '</div>';
+        _wsImagePickerStatus(term ? '沒有符合搜尋的圖片' : '目前媒體庫為空');
+        return;
+    }
+    _wsImagePickerStatus('共找到 ' + filtered.length + ' 張可重用圖片');
+    grid.innerHTML = filtered.map(function(asset) {
+        var date = asset.updated || asset.timeCreated || '';
+        var dateText = date ? new Date(date).toLocaleDateString('zh-HK') : '未有日期';
+        return '<div class="media-picker-item" data-media-path="' + escHtml(asset.path) + '" onclick="workshopImagePickerUseMedia(this.getAttribute(\'data-media-path\'))">' +
+            '<div class="media-picker-thumb"><img src="' + escHtml(fixStorageUrl(asset.url || '')) + '" alt=""></div>' +
+            '<div class="media-picker-meta">' +
+                '<div class="media-picker-name">' + escHtml(asset.name || asset.path || '未命名') + '</div>' +
+                '<div class="media-picker-sub">圖片 · ' + escHtml(dateText) + '</div>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function workshopImagePickerUseMedia(path) {
+    var asset = _wsImageFindAsset(path);
+    if (!asset || !_wsImagePickerActiveWorkshopId || !_wsImagePickerActiveArea) return;
+    closeWorkshopImagePicker();
+    _persistWorkshopImageUrl(_wsImagePickerActiveWorkshopId, asset.url || '', _wsImagePickerActiveArea, '已套用媒體池圖片');
+}
+
+function _uploadWorkshopImageFile(file, workshopId, area) {
+    if (!file) return;
+    if (!storage) {
+        showToast('儲存服務尚未載入，請重新整理頁面後再試。', 'error');
+        return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+        showToast('檔案大小不能超過 20MB', 'error');
+        return;
+    }
+    var progressWrap = area && area.parentElement ? area.parentElement.querySelector('.upload-progress') : null;
+    var progressBar = progressWrap ? progressWrap.querySelector('.upload-progress-bar') : null;
+    if (progressWrap) progressWrap.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    showLoadingOverlay('上傳圖片中...');
+
+    var ext = (file.name.split('.').pop() || 'png').toLowerCase();
     var path = 'workshop-images/' + workshopId + '_' + Date.now() + '.' + ext;
     var ref = storage.ref(path);
-    var task = ref.put(file);
+    var task = ref.put(file, {
+        contentType: file.type || undefined,
+        customMetadata: {
+            displayName: file.name || '',
+            originalName: file.name || ''
+        }
+    });
 
     task.on('state_changed',
         function(snapshot) {
             var pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            progressBar.style.width = pct + '%';
+            if (progressBar) progressBar.style.width = pct + '%';
+            var textEl = document.getElementById('cmsLoadingText');
+            if (textEl) textEl.textContent = '上傳圖片中... ' + Math.round(pct) + '%';
         },
         function(err) {
+            hideLoadingOverlay();
+            if (progressWrap) progressWrap.style.display = 'none';
             showToast('圖片上傳失敗：' + err.message, 'error');
-            progressWrap.style.display = 'none';
         },
         function() {
             task.snapshot.ref.getDownloadURL().then(function(url) {
-                db.collection('workshops').doc(workshopId).update({ imageUrl: url }).then(function() {
-                    showToast('圖片已上傳');
-                    area.classList.add('has-image');
-                    area.textContent = '';
-                    var prevImg = document.createElement('img');
-                    prevImg.src = url;
-                    prevImg.alt = 'cover';
-                    var prevInput = document.createElement('input');
-                    prevInput.type = 'file';
-                    prevInput.accept = 'image/*';
-                    prevInput.onchange = function() { handleImageUpload(this, workshopId); };
-                    area.appendChild(prevImg);
-                    area.appendChild(prevInput);
-                    progressWrap.style.display = 'none';
+                if (progressWrap) progressWrap.style.display = 'none';
+                _wsImageLibraryUpsert({
+                    path: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
+                    name: file.name || '',
+                    url: url,
+                    contentType: file.type || '',
+                    timeCreated: new Date().toISOString(),
+                    updated: new Date().toISOString()
                 });
+                _persistWorkshopImageUrl(workshopId, url, area, '圖片已上傳');
+            }).catch(function(err) {
+                hideLoadingOverlay();
+                if (progressWrap) progressWrap.style.display = 'none';
+                showToast('取得圖片連結失敗：' + err.message, 'error');
             });
         }
     );
+}
+
+function handleImageUpload(input, workshopId) {
+    var file = input.files[0];
+    if (!file) return;
+    var area = input.closest('.form-group');
+    area = area ? area.querySelector('.image-upload-area') : null;
+    _uploadWorkshopImageFile(file, workshopId, area);
+    input.value = '';
 }
 
 // ============================================================
@@ -5479,7 +6492,9 @@ function saveWorkshop(event, workshopId) {
         courseType: courseType,
         mode: 'offline',
         zoomLink: '',
-        notice: form.querySelector('[name="notice"]').value.trim(),
+        offlineNotice: form.querySelector('[name="offlineNotice"]').value.trim(),
+        onlineNotice: form.querySelector('[name="onlineNotice"]').value.trim(),
+        notice: '',
         notesLink: form.querySelector('[name="notesLink"]').value.trim(),
         questionnaireLink: form.querySelector('[name="questionnaireLink"]').value.trim(),
         location: form.querySelector('[name="location"]').value.trim(),
@@ -5488,6 +6503,8 @@ function saveWorkshop(event, workshopId) {
         regCloseHours: parseFloat(form.querySelector('[name="regCloseHours"]').value) || 0,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+
+    data.notice = data.offlineNotice || data.onlineNotice || (cachedWorkshop.notice || '');
 
     if (courseType === 'continuous') {
         var rawRounds = collectRounds(form);
@@ -5739,9 +6756,10 @@ function deleteWorkshop(workshopId) {
 // ============================================================
 // TABS (data-tab + URL hash for shareable links)
 // ============================================================
-var WORKSHOP_TAB_IDS = ['dashboard', 'workshops', 'members', 'attendance', 'discounts', 'settings'];
+var WORKSHOP_TAB_IDS = ['dashboard', 'quiz-dashboard', 'workshops', 'members', 'attendance', 'discounts', 'settings'];
 var WORKSHOP_TAB_CONTENT_IDS = {
     dashboard: 'tabDashboard',
+    'quiz-dashboard': 'tabQuizDashboard',
     workshops: 'tabWorkshops',
     members: 'tabMembers',
     attendance: 'tabAttendance',
@@ -5750,6 +6768,10 @@ var WORKSHOP_TAB_CONTENT_IDS = {
 };
 var WORKSHOP_TAB_LOADERS = {
     dashboard: loadDashboardData,
+    'quiz-dashboard': function() {
+        loadDashboardData();
+        renderQuizDashboard();
+    },
     workshops: function() {},
     members: loadMembersData,
     attendance: loadAttendanceLog,
@@ -5813,17 +6835,22 @@ function _applyWorkshopTabFromHash() {
 })();
 
 function switchMemberView(view) {
-    document.querySelectorAll('.members-subtab').forEach(function(t) { t.classList.remove('active'); });
-    if (view === 'byMember') {
-        document.querySelector('.members-subtab:nth-child(1)').classList.add('active');
-        document.getElementById('memberViewByMember').style.display = 'block';
-        document.getElementById('memberViewByWorkshop').style.display = 'none';
-        document.getElementById('memberFilterBar').style.display = _membersData.length > 0 ? 'flex' : 'none';
-    } else {
-        document.querySelector('.members-subtab:nth-child(2)').classList.add('active');
-        document.getElementById('memberViewByMember').style.display = 'none';
-        document.getElementById('memberViewByWorkshop').style.display = 'block';
-        document.getElementById('memberFilterBar').style.display = 'none';
+    document.querySelectorAll('.members-subtab').forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-member-view') === view);
+    });
+    var searchRow = document.getElementById('memberSearchRow');
+    var byMember = document.getElementById('memberViewByMember');
+    var byWorkshop = document.getElementById('memberViewByWorkshop');
+    var formsView = document.getElementById('memberViewForms');
+    var filterBar = document.getElementById('memberFilterBar');
+    if (byMember) byMember.style.display = view === 'byMember' ? 'block' : 'none';
+    if (byWorkshop) byWorkshop.style.display = view === 'byWorkshop' ? 'block' : 'none';
+    if (formsView) formsView.style.display = view === 'forms' ? 'block' : 'none';
+    if (searchRow) searchRow.style.display = view === 'forms' ? 'none' : 'flex';
+    if (filterBar) filterBar.style.display = view === 'byMember' && _membersData.length > 0 ? 'flex' : 'none';
+    if (view === 'forms') {
+        loadFormsInboxData();
+        if (_formsInboxItems.length) renderFormsInbox();
     }
 }
 
@@ -6322,7 +7349,10 @@ function _buildApplicantCardHtml(r, wsId, wsTitle, ws) {
     h += '<div class="applicant-card-inner">';
     h += '<input type="checkbox" class="app-checkbox" onchange="updateBulkCount(\'' + wsId + '\')" onclick="event.stopPropagation()">';
     h += '<div class="applicant-info">';
-    h += '<div class="applicant-name clickable" onclick="event.stopPropagation();openApplicantProfile(\'' + r._id + '\')">' + escHtml(r.name || '訪客') + '</div>';
+    var _attModeBadge = '';
+    if (r.attendanceMode === 'online') _attModeBadge = '<span class="applicant-mode-badge mode-online">線上</span>';
+    else if (r.attendanceMode === 'offline') _attModeBadge = '<span class="applicant-mode-badge mode-offline">實體</span>';
+    h += '<div class="applicant-name clickable" onclick="event.stopPropagation();openApplicantProfile(\'' + r._id + '\')">' + escHtml(r.name || '訪客') + _attModeBadge + '</div>';
     h += '<div class="applicant-meta">';
     if (r.userEmail) h += '<span><span class="meta-icon">✉</span> ' + escHtml(r.userEmail) + '</span>';
     if (r.phone) h += '<span><span class="meta-icon">📱</span> ' + escHtml(r.phone) + '</span>';
@@ -6779,11 +7809,771 @@ function filterMembers() {
 }
 
 // ============================================================
+// FORMS INBOX
+// ============================================================
+var _formsInboxLoaded = false;
+var _formsInboxUnsub = null;
+var _formsInboxItems = [];
+var _formsInboxTypeFilter = 'all';
+var _formsInboxStatusFilters = ['new', 'contacted', 'completed'];
+var _formsInboxSortOrder = 'desc';
+var _formsInboxViewMode = 'card';
+
+var FORMS_INBOX_TYPE_META = {
+    consultation: {
+        label: 'Consultation',
+        badgeClass: 'type-consultation',
+        fields: [
+            ['aiSkillLevel', 'AI 程度'],
+            ['aiGoal', 'AI 目標'],
+            ['currentProblem', '目前問題'],
+            ['successOutcome', '成功指標'],
+            ['startTiming', '開始時間'],
+            ['willingnessToPay', '付費意願'],
+            ['whyNow', '為什麼現在'],
+            ['workshopInterest', '工作坊興趣'],
+            ['currentAITools', '使用中的 AI 工具'],
+            ['currentAIToolsOtherText', 'AI 工具補充'],
+            ['aiTopics', '感興趣主題'],
+            ['aiTopicsOtherText', '主題補充'],
+            ['additionalInfo', '補充資料'],
+            ['whatsappConsent', 'WhatsApp 同意']
+        ]
+    },
+    'workshop-waitlist': {
+        label: 'Workshop Waitlist',
+        badgeClass: 'type-workshop-waitlist',
+        fields: [
+            ['workshopEvent', '等候工作坊'],
+            ['painPoint', '目前卡點'],
+            ['painPointOther', '其他補充']
+        ]
+    },
+    'lead-magnet': {
+        label: 'Lead Magnet',
+        badgeClass: 'type-lead-magnet',
+        fields: [
+            ['consentAccepted', '已同意接收']
+        ]
+    },
+    'quiz-lead': {
+        label: 'Quiz Lead',
+        badgeClass: 'type-quiz-lead',
+        fields: [
+            ['contactType', '聯絡方式'],
+            ['profileName', '結果類型'],
+            ['recommendedWorkshop', '推薦工作坊'],
+            ['scores', '分數'],
+            ['answers', '答題序列']
+        ]
+    },
+    'free-material': {
+        label: 'Free Material',
+        badgeClass: 'type-free-material',
+        fields: [
+            ['materialTitle', '資料名稱'],
+            ['documentName', '文件名稱'],
+            ['pageKey', '頁面 Key'],
+            ['sectionId', 'Section ID'],
+            ['consentAccepted', '已同意接收']
+        ]
+    }
+};
+
+var FORMS_INBOX_STATUS_META = {
+    new: { label: '新提交', className: 'forms-status-new' },
+    contacted: { label: '跟進中', className: 'forms-status-contacted' },
+    completed: { label: '已完成', className: 'forms-status-completed' },
+    archived: { label: '已封存', className: 'forms-status-archived' }
+};
+
+function _formsInboxSafeText(val) {
+    return String(val == null ? '' : val).trim();
+}
+
+function _formsInboxDomId(val) {
+    return _formsInboxSafeText(val).replace(/[^A-Za-z0-9_-]/g, '_');
+}
+
+function _formsInboxIsPlainObject(val) {
+    return Object.prototype.toString.call(val) === '[object Object]';
+}
+
+function _formsInboxHasValue(val) {
+    if (val == null) return false;
+    if (typeof val === 'string') return _formsInboxSafeText(val) !== '';
+    if (Array.isArray(val)) return val.length > 0;
+    if (_formsInboxIsPlainObject(val)) return Object.keys(val).length > 0;
+    return true;
+}
+
+function _formsInboxFlattenValues(val, bucket) {
+    bucket = bucket || [];
+    if (!_formsInboxHasValue(val)) return bucket;
+    if (typeof val === 'string') {
+        bucket.push(_formsInboxSafeText(val));
+        return bucket;
+    }
+    if (Array.isArray(val)) {
+        val.forEach(function(item) { _formsInboxFlattenValues(item, bucket); });
+        return bucket;
+    }
+    if (_formsInboxIsPlainObject(val)) {
+        Object.keys(val).forEach(function(key) { _formsInboxFlattenValues(val[key], bucket); });
+        return bucket;
+    }
+    bucket.push(String(val));
+    return bucket;
+}
+
+function _formsInboxHumanizeKey(key) {
+    return _formsInboxSafeText(key)
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .replace(/\b\w/g, function(ch) { return ch.toUpperCase(); });
+}
+
+function _formsInboxGetTypeMeta(type) {
+    return FORMS_INBOX_TYPE_META[type] || { label: _formsInboxHumanizeKey(type || 'other'), badgeClass: '', fields: [] };
+}
+
+function _formsInboxGetStatusMeta(status) {
+    return FORMS_INBOX_STATUS_META[status] || FORMS_INBOX_STATUS_META.new;
+}
+
+function _formsInboxGetStatusValue(item) {
+    var raw = _formsInboxSafeText(item && item.status);
+    if (raw && FORMS_INBOX_STATUS_META[raw]) return raw;
+    return 'new';
+}
+
+function _formsInboxDateToObject(val) {
+    if (!val) return null;
+    if (val.toDate) return val.toDate();
+    if (val.seconds) return new Date(val.seconds * 1000);
+    if (typeof val === 'string' || typeof val === 'number') {
+        var d = new Date(val);
+        if (!isNaN(d.getTime())) return d;
+    }
+    return null;
+}
+
+function _formsInboxFormatTimestamp(val) {
+    var d = _formsInboxDateToObject(val);
+    if (!d) return '—';
+    return d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0') + ' ' +
+        String(d.getHours()).padStart(2, '0') + ':' +
+        String(d.getMinutes()).padStart(2, '0');
+}
+
+function _formsInboxGetSourceLabel(item) {
+    return _formsInboxSafeText((item && (item.sourcePage || item.sourceLabel || item.sourcePath || item.sourceKey)) || '未知來源');
+}
+
+function _formsInboxBuildSearchText(item) {
+    var bucket = [
+        item.formType,
+        item.sourceKey,
+        item.sourceLabel,
+        item.sourcePage,
+        item.sourcePath,
+        item.contactName,
+        item.phone,
+        item.whatsapp,
+        item.email,
+        item.instagram
+    ];
+    bucket = bucket.concat(_formsInboxFlattenValues(item.answers || {}, []));
+    return bucket.join(' ').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function _formsInboxFormatAnswerValue(val) {
+    if (!_formsInboxHasValue(val)) return '—';
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+    if (typeof val === 'string') return escHtml(val).replace(/\n/g, '<br>');
+    if (Array.isArray(val)) {
+        if (!val.length) return '—';
+        return val.map(function(item) {
+            return _formsInboxFormatAnswerValue(item);
+        }).join('<br>');
+    }
+    if (_formsInboxIsPlainObject(val)) {
+        var keys = Object.keys(val);
+        if (!keys.length) return '—';
+        return keys.map(function(key) {
+            return '<strong>' + escHtml(_formsInboxHumanizeKey(key)) + ':</strong> ' + _formsInboxFormatAnswerValue(val[key]);
+        }).join('<br>');
+    }
+    return escHtml(String(val));
+}
+
+function _formsInboxBuildSummary(item) {
+    var answers = item.answers || {};
+    if (item.formType === 'consultation') {
+        return _formsInboxSafeText(answers.aiGoal || answers.currentProblem || answers.successOutcome || '');
+    }
+    if (item.formType === 'workshop-waitlist') {
+        var parts = [];
+        if (answers.workshopEvent) parts.push(answers.workshopEvent);
+        if (answers.painPoint) parts.push(answers.painPoint);
+        return parts.join(' | ');
+    }
+    if (item.formType === 'lead-magnet') {
+        return _formsInboxSafeText(item.sourceLabel || item.sourcePage || '免費內容索取');
+    }
+    if (item.formType === 'quiz-lead') {
+        var quizParts = [];
+        if (answers.profileName) quizParts.push('結果：' + answers.profileName);
+        if (answers.recommendedWorkshop) quizParts.push('推薦：' + answers.recommendedWorkshop);
+        return quizParts.join(' | ');
+    }
+    if (item.formType === 'free-material') {
+        return _formsInboxSafeText(answers.materialTitle || answers.documentName || '');
+    }
+    return _formsInboxFlattenValues(answers, []).slice(0, 2).join(' | ');
+}
+
+function _formsInboxBuildAnswerFields(item) {
+    var answers = item.answers || {};
+    var meta = _formsInboxGetTypeMeta(item.formType);
+    var used = {};
+    var html = '';
+    var i;
+    for (i = 0; i < meta.fields.length; i++) {
+        var key = meta.fields[i][0];
+        var label = meta.fields[i][1];
+        used[key] = true;
+        if (!_formsInboxHasValue(answers[key])) continue;
+        html += '<div class="consult-field"><div class="consult-field-label">' + escHtml(label) + '</div><div class="consult-field-value">' + _formsInboxFormatAnswerValue(answers[key]) + '</div></div>';
+    }
+    Object.keys(answers).forEach(function(key) {
+        if (used[key] || !_formsInboxHasValue(answers[key])) return;
+        html += '<div class="consult-field"><div class="consult-field-label">' + escHtml(_formsInboxHumanizeKey(key)) + '</div><div class="consult-field-value">' + _formsInboxFormatAnswerValue(answers[key]) + '</div></div>';
+    });
+    if (!html) return '<div class="forms-empty-answer">沒有額外答案。</div>';
+    return '<div class="forms-answer-grid">' + html + '</div>';
+}
+
+function _formsInboxGetContactText(item) {
+    var lines = [];
+    if (item.contactName) lines.push('Name: ' + item.contactName);
+    if (item.whatsapp) lines.push('WhatsApp: ' + item.whatsapp);
+    if (item.phone) lines.push('Phone: ' + item.phone);
+    if (item.email) lines.push('Email: ' + item.email);
+    if (item.instagram) lines.push('Instagram: ' + item.instagram);
+    return lines.join('\n');
+}
+
+function _formsInboxNormalizeWhatsappNumber(item) {
+    var raw = _formsInboxSafeText((item && (item.whatsapp || item.phone)) || '');
+    if (!raw) return '';
+    var digits = raw.replace(/[^\d]/g, '');
+    if (!digits) return '';
+    if (digits.length === 8) return '852' + digits;
+    if (digits.length > 8 && digits.indexOf('852') === 0) return digits;
+    return digits;
+}
+
+function _formsInboxGetItem(docId) {
+    for (var i = 0; i < _formsInboxItems.length; i++) {
+        if (_formsInboxItems[i]._id === docId) return _formsInboxItems[i];
+    }
+    return null;
+}
+
+function _formsInboxUpdateKpis() {
+    var totals = { total: _formsInboxItems.length, new: 0, contacted: 0, completed: 0 };
+    _formsInboxItems.forEach(function(item) {
+        var status = _formsInboxGetStatusValue(item);
+        if (status === 'new') totals.new++;
+        if (status === 'contacted') totals.contacted++;
+        if (status === 'completed') totals.completed++;
+    });
+    var totalEl = document.getElementById('fKpiTotal');
+    var newEl = document.getElementById('fKpiNew');
+    var contactedEl = document.getElementById('fKpiContacted');
+    var completedEl = document.getElementById('fKpiCompleted');
+    if (totalEl) totalEl.textContent = String(totals.total);
+    if (newEl) newEl.textContent = String(totals.new);
+    if (contactedEl) contactedEl.textContent = String(totals.contacted);
+    if (completedEl) completedEl.textContent = String(totals.completed);
+}
+
+function _formsInboxRefreshSourceOptions() {
+    var select = document.getElementById('formsSourceFilter');
+    if (!select) return;
+    var current = select.value || 'all';
+    var options = ['all'];
+    var seen = {};
+    _formsInboxItems.forEach(function(item) {
+        var label = _formsInboxGetSourceLabel(item);
+        if (!label || seen[label]) return;
+        seen[label] = true;
+        options.push(label);
+    });
+    options.sort(function(a, b) {
+        if (a === 'all') return -1;
+        if (b === 'all') return 1;
+        return a.localeCompare(b, 'zh-Hant');
+    });
+    select.innerHTML = options.map(function(opt) {
+        return '<option value="' + escHtml(opt) + '">' + escHtml(opt === 'all' ? '全部' : opt) + '</option>';
+    }).join('');
+    if (options.indexOf(current) === -1) current = 'all';
+    select.value = current;
+}
+
+function loadFormsInboxData() {
+    if (_formsInboxLoaded) return;
+    _formsInboxLoaded = true;
+    var listEl = document.getElementById('formsInboxList');
+    if (listEl) listEl.innerHTML = '<div class="empty-state">載入中...</div>';
+    _formsInboxUnsub = db.collection('formSubmissions').orderBy('submittedAt', 'desc').onSnapshot(function(snap) {
+        _formsInboxItems = [];
+        snap.forEach(function(doc) {
+            var data = doc.data() || {};
+            data._id = doc.id;
+            _formsInboxItems.push(data);
+        });
+        _formsInboxUpdateKpis();
+        _formsInboxRefreshSourceOptions();
+        renderFormsInbox();
+    }, function(err) {
+        console.error('[forms inbox] listener error:', err);
+        var list = document.getElementById('formsInboxList');
+        if (list) {
+            list.innerHTML = '<div class="empty-state" style="color:var(--red);">表單資料載入失敗：' + escHtml(err.message || '未知錯誤') + '</div>';
+        }
+    });
+}
+
+function setFormsInboxTypeFilter(type, btn) {
+    _formsInboxTypeFilter = type || 'all';
+    document.querySelectorAll('#formsTypePills .forms-type-pill').forEach(function(pill) {
+        pill.classList.toggle('active', pill.getAttribute('data-type') === _formsInboxTypeFilter);
+    });
+    if (btn) btn.blur();
+    renderFormsInbox();
+}
+
+function toggleFormsStatusDropdown() {
+    var dropdown = document.getElementById('formsStatusMultiDropdown');
+    var btn = document.getElementById('formsStatusMultiBtn');
+    if (!dropdown) return;
+    var isOpen = dropdown.classList.toggle('open');
+    if (btn) btn.classList.toggle('open', isOpen);
+    if (isOpen) {
+        setTimeout(function() {
+            document.addEventListener('click', _closeFormsStatusDropdownHandler, { once: true });
+        }, 10);
+    }
+}
+
+function _closeFormsStatusDropdownHandler(e) {
+    var wrap = document.getElementById('formsStatusMultiWrap');
+    if (wrap && wrap.contains(e.target)) {
+        setTimeout(function() {
+            document.addEventListener('click', _closeFormsStatusDropdownHandler, { once: true });
+        }, 10);
+        return;
+    }
+    var dropdown = document.getElementById('formsStatusMultiDropdown');
+    var btn = document.getElementById('formsStatusMultiBtn');
+    if (dropdown) dropdown.classList.remove('open');
+    if (btn) btn.classList.remove('open');
+}
+
+function onFormsStatusCheckboxChange() {
+    var checkboxes = document.querySelectorAll('#formsStatusMultiDropdown input[type="checkbox"]');
+    _formsInboxStatusFilters = [];
+    checkboxes.forEach(function(cb) {
+        if (cb.checked) _formsInboxStatusFilters.push(cb.value);
+    });
+    _updateFormsStatusBtnLabel();
+    renderFormsInbox();
+}
+
+function _updateFormsStatusBtnLabel() {
+    var btn = document.getElementById('formsStatusMultiBtn');
+    if (!btn) return;
+    var allStatuses = ['new', 'contacted', 'completed', 'archived'];
+    if (_formsInboxStatusFilters.length === 0 || _formsInboxStatusFilters.length === allStatuses.length) {
+        btn.textContent = '狀態：全部';
+    } else {
+        var labels = _formsInboxStatusFilters.map(function(s) {
+            return (FORMS_INBOX_STATUS_META[s] || {}).label || s;
+        });
+        btn.textContent = '狀態：' + labels.join('、');
+    }
+}
+
+function toggleFormsInboxSortOrder() {
+    _formsInboxSortOrder = _formsInboxSortOrder === 'desc' ? 'asc' : 'desc';
+    var btn = document.getElementById('formsSortBtn');
+    if (btn) btn.textContent = _formsInboxSortOrder === 'desc' ? '日期：新→舊 ▼' : '日期：舊→新 ▲';
+    renderFormsInbox();
+}
+
+function setFormsInboxView(mode, btn) {
+    _formsInboxViewMode = mode || 'card';
+    document.querySelectorAll('.forms-view-toggle-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-view') === _formsInboxViewMode);
+    });
+    if (btn) btn.blur();
+    renderFormsInbox();
+}
+
+function resetFormsInboxFilters() {
+    var sourceSel = document.getElementById('formsSourceFilter');
+    var dateFrom = document.getElementById('formsDateFrom');
+    var dateTo = document.getElementById('formsDateTo');
+    var search = document.getElementById('formsSearchInput');
+    if (sourceSel) sourceSel.value = 'all';
+    if (dateFrom) dateFrom.value = '';
+    if (dateTo) dateTo.value = '';
+    if (search) search.value = '';
+    _formsInboxTypeFilter = 'all';
+    _formsInboxStatusFilters = ['new', 'contacted', 'completed'];
+    _formsInboxSortOrder = 'desc';
+    _formsInboxViewMode = 'card';
+    var sortBtn = document.getElementById('formsSortBtn');
+    if (sortBtn) sortBtn.textContent = '日期：新→舊 ▼';
+    document.querySelectorAll('#formsTypePills .forms-type-pill').forEach(function(pill) {
+        pill.classList.toggle('active', pill.getAttribute('data-type') === 'all');
+    });
+    document.querySelectorAll('#formsStatusMultiDropdown input[type="checkbox"]').forEach(function(cb) {
+        cb.checked = cb.value !== 'archived';
+    });
+    _updateFormsStatusBtnLabel();
+    document.querySelectorAll('.forms-view-toggle-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-view') === 'card');
+    });
+    renderFormsInbox();
+}
+
+function _formsInboxBuildCardHtml(item) {
+    var meta = _formsInboxGetTypeMeta(item.formType);
+    var statusValue = _formsInboxGetStatusValue(item);
+    var statusMeta = _formsInboxGetStatusMeta(statusValue);
+    var domId = _formsInboxDomId(item._id);
+    var sourceLabel = _formsInboxGetSourceLabel(item);
+    var submittedAt = item.submittedAt || item.createdAt || item.clientSubmittedAt;
+    var summary = _formsInboxBuildSummary(item);
+    var actions = [];
+    if (_formsInboxNormalizeWhatsappNumber(item)) {
+        actions.push('<button type="button" class="wa-send-btn" onclick="event.stopPropagation();openFormSubmissionWhatsApp(\'' + item._id + '\')">WhatsApp</button>');
+    }
+    if (item.email) {
+        actions.push('<button type="button" class="forms-action-btn is-mail" onclick="event.stopPropagation();openFormSubmissionEmail(\'' + item._id + '\')">Email</button>');
+    }
+    if (_formsInboxGetContactText(item)) {
+        actions.push('<button type="button" class="forms-action-btn is-copy" onclick="event.stopPropagation();copyFormSubmissionContact(\'' + item._id + '\')">複製聯絡</button>');
+    }
+    var metaBits = [];
+    if (item.whatsapp) metaBits.push('<span>WhatsApp: ' + escHtml(item.whatsapp) + '</span>');
+    else if (item.phone) metaBits.push('<span>Phone: ' + escHtml(item.phone) + '</span>');
+    if (item.email) metaBits.push('<span>Email: ' + escHtml(item.email) + '</span>');
+    if (item.instagram) metaBits.push('<span>IG: ' + escHtml(item.instagram) + '</span>');
+    metaBits.push('<span>提交：' + escHtml(_formsInboxFormatTimestamp(submittedAt)) + '</span>');
+    var followUpText = item.lastFollowUpAt
+        ? '最近跟進：' + escHtml(_formsInboxFormatTimestamp(item.lastFollowUpAt)) + (item.lastFollowUpType ? ' via ' + escHtml(item.lastFollowUpType) : '')
+        : '尚未記錄跟進';
+    return '' +
+        '<div class="forms-inbox-card" id="formInbox_' + domId + '" onclick="toggleFormSubmissionExpand(this, event)">' +
+            '<div class="forms-inbox-header">' +
+                '<div>' +
+                    '<div class="forms-inbox-topline">' +
+                        '<span class="forms-type-badge ' + escHtml(meta.badgeClass) + '">' + escHtml(meta.label) + '</span>' +
+                        '<span class="forms-source-badge">' + escHtml(sourceLabel) + '</span>' +
+                    '</div>' +
+                    '<h3 class="forms-inbox-name">' + escHtml(item.contactName || '未提供姓名') + '</h3>' +
+                '</div>' +
+                '<div style="position:relative;">' +
+                    '<span class="forms-status-badge ' + escHtml(statusMeta.className) + '" onclick="event.stopPropagation();toggleFormStatusMenu(\'' + item._id + '\')">' + escHtml(statusMeta.label) + ' ▾</span>' +
+                    '<div class="consult-status-menu forms-status-menu" id="fStatusMenu_' + domId + '" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;">' +
+                        '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'new\')">標記為新提交</button>' +
+                        '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'contacted\')">標記為跟進中</button>' +
+                        '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'completed\')">標記為已完成</button>' +
+                        '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'archived\')">標記為已封存</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="forms-inbox-meta">' + metaBits.join('') + '</div>' +
+            '<div class="forms-inbox-summary">' + escHtml(summary || '按此查看完整表單內容與內部備註。') + '</div>' +
+            (actions.length ? '<div class="forms-inbox-actions">' + actions.join('') + '</div>' : '') +
+            '<div class="forms-inbox-fields">' +
+                _formsInboxBuildAnswerFields(item) +
+                '<div class="forms-notes-wrap">' +
+                    '<label for="formsNote_' + domId + '">內部備註</label>' +
+                    '<textarea id="formsNote_' + domId + '" onclick="event.stopPropagation()">' + escHtml(item.adminNotes || '') + '</textarea>' +
+                    '<div class="forms-notes-footer">' +
+                        '<span class="forms-followup-meta">' + followUpText + '</span>' +
+                        '<button type="button" class="btn btn-sm" onclick="event.stopPropagation();saveFormSubmissionNote(\'' + item._id + '\')">儲存備註</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="forms-provenance">' +
+                    'formType: <code>' + escHtml(item.formType || 'other') + '</code><br>' +
+                    'sourceCollection: <code>' + escHtml(item.sourceCollection || 'n/a') + '</code><br>' +
+                    'sourceDocId: <code>' + escHtml(item.sourceDocId || 'n/a') + '</code><br>' +
+                    'sheetTab: <code>' + escHtml(item.sheetTab || 'n/a') + '</code><br>' +
+                    'importSource: <code>' + escHtml(item.importSource || 'n/a') + '</code>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+}
+
+function _formsInboxFilterItems() {
+    var searchQuery = _formsInboxSafeText((document.getElementById('formsSearchInput') || {}).value || '').toLowerCase();
+    var sourceFilter = (document.getElementById('formsSourceFilter') || {}).value || 'all';
+    var dateFrom = (document.getElementById('formsDateFrom') || {}).value || '';
+    var dateTo = (document.getElementById('formsDateTo') || {}).value || '';
+    var startDate = dateFrom ? new Date(dateFrom + 'T00:00:00') : null;
+    var endDate = dateTo ? new Date(dateTo + 'T23:59:59') : null;
+    var allStatuses = ['new', 'contacted', 'completed', 'archived'];
+    var statusSet = _formsInboxStatusFilters.length === 0 || _formsInboxStatusFilters.length === allStatuses.length
+        ? null
+        : _formsInboxStatusFilters;
+    var filtered = _formsInboxItems.filter(function(item) {
+        var statusValue = _formsInboxGetStatusValue(item);
+        if (statusSet && statusSet.indexOf(statusValue) === -1) return false;
+        if (_formsInboxTypeFilter !== 'all' && item.formType !== _formsInboxTypeFilter) return false;
+        if (sourceFilter !== 'all' && _formsInboxGetSourceLabel(item) !== sourceFilter) return false;
+        if (searchQuery) {
+            var haystack = (item.searchText || _formsInboxBuildSearchText(item) || '');
+            if (haystack.indexOf(searchQuery) === -1) return false;
+        }
+        if (startDate || endDate) {
+            var submitted = _formsInboxDateToObject(item.submittedAt || item.createdAt || item.clientSubmittedAt);
+            if (!submitted) return false;
+            if (startDate && submitted < startDate) return false;
+            if (endDate && submitted > endDate) return false;
+        }
+        return true;
+    });
+    filtered.sort(function(a, b) {
+        var aTime = _formsInboxDateToObject(a.submittedAt || a.createdAt || a.clientSubmittedAt);
+        var bTime = _formsInboxDateToObject(b.submittedAt || b.createdAt || b.clientSubmittedAt);
+        var aMs = aTime ? aTime.getTime() : 0;
+        var bMs = bTime ? bTime.getTime() : 0;
+        return _formsInboxSortOrder === 'desc' ? (bMs - aMs) : (aMs - bMs);
+    });
+    return filtered;
+}
+
+function _formsInboxBuildGridHtml(filtered) {
+    if (!filtered.length) return '';
+    var cols = [
+        { key: '_type', label: '類型' },
+        { key: '_status', label: '狀態' },
+        { key: 'contactName', label: '姓名' },
+        { key: 'whatsapp', label: 'WhatsApp' },
+        { key: 'phone', label: '電話' },
+        { key: 'email', label: 'Email' },
+        { key: 'instagram', label: 'IG' },
+        { key: '_source', label: '來源' },
+        { key: '_submitted', label: '提交時間' },
+        { key: '_summary', label: '摘要' },
+        { key: '_actions', label: '' }
+    ];
+    var html = '<div class="forms-grid-table-wrap"><table class="forms-grid-table"><thead><tr>';
+    cols.forEach(function(c) { html += '<th>' + escHtml(c.label) + '</th>'; });
+    html += '</tr></thead><tbody>';
+    filtered.forEach(function(item) {
+        var meta = _formsInboxGetTypeMeta(item.formType);
+        var statusValue = _formsInboxGetStatusValue(item);
+        var statusMeta = _formsInboxGetStatusMeta(statusValue);
+        var submittedAt = item.submittedAt || item.createdAt || item.clientSubmittedAt;
+        html += '<tr>';
+        html += '<td><span class="forms-type-badge ' + escHtml(meta.badgeClass) + '" style="font-size:10px;padding:2px 8px;">' + escHtml(meta.label) + '</span></td>';
+        html += '<td><span class="forms-status-badge ' + escHtml(statusMeta.className) + '" style="font-size:11px;padding:2px 8px;cursor:pointer;" onclick="toggleFormStatusMenu(\'' + item._id + '\')">' + escHtml(statusMeta.label) + ' ▾</span>';
+        var domId = _formsInboxDomId(item._id);
+        html += '<div class="consult-status-menu forms-status-menu" id="fStatusMenu_' + domId + '" style="display:none;position:absolute;z-index:60;">';
+        html += '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'new\')">新提交</button>';
+        html += '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'contacted\')">跟進中</button>';
+        html += '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'completed\')">已完成</button>';
+        html += '<button onclick="event.stopPropagation();setFormSubmissionStatus(\'' + item._id + '\',\'archived\')">已封存</button>';
+        html += '</div></td>';
+        html += '<td class="fgt-name">' + escHtml(item.contactName || '—') + '</td>';
+        html += '<td>' + escHtml(item.whatsapp || '—') + '</td>';
+        html += '<td>' + escHtml(item.phone || '—') + '</td>';
+        html += '<td>' + escHtml(item.email || '—') + '</td>';
+        html += '<td>' + escHtml(item.instagram || '—') + '</td>';
+        html += '<td><span class="forms-source-badge" style="font-size:10px;padding:2px 8px;">' + escHtml(_formsInboxGetSourceLabel(item)) + '</span></td>';
+        html += '<td>' + escHtml(_formsInboxFormatTimestamp(submittedAt)) + '</td>';
+        html += '<td style="max-width:280px;" title="' + escHtml(_formsInboxBuildSummary(item)) + '">' + escHtml(_formsInboxBuildSummary(item) || '—') + '</td>';
+        html += '<td class="fgt-actions">';
+        if (_formsInboxNormalizeWhatsappNumber(item)) {
+            html += '<button type="button" class="wa-send-btn" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();openFormSubmissionWhatsApp(\'' + item._id + '\')">WA</button>';
+        }
+        if (item.email) {
+            html += '<button type="button" class="forms-action-btn is-mail" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();openFormSubmissionEmail(\'' + item._id + '\')">Email</button>';
+        }
+        html += '<button type="button" class="forms-action-btn is-copy" style="font-size:11px;padding:3px 8px;" onclick="event.stopPropagation();copyFormSubmissionContact(\'' + item._id + '\')">Copy</button>';
+        html += '</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    return html;
+}
+
+function renderFormsInbox() {
+    var listEl = document.getElementById('formsInboxList');
+    var gridEl = document.getElementById('formsInboxGrid');
+    var emptyEl = document.getElementById('formsInboxEmptyState');
+    if (!listEl || !emptyEl) return;
+    _formsInboxUpdateKpis();
+    var filtered = _formsInboxFilterItems();
+    var isGrid = _formsInboxViewMode === 'grid';
+    if (!filtered.length) {
+        listEl.innerHTML = '';
+        if (gridEl) gridEl.innerHTML = '';
+        listEl.style.display = 'none';
+        if (gridEl) gridEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = _formsInboxItems.length ? '沒有符合目前篩選條件的表單提交' : '尚未有表單提交';
+        return;
+    }
+    emptyEl.style.display = 'none';
+    if (isGrid) {
+        listEl.style.display = 'none';
+        if (gridEl) {
+            gridEl.style.display = 'block';
+            gridEl.innerHTML = _formsInboxBuildGridHtml(filtered);
+        }
+    } else {
+        if (gridEl) { gridEl.style.display = 'none'; gridEl.innerHTML = ''; }
+        listEl.style.display = 'block';
+        listEl.innerHTML = filtered.map(_formsInboxBuildCardHtml).join('');
+    }
+}
+
+function toggleFormSubmissionExpand(card, e) {
+    if (e && (
+        e.target.closest('.wa-send-btn') ||
+        e.target.closest('.forms-action-btn') ||
+        e.target.closest('.forms-status-badge') ||
+        e.target.closest('.consult-status-menu') ||
+        e.target.closest('textarea') ||
+        e.target.closest('button')
+    )) return;
+    card.classList.toggle('expanded');
+}
+
+function toggleFormStatusMenu(docId) {
+    var menu = document.getElementById('fStatusMenu_' + _formsInboxDomId(docId));
+    if (!menu) return;
+    var isVisible = menu.style.display !== 'none';
+    document.querySelectorAll('.forms-status-menu').forEach(function(m) { m.style.display = 'none'; });
+    if (!isVisible) {
+        menu.style.display = 'block';
+        setTimeout(function() {
+            document.addEventListener('click', function handler() {
+                menu.style.display = 'none';
+                document.removeEventListener('click', handler);
+            }, { once: true });
+        }, 10);
+    }
+}
+
+function setFormSubmissionStatus(docId, status) {
+    document.querySelectorAll('.forms-status-menu').forEach(function(m) { m.style.display = 'none'; });
+    db.collection('formSubmissions').doc(docId).set({
+        status: status,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).then(function() {
+        showToast('表單狀態已更新');
+    }).catch(function(err) {
+        showToast('更新狀態失敗：' + err.message, 'error');
+    });
+}
+
+function saveFormSubmissionNote(docId) {
+    var textarea = document.getElementById('formsNote_' + _formsInboxDomId(docId));
+    if (!textarea) return;
+    db.collection('formSubmissions').doc(docId).set({
+        adminNotes: textarea.value.trim(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).then(function() {
+        showToast('備註已儲存');
+    }).catch(function(err) {
+        showToast('儲存備註失敗：' + err.message, 'error');
+    });
+}
+
+function _markFormSubmissionFollowUp(docId, channel) {
+    var item = _formsInboxGetItem(docId);
+    var nextStatus = _formsInboxGetStatusValue(item) === 'new' ? 'contacted' : _formsInboxGetStatusValue(item);
+    db.collection('formSubmissions').doc(docId).set({
+        status: nextStatus,
+        lastFollowUpType: channel,
+        lastFollowUpAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).catch(function() {});
+}
+
+function openFormSubmissionWhatsApp(docId) {
+    var item = _formsInboxGetItem(docId);
+    if (!item) return;
+    var phone = _formsInboxNormalizeWhatsappNumber(item);
+    if (!phone) {
+        showToast('此提交未有 WhatsApp / 電話資料', 'error');
+        return;
+    }
+    var sourceLabel = _formsInboxGetSourceLabel(item);
+    var greeting = '你好' + (item.contactName ? ' ' + item.contactName : '') + '，我係 AIFlowTime，想跟進你透過「' + sourceLabel + '」提交的表單。';
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(greeting), '_blank');
+    _markFormSubmissionFollowUp(docId, 'whatsapp');
+}
+
+function openFormSubmissionEmail(docId) {
+    var item = _formsInboxGetItem(docId);
+    if (!item || !item.email) {
+        showToast('此提交未有 email 資料', 'error');
+        return;
+    }
+    var subject = 'AIFlowTime 跟進：' + _formsInboxGetSourceLabel(item);
+    window.location.href = 'mailto:' + item.email + '?subject=' + encodeURIComponent(subject);
+    _markFormSubmissionFollowUp(docId, 'email');
+}
+
+function copyFormSubmissionContact(docId) {
+    var text = _formsInboxGetContactText(_formsInboxGetItem(docId));
+    if (!text) {
+        showToast('此提交未有可複製的聯絡資料', 'error');
+        return;
+    }
+    function onSuccess() { showToast('聯絡資料已複製'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            onSuccess();
+        });
+        return;
+    }
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+    onSuccess();
+}
+
+// ============================================================
 // WHATSAPP TEMPLATES
 // ============================================================
 var _E = { pin: '📌', cal: '📅', clock: '🕐', laptop: '💻', office: '🏢', loc: '📍', link: '🔗', doc: '📄' };
 var DEFAULT_WA_TEMPLATES = {
-    confirmed: 'Hi {name}！\n\n你已成功報名以下工作坊：\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n💰 費用：{fee}\n\n{mode}\n{location}\n{zoomLink}\nℹ️{notice}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n如有任何問題，歡迎隨時聯絡我們！',
+    confirmed: 'Hi {name}！\n\n你已成功報名以下實體工作坊：\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n💰 費用：{fee}\n\n{mode}\n{location}\nℹ️{notice}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n如有任何問題，歡迎隨時聯絡我們！',
+    confirmedOnline: 'Hi {name}！\n\n你已成功報名以下線上工作坊：\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n💰 費用：{fee}\n\n{mode}\n{zoomLink}\nℹ️{notice}\n\n' + _E.doc + ' 收據（直接開啟）：{receiptLink}\n如有任何問題，歡迎隨時聯絡我們！',
     pending: 'Hi {name}！\n\n我們已收到你的付款截圖，正在確認中。\n\n' + _E.pin + ' 工作坊：{workshopTitle}\n' + _E.cal + ' 日期：{date}\n' + _E.clock + ' 時間：{time}\n\n確認後我們會再通知你。如有任何問題，歡迎隨時聯絡我們！'
 };
 var _wsSettings = null;
@@ -6827,6 +8617,7 @@ function ensureWsSettingsLoaded() {
 function _populateSettingsUI() {
     var wt = (_wsSettings && _wsSettings.waTemplates) || {};
     document.getElementById('stWaTplConfirmed').value = _fixWaEmoji(wt.confirmed) || DEFAULT_WA_TEMPLATES.confirmed;
+    document.getElementById('stWaTplConfirmedOnline').value = _fixWaEmoji(wt.confirmedOnline) || DEFAULT_WA_TEMPLATES.confirmedOnline;
     document.getElementById('stWaTplPending').value = _fixWaEmoji(wt.pending) || DEFAULT_WA_TEMPLATES.pending;
     var rch = document.getElementById('stRegCloseHours');
     if (rch) rch.value = (_wsSettings && _wsSettings.regCloseHours !== undefined) ? _wsSettings.regCloseHours : 3;
@@ -6837,6 +8628,7 @@ function saveWsSettings() {
     var data = {
         waTemplates: {
             confirmed: document.getElementById('stWaTplConfirmed').value.trim() || DEFAULT_WA_TEMPLATES.confirmed,
+            confirmedOnline: document.getElementById('stWaTplConfirmedOnline').value.trim() || DEFAULT_WA_TEMPLATES.confirmedOnline,
             pending: document.getElementById('stWaTplPending').value.trim() || DEFAULT_WA_TEMPLATES.pending
         },
         regCloseHours: parseFloat(document.getElementById('stRegCloseHours').value) || 0,
@@ -6873,9 +8665,12 @@ function _fixWaEmoji(tpl) {
     return result;
 }
 
-function _getWaTemplate(status) {
+function _getWaTemplate(status, attendanceMode) {
     var wt = (_wsSettings && _wsSettings.waTemplates) || {};
-    if (status === 'confirmed') return _fixWaEmoji(wt.confirmed) || DEFAULT_WA_TEMPLATES.confirmed;
+    if (status === 'confirmed') {
+        if (attendanceMode === 'online') return _fixWaEmoji(wt.confirmedOnline) || DEFAULT_WA_TEMPLATES.confirmedOnline;
+        return _fixWaEmoji(wt.confirmed) || DEFAULT_WA_TEMPLATES.confirmed;
+    }
     return _fixWaEmoji(wt.pending) || DEFAULT_WA_TEMPLATES.pending;
 }
 
@@ -6974,6 +8769,29 @@ function _resolveRegDateTime(ws, reg) {
     return { date: reg.workshopDate || ws.date || '', time: reg.workshopTime || ws.time || '' };
 }
 
+function _trimWorkshopNotice(value) {
+    return String(value || '').trim();
+}
+
+function _resolveWorkshopNotice(ws, attendanceMode) {
+    var legacy = _trimWorkshopNotice(ws && ws.notice);
+    var offline = _trimWorkshopNotice(ws && ws.offlineNotice);
+    var online = _trimWorkshopNotice(ws && ws.onlineNotice);
+
+    if (!offline && legacy) offline = legacy;
+
+    if (attendanceMode === 'online') return online || legacy || '';
+    return offline || legacy || '';
+}
+
+function _resolveAttendanceMode(reg, ws) {
+    if (reg.attendanceMode) return reg.attendanceMode;
+    var sessionMode = _resolveSessionMode(ws, reg);
+    if (sessionMode === 'online') return 'online';
+    if (sessionMode === 'offline') return 'offline';
+    return 'offline';
+}
+
 function openWhatsApp(regId) {
     var reg = _allRegistrations.find(function(r) { return r._id === regId; });
     if (!reg) { showToast('找不到報名資料', 'error'); return; }
@@ -6981,31 +8799,32 @@ function openWhatsApp(regId) {
         var ws = _allWorkshopsCache[reg.workshopId] || {};
         var wsTitle = (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || '');
         var waLoc = _resolveSessionLocation(ws, reg);
-        var waMode = _resolveSessionMode(ws, reg);
+        var waSessionMode = _resolveSessionMode(ws, reg);
+        var waAttMode = _resolveAttendanceMode(reg, ws);
         var waZoomLink = _resolveSessionZoomLink(ws, reg);
+        var waNotice = _resolveWorkshopNotice(ws, waAttMode);
         var dt = _resolveRegDateTime(ws, reg);
-        var url = buildWhatsAppUrl(reg.phone, reg.name, wsTitle, dt.date, dt.time, waMode, waZoomLink, waLoc, reg._id, reg.status, reg.pricePaid || ws.price || '', ws.notice || '');
+        var url = buildWhatsAppUrl(reg.phone, reg.name, wsTitle, dt.date, dt.time, waAttMode, waZoomLink, waLoc, reg._id, reg.status, reg.pricePaid || ws.price || '', waNotice);
         window.open(url, '_blank', 'noopener');
     }).catch(function(err) {
         showToast('載入 WhatsApp 設定失敗：' + err.message, 'error');
     });
 }
 
-function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, wsMode, wsZoomLink, wsLocation, regId, regStatus, fee, notice) {
+function buildWhatsAppUrl(phone, name, wsTitle, wsDate, wsTime, attendanceMode, wsZoomLink, wsLocation, regId, regStatus, fee, notice) {
     var num = (phone || '').replace(/[\s\-()]/g, '');
     if (num.startsWith('+')) num = num.substring(1);
     else if (/^\d{8}$/.test(num)) num = '852' + num;
 
     var isConfirmed = regStatus === 'confirmed';
-    var tpl = _getWaTemplate(isConfirmed ? 'confirmed' : 'pending');
+    var tpl = _getWaTemplate(isConfirmed ? 'confirmed' : 'pending', attendanceMode);
 
     var modeText = '';
-    if (wsMode === 'online') modeText = _E.laptop + ' 模式：線上';
-    else if (wsMode === 'both') modeText = _E.laptop + ' 模式：實體＋線上';
+    if (attendanceMode === 'online') modeText = _E.laptop + ' 模式：線上';
     else modeText = _E.office + ' 模式：實體';
 
-    var locationText = (wsLocation && wsMode !== 'online') ? (_E.loc + ' 地點：' + wsLocation) : '';
-    var zoomLinkText = (wsZoomLink && (wsMode === 'online' || wsMode === 'both')) ? (_E.link + ' 線上連結：' + wsZoomLink) : '';
+    var locationText = (wsLocation && attendanceMode !== 'online') ? (_E.loc + ' 地點：' + wsLocation) : '';
+    var zoomLinkText = (wsZoomLink && attendanceMode === 'online') ? (_E.link + ' 線上連結：' + wsZoomLink) : '';
 
     var receiptLink = regId ? 'https://aiflowtime-hk.web.app/receipt?id=' + regId : 'https://aiflowtime-hk.web.app/profile';
 
@@ -7677,6 +9496,8 @@ function sendNotesWhatsApp(regId) {
     var questionnaireList = _formatLinkList(questionnaireLinks);
 
     var dt = _resolveRegDateTime(ws, reg);
+    var waAttMode = _resolveAttendanceMode(reg, ws);
+    var wsNotice = _resolveWorkshopNotice(ws, waAttMode);
     var receiptLink = regId ? 'https://aiflowtime-hk.web.app/receipt?id=' + regId : 'https://aiflowtime-hk.web.app/profile';
 
     var msg = tpl
@@ -7693,7 +9514,7 @@ function sendNotesWhatsApp(regId) {
         .replace(/\{questionnaireLinks\}/g, questionnaireList)
         .replace(/\{selectedLink\}/g, [notesList, questionnaireList].filter(Boolean).join('\n\n'))
         .replace(/\{receiptLink\}/g, receiptLink)
-        .replace(/\{notice\}/g, ws.notice || '');
+        .replace(/\{notice\}/g, wsNotice);
 
     msg = msg.replace(/\n{3,}/g, '\n\n').trim();
 
@@ -7872,6 +9693,47 @@ function reassignRound(regId, newRoundValue, newRoundLabel) {
     });
 }
 
+function _buildPmAttendanceModeField(reg, regId) {
+    var ws = _allWorkshopsCache[reg.workshopId];
+    var sessionMode = ws ? _resolveSessionMode(ws, reg) : 'offline';
+    var currentMode = reg.attendanceMode || '';
+    if (!currentMode) {
+        if (sessionMode === 'online') currentMode = 'online';
+        else if (sessionMode === 'offline') currentMode = 'offline';
+    }
+    var isEditable = (sessionMode === 'both');
+    if (!isEditable) {
+        var label = currentMode === 'online' ? '線上' : (currentMode === 'offline' ? '實體' : '—');
+        return '<div class="pm-field"><div class="pm-label">參加模式</div><div class="pm-value"><span class="pm-chip">' + label + '</span></div></div>';
+    }
+    return '<div class="pm-field"><div class="pm-label">參加模式</div><div class="pm-value">' +
+        '<div class="pm-mode-pills" style="display:inline-flex;gap:4px;">' +
+            '<button type="button" class="session-mode-pill' + (currentMode === 'offline' ? ' active' : '') + '" style="font-size:12px;padding:4px 12px;" onclick="reassignAttendanceMode(\'' + escHtml(regId) + '\',\'offline\',this)">實體</button>' +
+            '<button type="button" class="session-mode-pill' + (currentMode === 'online' ? ' active' : '') + '" style="font-size:12px;padding:4px 12px;" onclick="reassignAttendanceMode(\'' + escHtml(regId) + '\',\'online\',this)">線上</button>' +
+        '</div></div></div>';
+}
+
+function reassignAttendanceMode(regId, newMode, btn) {
+    if (btn) {
+        var pills = btn.closest('.pm-mode-pills');
+        if (pills) {
+            pills.querySelectorAll('.session-mode-pill').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+        }
+    }
+    db.collection('registrations').doc(regId).update({
+        attendanceMode: newMode,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() {
+        showToast('已更改為「' + (newMode === 'online' ? '線上' : '實體') + '」');
+        var localReg = _allRegistrations.find(function(r) { return r._id === regId; });
+        if (localReg) localReg.attendanceMode = newMode;
+        rebuildMembersData();
+    }).catch(function(err) {
+        showToast('更改失敗：' + err.message, 'error');
+    });
+}
+
 function openApplicantProfile(regId) {
     db.collection('registrations').doc(regId).get().then(function(snap) {
         if (!snap.exists) { showToast('找不到報名資料', 'error'); return; }
@@ -7896,6 +9758,7 @@ function openApplicantProfile(regId) {
         html += '<div class="pm-field"><div class="pm-label">職業</div><div class="pm-value">' + escHtml(r.jobType || '—') + '</div></div>';
         var _pmRoundHtml = _buildPmRoundField(r, regId);
         if (_pmRoundHtml) html += _pmRoundHtml;
+        html += _buildPmAttendanceModeField(r, regId);
         html += '</div>';
         if (r.createdAt) {
             var d = r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
@@ -8339,14 +10202,104 @@ function changeRegistrationStatus(regId, workshopId, newStatus, badgeEl) {
 // DASHBOARD — DATA & CHARTS
 // ============================================================
 var _dashLoaded = false;
-var _dashDataReady = { workshops: false, regs: false, users: false };
+var _dashDataReady = { workshops: false, regs: false, users: false, quiz: false };
 var _dashWorkshops = {};
 var _dashRegistrations = [];
 var _dashUsers = {};
+var _dashQuizLeads = [];
 var _dashCharts = {}; // keep chart instances for destroy/recreate
 var _dashRangeFrom = null; // Date object or null (= no lower bound)
 var _dashRangeTo = null;   // Date object or null (= no upper bound)
 var _dashRangeMode = 'all'; // 'all', '7', '30', '90', 'custom'
+
+var QUIZ_DASH_LEVELS = [
+    { level: 1, key: 'observer', label: 'L1 旁觀者', shortLabel: '旁觀者', color: '#ef4444' },
+    { level: 2, key: 'dabbler', label: 'L2 試水者', shortLabel: '試水者', color: '#f97316' },
+    { level: 3, key: 'tooluser', label: 'L3 工具人', shortLabel: '工具人', color: '#eab308' },
+    { level: 4, key: 'semi-auto', label: 'L4 半自動化者', shortLabel: '半自動化者', color: '#3b82f6' },
+    { level: 5, key: 'native', label: 'L5 原住民', shortLabel: '原住民', color: '#a855f7' }
+];
+var QUIZ_DASH_PRODUCTS = [
+    { key: 'starter', label: 'AI 起動班', shortLabel: '起動班', color: '#D97757' },
+    { key: 'visual', label: 'AI 視覺創作營', shortLabel: '視覺營', color: '#7B61FF' },
+    { key: 'bootcamp', label: 'Bootcamp', shortLabel: 'Bootcamp', color: '#4A90D9' },
+    { key: 'community', label: '社群', shortLabel: '社群', color: '#2E7D32' },
+    { key: 'pro', label: 'Pro 會員', shortLabel: 'Pro', color: '#D4A017' }
+];
+var QUIZ_DASH_PAINS = [
+    { key: 'foundations', label: '唔知從何入手', shortLabel: '基礎', color: '#D97757' },
+    { key: 'prompting', label: 'AI出嘢唔啱', shortLabel: '提問', color: '#E8983F' },
+    { key: 'automation', label: '忙但冇進展', shortLabel: '自動化', color: '#F4C542' },
+    { key: 'visual', label: '想做靚內容', shortLabel: '視覺', color: '#F28E8E' },
+    { key: 'community', label: '想交流進步', shortLabel: '社群', color: '#C45A3A' }
+];
+var QUIZ_DASH_DESIRES = [
+    { key: 'efficiency', label: '提升效率', shortLabel: '效率', color: '#4A90D9' },
+    { key: 'visual', label: '視覺內容', shortLabel: '視覺', color: '#6C8EF5' },
+    { key: 'automation', label: '自動化系統', shortLabel: '自動化', color: '#3BA3C9' },
+    { key: 'learning', label: '學新技能', shortLabel: '學習', color: '#7B61FF' },
+    { key: 'business', label: '開展副業', shortLabel: '創業', color: '#2E7D32' }
+];
+var QUIZ_DASH_AXES = [
+    { key: 'communication', label: 'AI溝通力' },
+    { key: 'visual', label: '視覺創作力' },
+    { key: 'efficiency', label: '效率槓桿力' },
+    { key: 'automation', label: '自動化力' },
+    { key: 'awareness', label: 'AI認知力' },
+    { key: 'action', label: '行動力' }
+];
+
+var QUIZ_DASH_LEVEL_MAP = indexByKey(QUIZ_DASH_LEVELS, 'level');
+var QUIZ_DASH_ARCHETYPE_MAP = indexByKey(QUIZ_DASH_LEVELS, 'key');
+var QUIZ_DASH_PRODUCT_MAP = indexByKey(QUIZ_DASH_PRODUCTS, 'key');
+var QUIZ_DASH_PAIN_MAP = indexByKey(QUIZ_DASH_PAINS, 'key');
+var QUIZ_DASH_DESIRE_MAP = indexByKey(QUIZ_DASH_DESIRES, 'key');
+var QUIZ_DASH_AXIS_MAP = indexByKey(QUIZ_DASH_AXES, 'key');
+
+function indexByKey(list, key) {
+    var out = {};
+    (list || []).forEach(function(item) {
+        if (!item || item[key] == null) return;
+        out[item[key]] = item;
+    });
+    return out;
+}
+
+function dashSafeNumber(value, fallback) {
+    var num = parseFloat(value);
+    return isNaN(num) ? (fallback != null ? fallback : 0) : num;
+}
+
+function dashSafeInt(value, fallback) {
+    var num = parseInt(value, 10);
+    return isNaN(num) ? (fallback != null ? fallback : 0) : num;
+}
+
+function getDashTimestampDate(value) {
+    if (!value) return null;
+    if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+    if (typeof value.toDate === 'function') {
+        var d = value.toDate();
+        return d instanceof Date && !isNaN(d.getTime()) ? d : null;
+    }
+    if (typeof value.seconds === 'number') {
+        var fromSeconds = new Date(value.seconds * 1000);
+        return isNaN(fromSeconds.getTime()) ? null : fromSeconds;
+    }
+    var parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function normalizeDashEmail(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function getQuizLeadLevel(lead) {
+    var level = dashSafeInt(lead && lead.level, 0);
+    if (level >= 1 && level <= 5) return level;
+    var profile = lead && lead.archetype ? QUIZ_DASH_ARCHETYPE_MAP[lead.archetype] : null;
+    return profile ? profile.level : 0;
+}
 
 function loadDashboardData() {
     if (_dashLoaded) return;
@@ -8354,6 +10307,8 @@ function loadDashboardData() {
 
     // Initialize date range calendars
     initDashRangeCalendars();
+    syncDashRangeButtons();
+    syncDashRangeInputs();
 
     // Real-time listener: workshops
     db.collection('workshops').orderBy('order', 'asc').onSnapshot(function(snap) {
@@ -8378,29 +10333,63 @@ function loadDashboardData() {
         _dashDataReady.users = true;
         renderDashboard();
     });
+
+    db.collection('quizLeads').onSnapshot(function(snap) {
+        _dashQuizLeads = [];
+        snap.forEach(function(doc) {
+            var lead = doc.data() || {};
+            lead._id = doc.id;
+            _dashQuizLeads.push(lead);
+        });
+        _dashQuizLeads.sort(function(a, b) {
+            var ta = getDashTimestampDate(a.timestamp);
+            var tb = getDashTimestampDate(b.timestamp);
+            return (tb ? tb.getTime() : 0) - (ta ? ta.getTime() : 0);
+        });
+        _dashDataReady.quiz = true;
+        renderDashboard();
+    }, function(err) {
+        console.error('quizLeads load failed:', err);
+        _dashQuizLeads = [];
+        _dashDataReady.quiz = true;
+        renderDashboard();
+    });
 }
 
 // ---- DATE RANGE CONTROLS ----
+function syncDashRangeButtons() {
+    document.querySelectorAll('.dash-date-btn').forEach(function(btn) {
+        btn.classList.toggle('active', _dashRangeMode !== 'custom' && btn.getAttribute('data-range') === _dashRangeMode);
+    });
+}
+
+function syncDashRangeInputs() {
+    var fromValue = _dashRangeFrom ? formatDashDate(_dashRangeFrom) : '';
+    var toValue = _dashRangeTo ? formatDashDate(_dashRangeTo) : '';
+    ['dashRangeFrom', 'dashRangeFromQuiz'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = fromValue;
+    });
+    ['dashRangeTo', 'dashRangeToQuiz'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = toValue;
+    });
+}
+
 function setDashRange(mode, btnEl) {
     _dashRangeMode = mode;
-    // Update active button
-    document.querySelectorAll('.dash-date-btn').forEach(function(b) { b.classList.remove('active'); });
-    if (btnEl) btnEl.classList.add('active');
-
     var now = new Date(); now.setHours(23, 59, 59, 999);
     if (mode === 'all') {
         _dashRangeFrom = null;
         _dashRangeTo = null;
-        document.getElementById('dashRangeFrom').value = '';
-        document.getElementById('dashRangeTo').value = '';
     } else if (mode === '7' || mode === '30' || mode === '90') {
         var days = parseInt(mode);
         var from = new Date(now); from.setDate(from.getDate() - days + 1); from.setHours(0, 0, 0, 0);
         _dashRangeFrom = from;
         _dashRangeTo = now;
-        document.getElementById('dashRangeFrom').value = formatDashDate(from);
-        document.getElementById('dashRangeTo').value = formatDashDate(now);
     }
+    syncDashRangeButtons();
+    syncDashRangeInputs();
     // mode === 'custom' is handled by the calendar pickers directly
     renderDashboard();
 }
@@ -8419,20 +10408,33 @@ function parseDashDate(str) {
     return d;
 }
 
-function filterRegsByDateRange(regs) {
-    if (!_dashRangeFrom && !_dashRangeTo) return regs;
-    return regs.filter(function(r) {
-        if (!r.createdAt || !r.createdAt.toDate) return false;
-        var t = r.createdAt.toDate().getTime();
+function filterItemsByDateRange(items, getDateFn) {
+    if (!_dashRangeFrom && !_dashRangeTo) return items || [];
+    return (items || []).filter(function(item) {
+        var date = getDateFn ? getDateFn(item) : null;
+        if (!date) return false;
+        var t = date.getTime();
         if (_dashRangeFrom && t < _dashRangeFrom.getTime()) return false;
         if (_dashRangeTo && t > _dashRangeTo.getTime()) return false;
         return true;
     });
 }
 
+function filterRegsByDateRange(regs) {
+    if (!_dashRangeFrom && !_dashRangeTo) return regs;
+    return filterItemsByDateRange(regs, function(r) { return getDashTimestampDate(r && r.createdAt); });
+}
+
+function filterQuizLeadsByDateRange(leads) {
+    if (!_dashRangeFrom && !_dashRangeTo) return leads;
+    return filterItemsByDateRange(leads, function(lead) { return getDashTimestampDate(lead && lead.timestamp); });
+}
+
 function initDashRangeCalendars() {
     initDashRangeCal('dashRangeFrom', 'dashCalFrom', 'from');
     initDashRangeCal('dashRangeTo', 'dashCalTo', 'to');
+    initDashRangeCal('dashRangeFromQuiz', 'dashCalFromQuiz', 'from');
+    initDashRangeCal('dashRangeToQuiz', 'dashCalToQuiz', 'to');
 }
 
 function initDashRangeCal(inputId, dropdownId, which) {
@@ -8530,26 +10532,23 @@ function initDashRangeCal(inputId, dropdownId, which) {
 
                 if (which === 'from') {
                     _dashRangeFrom = selected;
-                    input.value = formatDashDate(selected);
                     // If from > to, clear to
                     if (_dashRangeTo && selected.getTime() > _dashRangeTo.getTime()) {
                         _dashRangeTo = null;
-                        document.getElementById('dashRangeTo').value = '';
                     }
                 } else {
                     var endOfDay = new Date(selected); endOfDay.setHours(23, 59, 59, 999);
                     _dashRangeTo = endOfDay;
-                    input.value = formatDashDate(selected);
                     // If to < from, clear from
                     if (_dashRangeFrom && selected.getTime() < _dashRangeFrom.getTime()) {
                         _dashRangeFrom = null;
-                        document.getElementById('dashRangeFrom').value = '';
                     }
                 }
 
                 // Switch to custom mode
                 _dashRangeMode = 'custom';
-                document.querySelectorAll('.dash-date-btn').forEach(function(b) { b.classList.remove('active'); });
+                syncDashRangeButtons();
+                syncDashRangeInputs();
 
                 dropdown.style.display = 'none';
                 renderDashboard();
@@ -8561,16 +10560,14 @@ function initDashRangeCal(inputId, dropdownId, which) {
             e.preventDefault(); e.stopPropagation();
             if (which === 'from') {
                 _dashRangeFrom = null;
-                input.value = '';
             } else {
                 _dashRangeTo = null;
-                input.value = '';
             }
             if (!_dashRangeFrom && !_dashRangeTo) {
                 _dashRangeMode = 'all';
-                var allBtn = document.querySelector('.dash-date-btn[data-range="all"]');
-                if (allBtn) allBtn.classList.add('active');
             }
+            syncDashRangeButtons();
+            syncDashRangeInputs();
             dropdown.style.display = 'none';
             renderDashboard();
         });
@@ -8739,6 +10736,104 @@ function exportDashboardExcel() {
     }
 }
 
+function exportQuizDashboardExcel() {
+    if (typeof XLSX === 'undefined') { alert('Excel 匯出功能載入中，請稍後再試。'); return; }
+    showLoadingOverlay('正在匯出測驗 Excel...');
+
+    try {
+        var leads = filterQuizLeadsByDateRange(_dashQuizLeads);
+        var regsForMatch = _dashRegistrations.filter(function(r) { return r.status !== 'deleted'; });
+        var stats = buildQuizDashboardStats(leads, regsForMatch);
+
+        var detailRows = (leads || []).map(function(lead) {
+            var level = getQuizLeadLevel(lead);
+            var axisNormalized = lead.axisNormalized || {};
+            var axisTotals = lead.axisTotals || {};
+            return {
+                '測驗日期': formatQuizDateTime(lead.timestamp),
+                '姓名': lead.name || '--',
+                'Email': lead.email || '--',
+                '電話': lead.phone || '--',
+                '等級': level ? ('L' + level) : '--',
+                '類型': getQuizArchetypeLabel(lead.archetype),
+                '平均AI能力值': Math.round(dashSafeNumber(lead.avgScore, 0)) + '%',
+                '痛點': getQuizPainLabel(lead.painTag),
+                '渴望': getQuizDesireLabel(lead.desireTag),
+                '推薦產品': getQuizProductLabel(lead.recommendedProduct),
+                '最弱維度': getQuizAxisLabel(lead.lowestAxis),
+                '溝通力(%)': Math.round(dashSafeNumber(axisNormalized.communication, 0)),
+                '視覺力(%)': Math.round(dashSafeNumber(axisNormalized.visual, 0)),
+                '效率力(%)': Math.round(dashSafeNumber(axisNormalized.efficiency, 0)),
+                '自動化力(%)': Math.round(dashSafeNumber(axisNormalized.automation, 0)),
+                '認知力(%)': Math.round(dashSafeNumber(axisNormalized.awareness, 0)),
+                '行動力(%)': Math.round(dashSafeNumber(axisNormalized.action, 0)),
+                '溝通力原始分': dashSafeNumber(axisTotals.communication, 0),
+                '視覺力原始分': dashSafeNumber(axisTotals.visual, 0),
+                '效率力原始分': dashSafeNumber(axisTotals.efficiency, 0),
+                '自動化力原始分': dashSafeNumber(axisTotals.automation, 0),
+                '認知力原始分': dashSafeNumber(axisTotals.awareness, 0),
+                '行動力原始分': dashSafeNumber(axisTotals.action, 0)
+            };
+        });
+
+        var summaryRows = [
+            { '分類': 'KPI', '項目': '測驗完成數', '數值': stats.total, '補充': '已完成測驗人數' },
+            { '分類': 'KPI', '項目': '平均 AI 等級', '數值': stats.total ? stats.avgLevel.toFixed(1) : '—', '補充': '1=旁觀者 · 5=原住民' },
+            { '分類': 'KPI', '項目': '測驗→報名轉換率', '數值': formatQuizPercent(stats.conversionRate, 1), '補充': stats.matchedPeopleCount + ' 人測驗後報名了工作坊' }
+        ];
+
+        QUIZ_DASH_LEVELS.forEach(function(item) {
+            summaryRows.push({
+                '分類': '等級分佈',
+                '項目': item.label,
+                '數值': stats.levelCounts[item.level] || 0,
+                '補充': formatQuizPercent(stats.total ? (stats.levelCounts[item.level] || 0) / stats.total * 100 : 0, 0)
+            });
+        });
+        QUIZ_DASH_PRODUCTS.forEach(function(item) {
+            summaryRows.push({
+                '分類': '推薦產品',
+                '項目': item.label,
+                '數值': stats.productCounts[item.key] || 0,
+                '補充': formatQuizPercent(stats.total ? (stats.productCounts[item.key] || 0) / stats.total * 100 : 0, 0)
+            });
+        });
+
+        var wb = XLSX.utils.book_new();
+        var wsSummary = XLSX.utils.json_to_sheet(summaryRows.length ? summaryRows : [{ '分類': '(無資料)' }]);
+        var wsDetails = XLSX.utils.json_to_sheet(detailRows.length ? detailRows : [{ '測驗日期': '(無資料)' }]);
+
+        [wsSummary, wsDetails].forEach(function(sheet) {
+            if (!sheet['!ref']) return;
+            var range = XLSX.utils.decode_range(sheet['!ref']);
+            var cols = [];
+            for (var c = range.s.c; c <= range.e.c; c++) {
+                var maxW = 10;
+                for (var r = range.s.r; r <= range.e.r; r++) {
+                    var cell = sheet[XLSX.utils.encode_cell({ r: r, c: c })];
+                    if (cell && cell.v != null) {
+                        var len = String(cell.v).length;
+                        if (len > maxW) maxW = Math.min(len, 40);
+                    }
+                }
+                cols.push({ wch: maxW + 2 });
+            }
+            sheet['!cols'] = cols;
+        });
+
+        XLSX.utils.book_append_sheet(wb, wsSummary, '測驗摘要');
+        XLSX.utils.book_append_sheet(wb, wsDetails, '測驗名單');
+
+        var dateStr = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(wb, 'AIFLOWTIME_Quiz_數據匯出_' + dateStr + '.xlsx');
+        hideLoadingOverlay();
+    } catch (err) {
+        console.error('Quiz Excel export error:', err);
+        hideLoadingOverlay();
+        alert('匯出失敗：' + err.message);
+    }
+}
+
 function renderDashboard() {
     if (!_dashDataReady.workshops || !_dashDataReady.regs || !_dashDataReady.users) return;
 
@@ -8797,6 +10892,7 @@ function renderDashboard() {
     renderDiscountChart(regs);
     renderRepeatCustomerInsight(regs);
     renderAvgConfirmTimeInsight(regs);
+    renderQuizDashboard();
 
     // ---- ACTION ITEMS ----
     renderActionItems(regs);
@@ -8807,6 +10903,599 @@ function setKpi(id, value, sub) {
     if (!el) return;
     el.querySelector('.kpi-value').textContent = value;
     if (sub !== undefined) el.querySelector('.kpi-sub').textContent = sub || '\u00a0';
+}
+
+function setQuizKpiTone(id, tone) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('accent', 'green', 'red');
+    if (tone) el.classList.add(tone);
+}
+
+function formatQuizPercent(value, digits) {
+    var places = digits == null ? 0 : digits;
+    var num = dashSafeNumber(value, 0);
+    var out = num.toFixed(places);
+    out = out.replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+    return out + '%';
+}
+
+function formatQuizDateTime(value) {
+    var date = getDashTimestampDate(value);
+    if (!date) return '—';
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, '0');
+    var d = String(date.getDate()).padStart(2, '0');
+    var hh = String(date.getHours()).padStart(2, '0');
+    var mm = String(date.getMinutes()).padStart(2, '0');
+    return y + '/' + m + '/' + d + ' ' + hh + ':' + mm;
+}
+
+function getQuizArchetypeLabel(key) {
+    return (QUIZ_DASH_ARCHETYPE_MAP[key] && QUIZ_DASH_ARCHETYPE_MAP[key].shortLabel) || '—';
+}
+
+function getQuizPainLabel(key) {
+    return (QUIZ_DASH_PAIN_MAP[key] && QUIZ_DASH_PAIN_MAP[key].shortLabel) || '—';
+}
+
+function getQuizDesireLabel(key) {
+    return (QUIZ_DASH_DESIRE_MAP[key] && QUIZ_DASH_DESIRE_MAP[key].shortLabel) || '—';
+}
+
+function getQuizProductLabel(key) {
+    return (QUIZ_DASH_PRODUCT_MAP[key] && QUIZ_DASH_PRODUCT_MAP[key].shortLabel) || '—';
+}
+
+function getQuizAxisLabel(key) {
+    return (QUIZ_DASH_AXIS_MAP[key] && QUIZ_DASH_AXIS_MAP[key].label) || '—';
+}
+
+function getQuizDashboardWindow(defaultDays) {
+    var now = new Date();
+    var end = _dashRangeTo ? new Date(Math.min(_dashRangeTo.getTime(), now.getTime())) : now;
+    var start;
+    if (_dashRangeFrom) {
+        start = new Date(_dashRangeFrom);
+    } else {
+        start = new Date(end);
+        start.setDate(start.getDate() - Math.max(1, defaultDays || 30) + 1);
+    }
+    start.setHours(0, 0, 0, 0);
+    var diffDays = Math.round((end - start) / 86400000);
+    if (diffDays > 90) {
+        start = new Date(end);
+        start.setDate(start.getDate() - 89);
+        start.setHours(0, 0, 0, 0);
+        diffDays = 90;
+    }
+    return {
+        start: start,
+        end: end,
+        days: Math.max(diffDays, 1),
+        titleText: _dashRangeMode === 'all'
+            ? '近 30 天'
+            : (_dashRangeMode === 'custom' ? '自訂期間' : ('近 ' + _dashRangeMode + ' 天'))
+    };
+}
+
+function buildQuizDashboardStats(leads, regs) {
+    var total = (leads || []).length;
+    var levelCounts = {};
+    var productCounts = {};
+    var painCounts = {};
+    var desireCounts = {};
+    var axisAverageTotals = {};
+    var lowestAxisCounts = {};
+    var matrix = {};
+    var matchedEmails = {};
+    var matchedLeadCount = 0;
+    var levelSum = 0;
+    var validLevelCount = 0;
+
+    QUIZ_DASH_LEVELS.forEach(function(item) {
+        levelCounts[item.level] = 0;
+        matrix[item.level] = {};
+        QUIZ_DASH_PRODUCTS.forEach(function(product) {
+            matrix[item.level][product.key] = 0;
+        });
+    });
+    QUIZ_DASH_PRODUCTS.forEach(function(item) { productCounts[item.key] = 0; });
+    QUIZ_DASH_PAINS.forEach(function(item) { painCounts[item.key] = 0; });
+    QUIZ_DASH_DESIRES.forEach(function(item) { desireCounts[item.key] = 0; });
+    QUIZ_DASH_AXES.forEach(function(item) {
+        axisAverageTotals[item.key] = 0;
+        lowestAxisCounts[item.key] = 0;
+    });
+
+    var regEmailTimes = {};
+    (regs || []).forEach(function(reg) {
+        var email = normalizeDashEmail(reg.userEmail || reg.email);
+        if (!email) return;
+        if (!regEmailTimes[email]) regEmailTimes[email] = [];
+        var regDate = getDashTimestampDate(reg.createdAt);
+        regEmailTimes[email].push(regDate ? regDate.getTime() : 0);
+    });
+    Object.keys(regEmailTimes).forEach(function(email) {
+        regEmailTimes[email].sort(function(a, b) { return a - b; });
+    });
+
+    (leads || []).forEach(function(lead) {
+        var level = getQuizLeadLevel(lead);
+        var productKey = QUIZ_DASH_PRODUCT_MAP[lead.recommendedProduct] ? lead.recommendedProduct : '';
+        var painKey = QUIZ_DASH_PAIN_MAP[lead.painTag] ? lead.painTag : '';
+        var desireKey = QUIZ_DASH_DESIRE_MAP[lead.desireTag] ? lead.desireTag : '';
+        var axisNormalized = lead.axisNormalized || {};
+        var lowestAxis = QUIZ_DASH_AXIS_MAP[lead.lowestAxis] ? lead.lowestAxis : '';
+
+        if (!lowestAxis) {
+            QUIZ_DASH_AXES.forEach(function(axis) {
+                var value = dashSafeNumber(axisNormalized[axis.key], 0);
+                if (!lowestAxis || value < dashSafeNumber(axisNormalized[lowestAxis], 0)) {
+                    lowestAxis = axis.key;
+                }
+            });
+        }
+
+        if (levelCounts[level] != null) {
+            levelCounts[level]++;
+            levelSum += level;
+            validLevelCount++;
+        }
+        if (productKey) productCounts[productKey]++;
+        if (painKey) painCounts[painKey]++;
+        if (desireKey) desireCounts[desireKey]++;
+        if (level && productKey && matrix[level]) matrix[level][productKey]++;
+        if (lowestAxis && lowestAxisCounts[lowestAxis] != null) lowestAxisCounts[lowestAxis]++;
+
+        QUIZ_DASH_AXES.forEach(function(axis) {
+            axisAverageTotals[axis.key] += dashSafeNumber(axisNormalized[axis.key], 0);
+        });
+
+        var email = normalizeDashEmail(lead.email);
+        if (email) {
+            var quizDate = getDashTimestampDate(lead.timestamp);
+            var quizTime = quizDate ? quizDate.getTime() : 0;
+            var matches = regEmailTimes[email] || [];
+            var isMatched = matches.some(function(time) { return !time || time >= quizTime; });
+            if (isMatched) {
+                matchedLeadCount++;
+                matchedEmails[email] = true;
+            }
+        }
+    });
+
+    var axisAverages = {};
+    var weakestRatios = {};
+    var biggestGapAxis = '';
+    QUIZ_DASH_AXES.forEach(function(axis) {
+        axisAverages[axis.key] = total ? Math.round(axisAverageTotals[axis.key] / total) : 0;
+        weakestRatios[axis.key] = total ? (lowestAxisCounts[axis.key] / total * 100) : 0;
+        if (!biggestGapAxis || weakestRatios[axis.key] > weakestRatios[biggestGapAxis]) {
+            biggestGapAxis = axis.key;
+        }
+    });
+
+    return {
+        total: total,
+        avgLevel: validLevelCount ? (levelSum / validLevelCount) : 0,
+        matchedLeadCount: matchedLeadCount,
+        matchedPeopleCount: Object.keys(matchedEmails).length,
+        conversionRate: total ? (matchedLeadCount / total * 100) : 0,
+        levelCounts: levelCounts,
+        productCounts: productCounts,
+        painCounts: painCounts,
+        desireCounts: desireCounts,
+        axisAverages: axisAverages,
+        weakestRatios: weakestRatios,
+        matrix: matrix,
+        recentLeads: (leads || []).slice(0, 20),
+        biggestGapAxis: biggestGapAxis
+    };
+}
+
+function renderQuizDashboard() {
+    var loading = document.getElementById('quizDashLoading');
+    var content = document.getElementById('quizDashContent');
+    if (!loading || !content) return;
+
+    if (!_dashDataReady.quiz) {
+        loading.style.display = 'flex';
+        content.style.display = 'none';
+        return;
+    }
+
+    loading.style.display = 'none';
+    content.style.display = 'block';
+
+    var regsForMatch = _dashRegistrations.filter(function(r) { return r.status !== 'deleted'; });
+    var leads = filterQuizLeadsByDateRange(_dashQuizLeads);
+    var stats = buildQuizDashboardStats(leads, regsForMatch);
+
+    renderQuizKpis(stats);
+    renderQuizLevelDistribution(stats);
+    renderQuizProductDistribution(stats);
+    renderQuizPainDistribution(stats);
+    renderQuizDesireDistribution(stats);
+    renderQuizRadarSummary(stats);
+    renderQuizTrendChart(leads);
+    renderQuizMatrixTable(stats);
+    renderQuizRecentTable(stats.recentLeads);
+}
+
+function renderQuizKpis(stats) {
+    setKpi('quizKpiCompleted', stats.total, '已完成測驗人數');
+    setQuizKpiTone('quizKpiCompleted', '');
+
+    setKpi('quizKpiAvgLevel', stats.total ? stats.avgLevel.toFixed(1) : '—', '1=旁觀者 · 5=原住民');
+    setQuizKpiTone('quizKpiAvgLevel', 'accent');
+
+    setKpi(
+        'quizKpiConversion',
+        stats.total ? formatQuizPercent(stats.conversionRate, 1) : '0%',
+        stats.matchedPeopleCount + ' 人測驗後報名了工作坊'
+    );
+    setQuizKpiTone(
+        'quizKpiConversion',
+        stats.conversionRate > 10 ? 'green' : (stats.conversionRate >= 5 ? 'accent' : 'red')
+    );
+}
+
+function renderQuizLevelDistribution(stats) {
+    var canvas = document.getElementById('chartQuizLevels');
+    if (!canvas) return;
+
+    var labels = QUIZ_DASH_LEVELS.map(function(item) { return item.label; });
+    var values = QUIZ_DASH_LEVELS.map(function(item) { return stats.levelCounts[item.level] || 0; });
+    var colors = QUIZ_DASH_LEVELS.map(function(item) { return item.color; });
+    var maxValue = Math.max.apply(null, values.concat([1]));
+
+    if (_dashCharts.quizLevels) _dashCharts.quizLevels.destroy();
+    _dashCharts.quizLevels = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '完成人數',
+                data: values,
+                backgroundColor: colors,
+                borderRadius: 6,
+                barThickness: 24
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { right: 54 } },
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0, font: { size: 11 } },
+                    suggestedMax: maxValue + 1,
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                y: {
+                    ticks: { font: { size: 12, family: "'Noto Sans TC', sans-serif" } },
+                    grid: { display: false }
+                }
+            }
+        },
+        plugins: [{
+            id: 'quizLevelValueLabels',
+            afterDatasetsDraw: function(chart) {
+                var ctx = chart.ctx;
+                var meta = chart.getDatasetMeta(0);
+                ctx.save();
+                ctx.font = "700 11px 'Noto Sans TC', sans-serif";
+                ctx.textBaseline = 'middle';
+                meta.data.forEach(function(bar, index) {
+                    var value = values[index] || 0;
+                    var pct = stats.total ? Math.round(value / stats.total * 100) : 0;
+                    var label = value + ' (' + pct + '%)';
+                    var props = bar.getProps(['x', 'y', 'base'], true);
+                    var inside = props.x - props.base > 72;
+                    ctx.fillStyle = inside ? '#FFFFFF' : '#7A7A7A';
+                    ctx.textAlign = inside ? 'right' : 'left';
+                    ctx.fillText(label, inside ? props.x - 8 : props.x + 8, props.y);
+                });
+                ctx.restore();
+            }
+        }]
+    });
+}
+
+function renderQuizDoughnutChart(chartKey, canvasId, items, counts) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    var labels = (items || []).map(function(item) { return item.label; });
+    var values = (items || []).map(function(item) { return counts[item.key] || 0; });
+    var colors = (items || []).map(function(item) { return item.color; });
+    var hasData = values.some(function(value) { return value > 0; });
+
+    if (_dashCharts[chartKey]) _dashCharts[chartKey].destroy();
+    _dashCharts[chartKey] = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: hasData ? labels : ['無資料'],
+            datasets: [{
+                data: hasData ? values : [1],
+                backgroundColor: hasData ? colors : ['#D1D5DB'],
+                borderWidth: 0,
+                spacing: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 14,
+                        font: { size: 11, family: "'Noto Sans TC', sans-serif" },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderQuizProductDistribution(stats) {
+    renderQuizDoughnutChart('quizProducts', 'chartQuizProducts', QUIZ_DASH_PRODUCTS, stats.productCounts);
+}
+
+function renderQuizPainDistribution(stats) {
+    renderQuizDoughnutChart('quizPain', 'chartQuizPain', QUIZ_DASH_PAINS, stats.painCounts);
+}
+
+function renderQuizDesireDistribution(stats) {
+    renderQuizDoughnutChart('quizDesire', 'chartQuizDesire', QUIZ_DASH_DESIRES, stats.desireCounts);
+}
+
+function quizRadarPoint(index, pct, radius, cx, cy) {
+    var angle = (-Math.PI / 2) + ((Math.PI * 2) / QUIZ_DASH_AXES.length) * index;
+    var distance = radius * (dashSafeNumber(pct, 0) / 100);
+    return {
+        x: cx + Math.cos(angle) * distance,
+        y: cy + Math.sin(angle) * distance
+    };
+}
+
+function quizRadarTextAnchor(x, cx) {
+    if (Math.abs(x - cx) < 12) return 'middle';
+    return x < cx ? 'end' : 'start';
+}
+
+function quizRadarPolygonPoints(values, radius, cx, cy) {
+    return QUIZ_DASH_AXES.map(function(axis, index) {
+        var point = quizRadarPoint(index, values[axis.key] || 0, radius, cx, cy);
+        return point.x.toFixed(2) + ',' + point.y.toFixed(2);
+    }).join(' ');
+}
+
+function buildQuizRadarSvg(axisAverages) {
+    var cx = 200;
+    var cy = 190;
+    var maxRadius = 112;
+    var labelRadius = 154;
+    var ringValues = [20, 40, 60, 80, 100];
+    var allFull = {};
+    QUIZ_DASH_AXES.forEach(function(axis) { allFull[axis.key] = 100; });
+
+    var ringHtml = ringValues.map(function(value) {
+        var ringShape = {};
+        QUIZ_DASH_AXES.forEach(function(axis) { ringShape[axis.key] = value; });
+        return '<polygon class="quiz-radar-ring" points="' + quizRadarPolygonPoints(ringShape, maxRadius, cx, cy) + '"></polygon>';
+    }).join('');
+
+    var spokeHtml = QUIZ_DASH_AXES.map(function(axis, index) {
+        var point = quizRadarPoint(index, 100, maxRadius, cx, cy);
+        return '<line class="quiz-radar-spoke" x1="' + cx + '" y1="' + cy + '" x2="' + point.x.toFixed(2) + '" y2="' + point.y.toFixed(2) + '"></line>';
+    }).join('');
+
+    var areaHtml = '<polygon class="quiz-radar-area" points="' + quizRadarPolygonPoints(axisAverages, maxRadius, cx, cy) + '"></polygon>';
+    var pointHtml = QUIZ_DASH_AXES.map(function(axis, index) {
+        var point = quizRadarPoint(index, axisAverages[axis.key] || 0, maxRadius, cx, cy);
+        return '<circle class="quiz-radar-point" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="5"></circle>';
+    }).join('');
+
+    var labelHtml = QUIZ_DASH_AXES.map(function(axis, index) {
+        var point = quizRadarPoint(index, 100, labelRadius, cx, cy);
+        var anchor = quizRadarTextAnchor(point.x, cx);
+        var value = Math.round(axisAverages[axis.key] || 0);
+        var groupY = point.y + (index === 0 ? -12 : index === 3 ? 10 : 0);
+        return '<g transform="translate(' + point.x.toFixed(2) + ' ' + groupY.toFixed(2) + ')">' +
+            '<text text-anchor="' + anchor + '" class="quiz-radar-label">' + escapeHtml(axis.label) + '</text>' +
+            '<text y="16" text-anchor="' + anchor + '" class="quiz-radar-value">' + value + '%</text>' +
+            '</g>';
+    }).join('');
+
+    return '<svg class="quiz-radar-svg" viewBox="0 0 400 400" role="img" aria-label="AI 六維能力雷達圖">' +
+        ringHtml + spokeHtml + areaHtml + pointHtml + labelHtml +
+    '</svg>';
+}
+
+function renderQuizRadarSummary(stats) {
+    var stage = document.getElementById('quizRadarStage');
+    var summaryWrap = document.getElementById('quizAxisSummaryWrap');
+    if (stage) stage.innerHTML = buildQuizRadarSvg(stats.axisAverages || {});
+    if (!summaryWrap) return;
+
+    var rows = QUIZ_DASH_AXES.map(function(axis) {
+        var avg = Math.round(stats.axisAverages[axis.key] || 0);
+        var weakRatio = stats.weakestRatios[axis.key] || 0;
+        var isGap = stats.total > 0 && axis.key === stats.biggestGapAxis;
+        return '<tr' + (isGap ? ' class="is-gap-row"' : '') + '>' +
+            '<td>' + escapeHtml(axis.label) + '</td>' +
+            '<td>' + avg + '%</td>' +
+            '<td>' + formatQuizPercent(weakRatio, 0) + ' 人最弱項</td>' +
+        '</tr>';
+    }).join('');
+
+    summaryWrap.innerHTML = '<table class="action-table"><thead><tr>' +
+        '<th>能力維度</th><th>全體平均</th><th>最常見弱項比例</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function buildQuizTrendSeries(leads) {
+    var range = getQuizDashboardWindow(30);
+    var countsByDay = {};
+
+    (leads || []).forEach(function(lead) {
+        var date = getDashTimestampDate(lead.timestamp);
+        if (!date) return;
+        if (date.getTime() < range.start.getTime() || date.getTime() > range.end.getTime()) return;
+        var key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+        countsByDay[key] = (countsByDay[key] || 0) + 1;
+    });
+
+    var labels = [];
+    var values = [];
+    for (var i = 0; i <= range.days; i++) {
+        var day = new Date(range.start);
+        day.setDate(day.getDate() + i);
+        var key = day.getFullYear() + '-' + String(day.getMonth() + 1).padStart(2, '0') + '-' + String(day.getDate()).padStart(2, '0');
+        labels.push(String(day.getMonth() + 1) + '/' + String(day.getDate()));
+        values.push(countsByDay[key] || 0);
+    }
+    return { labels: labels, values: values, titleText: range.titleText };
+}
+
+function renderQuizTrendChart(leads) {
+    var canvas = document.getElementById('chartQuizTrend');
+    if (!canvas) return;
+
+    var series = buildQuizTrendSeries(leads);
+    var titleEl = document.getElementById('chartQuizTrendTitle');
+    if (titleEl) titleEl.textContent = '測驗完成趨勢（' + series.titleText + '）';
+
+    if (_dashCharts.quizTrend) _dashCharts.quizTrend.destroy();
+    _dashCharts.quizTrend = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: series.labels,
+            datasets: [{
+                label: '完成數',
+                data: series.values,
+                borderColor: '#D97757',
+                backgroundColor: 'rgba(217,119,87,0.12)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, precision: 0, font: { size: 11 } },
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                x: {
+                    ticks: { font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderQuizMatrixTable(stats) {
+    var wrap = document.getElementById('quizMatrixWrap');
+    if (!wrap) return;
+
+    var headerHtml = QUIZ_DASH_PRODUCTS.map(function(product) {
+        return '<th>' + escapeHtml(product.shortLabel) + '</th>';
+    }).join('');
+
+    var bodyHtml = QUIZ_DASH_LEVELS.map(function(levelMeta) {
+        var row = stats.matrix[levelMeta.level] || {};
+        var rowValues = QUIZ_DASH_PRODUCTS.map(function(product) { return row[product.key] || 0; });
+        var rowMax = Math.max.apply(null, rowValues.concat([0]));
+        var cells = QUIZ_DASH_PRODUCTS.map(function(product) {
+            var value = row[product.key] || 0;
+            var cls = rowMax > 0 && value === rowMax ? ' class="is-max"' : '';
+            return '<td' + cls + '>' + value + '</td>';
+        }).join('');
+        return '<tr><td>' + escapeHtml(levelMeta.label) + '</td>' + cells + '</tr>';
+    }).join('');
+
+    wrap.innerHTML = '<table class="quiz-matrix-table"><thead><tr><th>等級</th>' + headerHtml + '</tr></thead><tbody>' + bodyHtml + '</tbody></table>';
+}
+
+function renderQuizRecentTable(leads) {
+    var wrap = document.getElementById('quizRecentTableBody');
+    if (!wrap) return;
+
+    if (!(leads || []).length) {
+        wrap.innerHTML = '<div class="dash-empty">此時段未有測驗完成紀錄。</div>';
+        return;
+    }
+
+    var html = '<table class="action-table"><thead><tr>' +
+        '<th>日期</th><th>姓名</th><th>Email</th><th>等級</th><th>類型</th><th>痛點</th><th>渴望</th><th>推薦產品</th><th>最弱維度</th>' +
+        '</tr></thead><tbody>';
+
+    (leads || []).forEach(function(lead, index) {
+        var detailId = 'quizLeadDetail_' + index;
+        var level = getQuizLeadLevel(lead);
+        var avgScore = dashSafeNumber(lead.avgScore, 0);
+        var chips = QUIZ_DASH_AXES.map(function(axis) {
+            var value = Math.round(dashSafeNumber((lead.axisNormalized || {})[axis.key], 0));
+            return '<div class="quiz-axis-chip">' +
+                '<div class="quiz-axis-chip-label">' + escapeHtml(axis.label) + '</div>' +
+                '<div class="quiz-axis-chip-value">' + value + '%</div>' +
+            '</div>';
+        }).join('');
+
+        html += '<tr class="quiz-lead-row" data-detail-id="' + detailId + '" onclick="toggleQuizLeadRow(this)">' +
+            '<td>' + escapeHtml(formatQuizDateTime(lead.timestamp)) + '</td>' +
+            '<td style="font-weight:700;">' + escapeHtml(lead.name || '—') + '</td>' +
+            '<td>' + escapeHtml(lead.email || '—') + '</td>' +
+            '<td>' + (level ? ('L' + level) : '—') + '</td>' +
+            '<td>' + escapeHtml(getQuizArchetypeLabel(lead.archetype)) + '</td>' +
+            '<td>' + escapeHtml(getQuizPainLabel(lead.painTag)) + '</td>' +
+            '<td>' + escapeHtml(getQuizDesireLabel(lead.desireTag)) + '</td>' +
+            '<td>' + escapeHtml(getQuizProductLabel(lead.recommendedProduct)) + '</td>' +
+            '<td>' + escapeHtml(getQuizAxisLabel(lead.lowestAxis)) + '</td>' +
+        '</tr>' +
+        '<tr class="quiz-lead-detail-row" id="' + detailId + '">' +
+            '<td colspan="9" class="quiz-lead-detail-cell">' +
+                '<div class="quiz-lead-detail-panel">' +
+                    '<div class="quiz-lead-detail-head">' +
+                        '<div class="quiz-lead-detail-title">完整六維能力分數</div>' +
+                        '<div class="quiz-lead-detail-meta">平均 AI 能力值 ' + Math.round(avgScore) + ' / 100</div>' +
+                    '</div>' +
+                    '<div class="quiz-axis-chip-grid">' + chips + '</div>' +
+                '</div>' +
+            '</td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+}
+
+function toggleQuizLeadRow(rowEl) {
+    if (!rowEl) return;
+    var detailId = rowEl.getAttribute('data-detail-id');
+    if (!detailId) return;
+    var detailRow = document.getElementById(detailId);
+    if (!detailRow) return;
+    var isOpen = detailRow.classList.contains('open');
+    rowEl.classList.toggle('is-open', !isOpen);
+    detailRow.classList.toggle('open', !isOpen);
 }
 
 function renderFunnel(totalSubmitted, paymentUploaded, confirmed) {

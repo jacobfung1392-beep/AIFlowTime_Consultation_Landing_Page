@@ -33,6 +33,13 @@ function sanitizeHeroTitleHtml(html) {
     if (html == null || html === '') return '';
     var raw = String(html).trim();
     if (!raw) return '';
+
+    if (/&lt;|&gt;|&#60;|&#62;|&#x3[cCeE];/.test(raw)) {
+        var decoder = document.createElement('textarea');
+        decoder.innerHTML = raw;
+        raw = decoder.value;
+    }
+
     if (!/[<>]/.test(raw)) return escHtml(raw).replace(/\n/g, '<br>');
 
     function cleanChildren(parent) {
@@ -79,6 +86,8 @@ function sanitizeHeroTitleHtml(html) {
                     var fs = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
                     if (/^[\d.]+\s*(px|em|rem|%)$/i.test(fs)) allowed.push('font-size:' + fs);
                 }
+                // Do not unwrap font-size-only spans whose sole child is another span — that drops
+                // font-size when users apply color after size (common: outer size, inner color).
                 if (allowed.length) {
                     var sp = document.createElement('span');
                     sp.setAttribute('style', allowed.join(';'));
@@ -101,6 +110,33 @@ function sanitizeHeroTitleHtml(html) {
     return out.innerHTML;
 }
 
+/**
+ * Shared rich-text renderer for page-layout CMS fields.
+ * Reuses the hero sanitizer so text adjustment bars and rich array fields
+ * render consistently in preview and on the live page.
+ */
+function aiflowRenderRichTextHtml(value) {
+    if (value == null) return '';
+    var raw = String(value);
+    if (!raw.trim()) return '';
+    if (typeof sanitizeHeroTitleHtml === 'function') return sanitizeHeroTitleHtml(raw);
+    return escHtml(raw).replace(/\n/g, '<br>');
+}
+
+function aiflowSetRichText(el, value) {
+    if (!el) return '';
+    var html = aiflowRenderRichTextHtml(value);
+    el.innerHTML = html;
+    return html;
+}
+
+function aiflowRichTextHasVisibleText(value) {
+    return String(aiflowRenderRichTextHtml(value) || '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 function fixStorageUrl(url) {
     if (!url) return '';
     if (url.startsWith('blob:') || url.startsWith('data:')) return url;
@@ -111,6 +147,166 @@ function fixStorageUrl(url) {
     }
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
     return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(url);
+}
+
+function _aiflowTrimString(val) {
+    return String(val == null ? '' : val).trim();
+}
+
+function _aiflowIsPlainObject(val) {
+    return Object.prototype.toString.call(val) === '[object Object]';
+}
+
+function _aiflowHasMeaningfulValue(val) {
+    if (val == null) return false;
+    if (typeof val === 'string') return _aiflowTrimString(val) !== '';
+    if (Array.isArray(val)) return val.length > 0;
+    if (_aiflowIsPlainObject(val)) return Object.keys(val).length > 0;
+    return true;
+}
+
+function _aiflowNormalizeSubmissionAnswers(val) {
+    if (val == null) return '';
+    if (typeof val === 'string') return _aiflowTrimString(val);
+    if (Array.isArray(val)) {
+        return val.map(function(item) {
+            return _aiflowNormalizeSubmissionAnswers(item);
+        }).filter(function(item) {
+            return _aiflowHasMeaningfulValue(item);
+        });
+    }
+    if (_aiflowIsPlainObject(val)) {
+        var out = {};
+        Object.keys(val).forEach(function(key) {
+            var normalized = _aiflowNormalizeSubmissionAnswers(val[key]);
+            if (_aiflowHasMeaningfulValue(normalized)) out[key] = normalized;
+        });
+        return out;
+    }
+    return val;
+}
+
+function _aiflowFlattenSubmissionValues(val, bucket) {
+    bucket = bucket || [];
+    if (!_aiflowHasMeaningfulValue(val)) return bucket;
+    if (typeof val === 'string') {
+        bucket.push(_aiflowTrimString(val));
+        return bucket;
+    }
+    if (Array.isArray(val)) {
+        val.forEach(function(item) {
+            _aiflowFlattenSubmissionValues(item, bucket);
+        });
+        return bucket;
+    }
+    if (_aiflowIsPlainObject(val)) {
+        Object.keys(val).forEach(function(key) {
+            _aiflowFlattenSubmissionValues(val[key], bucket);
+        });
+        return bucket;
+    }
+    bucket.push(String(val));
+    return bucket;
+}
+
+function _aiflowBuildFormSubmissionDocId(input, explicitDocId) {
+    var rawDocId = _aiflowTrimString(explicitDocId || '');
+    if (rawDocId) return rawDocId;
+    var sourceCollection = _aiflowTrimString(input && input.sourceCollection);
+    var sourceDocId = _aiflowTrimString(input && input.sourceDocId);
+    if (!sourceCollection || !sourceDocId) return '';
+    return sourceCollection + '__' + sourceDocId;
+}
+
+function buildFormSubmissionDoc(input) {
+    input = input || {};
+    if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.firestore.FieldValue) {
+        throw new Error('Firebase Firestore is unavailable for form submission mirroring.');
+    }
+
+    var answers = _aiflowNormalizeSubmissionAnswers(input.answers || input.rawAnswers || {});
+    var doc = {
+        formType: _aiflowTrimString(input.formType || 'other'),
+        sourceKey: _aiflowTrimString(input.sourceKey || input.source || ''),
+        sourceLabel: _aiflowTrimString(input.sourceLabel || ''),
+        sourcePage: _aiflowTrimString(input.sourcePage || input.page || ''),
+        sourcePath: _aiflowTrimString(input.sourcePath || (typeof window !== 'undefined' ? window.location.pathname : '')),
+        sourceUrl: _aiflowTrimString(input.sourceUrl || (typeof window !== 'undefined' ? window.location.href : '')),
+        sourceCollection: _aiflowTrimString(input.sourceCollection || ''),
+        sourceDocId: _aiflowTrimString(input.sourceDocId || ''),
+        sheetTab: _aiflowTrimString(input.sheetTab || ''),
+        importSource: _aiflowTrimString(input.importSource || 'live-form'),
+        contactName: _aiflowTrimString(input.contactName || input.name || ''),
+        phone: _aiflowTrimString(input.phone || ''),
+        whatsapp: _aiflowTrimString(input.whatsapp || ''),
+        email: _aiflowTrimString(input.email || ''),
+        instagram: _aiflowTrimString(input.instagram || input.igAccount || ''),
+        clientSubmittedAt: _aiflowTrimString(input.clientSubmittedAt || input.timestamp || new Date().toISOString()),
+        submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        answers: answers
+    };
+    var searchParts = [
+        doc.formType,
+        doc.sourceKey,
+        doc.sourceLabel,
+        doc.sourcePage,
+        doc.sourcePath,
+        doc.contactName,
+        doc.phone,
+        doc.whatsapp,
+        doc.email,
+        doc.instagram
+    ];
+    searchParts = searchParts.concat(_aiflowFlattenSubmissionValues(answers, []));
+    doc.searchText = searchParts.join(' ').toLowerCase().replace(/\s+/g, ' ').trim();
+    return doc;
+}
+
+function saveFormSubmissionMirror(input, opts) {
+    opts = opts || {};
+
+    function writeWithDb(db) {
+        if (!db) return Promise.reject(new Error('Firestore unavailable'));
+        try {
+            var docData = buildFormSubmissionDoc(input);
+            var explicitDocId = _aiflowBuildFormSubmissionDocId(input, opts.docId);
+            var ref = explicitDocId
+                ? db.collection('formSubmissions').doc(explicitDocId)
+                : db.collection('formSubmissions').doc();
+            return ref.set(docData, { merge: !!explicitDocId }).then(function() {
+                return { id: ref.id, data: docData };
+            });
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }
+
+    if (opts.db) return writeWithDb(opts.db);
+
+    return new Promise(function(resolve, reject) {
+        try {
+            if (typeof initFirebase === 'function') {
+                initFirebase(function(app) {
+                    try {
+                        writeWithDb(app.firestore()).then(resolve).catch(reject);
+                    } catch (err) {
+                        reject(err);
+                    }
+                }, { waitForAuthPersistence: false });
+                return;
+            }
+            if (typeof firebase !== 'undefined' && firebase.firestore) {
+                writeWithDb(firebase.firestore()).then(resolve).catch(reject);
+                return;
+            }
+        } catch (err) {
+            reject(err);
+            return;
+        }
+        reject(new Error('Firebase unavailable'));
+    });
 }
 
 /**
@@ -640,10 +836,33 @@ function _submitFreeMaterialRequest(e) {
 
     var leadRef = db.collection('freeMaterialLeads').doc();
     leadData.mailDocId = leadRef.id;
+    var formMirrorPromise = Promise.resolve();
+    if (typeof saveFormSubmissionMirror === 'function') {
+        formMirrorPromise = saveFormSubmissionMirror({
+            formType: 'free-material',
+            sourceKey: 'free-material-modal',
+            sourceLabel: '免費資料下載',
+            sourcePage: meta.pageTitle || document.title || '',
+            sourcePath: meta.pagePath || window.location.pathname,
+            sourceUrl: window.location.href,
+            sourceCollection: 'freeMaterialLeads',
+            sourceDocId: leadRef.id,
+            contactName: name,
+            email: email,
+            answers: {
+                materialTitle: cfg.materialTitle || '',
+                documentName: docName,
+                pageKey: meta.pageKey || '',
+                sectionId: meta.sectionId || '',
+                consentAccepted: consentAccepted
+            }
+        }, { db: db });
+    }
 
     Promise.all([
         leadRef.set(leadData),
-        db.collection('mail').doc(leadRef.id).set(mailData)
+        db.collection('mail').doc(leadRef.id).set(mailData),
+        formMirrorPromise
     ]).then(function() {
         status.textContent = cfg.successMessage || '已寄送，請查看你的 email。';
         status.className = 'af-free-material-status success';
@@ -657,4 +876,172 @@ function _submitFreeMaterialRequest(e) {
         submitBtn.disabled = false;
         _aiflowFreeMaterialState.busy = false;
     });
+}
+
+/**
+ * Apply CMS page-level SEO from a Firestore `pageLayouts` document.
+ * Uses metaTitle, pageName (display name), and metaDescription when present.
+ *
+ * @param {Object|null|undefined} data - Result of doc.data(), or null if no doc
+ * @param {Object} [options]
+ * @param {string} [options.fallbackTitle] - Default <title> / og:title when CMS leaves SEO title blank
+ */
+function maybeRedirectToCanonicalPageSlug(data) {
+    if (!data || typeof window === 'undefined') return false;
+    var params;
+    try {
+        params = new URLSearchParams(window.location && window.location.search ? window.location.search : '');
+    } catch (err) {
+        params = null;
+    }
+    if (params && params.get('preview') === '1') return false;
+    var slug = String((window.__AIFLOWTIME_PAGE_SLUG || data.pageSlug || '')).trim().replace(/^\/+/, '').toLowerCase();
+    if (!slug || !/^[a-z0-9-]+$/.test(slug)) return false;
+    var currentPath = String((window.location && window.location.pathname) || '/').replace(/\/+$/, '') || '/';
+    var targetPath = '/' + slug;
+    if (currentPath === targetPath) return false;
+    var nextUrl = targetPath + String((window.location && window.location.search) || '');
+    window.location.replace(nextUrl);
+    return true;
+}
+
+function applyFirestorePageMeta(data, options) {
+    options = options || {};
+    if (!data || typeof document === 'undefined') return;
+    if (maybeRedirectToCanonicalPageSlug(data)) return;
+
+    var fallbackTitle = String(options.fallbackTitle || document.title || '').trim();
+
+    function upsert(isProperty, key, val) {
+        var realSel = isProperty
+            ? 'meta[property="' + key.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]'
+            : 'meta[name="' + key.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]';
+        var el = document.head.querySelector(realSel);
+        if (!val) {
+            if (el) el.remove();
+            return;
+        }
+        if (!el) {
+            el = document.createElement('meta');
+            if (isProperty) el.setAttribute('property', key);
+            else el.setAttribute('name', key);
+            document.head.appendChild(el);
+        }
+        el.setAttribute('content', val);
+    }
+
+    var seoTitle = String(data.metaTitle || '').trim();
+    var pageName = String(data.pageName || '').trim();
+    var docTitle = seoTitle || pageName;
+    if (docTitle) document.title = docTitle;
+
+    var desc = String(data.metaDescription || '').trim();
+    var shareTitle = docTitle || fallbackTitle;
+
+    upsert(false, 'description', desc);
+    upsert(true, 'og:title', shareTitle);
+    upsert(true, 'og:description', desc);
+    upsert(false, 'twitter:title', shareTitle);
+    upsert(false, 'twitter:description', desc);
+}
+
+/**
+ * Layout editor preview bridge.
+ * Handles:
+ * - live section updates from parent iframe host
+ * - scroll/highlight requests from the editor
+ * - click-to-select section messaging back to the editor
+ * - runtime enable/disable of preview click selection
+ */
+function initLayoutPreviewBridge(options) {
+    options = options || {};
+    if (typeof window === 'undefined' || typeof document === 'undefined') return null;
+    if (window.__layoutPreviewBridgeInit) return window.__layoutPreviewBridgeApi || null;
+
+    var onLayoutPreview = typeof options.onLayoutPreview === 'function' ? options.onLayoutPreview : null;
+    var sectionSelector = options.sectionSelector || '[data-section-id]';
+    var clickSelectEnabled = options.clickSelectEnabled !== false;
+
+    function _allSectionEls() {
+        return document.querySelectorAll(sectionSelector);
+    }
+
+    function _findSectionEl(sectionId) {
+        if (!sectionId) return null;
+        return document.querySelector('[data-section-id="' + String(sectionId).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"]');
+    }
+
+    function _clearPreviewSelection() {
+        _allSectionEls().forEach(function(el) {
+            el.classList.remove('preview-selected');
+        });
+    }
+
+    function _syncPreviewClickUi() {
+        document.documentElement.classList.toggle('layout-preview-click-select-enabled', !!clickSelectEnabled);
+    }
+
+    if (!document.getElementById('layoutPreviewBridgeStyle')) {
+        var bridgeStyle = document.createElement('style');
+        bridgeStyle.id = 'layoutPreviewBridgeStyle';
+        bridgeStyle.textContent =
+            'html.layout-preview-click-select-enabled [data-section-id] { cursor: pointer; transition: outline 0.15s, outline-offset 0.15s; outline: 2px solid transparent; outline-offset: -2px; }' +
+            'html.layout-preview-click-select-enabled [data-section-id]:hover { outline: 2px solid rgba(217,119,87,0.55); outline-offset: -2px; }' +
+            '[data-section-id].preview-selected { outline: 2px solid #D97757; outline-offset: -2px; }';
+        document.head.appendChild(bridgeStyle);
+    }
+
+    window.addEventListener('message', function(e) {
+        if (!e || !e.data) return;
+        if (e.data.type === 'layoutPreview' && onLayoutPreview && Array.isArray(e.data.sections)) {
+            onLayoutPreview(e.data.sections, e.data);
+            return;
+        }
+        if (e.data.type === 'scrollToSection' && e.data.sectionId) {
+            var target = _findSectionEl(e.data.sectionId);
+            if (target && typeof target.scrollIntoView === 'function') {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+        if (e.data.type === 'highlightSection') {
+            _clearPreviewSelection();
+            if (e.data.sectionId) {
+                var active = _findSectionEl(e.data.sectionId);
+                if (active) active.classList.add('preview-selected');
+            }
+            return;
+        }
+        if (e.data.type === 'setPreviewClickSelectEnabled') {
+            clickSelectEnabled = e.data.enabled !== false;
+            _syncPreviewClickUi();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        var secEl = e.target && e.target.closest ? e.target.closest(sectionSelector) : null;
+        if (!secEl) return;
+        if (!clickSelectEnabled) return;
+        e.preventDefault();
+        e.stopPropagation();
+        _clearPreviewSelection();
+        secEl.classList.add('preview-selected');
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+                type: 'previewSectionClick',
+                sectionId: secEl.getAttribute('data-section-id')
+            }, '*');
+        }
+    }, true);
+
+    _syncPreviewClickUi();
+
+    window.__layoutPreviewBridgeApi = {
+        setClickSelectEnabled: function(enabled) {
+            clickSelectEnabled = enabled !== false;
+            _syncPreviewClickUi();
+        }
+    };
+    window.__layoutPreviewBridgeInit = true;
+    return window.__layoutPreviewBridgeApi;
 }

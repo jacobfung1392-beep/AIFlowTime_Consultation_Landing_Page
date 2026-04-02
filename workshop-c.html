@@ -1225,7 +1225,7 @@
     </section>
 
     <!-- PROBLEM SECTION -->
-    <section id="problem" data-section-id="wc-problem" data-section-type="pain-points">
+    <section id="problem" data-section-id="wc-problem" data-section-type="problem-grid">
         <div class="container">
             <div class="reveal">
                 <div class="section-label">— 問題在哪 —</div>
@@ -1528,7 +1528,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js"></script>
+<script src="/js/shared-utils.js?v=2"></script>
+<script src="/js/page-background-runtime.js"></script>
 
 <script>
 // =============================================
@@ -1626,32 +1627,114 @@ function toggleFaq(el) {
 // =============================================
 // LAYOUT ENGINE (for Layout Editor integration)
 // =============================================
-var _isPreviewMode = new URLSearchParams(window.location.search).has('preview');
+var _layoutQuery = new URLSearchParams(window.location.search);
+var _isPreviewMode = _layoutQuery.has('preview');
+var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'workshop-c';
+
+function _normalizeLayoutPageStatus(status) {
+    var raw = String(status || '').trim().toLowerCase();
+    if (raw === 'unpublished') return 'unpublished';
+    if (raw === 'archived') return 'archived';
+    return 'published';
+}
+
+function _layoutAllowsPublicView(data) {
+    if (_isPreviewMode) return true;
+    return _normalizeLayoutPageStatus(data && data.pageStatus) === 'published';
+}
+
+function _showLayoutUnavailableState() {
+    if (document.getElementById('layoutUnavailableState')) return;
+    var overlay = document.createElement('div');
+    overlay.id = 'layoutUnavailableState';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(245,244,242,0.98);';
+    overlay.innerHTML = '<div style="max-width:420px;padding:32px 28px;border-radius:24px;background:#fff;box-shadow:0 16px 48px rgba(0,0,0,0.12);text-align:center;font-family:inherit;">' +
+        '<div style="font-size:34px;margin-bottom:12px;">🚧</div>' +
+        '<h2 style="margin:0 0 10px;font-size:24px;">Page Unavailable</h2>' +
+        '<p style="margin:0;color:#666;line-height:1.7;">此頁面目前未發佈或已封存，暫時不對外開放。</p>' +
+    '</div>';
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+}
 
 function applyLayoutConfig() {
     if (_isPreviewMode) {
-        window.addEventListener('message', function(e) {
-            if (e.data && e.data.type === 'layoutPreview' && e.data.sections) {
-                applySections(e.data.sections);
+        initLayoutPreviewBridge({
+            onLayoutPreview: function(sections) {
+                applySections(sections);
             }
         });
         return;
     }
     initFirebase(function() {
         var db = firebase.firestore();
-        db.collection('pageLayouts').doc('workshop-c').get().then(function(doc) {
-            if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
-            applySections(doc.data().sections);
+        db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
+            var data = doc.exists ? (doc.data() || {}) : null;
+            if (!_layoutAllowsPublicView(data)) {
+                _showLayoutUnavailableState();
+                return;
+            }
+            if (typeof applyFirestorePageMeta === 'function') {
+                applyFirestorePageMeta(data, { fallbackTitle: document.title });
+            }
+            if (!doc.exists || !data.sections || data.sections.length === 0) return;
+            applySections(data.sections);
         }).catch(function(err) {
-            console.log('[Layout] No layout config found for workshop-c.', err);
+            console.log('[Layout] No layout config found for ' + _layoutDocId + '.', err);
         });
     });
 }
 
+function _wcNormalizeProblemGridContent(content) {
+    var legacy = content || {};
+    var items = [];
+    if (Array.isArray(legacy.items) && legacy.items.length) items = legacy.items;
+    else if (Array.isArray(legacy.cards) && legacy.cards.length) items = legacy.cards;
+    items = items.map(function(item) {
+        if (typeof item === 'string') return { text: item };
+        item = item || {};
+        return { text: item.text || item.title || item.description || '' };
+    }).filter(function(item) {
+        return String(item.text || '').trim() !== '';
+    });
+    if (!items.length) {
+        items = [
+            { text: '風格不統一，每次出圖都像不同人做的' },
+            { text: '顏色飄移，跟品牌毫無關係' },
+            { text: '一眼就看出是 AI 生成，客戶不買單' },
+            { text: '改稿改到懷疑人生，輸出效率極低' },
+            { text: '不知道哪個工具適合哪個用途' },
+            { text: '有想法但出不到那個感覺' }
+        ];
+    }
+    return {
+        sectionLabel: legacy.sectionLabel || '— 問題在哪 —',
+        sectionTitle: legacy.sectionTitle || legacy.title || '為什麼你的 AI 圖片<br>總是「差一點」？',
+        items: items
+    };
+}
+
+function _wcNormalizeLayoutSections(rawSections) {
+    return (Array.isArray(rawSections) ? rawSections : []).map(function(section) {
+        if (!section) return section;
+        var next = Object.assign({}, section);
+        if (next.id === 'wc-problem') {
+            next.type = 'problem-grid';
+            next.content = _wcNormalizeProblemGridContent(next.content);
+        } else if (next.type === 'problem-grid') {
+            next.content = _wcNormalizeProblemGridContent(next.content);
+        }
+        return next;
+    });
+}
+
 function applySections(rawSections) {
-    var sections = rawSections.slice().sort(function(a, b) {
+    var sections = _wcNormalizeLayoutSections(rawSections).slice().sort(function(a, b) {
         return (a.order || 0) - (b.order || 0);
     });
+    if (typeof syncPageBackgroundFromSections === 'function') {
+        syncPageBackgroundFromSections(sections, { wrapperId: 'layout-page-bg' });
+    }
     var main = document.getElementById('main-content');
     if (!main) return;
 
@@ -1668,6 +1751,7 @@ function applySections(rawSections) {
     });
 
     sections.forEach(function(sec) {
+        if (!sec || sec.type === 'page-background') return;
         var el = existingEls[sec.id];
 
         if (!el && sec.visible !== false) {
@@ -1706,23 +1790,278 @@ function applySections(rawSections) {
     }
 }
 
+function _escHtml(value) {
+    if (typeof escHtml === 'function') return escHtml(value);
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function _wcRichHtml(value) {
+    if (!value) return '';
+    return typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(value) : _escHtml(value);
+}
+
+function _wcMediaUrl(url) {
+    var raw = String(url || '').trim();
+    if (!raw) return '';
+    if (typeof fixStorageUrl === 'function') return fixStorageUrl(raw);
+    return raw;
+}
+
+function _wcNormalizeVideoContent(content) {
+    var legacy = content || {};
+    return {
+        sectionLabel: legacy.sectionLabel || '— 預覽 —',
+        videoUrl: _wcMediaUrl(legacy.videoUrl || '/workshop-c-assets/ai-video-compressed.mp4'),
+        posterUrl: _wcMediaUrl(legacy.posterUrl || ''),
+        caption: legacy.caption || ''
+    };
+}
+
+function _wcNormalizeImageChainContent(content) {
+    var legacy = content || {};
+    var cards = Array.isArray(legacy.cards) ? legacy.cards : [];
+    cards = cards.map(function(card) {
+        card = card || {};
+        return {
+            imageUrl: _wcMediaUrl(card.imageUrl || ''),
+            label: card.label || '',
+            alt: card.alt || ''
+        };
+    }).filter(function(card) {
+        return !!card.imageUrl;
+    });
+    if (!cards.length) {
+        cards = [
+            {
+                imageUrl: '/workshop-c-assets/Untitled_Ethereal_Butterfly_2026-02-22_17-56.webp',
+                label: '品牌視覺 · Midjourney',
+                alt: 'Ethereal Butterfly — AI商業圖像示例'
+            },
+            {
+                imageUrl: '/workshop-c-assets/Untitled_Floating_Hourglass_2026-02-22_17-56.webp',
+                label: '概念視覺 · FloraFauna',
+                alt: 'Floating Hourglass — AI商業圖像示例'
+            },
+            {
+                imageUrl: '/workshop-c-assets/Untitled_Surreal_Chess_Game_2026-02-22_17-56.webp',
+                label: '商業素材 · Higgsfield',
+                alt: 'Surreal Chess — AI商業圖像示例'
+            }
+        ];
+    }
+    return {
+        sectionLabel: legacy.sectionLabel || '— 你能做到的 —',
+        sectionTitle: legacy.sectionTitle || '從生成圖片<br>到<span style="color:var(--accent)">設計視覺</span>',
+        introText: legacy.introText || legacy.description || '',
+        cards: cards
+    };
+}
+
+function _wcNormalizeMindsetContent(content) {
+    var legacy = content || {};
+    return {
+        sectionLabel: legacy.sectionLabel || '— 思維轉換 —',
+        beforeText: legacy.beforeText || legacy.title || '問題不是工具。',
+        afterText: legacy.afterText || '是視覺決策能力。',
+        description: legacy.description || legacy.body || '這堂課不教你亂試 prompt。<br>而是教你如何<strong>定義風格、控制輸出、建立品牌視覺語言</strong>。<br><br>你生成的每一張圖，都應該是一個決定——不是一個賭注。'
+    };
+}
+
+function _wcNormalizeLearningContent(content) {
+    var legacy = content || {};
+    var items = Array.isArray(legacy.items) ? legacy.items : [];
+    items = items.map(function(item) {
+        item = item || {};
+        return {
+            title: item.title || item.text || '',
+            description: item.description || item.sub || item.moreText || '',
+            moreText: item.moreText || ''
+        };
+    }).filter(function(item) {
+        return String(item.title || '').trim() !== '';
+    });
+    if (!items.length) {
+        items = [
+            { title: '控制風格參數，建立視覺一致性', description: 'Midjourney Stylization', moreText: '' },
+            { title: '定義品牌視覺調性與色彩語言', description: 'Brand Visual Language', moreText: '' },
+            { title: '用 FloraFauna 快速迭代商業素材', description: 'Workflow Automation', moreText: '' },
+            { title: '用 Higgsfield 生成品牌短影片', description: 'AI Video Generation', moreText: '' },
+            { title: '一小時從構想到成品，整套流程', description: 'End-to-End Production', moreText: '' }
+        ];
+    }
+    return {
+        sectionLabel: legacy.sectionLabel || '— 你將掌握 —',
+        sectionTitle: legacy.sectionTitle || '離開時，<br>你的輸出不一樣了。',
+        items: items,
+        tools: Array.isArray(legacy.tools) && legacy.tools.length ? legacy.tools : [{ name: 'Midjourney' }, { name: 'FloraFauna' }, { name: 'Higgsfield' }],
+        demoText: legacy.demoText || '帶著你的品牌進來。<br><span style="color:var(--accent)">帶走 3 件即用素材。</span>',
+        demoSubtext: legacy.demoSubtext || '現場完成 1 個品牌視覺專案示範。這不是理論課。'
+    };
+}
+
+function _wcNormalizeAudienceContent(content) {
+    var legacy = content || {};
+    function normList(list) {
+        return (Array.isArray(list) ? list : []).map(function(item) {
+            if (typeof item === 'string') return { text: item };
+            item = item || {};
+            return { text: item.text || item.title || '' };
+        }).filter(function(item) {
+            return String(item.text || '').trim() !== '';
+        });
+    }
+    var forItems = normList(legacy.forItems);
+    var notForItems = normList(legacy.notForItems);
+    if (!forItems.length) {
+        forItems = [
+            { text: '你在經營社群或品牌' },
+            { text: '你的內容需要視覺一致性' },
+            { text: '你是創業者或自由工作者' },
+            { text: '你有想法但不懂如何落地' },
+            { text: '你每次出圖都不夠滿意' }
+        ];
+    }
+    if (!notForItems.length) {
+        notForItems = [
+            { text: '你只是想玩玩看 AI' },
+            { text: '你想要一鍵模板解決一切' },
+            { text: '你不打算實際應用於品牌' },
+            { text: '你覺得設計不重要' }
+        ];
+    }
+    return {
+        sectionLabel: legacy.sectionLabel || '— 適合對象 —',
+        sectionTitle: legacy.sectionTitle || '這堂課適合你嗎？',
+        forTitle: legacy.forTitle || '✓ FOR YOU IF',
+        forItems: forItems,
+        notForTitle: legacy.notForTitle || '✕ NOT FOR YOU IF',
+        notForItems: notForItems
+    };
+}
+
+function _wcNormalizeFaqContent(content) {
+    var legacy = content || {};
+    var items = (Array.isArray(legacy.items) ? legacy.items : []).map(function(item) {
+        item = item || {};
+        return {
+            question: item.question || '',
+            answer: item.answer || ''
+        };
+    }).filter(function(item) {
+        return String(item.question || '').trim() !== '';
+    });
+    if (!items.length) {
+        items = [
+            { question: '需要有設計背景嗎？', answer: '完全不需要。這堂課教的是視覺判斷力，不是技術操作。你只需要知道自己的品牌是什麼感覺就夠了。' },
+            { question: '我沒有用過 Midjourney，可以嗎？', answer: '可以。工作坊包含工具入門，你不需要任何先備知識。有 AI 圖像生成基礎的學員可以更快進入進階部分。' },
+            { question: '工作坊是實體還是線上？', answer: '提供實體及線上兩種模式。實體於太子區舉行，確切場地報名後通知。線上學員可全程參與並獲得錄影。' },
+            { question: '可以退款嗎？', answer: '報名後不設退款。建議先參加免費 AI 認知工作坊，了解教學風格後再報名付費課程。' },
+            { question: '完成後有支援嗎？', answer: '會。完成工作坊後可加入學員專屬社群，持續獲得更新、資源及 Jacob 本人的回應。' }
+        ];
+    }
+    return {
+        sectionLabel: legacy.sectionLabel || '— 常見問題 —',
+        sectionTitle: legacy.sectionTitle || '你可能想問',
+        items: items
+    };
+}
+
 function applyContentToSection(el, type, c) {
     switch (type) {
         case 'hero':
             var h1 = el.querySelector('.hero-title');
-            if (h1) h1.innerHTML = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : String(c.title).replace(/\n/g, '<br>')) : '';
+            if (h1) h1.innerHTML = _wcRichHtml(c.title || '');
             var sub = el.querySelector('.hero-tagline');
-            if (sub && c.subtitle) sub.innerHTML = c.subtitle;
+            if (sub) sub.innerHTML = _wcRichHtml(c.subtitle || '');
             var badge = el.querySelector('.hero-badge');
-            if (badge && c.badge) badge.textContent = c.badge;
+            if (badge) badge.innerHTML = _wcRichHtml(c.badge || '✦ WORKSHOP C · 視覺升級');
+            var eyebrow = el.querySelector('.hero-subtitle-en');
+            if (eyebrow) {
+                eyebrow.innerHTML = _wcRichHtml(c.eyebrowText || 'NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY');
+                eyebrow.style.display = '';
+            }
             var cta = el.querySelector('.btn-primary');
-            if (cta && c.ctaText) cta.textContent = c.ctaText;
+            if (cta) cta.innerHTML = _wcRichHtml(c.ctaText || '');
             if (cta && c.ctaLink) cta.href = c.ctaLink;
+            var ctaSecondary = el.querySelector('.btn-outline');
+            if (ctaSecondary) {
+                ctaSecondary.innerHTML = _wcRichHtml(c.secondaryCtaText || '了解內容');
+                ctaSecondary.href = c.secondaryCtaLink || '#what-you-learn';
+                ctaSecondary.style.display = 'inline-flex';
+            }
+            break;
+
+        case 'video':
+            var videoContent = _wcNormalizeVideoContent(c);
+            var videoLabel = el.querySelector('.section-label');
+            if (videoLabel) videoLabel.innerHTML = _wcRichHtml(videoContent.sectionLabel);
+            var videoWrap = el.querySelector('.video-wrap');
+            if (videoWrap) {
+                videoWrap.innerHTML = videoContent.videoUrl
+                    ? '<video src="' + _escHtml(videoContent.videoUrl) + '"' + (videoContent.posterUrl ? ' poster="' + _escHtml(videoContent.posterUrl) + '"' : '') + ' autoplay muted loop playsinline></video>'
+                    : '<div style="width:100%;aspect-ratio:9/16;border:1px dashed rgba(255,255,255,0.14);border-radius:28px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">未設定影片</div>';
+            }
+            var videoCaption = el.querySelector('.video-caption');
+            if (!videoCaption && videoWrap) {
+                videoCaption = document.createElement('p');
+                videoCaption.className = 'video-caption';
+                videoCaption.style.cssText = 'margin:18px auto 0;max-width:420px;text-align:center;color:var(--text-dim);font-size:14px;line-height:1.7;';
+                videoWrap.insertAdjacentElement('afterend', videoCaption);
+            }
+            if (videoCaption) {
+                videoCaption.innerHTML = _wcRichHtml(videoContent.caption || '');
+                videoCaption.style.display = videoContent.caption ? '' : 'none';
+            }
+            break;
+
+        case 'image-chain':
+            var chainContent = _wcNormalizeImageChainContent(c);
+            el.innerHTML = '<div class="container">' +
+                '<div class="chain-intro reveal">' +
+                    '<div class="section-label">' + _wcRichHtml(chainContent.sectionLabel) + '</div>' +
+                    '<h2 class="section-title">' + _wcRichHtml(chainContent.sectionTitle) + '</h2>' +
+                    (chainContent.introText ? '<p style="color:var(--text-dim);font-size:16px;max-width:480px;margin:0 auto;">' + _wcRichHtml(chainContent.introText) + '</p>' : '') +
+                '</div>' +
+                chainContent.cards.map(function(card, idx) {
+                    var rowClass = idx % 2 === 1 ? 'right' : 'left';
+                    return '<div class="chain-row ' + rowClass + '">' +
+                        '<div class="chain-card">' +
+                            '<img src="' + _escHtml(card.imageUrl) + '" alt="' + _escHtml(card.alt || card.label || 'AI 商業圖像示例') + '" loading="lazy">' +
+                            (card.label ? '<div class="chain-card-label">' + _escHtml(card.label) + '</div>' : '') +
+                        '</div>' +
+                    '</div>';
+                }).join('') +
+            '</div>';
+            break;
+
+        case 'problem-grid':
+            var labelPg = el.querySelector('.section-label');
+            if (labelPg) labelPg.innerHTML = _wcRichHtml(c.sectionLabel || '');
+            var h2pg = el.querySelector('.section-title');
+            if (h2pg) h2pg.innerHTML = _wcRichHtml(c.sectionTitle || '');
+            var problemGrid = el.querySelector('.problem-grid');
+            if (problemGrid) {
+                var pgContent = _wcNormalizeProblemGridContent(c);
+                problemGrid.innerHTML = pgContent.items.map(function(item, idx) {
+                    var safeText = typeof sanitizeHeroTitleHtml === 'function'
+                        ? sanitizeHeroTitleHtml(item.text || '')
+                        : _escHtml(item.text || '');
+                    return '<div class="problem-item reveal reveal-delay-' + ((idx % 2) + 1) + '">' +
+                        '<div class="problem-dot"></div>' +
+                        '<p>' + safeText + '</p>' +
+                    '</div>';
+                }).join('');
+            }
             break;
 
         case 'pain-points':
             var h2 = el.querySelector('.section-title');
-            if (h2 && c.sectionTitle) h2.innerHTML = c.sectionTitle;
+            if (h2) h2.innerHTML = _wcRichHtml(c.sectionTitle || '');
             if (c.items) {
                 var items = el.querySelectorAll('.problem-item p');
                 c.items.forEach(function(item, i) {
@@ -1732,64 +2071,129 @@ function applyContentToSection(el, type, c) {
             break;
 
         case 'mindset-shift':
+            var mindsetContent = _wcNormalizeMindsetContent(c);
+            var labelMs = el.querySelector('.section-label');
+            if (labelMs) labelMs.innerHTML = _wcRichHtml(mindsetContent.sectionLabel);
             var large = el.querySelector('.shift-large');
-            if (large && c.title) large.innerHTML = c.title;
+            if (large) {
+                large.innerHTML = _wcRichHtml(mindsetContent.beforeText) +
+                    (mindsetContent.afterText ? '<br><span class="accent"> ' + _wcRichHtml(mindsetContent.afterText) + '</span>' : '');
+            }
             var body = el.querySelector('.shift-body');
-            if (body && c.body) body.innerHTML = c.body;
+            if (body) body.innerHTML = _wcRichHtml(mindsetContent.description || '');
             break;
 
         case 'learning-outcomes':
+            var learningContent = _wcNormalizeLearningContent(c);
+            var labelLo = el.querySelector('.section-label');
+            if (labelLo) labelLo.innerHTML = _wcRichHtml(learningContent.sectionLabel);
             var h2lo = el.querySelector('.section-title');
-            if (h2lo && c.sectionTitle) h2lo.innerHTML = c.sectionTitle;
-            if (c.items) {
-                var masterItems = el.querySelectorAll('.master-item');
-                c.items.forEach(function(item, i) {
-                    if (masterItems[i]) {
-                        var txt = masterItems[i].querySelector('.master-text');
-                        if (txt && item.text) txt.textContent = item.text;
-                        var sub = masterItems[i].querySelector('.master-sub');
-                        if (sub && item.sub) sub.textContent = item.sub;
-                    }
-                });
+            if (h2lo) h2lo.innerHTML = _wcRichHtml(learningContent.sectionTitle);
+            var masterList = el.querySelector('.master-list');
+            if (masterList) {
+                masterList.innerHTML = learningContent.items.map(function(item, idx) {
+                    var num = String(idx + 1).padStart(2, '0');
+                    var delay = idx === 0 ? '' : (' reveal-delay-' + ((idx % 2) + 1));
+                    return '<div class="master-item reveal' + delay + '">' +
+                        '<span class="master-num">' + num + '</span>' +
+                        '<span class="master-text">' + _wcRichHtml(item.title) + '</span>' +
+                        '<span class="master-sub">' + _wcRichHtml(item.description) + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+            var toolsRow = el.querySelector('.tools-row');
+            if (toolsRow) {
+                if (learningContent.tools && learningContent.tools.length) {
+                    toolsRow.style.display = '';
+                    toolsRow.innerHTML = learningContent.tools.map(function(tool) {
+                        return '<div class="tool-chip"><div class="tool-chip-dot"></div> ' + _escHtml(tool.name || '') + '</div>';
+                    }).join('');
+                } else {
+                    toolsRow.style.display = 'none';
+                }
+            }
+            var demoBox = el.querySelector('.demo-box');
+            if (demoBox) {
+                demoBox.innerHTML = '<div class="demo-big">' + _wcRichHtml(learningContent.demoText || '') + '</div>' +
+                    (learningContent.demoSubtext ? '<p class="demo-sub">' + _wcRichHtml(learningContent.demoSubtext) + '</p>' : '');
             }
             break;
 
         case 'audience-fit':
+            var audienceContent = _wcNormalizeAudienceContent(c);
+            var labelAf = el.querySelector('.section-label');
+            if (labelAf) labelAf.innerHTML = _wcRichHtml(audienceContent.sectionLabel);
             var h2af = el.querySelector('.section-title');
-            if (h2af && c.sectionTitle) h2af.innerHTML = c.sectionTitle;
+            if (h2af) h2af.innerHTML = _wcRichHtml(audienceContent.sectionTitle || '');
+            var forGrid = el.querySelector('.for-grid');
+            if (forGrid) {
+                forGrid.innerHTML = '<div class="for-card for-yes reveal reveal-delay-1">' +
+                    '<div class="for-card-label">' + _wcRichHtml(audienceContent.forTitle) + '</div>' +
+                    '<ul class="for-list">' + audienceContent.forItems.map(function(item) {
+                        return '<li>' + _wcRichHtml(item.text || '') + '</li>';
+                    }).join('') + '</ul>' +
+                '</div>' +
+                '<div class="for-card for-no reveal reveal-delay-2">' +
+                    '<div class="for-card-label">' + _wcRichHtml(audienceContent.notForTitle) + '</div>' +
+                    '<ul class="for-list">' + audienceContent.notForItems.map(function(item) {
+                        return '<li>' + _wcRichHtml(item.text || '') + '</li>';
+                    }).join('') + '</ul>' +
+                '</div>';
+            }
             break;
 
         case 'about':
+            var labelAbout = el.querySelector('.section-label');
+            if (labelAbout) labelAbout.innerHTML = _wcRichHtml(c.sectionLabel || '— 關於講師 —');
+            var avatar = el.querySelector('.instructor-avatar img');
+            if (avatar && c.photoUrl) avatar.src = _wcMediaUrl(c.photoUrl);
             var name = el.querySelector('.instructor-name');
-            if (name && c.name) name.textContent = c.name;
+            if (name) name.innerHTML = _wcRichHtml(c.name || '');
             var role = el.querySelector('.instructor-role');
-            if (role && c.role) role.textContent = c.role;
+            if (role) role.innerHTML = _wcRichHtml(c.role || '');
             var bio = el.querySelector('.instructor-bio');
-            if (bio && c.bio) bio.innerHTML = c.bio;
+            if (bio) bio.innerHTML = _wcRichHtml(c.bio || '');
             break;
 
         case 'faq':
+            var faqContent = _wcNormalizeFaqContent(c);
+            var labelFaq = el.querySelector('.section-label');
+            if (labelFaq) labelFaq.innerHTML = _wcRichHtml(faqContent.sectionLabel);
             var h2faq = el.querySelector('.section-title');
-            if (h2faq && c.sectionTitle) h2faq.textContent = c.sectionTitle;
+            if (h2faq) h2faq.innerHTML = _wcRichHtml(faqContent.sectionTitle || '');
+            var faqList = el.querySelector('.faq-list');
+            if (faqList) {
+                faqList.innerHTML = faqContent.items.map(function(item) {
+                    return '<div class="faq-item">' +
+                        '<div class="faq-q" onclick="toggleFaq(this)">' +
+                            _wcRichHtml(item.question || '') +
+                            '<span class="faq-arrow">+</span>' +
+                        '</div>' +
+                        '<div class="faq-a">' + _wcRichHtml(item.answer || '') + '</div>' +
+                    '</div>';
+                }).join('');
+            }
             break;
 
         case 'logistics-card':
             var lLabel = el.querySelector('.section-label');
-            if (lLabel && c.sectionLabel) lLabel.textContent = c.sectionLabel;
+            if (lLabel) lLabel.innerHTML = _wcRichHtml(c.sectionLabel || '');
             var lTitle = el.querySelector('.section-title');
-            if (lTitle && c.sectionTitle) lTitle.innerHTML = c.sectionTitle;
+            if (lTitle) lTitle.innerHTML = _wcRichHtml(c.sectionTitle || '');
             var lCta = el.querySelector('.wsc-logistics-cta .btn-primary');
-            if (lCta && c.ctaText) lCta.textContent = c.ctaText;
+            if (lCta) lCta.innerHTML = _wcRichHtml(c.ctaText || '');
             if (lCta && c.ctaLink) lCta.href = c.ctaLink;
             break;
 
         case 'final-cta':
+            var labelFinal = el.querySelector('.section-label');
+            if (labelFinal) labelFinal.innerHTML = _wcRichHtml(c.sectionLabel || '— 最後 —');
             var title = el.querySelector('.final-cta-title');
-            if (title && c.title) title.innerHTML = c.title;
+            if (title) title.innerHTML = _wcRichHtml(c.title || '');
             var subFc = el.querySelector('.final-cta-sub');
-            if (subFc && c.subtitle) subFc.textContent = c.subtitle;
+            if (subFc) subFc.innerHTML = _wcRichHtml(c.subtitle || '');
             var ctaFc = el.querySelector('.btn-primary');
-            if (ctaFc && c.ctaText) ctaFc.textContent = c.ctaText;
+            if (ctaFc) ctaFc.innerHTML = _wcRichHtml(c.ctaText || '');
             if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
             break;
 
@@ -1815,7 +2219,7 @@ function applyContentToSection(el, type, c) {
                     : '0 12px 32px rgba(0,0,0,0.24)';
             var wcImgUrl = _escHtml(c.imageUrl || '');
             var wcAlt = _escHtml(c.alt || '');
-            var wcCap = _escHtml(c.caption || '');
+            var wcCap = _wcRichHtml(c.caption || '');
             var wcLink = String(c.linkUrl || '').trim();
             var wcStart = wcLink ? '<a href="' + _escHtml(wcLink) + '"' + (/^https?:/i.test(wcLink) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
             var wcEnd = wcLink ? '</a>' : '</div>';

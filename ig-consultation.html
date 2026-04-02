@@ -540,7 +540,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js"></script>
+    <script src="/js/shared-utils.js?v=2"></script>
     <script>
         // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
@@ -580,11 +580,51 @@
 
             initFirebase(function(app) {
                 var db = app.firestore();
+                var consultRef = db.collection('consultations').doc();
                 var fsData = Object.assign({}, formData, {
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'new'
                 });
-                db.collection('consultations').add(fsData).then(function() {
+                var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+                    ? saveFormSubmissionMirror({
+                        formType: 'consultation',
+                        sourceKey: 'ig-consultation',
+                        sourceLabel: 'AI 諮詢申請',
+                        sourcePage: formData.page,
+                        sourcePath: window.location.pathname,
+                        sourceUrl: window.location.href,
+                        sourceCollection: 'consultations',
+                        sourceDocId: consultRef.id,
+                        sheetTab: '1 on 1 Consultation',
+                        contactName: formData.name,
+                        phone: formData.phone,
+                        email: formData.email,
+                        instagram: formData.igAccount,
+                        answers: {
+                            aiSkillLevel: formData.aiSkillLevel,
+                            aiGoal: formData.aiGoal,
+                            currentAITools: formData.currentAITools,
+                            currentAIToolsOtherText: formData.currentAIToolsOtherText,
+                            successOutcome: formData.successOutcome,
+                            currentProblem: formData.currentProblem,
+                            startTiming: formData.startTiming,
+                            willingnessToPay: formData.willingnessToPay,
+                            whyNow: formData.whyNow,
+                            workshopInterest: formData.workshopInterest,
+                            aiTopics: formData.aiTopics,
+                            aiTopicsOtherText: formData.aiTopicsOtherText,
+                            additionalInfo: formData.additionalInfo,
+                            whatsappConsent: formData.whatsappConsent
+                        },
+                        timestamp: formData.timestamp
+                    }, { db: db }).catch(function(err) {
+                        console.error('Form submission mirror failed:', err);
+                    })
+                    : Promise.resolve();
+                Promise.all([
+                    consultRef.set(fsData),
+                    mirrorPromise
+                ]).then(function() {
                     console.log('Consultation saved to Firestore');
                 }).catch(function(err) {
                     console.error('Firestore write failed:', err);

@@ -592,12 +592,41 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js"></script>
+    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/page-background-runtime.js"></script>
 
     <!-- Layout Engine (Preview + Public) -->
     <script>
     (function() {
-        var _isPreview = new URLSearchParams(window.location.search).has('preview');
+        var _layoutQuery = new URLSearchParams(window.location.search);
+        var _isPreview = _layoutQuery.has('preview');
+        var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'about-jacob';
+
+        function _normalizeLayoutPageStatus(status) {
+            var raw = String(status || '').trim().toLowerCase();
+            if (raw === 'unpublished') return 'unpublished';
+            if (raw === 'archived') return 'archived';
+            return 'published';
+        }
+
+        function _layoutAllowsPublicView(data) {
+            if (_isPreview) return true;
+            return _normalizeLayoutPageStatus(data && data.pageStatus) === 'published';
+        }
+
+        function _showLayoutUnavailableState() {
+            if (document.getElementById('layoutUnavailableState')) return;
+            var overlay = document.createElement('div');
+            overlay.id = 'layoutUnavailableState';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(245,244,242,0.98);';
+            overlay.innerHTML = '<div style="max-width:420px;padding:32px 28px;border-radius:24px;background:#fff;box-shadow:0 16px 48px rgba(0,0,0,0.12);text-align:center;font-family:inherit;">' +
+                '<div style="font-size:34px;margin-bottom:12px;">🚧</div>' +
+                '<h2 style="margin:0 0 10px;font-size:24px;">Page Unavailable</h2>' +
+                '<p style="margin:0;color:#666;line-height:1.7;">此頁面目前未發佈或已封存，暫時不對外開放。</p>' +
+            '</div>';
+            document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
+        }
         var _aboutJacobSectionTypes = {
             'aj-hero': 'aj-hero',
             'aj-origin': 'aj-origin',
@@ -633,7 +662,9 @@
         ];
 
         function _richText(value) {
-            return String(value || '').replace(/\n/g, '<br>');
+            return typeof aiflowRenderRichTextHtml === 'function'
+                ? aiflowRenderRichTextHtml(value)
+                : String(value || '').replace(/\n/g, '<br>');
         }
 
         function _escHtml(s) { return escHtml(s); }
@@ -750,6 +781,9 @@
         }
 
         function applySections(sections) {
+            if (typeof syncPageBackgroundFromSections === 'function') {
+                syncPageBackgroundFromSections(sections || [], { wrapperId: 'layout-page-bg' });
+            }
             var allSecs = document.querySelectorAll('[data-section-id]');
             allSecs.forEach(function(el) { el.style.display = 'none'; el.style.order = ''; });
 
@@ -759,6 +793,7 @@
 
             var order = 0;
             sections.forEach(function(sec) {
+                if (!sec || sec.type === 'page-background') return;
                 if (!sec.visible) return;
                 var el = document.querySelector('[data-section-id="' + sec.id + '"]');
                 if (!el && (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download')) {
@@ -786,9 +821,9 @@
                     if (heroPhoto && c.photoUrl) heroPhoto.src = c.photoUrl;
                     if (heroPhoto && c.name) heroPhoto.alt = c.name;
                     var heroTitle = el.querySelector('h1');
-                    if (heroTitle && c.name !== undefined) heroTitle.textContent = c.name;
+                    if (heroTitle && c.name !== undefined) heroTitle.innerHTML = _richText(c.name);
                     var heroSubtitle = el.querySelector('.aj-subtitle');
-                    if (heroSubtitle && c.role !== undefined) heroSubtitle.textContent = c.role;
+                    if (heroSubtitle && c.role !== undefined) heroSubtitle.innerHTML = _richText(c.role);
                     var heroIntro = el.querySelector('.aj-intro');
                     if (heroIntro && c.intro !== undefined) heroIntro.innerHTML = _richText(c.intro);
                     var heroTags = el.querySelector('.aj-pill-row');
@@ -803,11 +838,11 @@
                     }
                     var heroButtons = el.querySelectorAll('.aj-cta-row .aj-btn');
                     if (heroButtons[0]) {
-                        if (c.primaryCtaText !== undefined) heroButtons[0].textContent = c.primaryCtaText;
+                        if (c.primaryCtaText !== undefined) heroButtons[0].innerHTML = _richText(c.primaryCtaText);
                         if (c.primaryCtaLink !== undefined) heroButtons[0].href = c.primaryCtaLink || '#';
                     }
                     if (heroButtons[1]) {
-                        if (c.secondaryCtaText !== undefined) heroButtons[1].textContent = c.secondaryCtaText;
+                        if (c.secondaryCtaText !== undefined) heroButtons[1].innerHTML = _richText(c.secondaryCtaText);
                         if (c.secondaryCtaLink !== undefined) heroButtons[1].href = c.secondaryCtaLink || '#';
                     }
                     break;
@@ -837,9 +872,9 @@
 
                 case 'aj-why':
                     var whyLabel = el.querySelector('.aj-section-label');
-                    if (whyLabel && c.sectionLabel !== undefined) whyLabel.textContent = c.sectionLabel;
+                    if (whyLabel && c.sectionLabel !== undefined) whyLabel.innerHTML = _richText(c.sectionLabel);
                     var whyTitle = el.querySelector('h2');
-                    if (whyTitle && c.title !== undefined) whyTitle.textContent = c.title;
+                    if (whyTitle && c.title !== undefined) whyTitle.innerHTML = _richText(c.title);
                     var whyLeads = el.querySelectorAll('p.lead');
                     if (whyLeads[0] && c.lead1 !== undefined) whyLeads[0].innerHTML = _richText(c.lead1);
                     if (whyLeads[1] && c.lead2 !== undefined) whyLeads[1].innerHTML = _richText(c.lead2);
@@ -857,9 +892,9 @@
 
                 case 'aj-timeline':
                     var timelineTitle = el.querySelector('h2');
-                    if (timelineTitle && c.title !== undefined) timelineTitle.textContent = c.title;
+                    if (timelineTitle && c.title !== undefined) timelineTitle.innerHTML = _richText(c.title);
                     var shuffleBtn = el.querySelector('.aj-gallery-btn');
-                    if (shuffleBtn && c.galleryButtonText !== undefined) shuffleBtn.textContent = c.galleryButtonText;
+                    if (shuffleBtn && c.galleryButtonText !== undefined) shuffleBtn.innerHTML = _richText(c.galleryButtonText);
                     var galleryWrap = el.querySelector('.aj-gallery-wrapper');
                     if (galleryWrap && Array.isArray(c.photos)) {
                         galleryWrap.innerHTML = '';
@@ -889,7 +924,7 @@
 
                 case 'aj-audience':
                     var audienceTitle = el.querySelector('h2');
-                    if (audienceTitle && c.title !== undefined) audienceTitle.textContent = c.title;
+                    if (audienceTitle && c.title !== undefined) audienceTitle.innerHTML = _richText(c.title);
                     var audienceGrid = el.querySelector('.aj-grid-3');
                     if (audienceGrid && Array.isArray(c.cards)) {
                         audienceGrid.innerHTML = '';
@@ -904,7 +939,7 @@
 
                 case 'aj-process':
                     var processTitle = el.querySelector('h2');
-                    if (processTitle && c.title !== undefined) processTitle.textContent = c.title;
+                    if (processTitle && c.title !== undefined) processTitle.innerHTML = _richText(c.title);
                     var processContainer = el.querySelector('.aj-container');
                     if (processContainer && Array.isArray(c.steps)) {
                         processContainer.querySelectorAll('.aj-step').forEach(function(node) { node.remove(); });
@@ -920,7 +955,7 @@
 
                 case 'aj-tools':
                     var toolsTitle = el.querySelector('h2');
-                    if (toolsTitle && c.title !== undefined) toolsTitle.textContent = c.title;
+                    if (toolsTitle && c.title !== undefined) toolsTitle.innerHTML = _richText(c.title);
                     var toolsLead = el.querySelector('.lead');
                     if (toolsLead && c.description !== undefined) toolsLead.innerHTML = _richText(c.description);
                     var toolsWrap = el.querySelector('.aj-tools-wrap');
@@ -946,23 +981,23 @@
 
                 case 'aj-cta':
                     var ctaTitle = el.querySelector('.aj-cta-banner h2');
-                    if (ctaTitle && c.title !== undefined) ctaTitle.textContent = c.title;
+                    if (ctaTitle && c.title !== undefined) ctaTitle.innerHTML = _richText(c.title);
                     var ctaDesc = el.querySelector('.aj-cta-banner p');
                     if (ctaDesc && c.description !== undefined) ctaDesc.innerHTML = _richText(c.description);
                     var ctaButtons = el.querySelectorAll('.aj-cta-row .aj-btn');
                     if (ctaButtons[0]) {
-                        if (c.primaryCtaText !== undefined) ctaButtons[0].textContent = c.primaryCtaText;
+                        if (c.primaryCtaText !== undefined) ctaButtons[0].innerHTML = _richText(c.primaryCtaText);
                         if (c.primaryCtaLink !== undefined) ctaButtons[0].href = c.primaryCtaLink || '#';
                     }
                     if (ctaButtons[1]) {
-                        if (c.secondaryCtaText !== undefined) ctaButtons[1].textContent = c.secondaryCtaText;
+                        if (c.secondaryCtaText !== undefined) ctaButtons[1].innerHTML = _richText(c.secondaryCtaText);
                         if (c.secondaryCtaLink !== undefined) ctaButtons[1].href = c.secondaryCtaLink || '#';
                     }
                     break;
 
                 case 'aj-faq':
                     var faqTitle = el.querySelector('h2');
-                    if (faqTitle && c.title !== undefined) faqTitle.textContent = c.title;
+                    if (faqTitle && c.title !== undefined) faqTitle.innerHTML = _richText(c.title);
                     var faqContainer = el.querySelector('.aj-container');
                     if (faqContainer && Array.isArray(c.items)) {
                         faqContainer.querySelectorAll('.aj-faq').forEach(function(node) { node.remove(); });
@@ -1000,7 +1035,7 @@
                             : '0 12px 28px rgba(0,0,0,0.10)';
                     var ajImgUrl = _escHtml(c.imageUrl || '');
                     var ajAlt = _escHtml(c.alt || '');
-                    var ajCap = _escHtml(c.caption || '');
+                    var ajCap = _richText(c.caption || '');
                     var ajLink = String(c.linkUrl || '').trim();
                     var ajStart = ajLink ? '<a href="' + _escHtml(ajLink) + '"' + (/^https?:/i.test(ajLink) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' style="display:block;text-decoration:none;color:inherit;">' : '<div>';
                     var ajEnd = ajLink ? '</a>' : '</div>';
@@ -1041,19 +1076,28 @@
         }
 
         if (_isPreview) {
-            window.addEventListener('message', function(e) {
-                if (!e.data || e.data.type !== 'layoutPreview') return;
-                applySections(e.data.sections);
+            initLayoutPreviewBridge({
+                onLayoutPreview: function(sections) {
+                    applySections(sections);
+                }
             });
         } else {
             initFirebase(function() {
                 var db = firebase.firestore();
-                db.collection('pageLayouts').doc('about-jacob').get().then(function(doc) {
-                    if (!doc.exists || !doc.data().sections || doc.data().sections.length === 0) return;
-                    console.log('[Layout] Loaded about-jacob layout from Firestore');
-                    applySections(normalizeAboutJacobSections(doc.data().sections));
+                db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
+                    var data = doc.exists ? (doc.data() || {}) : null;
+                    if (!_layoutAllowsPublicView(data)) {
+                        _showLayoutUnavailableState();
+                        return;
+                    }
+                    if (typeof applyFirestorePageMeta === 'function') {
+                        applyFirestorePageMeta(data, { fallbackTitle: document.title });
+                    }
+                    if (!doc.exists || !data.sections || data.sections.length === 0) return;
+                    console.log('[Layout] Loaded ' + _layoutDocId + ' layout from Firestore');
+                    applySections(normalizeAboutJacobSections(data.sections));
                 }).catch(function(err) {
-                    console.log('[Layout] No layout config found for about-jacob.', err);
+                    console.log('[Layout] No layout config found for ' + _layoutDocId + '.', err);
                 });
             });
         }

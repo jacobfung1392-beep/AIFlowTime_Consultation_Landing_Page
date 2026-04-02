@@ -387,7 +387,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js"></script>
+<script src="/js/shared-utils.js?v=2"></script>
 
 <script>
 var db, auth, storage, currentUser = null;
@@ -627,6 +627,7 @@ function profileSessionStableId(session, fallbackIdx) {
 }
 
 function _profileResolveSessionMode(wsData, reg) {
+    if (reg && reg.attendanceMode) return reg.attendanceMode;
     wsData = wsData || {};
     var sessions = wsData.sessions || [];
     if (reg && reg.selectedRound && sessions.length > 1) {
@@ -689,6 +690,18 @@ function _profileResolveLocation(wsData, reg) {
     }
     if (sessions.length === 1 && sessions[0].location) return sessions[0].location;
     return wsData.location || '';
+}
+
+function _profileResolveNotice(wsData, mode) {
+    wsData = wsData || {};
+    var legacy = String(wsData.notice || '').trim();
+    var offline = String(wsData.offlineNotice || '').trim();
+    var online = String(wsData.onlineNotice || '').trim();
+
+    if (!offline && legacy) offline = legacy;
+
+    if (mode === 'online') return online || legacy || '';
+    return offline || legacy || '';
 }
 
 function _rebuildProfileWorkshops() {
@@ -799,6 +812,7 @@ function buildWsHistoryItemHtml(r) {
     var wsData = _workshopDataCache[r.workshopId] || {};
     var wsMode = _profileResolveSessionMode(wsData, r);
     var wsZoomLink = _profileResolveZoomLink(wsData, r);
+    var wsNotice = _profileResolveNotice(wsData, wsMode);
 
     // QR code for confirmed upcoming workshops (offline / both)
     var qrHtml = '';
@@ -818,7 +832,7 @@ function buildWsHistoryItemHtml(r) {
 
     // Zoom link for online / both workshops
     var zoomHtml = '';
-    if (status === 'confirmed' && upcoming && wsZoomLink && (wsMode === 'online' || wsMode === 'both')) {
+    if (status === 'confirmed' && upcoming && wsZoomLink && wsMode === 'online') {
         zoomHtml = '<div class="ws-h-zoom-wrap">' +
             '<div class="ws-h-zoom-label">💻 線上參加連結</div>' +
             '<a href="' + escHtml(wsZoomLink) + '" target="_blank" rel="noopener" class="ws-h-zoom-link">' + escHtml(wsZoomLink) + '</a>' +
@@ -860,7 +874,7 @@ function buildWsHistoryItemHtml(r) {
             confirmedAt: r.confirmedAt || r.updatedAt || '',
             location: wsLocation || '',
             zoomLink: wsZoomLink || '',
-            notice: wsData.notice || '',
+            notice: wsNotice,
             attendanceToken: r.attendanceToken || '',
             workshopMode: wsMode || 'offline'
         }));

@@ -156,6 +156,10 @@
         "destination": "/layout-editor.html"
       },
       {
+        "source": "/carousel-creator",
+        "destination": "/carousel-creator.html"
+      },
+      {
         "source": "/qr-display",
         "destination": "/qr-display.html"
       },

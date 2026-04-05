@@ -29,6 +29,20 @@ service firebase.storage {
             || request.resource.contentType.matches('video/.*'));
     }
 
+    // Carousel Creator exports (PNG etc.): same policy as layout-images — keeps exports out of layout-images root
+    match /carousel-exports/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ]
+        && request.resource.size < 20 * 1024 * 1024
+        && (request.resource.contentType.matches('image/.*')
+            || request.resource.contentType.matches('video/.*'));
+    }
+
     // Layout documents (PDF, DOC, etc.): public read; write for authorised CMS admins, max 50MB
     match /layout-documents/{allPaths=**} {
       allow read: if true;

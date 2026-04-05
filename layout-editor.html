@@ -2251,7 +2251,7 @@
     <div class="modal-box" style="max-width:920px;">
         <button class="modal-close" onclick="closeBackgroundAnimationPicker()">&times;</button>
         <h3>Background Animation</h3>
-        <p class="media-picker-intro">把現有背景動畫集中成可重用卡片，揀選後會直接套用到「HTML 程式碼」欄位。</p>
+        <p class="media-picker-intro">把現有背景動畫集中成可重用卡片；揀選後會依動畫類型自動套用到「單檔動畫程式碼」或「已託管動畫頁面」欄位。</p>
         <div class="media-picker-toolbar">
             <input type="text" id="bgAnimationPickerSearch" class="media-picker-search" placeholder="搜尋背景動畫..." oninput="renderBackgroundAnimationPicker()">
         </div>
@@ -2970,12 +2970,18 @@ var SECTION_TYPES = {
     'page-background': {
         label: '頁面背景 Page Background',
         icon: '🎨',
-        desc: '自訂頁面背景，支援圖片、漸層色或 HTML 程式碼',
+        desc: '自訂頁面背景，支援圖片、漸層色、結構化動畫欄位 / 原始碼，或已託管動畫頁面（iframe URL）',
         defaults: {
             sourceType: 'css',
             imageUrl: '',
             css: '',
             code: '',
+            codeEditorMode: 'structured',
+            codeHtml: '',
+            codeCss: '',
+            codeJs: '',
+            codeLibraryUrls: '',
+            iframeUrl: '',
             opacity: 100,
             fixed: false
         }
@@ -3092,8 +3098,17 @@ var PAGE_REGISTRY = {
         label: 'Linktree',
         previewUrl: '/linktree',
         firestoreDoc: 'linktree',
-        sectionTypes: ['hero', 'gooey-flow', 'link-list', 'tools-grid', 'section-divider', 'workshops', 'faq', 'final-cta', 'cta', 'floating-icon', 'image-only', 'text-only', 'free-material-download'],
+        sectionTypes: ['page-background', 'hero', 'gooey-flow', 'link-list', 'tools-grid', 'section-divider', 'workshops', 'faq', 'final-cta', 'cta', 'floating-icon', 'image-only', 'text-only', 'free-material-download'],
         defaultSections: [
+            { id: 'lt-page-background', type: 'page-background', visible: true, content: {
+                sourceType: 'iframe',
+                iframeUrl: '/backgrounds/cosmic-orbit/index.html',
+                css: '',
+                code: '',
+                imageUrl: '',
+                opacity: 100,
+                fixed: false
+            }},
             { id: 'lt-header', type: 'hero', visible: true },
             { id: 'lt-flow-ai', type: 'gooey-flow', visible: true, content: { wordsText: 'Flow|With|AI|:)' } },
             { id: 'lt-services', type: 'link-list', visible: true, content: {
@@ -3311,16 +3326,84 @@ function ensurePageBackgroundSectionType(sectionTypes) {
     return list;
 }
 
+function _pbgNormalizeCodeEditorMode(content) {
+    var raw = String(content && content.codeEditorMode || '').trim().toLowerCase();
+    if (raw === 'raw' || raw === 'structured') return raw;
+    var hasStructured = !!String(content && content.codeHtml || '').trim() ||
+        !!String(content && content.codeCss || '').trim() ||
+        !!String(content && content.codeJs || '').trim() ||
+        !!String(content && content.codeLibraryUrls || '').trim();
+    if (hasStructured) return 'structured';
+    return String(content && content.code || '').trim() ? 'raw' : 'structured';
+}
+
+function _pbgNormalizeLibraryUrlList(raw) {
+    var seen = {};
+    return String(raw || '').replace(/\r\n?/g, '\n').split('\n').map(function(item) {
+        return String(item || '').trim();
+    }).filter(function(item) {
+        if (!item || /^javascript:/i.test(item)) return false;
+        if (!/^https?:\/\//i.test(item) && item.charAt(0) !== '/') return false;
+        if (seen[item]) return false;
+        seen[item] = true;
+        return true;
+    });
+}
+
+function _pbgStructuredHasContent(content) {
+    var c = content || {};
+    return !!String(c.codeHtml || '').trim() ||
+        !!String(c.codeCss || '').trim() ||
+        !!String(c.codeJs || '').trim() ||
+        _pbgNormalizeLibraryUrlList(c.codeLibraryUrls).length > 0;
+}
+
+function _pbgBuildStructuredCode(content) {
+    var c = content || {};
+    if (!_pbgStructuredHasContent(c)) return '';
+    var html = String(c.codeHtml || '');
+    var css = String(c.codeCss || '');
+    var js = String(c.codeJs || '');
+    var libs = _pbgNormalizeLibraryUrlList(c.codeLibraryUrls);
+    var headParts = [
+        '<meta charset="UTF-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    ];
+    if (css.trim()) headParts.push('<style>\n' + css + '\n</style>');
+    libs.forEach(function(url) {
+        headParts.push('<script src="' + escHtml(url) + '"><\/script>');
+    });
+    var bodyParts = [html || '<div id="bg-root"></div>'];
+    if (js.trim()) {
+        bodyParts.push('<script>\n' + String(js).replace(/<\/script/ig, '<\\/script') + '\n<\/script>');
+    }
+    return '<!DOCTYPE html><html lang="en"><head>' + headParts.join('') + '</head><body>' + bodyParts.join('') + '</body></html>';
+}
+
 function normalizePageBackgroundContent(content, opts) {
     opts = opts || {};
     var next = mergeDefaults(SECTION_TYPES['page-background'].defaults, content || {});
     var defaultCode = String(opts.defaultCode || '');
-    next.sourceType = ['css', 'image', 'code'].indexOf(next.sourceType) >= 0 ? next.sourceType : 'css';
+    next.sourceType = ['css', 'image', 'code', 'iframe'].indexOf(next.sourceType) >= 0 ? next.sourceType : 'css';
     next.imageUrl = String(next.imageUrl || '');
     next.css = String(next.css || '');
     next.code = String(next.code || '');
+    next.codeEditorMode = _pbgNormalizeCodeEditorMode(next);
+    next.codeHtml = String(next.codeHtml || '');
+    next.codeCss = String(next.codeCss || '');
+    next.codeJs = String(next.codeJs || '');
+    next.codeLibraryUrls = _pbgNormalizeLibraryUrlList(next.codeLibraryUrls).join('\n');
+    next.iframeUrl = String(next.iframeUrl || '').trim();
+    if (next.iframeUrl && /^javascript:/i.test(next.iframeUrl)) next.iframeUrl = '';
+    if (next.iframeUrl && next.iframeUrl.charAt(0) !== '/' && !/^https?:\/\//i.test(next.iframeUrl)) next.iframeUrl = '/' + next.iframeUrl.replace(/^\/+/, '');
     if (next.sourceType === 'code' && typeof normalizePageBackgroundEffectCode === 'function') {
-        next.code = normalizePageBackgroundEffectCode(next.code);
+        if (next.codeEditorMode === 'structured') {
+            var compiledStructured = _pbgBuildStructuredCode(next);
+            if (compiledStructured) next.code = compiledStructured;
+            else next.code = normalizePageBackgroundEffectCode(next.code);
+        } else {
+            next.code = normalizePageBackgroundEffectCode(next.code);
+        }
     }
     if (next.sourceType === 'code' && defaultCode && !next.code.trim()) {
         next.code = defaultCode;
@@ -3607,7 +3690,14 @@ function handleGoogleLogin() {
     }
     var provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
+    document.getElementById('loginError').textContent = '';
     auth.signInWithPopup(provider).catch(function(err) {
+        if (err && err.code === 'auth/popup-blocked') {
+            auth.signInWithRedirect(provider).catch(function(redirectErr) {
+                showLoginError('登入失敗：' + redirectErr.message);
+            });
+            return;
+        }
         showLoginError('登入失敗：' + err.message);
     });
 }
@@ -4170,6 +4260,12 @@ function _getDefaultWorkshop0BackgroundContent() {
         imageUrl: '',
         css: '',
         code: WORKSHOP0_ZERO_BG_CODE,
+        codeEditorMode: 'raw',
+        codeHtml: '',
+        codeCss: '',
+        codeJs: '',
+        codeLibraryUrls: '',
+        iframeUrl: '',
         opacity: 100,
         fixed: false
     };
@@ -4180,10 +4276,14 @@ function _repairWorkshop0BackgroundContent(content) {
     var hasCss = !!String(next.css || '').trim();
     var hasImage = !!String(next.imageUrl || '').trim();
     var hasCode = !!String(next.code || '').trim();
+    var hasIframe = !!String(next.iframeUrl || '').trim();
     if (!next.sourceType) next.sourceType = 'code';
-    if (next.sourceType === 'css' && !hasCss) next.sourceType = hasCode ? 'code' : (hasImage ? 'image' : 'code');
-    if (next.sourceType === 'image' && !hasImage) next.sourceType = hasCode ? 'code' : (hasCss ? 'css' : 'code');
-    if (next.sourceType === 'code' && !hasCode) next.sourceType = hasImage ? 'image' : (hasCss ? 'css' : 'code');
+    if (next.sourceType === 'iframe' && !hasIframe) {
+        next.sourceType = hasCode ? 'code' : (hasImage ? 'image' : (hasCss ? 'css' : 'code'));
+    }
+    if (next.sourceType === 'css' && !hasCss) next.sourceType = hasCode ? 'code' : (hasImage ? 'image' : (hasIframe ? 'iframe' : 'code'));
+    if (next.sourceType === 'image' && !hasImage) next.sourceType = hasCode ? 'code' : (hasCss ? 'css' : (hasIframe ? 'iframe' : 'code'));
+    if (next.sourceType === 'code' && !hasCode) next.sourceType = hasImage ? 'image' : (hasCss ? 'css' : (hasIframe ? 'iframe' : 'code'));
     return next;
 }
 
@@ -4234,13 +4334,25 @@ function ensurePageBackgroundSectionPresent(sections, docId) {
         }
     }
     if (!hasBg) {
-        var safeIdPart = String(docId || 'page').replace(/[^a-z0-9_-]/gi, '_') || 'page';
-        list.unshift(buildSectionFromDefaults({
-            id: 'page-background-' + safeIdPart,
-            type: 'page-background',
-            visible: true,
-            content: deepClone((SECTION_TYPES['page-background'] || {}).defaults || {})
-        }, -1));
+        if (docId === 'linktree') {
+            list.unshift(buildSectionFromDefaults({
+                id: 'lt-page-background',
+                type: 'page-background',
+                visible: true,
+                content: {
+                    sourceType: 'iframe',
+                    iframeUrl: '/backgrounds/cosmic-orbit/index.html'
+                }
+            }, -1));
+        } else {
+            var safeIdPart = String(docId || 'page').replace(/[^a-z0-9_-]/gi, '_') || 'page';
+            list.unshift(buildSectionFromDefaults({
+                id: 'page-background-' + safeIdPart,
+                type: 'page-background',
+                visible: true,
+                content: deepClone((SECTION_TYPES['page-background'] || {}).defaults || {})
+            }, -1));
+        }
     }
     list.forEach(function(sec, idx) { sec.order = idx; });
     return list;
@@ -4934,11 +5046,6 @@ function saveLayout() {
     var pageName = getPageDisplayName(currentPageId);
     if (pageName) saveData.pageName = pageName;
     if (page) saveData.pageStatus = _normalizePageStatus(page.pageStatus);
-    toSave.forEach(function(s) {
-        if (s.type === 'page-background' && s.content && s.content.sourceType === 'code' && s.content.code && String(s.content.code).trim()) {
-            _bgAnimAutoAddIfNew(s.content.code);
-        }
-    });
 
     db.collection('pageLayouts').doc(docId).set(saveData, { merge: true }).then(function() {
         _clearPendingUndoState();
@@ -6214,6 +6321,17 @@ function commitCurrentEdit() {
         c.css = (card.querySelector('[name="css"]') || {}).value || '';
         c.imageUrl = (card.querySelector('input[data-field="imageUrl"]') || card.querySelector('[name="imageUrl"]') || {}).value || '';
         c.code = (card.querySelector('[name="code"]') || {}).value || '';
+        card.querySelectorAll('input[name="codeEditorMode"]').forEach(function(r) { if (r.checked) c.codeEditorMode = r.value; });
+        c.codeEditorMode = _pbgNormalizeCodeEditorMode(c);
+        c.codeHtml = (card.querySelector('[name="codeHtml"]') || {}).value || '';
+        c.codeCss = (card.querySelector('[name="codeCss"]') || {}).value || '';
+        c.codeJs = (card.querySelector('[name="codeJs"]') || {}).value || '';
+        c.codeLibraryUrls = (card.querySelector('[name="codeLibraryUrls"]') || {}).value || '';
+        if (c.sourceType === 'code' && c.codeEditorMode === 'structured') {
+            var compiledDraftCode = _pbgBuildStructuredCode(c);
+            if (compiledDraftCode) c.code = compiledDraftCode;
+        }
+        c.iframeUrl = (card.querySelector('[name="iframeUrl"]') || {}).value || '';
         c.opacity = parseInt((card.querySelector('[name="opacity"]') || {}).value, 10);
         if (isNaN(c.opacity)) c.opacity = 100;
         c.fixed = !!(card.querySelector('[name="fixed"]') || {}).checked;
@@ -7049,15 +7167,28 @@ function renderEditForm() {
             break;
 
         case 'page-background':
-            var currentBgPreset = getAppliedBackgroundAnimationPreset(c.code || '');
+            var currentBgPreset = getAppliedBackgroundAnimationPreset(c);
+            var _pbgIsCss = (c.sourceType === 'css' || !c.sourceType);
+            var _pbgCodeEditorMode = _pbgNormalizeCodeEditorMode(c);
+            var _pbgStructuredHasSavedContent = _pbgStructuredHasContent(c);
             html += '<div class="edit-subsection"><div class="form-group"><label>背景類型</label>' +
-                '<div style="display:flex;gap:8px;">' +
-                '<label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (c.sourceType === 'css' || !c.sourceType ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'css\')">' +
-                '<input type="radio" name="sourceType" value="css"' + (c.sourceType === 'css' || !c.sourceType ? ' checked' : '') + ' style="display:none;">🎨 CSS / 漸層</label>' +
-                '<label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (c.sourceType === 'image' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'image\')">' +
-                '<input type="radio" name="sourceType" value="image"' + (c.sourceType === 'image' ? ' checked' : '') + ' style="display:none;">🖼 圖片</label>' +
-                '<label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (c.sourceType === 'code' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'code\')">' +
-                '<input type="radio" name="sourceType" value="code"' + (c.sourceType === 'code' ? ' checked' : '') + ' style="display:none;">🧑‍💻 HTML 程式碼</label></div></div></div>';
+                '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+                '<label style="flex:1;min-width:120px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (_pbgIsCss ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'css\')">' +
+                '<input type="radio" name="sourceType" value="css"' + (_pbgIsCss ? ' checked' : '') + ' style="display:none;">🎨 CSS / 漸層</label>' +
+                '<label style="flex:1;min-width:120px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (c.sourceType === 'image' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'image\')">' +
+                '<input type="radio" name="sourceType" value="image"' + (c.sourceType === 'image' ? ' checked' : '') + ' style="display:none;">🖼 圖片</label>'  +
+                '<label style="flex:1;min-width:120px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (c.sourceType === 'code' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'code\')">' +
+                '<input type="radio" name="sourceType" value="code"' + (c.sourceType === 'code' ? ' checked' : '') + ' style="display:none;">🧩 單檔動畫程式碼</label>' +
+                '<label style="flex:1;min-width:120px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (c.sourceType === 'iframe' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetSourceType(\'iframe\')">' +
+                '<input type="radio" name="sourceType" value="iframe"' + (c.sourceType === 'iframe' ? ' checked' : '') + ' style="display:none;">🔗 已託管動畫頁面</label></div>' +
+                '<p style="font-size:12px;color:var(--text-light);margin:8px 0 0;line-height:1.5;">單檔動畫程式碼適合自包含的 HTML / CSS / JavaScript；若動畫需要多個檔案（例如 Three.js、額外 CSS/JS、圖片、模型或字型），請改用「已託管動畫頁面」。</p></div></div>';
+            html += '<div class="edit-subsection"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">' +
+                '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                '<button type="button" class="btn btn-outline" onclick="openBackgroundAnimationPicker()">Background Animation</button>' +
+                '<button type="button" class="btn btn-outline" onclick="_pbgSaveCurrentAsPreset()">儲存目前動畫為預設</button>' +
+                '</div>' +
+                '<span id="pbgCurrentPresetBadge" class="bg-animation-badge"' + (currentBgPreset ? '' : ' style="display:none;"') + '>' + (currentBgPreset ? ('目前套用：' + escHtml(currentBgPreset.name || '')) : '') + '</span>' +
+                '</div></div>';
             html += '<div class="edit-subsection" id="pbgCssWrap" style="' + (c.sourceType !== 'css' && c.sourceType ? 'display:none;' : '') + '">';
             html += '<div class="form-group"><label>CSS 樣式</label><textarea name="css" rows="5" style="font-family:monospace;font-size:12px;" placeholder="background: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 100%);">' + escHtml(c.css || '') + '</textarea></div>';
             html += '<p style="font-size:12px;color:var(--text-light);margin:-6px 0 12px;line-height:1.5;">填入 CSS 屬性，會套用到 body。例如 <code>background: linear-gradient(...)</code> 或 <code>background-color: #1a1a4e;</code></p>';
@@ -7071,19 +7202,46 @@ function renderEditForm() {
             }
             html += '</div>';
             html += '<div class="edit-subsection" id="pbgCodeWrap" style="' + (c.sourceType !== 'code' ? 'display:none;' : '') + '">';
-            html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">' +
-                '<button type="button" class="btn btn-outline" onclick="openBackgroundAnimationPicker()">Background Animation</button>' +
-                (currentBgPreset ? '<span class="bg-animation-badge">目前套用：' + escHtml(currentBgPreset.name || '') + '</span>' : '') +
+            html += '<div class="form-group"><label>編輯方式</label>' +
+                '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                '<label style="flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (_pbgCodeEditorMode === 'structured' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetCodeEditorMode(\'structured\')">' +
+                '<input type="radio" name="codeEditorMode" value="structured"' + (_pbgCodeEditorMode === 'structured' ? ' checked' : '') + ' style="display:none;">🧱 結構化欄位</label>' +
+                '<label style="flex:1;min-width:150px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid ' + (_pbgCodeEditorMode === 'raw' ? 'var(--accent)' : 'var(--bg-off)') + ';border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s;" onclick="_pbgSetCodeEditorMode(\'raw\')">' +
+                '<input type="radio" name="codeEditorMode" value="raw"' + (_pbgCodeEditorMode === 'raw' ? ' checked' : '') + ' style="display:none;">🧾 原始碼</label>' +
+                '</div></div>';
+            html += '<div id="pbgStructuredCodeWrap" style="' + (_pbgCodeEditorMode === 'structured' ? '' : 'display:none;') + '">';
+            html += '<div class="form-group"><label>HTML</label><textarea name="codeHtml" rows="6" oninput="_pbgRefreshUi()" style="font-family:monospace;font-size:12px;" placeholder="<div id=&quot;scene-root&quot;></div>">' + escHtml(c.codeHtml || '') + '</textarea></div>';
+            html += '<div class="form-group"><label>CSS</label><textarea name="codeCss" rows="6" oninput="_pbgRefreshUi()" style="font-family:monospace;font-size:12px;" placeholder="html, body { margin: 0; }&#10;#scene-root { position: fixed; inset: 0; }">' + escHtml(c.codeCss || '') + '</textarea></div>';
+            html += '<div class="form-group"><label>JavaScript</label><textarea name="codeJs" rows="8" oninput="_pbgRefreshUi()" style="font-family:monospace;font-size:12px;" placeholder="const root = document.getElementById(\'scene-root\');&#10;// background animation code here">' + escHtml(c.codeJs || '') + '</textarea></div>';
+            html += '<div class="form-group"><label>外部腳本 / Libraries（每行一個 URL）</label><textarea name="codeLibraryUrls" rows="4" oninput="_pbgRefreshUi()" style="font-family:monospace;font-size:12px;" placeholder="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">' + escHtml(c.codeLibraryUrls || '') + '</textarea></div>';
+            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 12px;">' +
+                '<button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="_pbgAddLibrary(\'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js\')">+ Three.js</button>' +
+                '<button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="_pbgAddLibrary(\'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js\')">+ GSAP</button>' +
+                '<button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:12px;" onclick="_pbgAddLibrary(\'https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js\')">+ p5.js</button>' +
                 '</div>';
-            html += '<div class="form-group"><label>HTML 程式碼</label><textarea name="code" rows="10" style="font-family:monospace;font-size:12px;" placeholder="<div style=&quot;position:fixed;inset:0;z-index:-1;&quot;>...</div>">' + escHtml(c.code || '') + '</textarea></div>';
-            html += '<p style="font-size:12px;color:var(--text-light);margin:-6px 0 12px;line-height:1.5;">把整段背景動畫 HTML / CSS / JavaScript 貼在這裡即可。你亦可以打開 <strong>Background Animation</strong> 瀏覽現有特效卡片並直接套用。</p>';
+            if (!_pbgStructuredHasSavedContent && String(c.code || '').trim()) {
+                html += '<p style="font-size:12px;color:var(--text-light);margin:-6px 0 12px;line-height:1.5;">目前這個背景原本是以「原始碼」儲存。結構化欄位暫時為空；當你開始填寫 HTML / CSS / JavaScript 後，系統便會改用下方內容重新產生背景。</p>';
+            } else {
+                html += '<p style="font-size:12px;color:var(--text-light);margin:-6px 0 12px;line-height:1.5;">適合簡單或中等複雜度、可自包含的動畫。系統會自動把 HTML / CSS / JavaScript 合併成單一背景頁。若需要相對路徑資源、模型、字型、圖片或多個檔案，請改用「已託管動畫頁面」。</p>';
+            }
+            html += '</div>';
+            html += '<div id="pbgRawCodeWrap" style="' + (_pbgCodeEditorMode === 'raw' ? '' : 'display:none;') + '">';
+            html += '<div class="form-group"><label>原始碼</label><textarea name="code" rows="10" oninput="_pbgRefreshUi()" style="font-family:monospace;font-size:12px;" placeholder="<canvas id=&quot;bg&quot;></canvas>&#10;<script>/* self-contained background animation */<\/script>">' + escHtml(c.code || '') + '</textarea></div>';
+            html += '<p style="font-size:12px;color:var(--text-light);margin:-6px 0 12px;line-height:1.5;">貼上完整、自行組裝好的單一 HTML 片段。適合已經有現成 snippet、或暫時不想拆成 HTML / CSS / JavaScript 欄位的情況。</p>';
+            html += '</div>';
+            html += '</div>';
+            html += '<div class="edit-subsection" id="pbgIframeWrap" style="' + (c.sourceType !== 'iframe' ? 'display:none;' : '') + '">';
+            html += '<div class="form-group"><label>已託管動畫頁面網址 (iframe src)</label>' +
+                '<input type="url" name="iframeUrl" value="' + escHtml(c.iframeUrl || '') + '" oninput="_pbgRefreshUi()" placeholder="/backgrounds/cosmic-orbit/index.html" style="width:100%;padding:10px 14px;border:1px solid var(--bg-off);border-radius:10px;font-family:inherit;font-size:14px;">' +
+                '</div>';
+            html += '<p style="font-size:12px;color:var(--text-light);margin:-6px 0 12px;line-height:1.5;">適合完整動畫套件。先把整個動畫頁面託管到本站（例如 <code>/backgrounds/your-effect/index.html</code>），再把網址貼到這裡；它會以 iframe 方式載入，與主頁腳本隔離。</p>';
             html += '</div>';
             html += '<div class="edit-subsection"><div class="form-group"><label>透明度 (' + (c.opacity != null ? c.opacity : 100) + '%)</label>' +
                 '<input type="range" class="pbg-opacity-range" name="opacity" min="0" max="100" step="5" value="' + (c.opacity != null ? c.opacity : 100) + '" ' +
                 'oninput="_pbgSyncOpacitySlider(this)" ' +
                 'style="width:100%;--range-fill:' + (c.opacity != null ? c.opacity : 100) + '%;"></div>';
-            html += '<div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;">' +
-                '<input type="checkbox" name="fixed" ' + (c.fixed ? 'checked' : '') + ' style="width:18px;height:18px;accent-color:var(--accent);"> 固定背景（fixed / parallax 效果）</label></div></div>';
+            html += '<div class="form-group" id="pbgFixedWrap" style="' + (_pbgIsCss ? '' : 'display:none;') + '"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;">' +
+                '<input type="checkbox" name="fixed" ' + (c.fixed ? 'checked' : '') + ' style="width:18px;height:18px;accent-color:var(--accent);"> 固定背景（僅 CSS 模式適用）</label></div></div>';
             break;
 
         case 'floating-icon':
@@ -7743,7 +7901,21 @@ function _saveLayoutEditorConfig() {
         recentTextColors: _normalizeColorList(_layoutEditorConfig.recentTextColors),
         pinnedTextColors: _normalizeColorList(_layoutEditorConfig.pinnedTextColors),
         customBgAnimPresets: (_layoutEditorConfig.customBgAnimPresets || []).map(function(p) {
-            return { id: p.id, name: p.name || '', badge: p.badge || '', description: p.description || '', code: p.code || '' };
+            return {
+                id: p.id,
+                name: p.name || '',
+                badge: p.badge || '',
+                description: p.description || '',
+                previewHtml: p.previewHtml || '',
+                sourceType: p.sourceType || '',
+                code: p.code || '',
+                codeEditorMode: p.codeEditorMode || '',
+                codeHtml: p.codeHtml || '',
+                codeCss: p.codeCss || '',
+                codeJs: p.codeJs || '',
+                codeLibraryUrls: p.codeLibraryUrls || '',
+                iframeUrl: p.iframeUrl || ''
+            };
         }),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedBy: auth && auth.currentUser ? auth.currentUser.email : 'unknown'
@@ -7755,43 +7927,53 @@ function _saveLayoutEditorConfig() {
     });
 }
 
+function _bgAnimNormalizePresetRecord(raw) {
+    raw = raw || {};
+    var initialSourceType = raw.sourceType === 'iframe' ? 'iframe' : (raw.iframeUrl ? 'iframe' : 'code');
+    var normalized = normalizePageBackgroundContent({
+        sourceType: initialSourceType,
+        code: raw.code || '',
+        codeEditorMode: raw.codeEditorMode || '',
+        codeHtml: raw.codeHtml || '',
+        codeCss: raw.codeCss || '',
+        codeJs: raw.codeJs || '',
+        codeLibraryUrls: raw.codeLibraryUrls || '',
+        iframeUrl: raw.iframeUrl || ''
+    });
+    var sourceType = normalized.sourceType === 'iframe' && normalized.iframeUrl ? 'iframe' : 'code';
+    var codeEditorMode = sourceType === 'code' ? _pbgNormalizeCodeEditorMode(normalized) : '';
+    var code = sourceType === 'code' ? String(normalized.code || '') : '';
+    var iframeUrl = sourceType === 'iframe' ? String(normalized.iframeUrl || '') : '';
+    if (sourceType === 'code' && !code.trim()) return null;
+    if (sourceType === 'iframe' && !iframeUrl.trim()) return null;
+    return {
+        id: raw.id || ('custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)),
+        name: raw.name || '自訂動畫',
+        badge: raw.badge || '自訂',
+        description: raw.description || '',
+        previewHtml: raw.previewHtml || '',
+        sourceType: sourceType,
+        code: code,
+        codeEditorMode: codeEditorMode,
+        codeHtml: sourceType === 'code' && codeEditorMode === 'structured' ? String(normalized.codeHtml || '') : '',
+        codeCss: sourceType === 'code' && codeEditorMode === 'structured' ? String(normalized.codeCss || '') : '',
+        codeJs: sourceType === 'code' && codeEditorMode === 'structured' ? String(normalized.codeJs || '') : '',
+        codeLibraryUrls: sourceType === 'code' && codeEditorMode === 'structured' ? String(normalized.codeLibraryUrls || '') : '',
+        iframeUrl: iframeUrl
+    };
+}
+
 function _hydrateCustomBgAnimPresets() {
     var list = _layoutEditorConfig.customBgAnimPresets || [];
     window._bgAnimCustomPresets = list.map(function(p) {
-        return {
-            id: p.id || ('custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)),
-            name: p.name || '自訂動畫',
-            badge: p.badge || '自訂',
-            description: p.description || '',
-            previewHtml: '',
-            code: p.code || ''
-        };
+        return _bgAnimNormalizePresetRecord(p);
+    }).filter(Boolean);
+    _layoutEditorConfig.customBgAnimPresets = window._bgAnimCustomPresets.map(function(p) {
+        return JSON.parse(JSON.stringify(p));
     });
     if (typeof bgAnimGetAllPresets === 'function') {
         window.BACKGROUND_ANIMATION_PRESETS = bgAnimGetAllPresets();
     }
-}
-
-function _bgAnimAutoAddIfNew(code) {
-    if (!code || !String(code).trim()) return;
-    var normalized = typeof normalizePageBackgroundEffectCode === 'function' ? normalizePageBackgroundEffectCode(code) : code;
-    var all = typeof bgAnimGetAllPresets === 'function' ? bgAnimGetAllPresets() : (window.BACKGROUND_ANIMATION_PRESETS || []);
-    for (var i = 0; i < all.length; i++) {
-        if (String(all[i].code || '') === String(normalized)) return;
-    }
-    var newId = 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
-    var snippet = String(normalized).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
-    var preset = {
-        id: newId,
-        name: '自訂動畫 ' + ((_layoutEditorConfig.customBgAnimPresets || []).length + 1),
-        badge: '自訂',
-        description: snippet ? snippet + '…' : '自訂背景動畫',
-        code: normalized
-    };
-    if (typeof bgAnimAddCustomPreset === 'function') bgAnimAddCustomPreset(preset);
-    if (!_layoutEditorConfig.customBgAnimPresets) _layoutEditorConfig.customBgAnimPresets = [];
-    _layoutEditorConfig.customBgAnimPresets.push(preset);
-    _saveLayoutEditorConfig();
 }
 
 function _bgAnimRemovePreset(id) {
@@ -9310,6 +9492,7 @@ function imgPickerLoadLibrary(forceReload) {
     Promise.all([
         _imgLoadFolderAssets('layout-images'),
         _imgLoadFolderAssets('workshop-images'),
+        _imgLoadFolderAssets('carousel-exports'),
         _imgLoadFolderAssets('layout-documents')
     ]).then(function(groups) {
         var merged = [];
@@ -10540,11 +10723,156 @@ function _heroScrollHintToggle(cb) {
     schedulePreviewUpdate();
 }
 
-function getAppliedBackgroundAnimationPreset(code) {
-    var normalized = String(typeof normalizePageBackgroundEffectCode === 'function' ? normalizePageBackgroundEffectCode(code) : (code || ''));
+function _normalizeBgPresetIframeUrl(u) {
+    var s = String(u || '').trim();
+    if (!s) return '';
+    if (/^javascript:/i.test(s)) return '';
+    if (/^https?:\/\//i.test(s)) return s;
+    if (s.charAt(0) !== '/') s = '/' + s.replace(/^\/+/, '');
+    return s;
+}
+
+function _pbgBuildPresetPreviewHtml(content) {
+    var sourceType = String(content && content.sourceType || '');
+    if (sourceType === 'iframe') {
+        return '<div style="width:100%;height:100%;display:flex;align-items:flex-end;justify-content:flex-start;padding:12px;background:linear-gradient(160deg,#0b1220 0%,#132238 60%,#1f3a5c 100%);color:#dbeafe;font-size:12px;font-weight:600;letter-spacing:0.02em;">Hosted iframe</div>';
+    }
+    if (_pbgNormalizeCodeEditorMode(content) === 'structured') {
+        return '<div style="width:100%;height:100%;padding:12px;background:linear-gradient(160deg,#111827 0%,#0f172a 100%);color:#e5e7eb;font-family:monospace;font-size:12px;line-height:1.6;"><div>&lt;HTML&gt;</div><div style="opacity:0.75;">{ CSS }</div><div style="opacity:0.6;">JavaScript()</div></div>';
+    }
+    return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#111827 0%,#1f2937 100%);color:#e5e7eb;font-family:monospace;font-size:12px;">Custom Code</div>';
+}
+
+function _pbgBuildPresetDescription(content) {
+    var normalized = normalizePageBackgroundContent(content || {});
+    if (normalized.sourceType === 'iframe' && normalized.iframeUrl) {
+        return '已託管動畫頁面：' + String(normalized.iframeUrl || '').slice(0, 60);
+    }
+    if (_pbgNormalizeCodeEditorMode(normalized) === 'structured') {
+        var parts = [];
+        if (String(normalized.codeHtml || '').trim()) parts.push('HTML');
+        if (String(normalized.codeCss || '').trim()) parts.push('CSS');
+        if (String(normalized.codeJs || '').trim()) parts.push('JavaScript');
+        var libCount = _pbgNormalizeLibraryUrlList(normalized.codeLibraryUrls).length;
+        if (libCount) parts.push('外部腳本 ' + libCount + ' 個');
+        if (parts.length) return '結構化動畫：' + parts.join(' / ');
+    }
+    var snippet = String(normalized.code || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
+    return snippet ? snippet + '…' : '自訂背景動畫';
+}
+
+function _bgAnimPresetToPageBackgroundContent(preset, baseContent) {
+    var normalizedPreset = _bgAnimNormalizePresetRecord(preset);
+    var next = normalizePageBackgroundContent(baseContent || {});
+    if (!normalizedPreset) return next;
+    next.css = '';
+    next.imageUrl = '';
+    next.sourceType = normalizedPreset.sourceType || 'code';
+    next.code = normalizedPreset.code || '';
+    next.codeEditorMode = normalizedPreset.codeEditorMode || _pbgNormalizeCodeEditorMode(normalizedPreset);
+    next.codeHtml = normalizedPreset.codeHtml || '';
+    next.codeCss = normalizedPreset.codeCss || '';
+    next.codeJs = normalizedPreset.codeJs || '';
+    next.codeLibraryUrls = normalizedPreset.codeLibraryUrls || '';
+    next.iframeUrl = normalizedPreset.iframeUrl || '';
+    return normalizePageBackgroundContent(next);
+}
+
+function _pbgGetCurrentPresetContent() {
+    var sec = getSelectedSection();
+    if (!sec || sec.type !== 'page-background') return null;
+    var card = document.querySelector('.edit-card');
+    var raw = card ? _pbgReadDraftContent(card) : (sec.content || {});
+    return normalizePageBackgroundContent(raw, {
+        defaultCode: sec.id === 'w0-page-background' ? WORKSHOP0_ZERO_BG_CODE : ''
+    });
+}
+
+function _bgAnimSaveCustomPreset(preset) {
+    var normalized = _bgAnimNormalizePresetRecord(preset);
+    if (!normalized) return Promise.resolve(null);
+    if (typeof bgAnimAddCustomPreset === 'function') bgAnimAddCustomPreset(normalized);
+    if (!_layoutEditorConfig.customBgAnimPresets) _layoutEditorConfig.customBgAnimPresets = [];
+    _layoutEditorConfig.customBgAnimPresets = (_layoutEditorConfig.customBgAnimPresets || []).filter(function(item) {
+        return item.id !== normalized.id;
+    });
+    _layoutEditorConfig.customBgAnimPresets.push(JSON.parse(JSON.stringify(normalized)));
+    return _saveLayoutEditorConfig().then(function() {
+        return normalized;
+    });
+}
+
+function _pbgSaveCurrentAsPreset() {
+    var content = _pbgGetCurrentPresetContent();
+    if (!content) return;
+    if (content.sourceType !== 'code' && content.sourceType !== 'iframe') {
+        alert('只有「單檔動畫程式碼」與「已託管動畫頁面」可以儲存為動畫預設。');
+        return;
+    }
+    if (content.sourceType === 'code' && !String(content.code || '').trim()) {
+        alert('請先填入背景動畫程式碼，再儲存為預設。');
+        return;
+    }
+    if (content.sourceType === 'iframe' && !String(content.iframeUrl || '').trim()) {
+        alert('請先填入已託管動畫頁面網址，再儲存為預設。');
+        return;
+    }
+    var applied = typeof getAppliedBackgroundAnimationPreset === 'function'
+        ? getAppliedBackgroundAnimationPreset(content)
+        : null;
+    var isExistingCustom = !!(applied && !(typeof bgAnimIsBuiltInPreset === 'function' && bgAnimIsBuiltInPreset(applied.id)));
+    var defaultName = isExistingCustom
+        ? String(applied.name || '自訂動畫')
+        : ('自訂動畫 ' + ((_layoutEditorConfig.customBgAnimPresets || []).length + 1));
+    var name = prompt('請為此背景動畫預設命名:', defaultName);
+    if (name == null) return;
+    name = String(name || '').trim();
+    if (!name) return;
+    _bgAnimSaveCustomPreset({
+        id: isExistingCustom ? applied.id : '',
+        name: name,
+        badge: isExistingCustom ? String(applied.badge || '自訂') : '自訂',
+        description: _pbgBuildPresetDescription(content),
+        previewHtml: isExistingCustom && applied.previewHtml ? applied.previewHtml : _pbgBuildPresetPreviewHtml(content),
+        sourceType: content.sourceType,
+        code: content.code,
+        codeEditorMode: content.codeEditorMode,
+        codeHtml: content.codeHtml,
+        codeCss: content.codeCss,
+        codeJs: content.codeJs,
+        codeLibraryUrls: content.codeLibraryUrls,
+        iframeUrl: content.iframeUrl
+    }).then(function(saved) {
+        if (!saved) return;
+        _pbgRefreshUi();
+        var modal = document.getElementById('bgAnimationPickerModal');
+        if (modal && modal.classList.contains('show')) renderBackgroundAnimationPicker();
+        showStatus('背景動畫預設已儲存', true);
+    });
+}
+
+function getAppliedBackgroundAnimationPreset(codeOrContent) {
     var presets = Array.isArray(window.BACKGROUND_ANIMATION_PRESETS) ? window.BACKGROUND_ANIMATION_PRESETS : [];
+    var code = '';
+    var iframeUrl = '';
+    var sourceType = '';
+    if (codeOrContent && typeof codeOrContent === 'object') {
+        code = String(codeOrContent.code || '');
+        iframeUrl = _normalizeBgPresetIframeUrl(codeOrContent.iframeUrl);
+        sourceType = String(codeOrContent.sourceType || '');
+    } else {
+        code = String(codeOrContent || '');
+        sourceType = 'code';
+    }
+    var normalized = String(typeof normalizePageBackgroundEffectCode === 'function' ? normalizePageBackgroundEffectCode(code) : code);
     for (var i = 0; i < presets.length; i++) {
-        if (String(presets[i].code || '') === normalized) return presets[i];
+        var p = presets[i];
+        if (p.iframeUrl && String(p.iframeUrl).trim()) {
+            if (sourceType === 'iframe' && iframeUrl && _normalizeBgPresetIframeUrl(p.iframeUrl) === iframeUrl) return p;
+            continue;
+        }
+        if (sourceType !== 'code') continue;
+        if (String(p.code || '') === normalized) return p;
     }
     return null;
 }
@@ -10622,21 +10950,29 @@ function _bgAnimBindHoverPreview(grid) {
 
 function _bgAnimShowLivePreview(card, presetId) {
     var preset = typeof getBackgroundAnimationPresetById === 'function' ? getBackgroundAnimationPresetById(presetId) : null;
-    if (!preset || !preset.code) return;
+    if (!preset) return;
     _bgAnimHideLivePreview();
     var previewEl = card.querySelector('.bg-animation-preview');
     if (!previewEl) return;
-    var previewCode = typeof preparePageBackgroundEffectSrcdoc === 'function'
-        ? preparePageBackgroundEffectSrcdoc(preset.code)
-        : preset.code;
     var iframe = document.createElement('iframe');
     iframe.className = 'bg-anim-live-iframe';
-    iframe.setAttribute('sandbox', 'allow-scripts');
     iframe.setAttribute('loading', 'lazy');
     iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;z-index:2;pointer-events:none;border-radius:14px 14px 0 0;';
     previewEl.style.position = 'relative';
     previewEl.appendChild(iframe);
     _bgAnimHoverIframe = iframe;
+    if (preset.iframeUrl && String(preset.iframeUrl).trim()) {
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+        var src = _normalizeBgPresetIframeUrl(preset.iframeUrl);
+        if (src.charAt(0) === '/') src = (window.location && window.location.origin ? window.location.origin : '') + src;
+        iframe.src = src;
+        return;
+    }
+    if (!preset.code) return;
+    iframe.setAttribute('sandbox', 'allow-scripts');
+    var previewCode = typeof preparePageBackgroundEffectSrcdoc === 'function'
+        ? preparePageBackgroundEffectSrcdoc(preset.code)
+        : preset.code;
     try {
         var doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
@@ -10661,11 +10997,7 @@ function _pbgApplyAnimationPreset(presetId) {
     if (!preset) return;
     commitCurrentEdit();
     pushUndo();
-    sec.content = normalizePageBackgroundContent(sec.content);
-    sec.content.sourceType = 'code';
-    sec.content.css = '';
-    sec.content.imageUrl = '';
-    sec.content.code = String(preset.code || '');
+    sec.content = _bgAnimPresetToPageBackgroundContent(preset, sec.content);
     renderEditForm();
     setDirty(true);
     sendPreviewUpdate();
@@ -10684,6 +11016,85 @@ function _pbgSyncOpacitySlider(input) {
     setDirty(true);
 }
 
+function _pbgReadDraftContent(card) {
+    card = card || document.querySelector('.edit-card');
+    if (!card) return null;
+    var sec = getSelectedSection();
+    var fallback = sec && sec.content ? sec.content : {};
+    var draft = {};
+    card.querySelectorAll('input[name="sourceType"]').forEach(function(r) {
+        if (r.checked) draft.sourceType = r.value;
+    });
+    draft.sourceType = draft.sourceType || 'css';
+    card.querySelectorAll('input[name="codeEditorMode"]').forEach(function(r) {
+        if (r.checked) draft.codeEditorMode = r.value;
+    });
+    draft.codeEditorMode = draft.codeEditorMode || _pbgNormalizeCodeEditorMode(fallback);
+    draft.code = (card.querySelector('[name="code"]') || {}).value || String(fallback.code || '');
+    draft.codeHtml = (card.querySelector('[name="codeHtml"]') || {}).value || String(fallback.codeHtml || '');
+    draft.codeCss = (card.querySelector('[name="codeCss"]') || {}).value || String(fallback.codeCss || '');
+    draft.codeJs = (card.querySelector('[name="codeJs"]') || {}).value || String(fallback.codeJs || '');
+    draft.codeLibraryUrls = (card.querySelector('[name="codeLibraryUrls"]') || {}).value || String(fallback.codeLibraryUrls || '');
+    if (draft.sourceType === 'code' && draft.codeEditorMode === 'structured') {
+        var draftCompiled = _pbgBuildStructuredCode(draft);
+        if (draftCompiled) draft.code = draftCompiled;
+    }
+    draft.iframeUrl = (card.querySelector('[name="iframeUrl"]') || {}).value || '';
+    return draft;
+}
+
+function _pbgRefreshUi() {
+    var card = document.querySelector('.edit-card');
+    if (!card) return;
+    var draft = _pbgReadDraftContent(card) || {};
+    var badge = document.getElementById('pbgCurrentPresetBadge');
+    var preset = typeof getAppliedBackgroundAnimationPreset === 'function'
+        ? getAppliedBackgroundAnimationPreset(draft)
+        : null;
+    if (badge) {
+        if (preset) {
+            badge.textContent = '目前套用：' + String(preset.name || '');
+            badge.style.display = '';
+        } else {
+            badge.textContent = '';
+            badge.style.display = 'none';
+        }
+    }
+    var fixedWrap = document.getElementById('pbgFixedWrap');
+    if (fixedWrap) fixedWrap.style.display = draft.sourceType === 'css' ? '' : 'none';
+    var structuredWrap = document.getElementById('pbgStructuredCodeWrap');
+    if (structuredWrap) structuredWrap.style.display = (draft.sourceType === 'code' && draft.codeEditorMode === 'structured') ? '' : 'none';
+    var rawWrap = document.getElementById('pbgRawCodeWrap');
+    if (rawWrap) rawWrap.style.display = (draft.sourceType === 'code' && draft.codeEditorMode === 'raw') ? '' : 'none';
+}
+
+function _pbgSetCodeEditorMode(mode) {
+    var card = document.querySelector('.edit-card');
+    if (!card) return;
+    _capturePendingUndoState();
+    card.querySelectorAll('input[name="codeEditorMode"]').forEach(function(r) { r.checked = r.value === mode; });
+    card.querySelectorAll('input[name="codeEditorMode"]').forEach(function(r) {
+        r.parentElement.style.borderColor = r.checked ? 'var(--accent)' : 'var(--bg-off)';
+    });
+    _pbgRefreshUi();
+    setDirty(true);
+    schedulePreviewUpdate();
+}
+
+function _pbgAddLibrary(url) {
+    var card = document.querySelector('.edit-card');
+    if (!card) return;
+    var input = card.querySelector('[name="codeLibraryUrls"]');
+    if (!input) return;
+    var current = _pbgNormalizeLibraryUrlList(input.value);
+    if (current.indexOf(url) === -1) current.push(url);
+    input.value = current.join('\n');
+    _capturePendingUndoState();
+    _pbgRefreshUi();
+    setDirty(true);
+    schedulePreviewUpdate();
+}
+
 function _pbgSetSourceType(type) {
     var card = document.querySelector('.edit-card');
     if (!card) return;
@@ -10698,6 +11109,9 @@ function _pbgSetSourceType(type) {
     if (cssW) cssW.style.display = type === 'css' ? '' : 'none';
     if (imgW) imgW.style.display = type === 'image' ? '' : 'none';
     if (codeW) codeW.style.display = type === 'code' ? '' : 'none';
+    var iframeW = document.getElementById('pbgIframeWrap');
+    if (iframeW) iframeW.style.display = type === 'iframe' ? '' : 'none';
+    _pbgRefreshUi();
     setDirty(true);
     schedulePreviewUpdate();
 }

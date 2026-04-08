@@ -1,0 +1,2982 @@
+// ============================================================
+// ELEVATOR ACTION - GAME BOY RECREATION
+// ============================================================
+// Faithful recreation of the 1991 Taito Game Boy game.
+// 160x144 native resolution, 4-shade GB palette.
+// ============================================================
+
+(() => {
+'use strict';
+
+// ---- CONSTANTS ----
+const NATIVE_W = 160;
+const NATIVE_H = 144;
+const TILE = 8; // tile size in pixels
+
+// Game Boy 4-shade palette (classic green)
+const PAL = {
+  darkest:  '#0f380f',
+  dark:     '#306230',
+  light:    '#8bac0f',
+  lightest: '#9bbc0f',
+};
+
+// Game states
+const STATE = {
+  TITLE: 0,
+  PLAYING: 1,
+  ENTERING_DOOR: 2,
+  LEVEL_COMPLETE: 3,
+  GAME_OVER: 4,
+  PAUSED: 5,
+  SETTINGS: 6,
+  LEVEL_INTRO: 7,
+  NAME_ENTRY: 8,
+  LEADERBOARD: 9,
+};
+
+// Tile types
+const T = {
+  EMPTY: 0,
+  FLOOR: 1,
+  WALL: 2,
+  SHAFT: 3,       // elevator shaft (passable)
+  DOOR_RED: 4,    // document door (must enter)
+  DOOR_BLUE: 5,   // enemy spawn door
+  DOOR_QMARK: 6,  // item door
+  ESCALATOR_UP: 7,
+  ESCALATOR_DOWN: 8,
+  LAMP: 9,
+  EXIT: 10,
+};
+
+// ---- LEADERBOARD API ----
+const API_BASE = '__PORT_8000__'.startsWith('__') ? 'http://localhost:8000' : '__PORT_8000__';
+
+const GRAVITY = 280;
+const PLAYER_SPEED = 45;
+const PLAYER_JUMP = -65;  // small hop, stays well within same floor (~7px rise)
+const BULLET_SPEED = 120;
+const ENEMY_SPEED = 16; // slower walk, more faithful to original GB game
+const ENEMY_BULLET_SPEED = 80;
+
+// ---- LEVEL CONFIGURATION ----
+const LEVEL_CONFIG = [
+  { floors: 8,  shafts: 1, enemyRate: 0.2, redDoors: 2, qmarkDoors: 1, hasDogs: false, bossLevel: false },
+  { floors: 10, shafts: 2, enemyRate: 0.3, redDoors: 3, qmarkDoors: 2, hasDogs: false, bossLevel: false },
+  { floors: 12, shafts: 2, enemyRate: 0.4, redDoors: 3, qmarkDoors: 2, hasDogs: false, bossLevel: false },
+  { floors: 12, shafts: 2, enemyRate: 0.5, redDoors: 4, qmarkDoors: 3, hasDogs: true,  bossLevel: false },
+  { floors: 14, shafts: 3, enemyRate: 0.6, redDoors: 4, qmarkDoors: 3, hasDogs: true,  bossLevel: false },
+  { floors: 16, shafts: 3, enemyRate: 0.7, redDoors: 5, qmarkDoors: 4, hasDogs: true,  bossLevel: true  },
+];
+
+// Level names for intro screen
+const LEVEL_NAMES = ['LOBBY', 'OFFICES', 'ARCHIVES', 'KENNEL', 'PENTHOUSE', 'ROOFTOP'];
+
+// ---- DIFFICULTY MULTIPLIER ----
+function getDifficultyMultiplier(level) {
+  return {
+    enemySpawnRate: 0.005 * (1 + level * 0.5),
+    maxEnemies: 6 + level * 3,
+    shootTimerBase: Math.max(0.8, 1.5 - level * 0.1),
+    shootTimerRandom: Math.max(0.5, 1.5 - level * 0.15),
+    patrolSpeed: ENEMY_SPEED * (1 + level * 0.08),
+    dogSpeed: ENEMY_SPEED * 1.8 * (1 + level * 0.1),
+  };
+}
+
+// ---- WEAPON DEFINITIONS ----
+const WEAPONS = {
+  pistol: {
+    name: 'PISTOL',
+    fireRate: 0.28,     // seconds between shots
+    bulletSpeed: 120,
+    maxOnScreen: 3,
+    ammo: Infinity,
+    piercing: false,
+    spread: 0,          // number of extra bullets (0 = single)
+    auto: false,        // false = must re-press for each shot (but we still use cooldown)
+    bulletW: 3,
+    bulletH: 2,
+  },
+  machinegun: {
+    name: 'M-GUN',
+    fireRate: 0.08,     // very fast
+    bulletSpeed: 150,
+    maxOnScreen: 6,
+    ammo: 50,
+    piercing: false,
+    spread: 0,
+    auto: true,         // hold to spray
+    bulletW: 4,
+    bulletH: 2,
+  },
+  spread: {
+    name: 'SPREAD',
+    fireRate: 0.35,
+    bulletSpeed: 110,
+    maxOnScreen: 9,     // 3 per shot x 3
+    ammo: 20,
+    piercing: false,
+    spread: 2,          // fires 3 bullets (1 + 2 extra)
+    auto: false,
+    bulletW: 3,
+    bulletH: 2,
+  },
+  laser: {
+    name: 'LASER',
+    fireRate: 0.40,
+    bulletSpeed: 200,
+    maxOnScreen: 2,
+    ammo: 15,
+    piercing: true,     // goes through enemies
+    spread: 0,
+    auto: false,
+    bulletW: 6,
+    bulletH: 1,
+  },
+  shotgun: {
+    name: 'SHOTGN',
+    fireRate: 0.5,
+    bulletSpeed: 100,
+    maxOnScreen: 12,    // 4 per shot x 3
+    ammo: 12,
+    piercing: false,
+    spread: 3,          // fires 4 bullets (1 + 3 extra) in a fan
+    auto: false,
+    bulletW: 2,
+    bulletH: 2,
+  },
+  rocket: {
+    name: 'ROCKET',
+    fireRate: 0.8,
+    bulletSpeed: 80,
+    maxOnScreen: 2,
+    ammo: 8,
+    piercing: true,
+    spread: 0,
+    auto: false,
+    bulletW: 6,
+    bulletH: 3,
+    explosive: true,    // deals area damage
+  },
+};
+
+// ---- CANVAS SETUP ----
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ---- RESPONSIVE SCALING ----
+function resizeCanvas() {
+  const isTouchDevice = 'ontouchstart' in window;
+  const isLandscape = window.innerWidth > window.innerHeight;
+  
+  let availW = window.innerWidth;
+  let availH = window.innerHeight;
+  
+  // Reserve space for controls on touch devices
+  if (isTouchDevice) {
+    if (isLandscape) {
+      // Leave room for D-pad on left and A/B on right
+      availW -= 280; // ~140px each side
+      availH -= 30;  // small margin for START/SELECT at bottom
+    } else {
+      // Portrait: screen on top, controls below
+      // Controls area needs ~200px (d-pad 130 + menu 40 + gaps)
+      availH = availH * 0.52; // give ~52% of screen to the game
+    }
+  }
+  
+  // Calculate the best integer scale
+  const scaleX = Math.floor(availW / NATIVE_W);
+  const scaleY = Math.floor(availH / NATIVE_H);
+  let scale = Math.max(1, Math.min(scaleX, scaleY));
+  
+  canvas.style.width = (NATIVE_W * scale) + 'px';
+  canvas.style.height = (NATIVE_H * scale) + 'px';
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ---- INPUT SYSTEM ----
+// Redesigned: jump uses a buffer so short presses never get lost.
+// Shoot reads held state so holding X gives continuous fire.
+const Input = {
+  keys: {},
+  justPressed: {},
+  // Jump buffer: survives across frames until consumed
+  _jumpBuffer: 0, // frames remaining
+  
+  init() {
+    document.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      const k = e.code;
+      if (!this.keys[k]) this.justPressed[k] = true;
+      this.keys[k] = true;
+      // Buffer jump on keydown so the game loop never misses it
+      if (k === 'KeyZ' || k === 'ArrowUp') this._jumpBuffer = 6; // ~100ms at 60fps
+    });
+    document.addEventListener('keyup', (e) => {
+      e.preventDefault();
+      this.keys[e.code] = false;
+    });
+    this.initTouch();
+  },
+  
+  initTouch() {
+    const map = {
+      'dpad-up': 'ArrowUp',
+      'dpad-down': 'ArrowDown',
+      'dpad-left': 'ArrowLeft',
+      'dpad-right': 'ArrowRight',
+      'btn-a': 'KeyZ',      // Jump
+      'btn-b': 'KeyX',      // Shoot
+      'btn-start': 'Enter',
+      'btn-select': 'ShiftLeft',
+    };
+    
+    for (const [id, key] of Object.entries(map)) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      
+      const press = (e) => {
+        e.preventDefault();
+        if (!this.keys[key]) this.justPressed[key] = true;
+        this.keys[key] = true;
+        el.classList.add('pressed');
+        if (key === 'KeyZ') this._jumpBuffer = 6;
+      };
+      const release = (e) => {
+        e.preventDefault();
+        this.keys[key] = false;
+        el.classList.remove('pressed');
+      };
+      
+      el.addEventListener('touchstart', press, { passive: false });
+      el.addEventListener('touchend', release, { passive: false });
+      el.addEventListener('touchcancel', release, { passive: false });
+      el.addEventListener('mousedown', press);
+      el.addEventListener('mouseup', release);
+      el.addEventListener('mouseleave', release);
+    }
+  },
+  
+  isDown(code) { return !!this.keys[code]; },
+  wasPressed(code) { return !!this.justPressed[code]; },
+  endFrame() {
+    this.justPressed = {};
+    if (this._jumpBuffer > 0) this._jumpBuffer--;
+  },
+  
+  left()  { return this.isDown('ArrowLeft'); },
+  right() { return this.isDown('ArrowRight'); },
+  up()    { return this.isDown('ArrowUp'); },
+  down()  { return this.isDown('ArrowDown'); },
+  // Jump: consumed from buffer OR fresh press
+  jump()  {
+    if (this._jumpBuffer > 0) { this._jumpBuffer = 0; return true; }
+    return false;
+  },
+  // Shoot: returns true while the key is HELD (continuous fire)
+  shootHeld() { return this.isDown('KeyX'); },
+  start() { return this.wasPressed('Enter'); },
+  select() { return this.wasPressed('ShiftLeft'); },
+};
+
+Input.init();
+
+// ---- SOUND SYSTEM (Procedural Web Audio) ----
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, dur, type = 'square', vol = 0.15) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+const SFX = {
+  shoot()     { playTone(800, 0.08, 'square', 0.12); },
+  jump()      { playTone(300, 0.1, 'square', 0.1); setTimeout(() => playTone(500, 0.08, 'square', 0.1), 50); },
+  hit()       { playTone(100, 0.2, 'sawtooth', 0.15); },
+  door()      { playTone(600, 0.1, 'square', 0.1); setTimeout(() => playTone(800, 0.15, 'square', 0.1), 100); },
+  pickup()    { playTone(500, 0.08, 'square', 0.1); setTimeout(() => playTone(700, 0.08, 'square', 0.1), 80); setTimeout(() => playTone(900, 0.12, 'square', 0.1), 160); },
+  crush()     { playTone(60, 0.3, 'sawtooth', 0.2); },
+  lamp()      { playTone(200, 0.15, 'triangle', 0.1); },
+  complete()  { for (let i = 0; i < 4; i++) setTimeout(() => playTone(400 + i * 100, 0.15, 'square', 0.12), i * 150); },
+  gameOver()  { for (let i = 0; i < 3; i++) setTimeout(() => playTone(400 - i * 80, 0.25, 'square', 0.12), i * 250); },
+  // New sound effects
+  dogBark()   { playTone(120, 0.08, 'sawtooth', 0.18); setTimeout(() => playTone(90, 0.12, 'sawtooth', 0.15), 90); },
+  bossHit()   { playTone(80, 0.15, 'sawtooth', 0.2); playTone(60, 0.2, 'square', 0.15); },
+  bossDeath() {
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => playTone(200 - i * 25, 0.2, 'sawtooth', 0.18), i * 120);
+      setTimeout(() => playTone(300 + i * 30, 0.1, 'square', 0.12), i * 120 + 60);
+    }
+  },
+  levelIntro() {
+    const notes = [300, 400, 500, 700];
+    for (let i = 0; i < notes.length; i++) setTimeout(() => playTone(notes[i], 0.15, 'square', 0.12), i * 120);
+  },
+  extraLife() {
+    const notes = [400, 500, 600, 800, 700, 900];
+    for (let i = 0; i < notes.length; i++) setTimeout(() => playTone(notes[i], 0.1, 'square', 0.14), i * 80);
+  },
+  rocketExplode() {
+    playTone(120, 0.35, 'sawtooth', 0.22);
+    setTimeout(() => playTone(80, 0.25, 'sawtooth', 0.18), 80);
+    setTimeout(() => playTone(60, 0.3, 'square', 0.1), 160);
+  },
+};
+
+// ---- GAME DATA ----
+// Building layout generator
+// The GB version has multiple buildings. Each building is a tall structure
+// with floors connected by elevators and escalators.
+
+function generateBuilding(level) {
+  const cfgIdx = level % LEVEL_CONFIG.length;
+  const cfg = LEVEL_CONFIG[cfgIdx];
+  const numFloors = cfg.floors;
+  const buildingW = 20; // tiles wide (160px / 8 = 20 tiles)
+  const floorH = 4;     // tiles per floor (floor + 3 rows of room)
+  const totalH = numFloors * floorH + 2; // +2 for roof and basement
+  
+  // Create empty tilemap
+  const map = [];
+  for (let y = 0; y < totalH; y++) {
+    map[y] = [];
+    for (let x = 0; x < buildingW; x++) {
+      map[y][x] = T.EMPTY;
+    }
+  }
+  
+  // Elevator shaft positions based on level config
+  const shafts = [];
+  shafts.push(Math.floor(buildingW / 2)); // center shaft always present
+  if (cfg.shafts >= 2) {
+    shafts.push(Math.floor(buildingW / 4));
+  }
+  if (cfg.shafts >= 3) {
+    shafts.push(Math.floor(buildingW * 3 / 4));
+  }
+  
+  // Build each floor
+  const doors = [];
+  const lamps = [];
+  const escalators = [];
+  
+  // Track remaining red/qmark doors to place
+  let remainingRedDoors = cfg.redDoors;
+  let remainingQmarkDoors = cfg.qmarkDoors;
+  
+  for (let f = 0; f < numFloors; f++) {
+    const fy = (f + 1) * floorH; // floor Y position (top-down, floor 0 = top)
+    
+    // Floor tiles
+    for (let x = 0; x < buildingW; x++) {
+      map[fy][x] = T.FLOOR;
+    }
+    
+    // Shaft openings
+    for (const sx of shafts) {
+      map[fy][sx] = T.SHAFT;
+      // Mark shaft tiles above
+      for (let y = fy - floorH; y < fy; y++) {
+        if (y >= 0) map[y][sx] = T.SHAFT;
+      }
+    }
+    
+    // Walls at edges
+    for (let y = fy - floorH + 1; y < fy; y++) {
+      if (y >= 0) {
+        map[y][0] = T.WALL;
+        map[y][buildingW - 1] = T.WALL;
+      }
+    }
+    
+    // Doors on this floor - distribute based on config
+    const usedX = new Set(shafts);
+    usedX.add(0);
+    usedX.add(buildingW - 1);
+    
+    function placeDoor(type) {
+      for (let tries = 0; tries < 20; tries++) {
+        const dx = 2 + Math.floor(Math.random() * (buildingW - 4));
+        if (!usedX.has(dx) && !usedX.has(dx - 1) && !usedX.has(dx + 1)) {
+          usedX.add(dx);
+          doors.push({ x: dx, y: fy, type, floor: f, entered: false });
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    // Place red doors spread across floors
+    if (f > 0 && remainingRedDoors > 0) {
+      const floorsLeft = numFloors - f;
+      const shouldPlace = remainingRedDoors >= floorsLeft || (f % Math.ceil(numFloors / cfg.redDoors) === 0);
+      if (shouldPlace) {
+        if (placeDoor(T.DOOR_RED)) remainingRedDoors--;
+      }
+    }
+    
+    // Place question mark doors
+    if (f > 0 && remainingQmarkDoors > 0) {
+      const floorsLeft = numFloors - f;
+      const shouldPlace = remainingQmarkDoors >= floorsLeft || (f % Math.ceil(numFloors / cfg.qmarkDoors) === 0);
+      if (shouldPlace) {
+        if (placeDoor(T.DOOR_QMARK)) remainingQmarkDoors--;
+      }
+    }
+    
+    // Blue doors (enemy spawn) on most floors
+    if (f > 0 && Math.random() < 0.6) {
+      placeDoor(T.DOOR_BLUE);
+    }
+    
+    // Lamps on upper floors
+    if (f < numFloors - 2 && f > 0 && Math.random() < 0.5) {
+      const lx = 3 + Math.floor(Math.random() * (buildingW - 6));
+      if (!usedX.has(lx)) {
+        lamps.push({ x: lx, y: fy - 3, floor: f, active: true });
+      }
+    }
+    
+    // Escalators on the sides
+    if (f > 0 && f < numFloors - 1 && f % 2 === 0) {
+      escalators.push({ x: 1, y: fy, dir: -1, floor: f }); // left side going up
+      escalators.push({ x: buildingW - 2, y: fy, dir: 1, floor: f }); // right side going down
+    }
+  }
+  
+  // Ensure at least the configured number of red doors
+  let redCount = doors.filter(d => d.type === T.DOOR_RED).length;
+  while (redCount < cfg.redDoors) {
+    const f = 2 + Math.floor(Math.random() * (numFloors - 3));
+    const usedOnFloor = doors.filter(d => d.floor === f).map(d => d.x);
+    for (let tries = 0; tries < 10; tries++) {
+      const dx = 2 + Math.floor(Math.random() * (buildingW - 4));
+      if (!usedOnFloor.includes(dx) && !shafts.includes(dx)) {
+        doors.push({ x: dx, y: (f + 1) * floorH, type: T.DOOR_RED, floor: f, entered: false });
+        redCount++;
+        break;
+      }
+    }
+    // safety escape if we can't place
+    if (redCount < cfg.redDoors - 1) break;
+  }
+  
+  // Basement floor
+  const basementY = (numFloors + 1) * floorH;
+  for (let x = 0; x < buildingW; x++) {
+    map[Math.min(basementY, totalH - 1)][x] = T.FLOOR;
+  }
+  
+  // Extend shafts to bottom — mark shaft tiles through ALL rows including floors
+  for (const sx of shafts) {
+    for (let y = 0; y < totalH; y++) {
+      if (map[y][sx] === T.EMPTY || map[y][sx] === T.FLOOR) {
+        map[y][sx] = T.SHAFT;
+      }
+    }
+  }
+  
+  return {
+    map,
+    width: buildingW,
+    height: totalH,
+    doors,
+    lamps,
+    escalators,
+    shafts,
+    numFloors,
+    floorH,
+    startX: shafts[0] * TILE,
+    startY: floorH * TILE - TILE,
+    exitX: Math.floor(buildingW / 2) * TILE,
+    exitY: (totalH - 2) * TILE,
+    config: cfg,
+  };
+}
+
+// ---- GAME OBJECT ----
+const G = {
+  state: STATE.TITLE,
+  level: 0,
+  score: 0,
+  lives: 3,
+  maxHealth: 5,
+  health: 5,
+  building: null,
+  camera: { x: 0, y: 0 },
+  player: null,
+  enemies: [],
+  bullets: [],
+  elevators: [],
+  particles: [],
+  lightsOn: true,
+  lightTimer: 0,
+  doorTimer: 0,
+  doorAnim: 0,
+  levelCompleteTimer: 0,
+  gameOverTimer: 0,
+  titleBlink: 0,
+  docsCollected: 0,
+  docsTotal: 0,
+  redDoorsRemaining: 0,
+  invincibleTimer: 0,
+  fallingLamps: [],
+  weaponPickupMsg: '',      // e.g. 'GOT M-GUN!'
+  weaponPickupTimer: 0,
+  levelIntroTimer: 0,       // countdown for level intro screen
+  nextLifeAt: 10000,        // score threshold for next extra life
+  bossSpawned: false,       // has boss been spawned on level 6
+  bossDefeated: false,      // has boss been defeated
+  // Settings
+  settings: {
+    unlimitedAmmo: false,
+  },
+  settingsCursor: 0,        // which setting is selected
+  settingsFrom: STATE.TITLE, // which screen opened settings
+  // Name entry / leaderboard
+  nameEntry: { chars: ['A','A','A','A','A','A','A','A'], pos: 0, done: false },
+  leaderboard: [],
+  leaderboardLoading: false,
+  leaderboardError: false,
+};
+
+// ---- CHECK BONUS LIFE ----
+function checkBonusLife() {
+  while (G.score >= G.nextLifeAt) {
+    G.lives++;
+    G.nextLifeAt += 10000;
+    SFX.extraLife();
+    G.weaponPickupMsg = '1UP!';
+    G.weaponPickupTimer = 2.0;
+  }
+}
+
+// ---- PLAYER ----
+function createPlayer(x, y) {
+  return {
+    x, y,
+    w: 8, h: 14,
+    vx: 0, vy: 0,
+    dir: 1, // 1=right, -1=left
+    grounded: false,
+    crouching: false,
+    inElevator: null,
+    onElevatorTop: null,    // riding top plate of elevator
+    onEscalator: false,
+    shooting: false,
+    shootCooldown: 0,    // time until next shot allowed
+    walkFrame: 0,
+    walkTimer: 0,
+    enteringDoor: false,
+    jumpKicking: false,
+    weapon: 'pistol',    // current weapon key
+    weaponAmmo: Infinity,
+    fallStartY: y,       // Y position where falling began (for fall damage)
+  };
+}
+
+// ---- ELEVATOR ----
+function createElevator(shaftX, startY, minY, maxY) {
+  return {
+    x: shaftX * TILE,
+    y: startY,
+    w: TILE,
+    h: 4, // elevator platform thickness
+    topH: 4, // top plate thickness
+    vy: 0,
+    minY,
+    maxY,
+    occupied: false,
+    moving: false,
+  };
+}
+
+// Get the Y position of the elevator's top plate
+function getElevTopY(elev, floorH) {
+  return elev.y - floorH * TILE + 4;
+}
+
+// ---- ENEMY ----
+function createEnemy(x, y, floor, type = null) {
+  const isDog = type === 'dog';
+  const isBoss = type === 'boss';
+  const diff = getDifficultyMultiplier(G.level);
+  return {
+    x, y,
+    w: isBoss ? 16 : (isDog ? 10 : 8),
+    h: isBoss ? 16 : (isDog ? 8 : 14),
+    vx: 0, vy: 0,
+    dir: Math.random() < 0.5 ? 1 : -1,
+    grounded: false,
+    alive: true,
+    hp: isBoss ? 10 : 1,
+    maxHp: isBoss ? 10 : 1,
+    hitFlashTimer: 0,
+    shootTimer: isBoss ? 0.6 : (diff.shootTimerBase + Math.random() * diff.shootTimerRandom),
+    walkTimer: 0,
+    walkFrame: 0,
+    floor,
+    crouching: false,
+    crouchTimer: 0,
+    patrolTimer: 1.5 + Math.random() * 2,
+    idleTimer: 0,          // when > 0, enemy stands still
+    patrolState: 'walk',   // 'walk' or 'idle'
+    type: type || (Math.random() < 0.3 ? 'hat' : 'suit'),
+    isBoss: isBoss,
+    isDog: isDog,
+    dogBarkTimer: 1.5 + Math.random() * 2, // for bark sound timing
+  };
+}
+
+// ---- BULLET ----
+function createBullet(x, y, dir, isEnemy = false, weaponKey = 'pistol') {
+  const wep = WEAPONS[weaponKey] || WEAPONS.pistol;
+  return {
+    x, y, dir, isEnemy, alive: true,
+    w: isEnemy ? 3 : wep.bulletW,
+    h: isEnemy ? 2 : wep.bulletH,
+    speed: isEnemy ? ENEMY_BULLET_SPEED : wep.bulletSpeed,
+    piercing: isEnemy ? false : wep.piercing,
+    weapon: weaponKey,
+    explosive: (!isEnemy && wep.explosive) ? true : false,
+  };
+}
+
+// ---- ROCKET EXPLOSION ----
+function rocketExplode(rx, ry) {
+  // Damage all enemies within 16px
+  for (const e of G.enemies) {
+    if (!e.alive) continue;
+    const dist = Math.sqrt(Math.pow(e.x + e.w / 2 - rx, 2) + Math.pow(e.y + e.h / 2 - ry, 2));
+    if (dist < 24) {
+      e.alive = false;
+      const pts = e.isBoss ? 0 : (e.isDog ? (G.lightsOn ? 200 : 250) : (G.lightsOn ? 100 : 150));
+      G.score += pts;
+      checkBonusLife();
+      spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 6);
+    }
+  }
+  // Explosion particles
+  spawnParticles(rx, ry, 12);
+  SFX.rocketExplode();
+}
+
+// ---- SPAWN BOSS ----
+function spawnBoss() {
+  if (G.bossSpawned) return;
+  G.bossSpawned = true;
+  const b = G.building;
+  // Spawn boss at bottom floor
+  const bossFloor = b.numFloors - 1;
+  const bossY = (bossFloor + 1) * b.floorH * TILE - 16;
+  const bossX = b.width * TILE / 2 - 8;
+  const boss = createEnemy(bossX, bossY, bossFloor, 'boss');
+  G.enemies.push(boss);
+  // Boss appearance message
+  G.weaponPickupMsg = 'BOSS!';
+  G.weaponPickupTimer = 2.5;
+}
+
+// ---- INIT LEVEL ----
+function initLevel() {
+  const b = generateBuilding(G.level);
+  G.building = b;
+  G.player = createPlayer(b.startX, b.startY);
+  G.enemies = [];
+  G.bullets = [];
+  G.elevators = [];
+  G.particles = [];
+  G.fallingLamps = [];
+  G.lightsOn = true;
+  G.lightTimer = 0;
+  G.doorTimer = 0;
+  G.doorAnim = 0;
+  G.levelCompleteTimer = 0;
+  G.invincibleTimer = 0;
+  G.docsCollected = 0;
+  G.docsTotal = b.doors.filter(d => d.type === T.DOOR_RED).length;
+  G.redDoorsRemaining = G.docsTotal;
+  G.bossSpawned = false;
+  G.bossDefeated = false;
+  
+  // Create elevators
+  for (const sx of b.shafts) {
+    const minY = b.floorH * TILE;
+    const maxY = (b.height - 1) * TILE; // extend to near bottom so elevator can reach lowest floors
+    // Place 2-3 elevators per shaft
+    const numElevs = 2 + Math.min(G.level, 2);
+    for (let i = 0; i < numElevs; i++) {
+      const ey = minY + Math.floor((maxY - minY) * (i + 1) / (numElevs + 1));
+      // Snap to floor level
+      const snappedY = Math.round(ey / (b.floorH * TILE)) * (b.floorH * TILE) - 4;
+      G.elevators.push(createElevator(sx, snappedY, minY - TILE, maxY));
+    }
+  }
+  
+  // Spawn initial enemies
+  spawnEnemies();
+  
+  // Center camera on player
+  updateCamera();
+  
+  // Show level intro screen
+  G.levelIntroTimer = 2.0;
+  G.state = STATE.LEVEL_INTRO;
+  SFX.levelIntro();
+}
+
+function spawnEnemies() {
+  const b = G.building;
+  const cfg = b.config;
+  const diff = getDifficultyMultiplier(G.level);
+  
+  // Spawn enemies on floors that have blue doors
+  for (const door of b.doors) {
+    if (door.type === T.DOOR_BLUE && Math.random() < 0.7) {
+      const ey = door.y * TILE - 14;
+      const ex = (door.x + (Math.random() < 0.5 ? -2 : 2)) * TILE;
+      // On dog levels, sometimes spawn dogs
+      const type = (cfg.hasDogs && Math.random() < 0.3) ? 'dog' : null;
+      const enemy = createEnemy(ex, ey, door.floor, type);
+      if (type === 'dog') enemy.y = door.y * TILE - 8; // dogs are shorter
+      G.enemies.push(enemy);
+    }
+  }
+  // Also spawn some patrol enemies
+  for (let f = 1; f < b.numFloors; f++) {
+    if (Math.random() < cfg.enemyRate) {
+      const fy = (f + 1) * b.floorH * TILE - 14;
+      const fx = (3 + Math.floor(Math.random() * (b.width - 6))) * TILE;
+      const type = (cfg.hasDogs && Math.random() < 0.3) ? 'dog' : null;
+      const enemy = createEnemy(fx, fy, f, type);
+      if (type === 'dog') enemy.y = (f + 1) * b.floorH * TILE - 8;
+      G.enemies.push(enemy);
+    }
+  }
+}
+
+// ---- COLLISION HELPERS ----
+function tileAt(tx, ty) {
+  const b = G.building;
+  if (!b || ty < 0 || ty >= b.height || tx < 0 || tx >= b.width) return T.WALL;
+  return b.map[ty][tx];
+}
+
+function isSolid(tx, ty) {
+  const t = tileAt(tx, ty);
+  return t === T.FLOOR || t === T.WALL;
+}
+
+function isFloor(px, py) {
+  const tx = Math.floor(px / TILE);
+  const ty = Math.floor(py / TILE);
+  return isSolid(tx, ty);
+}
+
+function isShaft(px, py) {
+  const tx = Math.floor(px / TILE);
+  const ty = Math.floor(py / TILE);
+  return tileAt(tx, ty) === T.SHAFT;
+}
+
+function rectOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// ---- CAMERA ----
+function updateCamera() {
+  const p = G.player;
+  const targetX = p.x - NATIVE_W / 2 + p.w / 2;
+  const targetY = p.y - NATIVE_H / 2 + p.h / 2;
+  
+  G.camera.x += (targetX - G.camera.x) * 0.15;
+  G.camera.y += (targetY - G.camera.y) * 0.15;
+  
+  // Clamp
+  const maxX = G.building.width * TILE - NATIVE_W;
+  const maxY = G.building.height * TILE - NATIVE_H;
+  G.camera.x = Math.max(0, Math.min(G.camera.x, maxX));
+  G.camera.y = Math.max(0, Math.min(G.camera.y, maxY));
+}
+
+// ---- UPDATE ----
+function update(dt) {
+  switch (G.state) {
+    case STATE.TITLE:    updateTitle(dt); break;
+    case STATE.LEVEL_INTRO: updateLevelIntro(dt); break;
+    case STATE.PLAYING:  updatePlaying(dt); break;
+    case STATE.ENTERING_DOOR: updateDoorAnim(dt); break;
+    case STATE.LEVEL_COMPLETE: updateLevelComplete(dt); break;
+    case STATE.GAME_OVER: updateGameOver(dt); break;
+    case STATE.PAUSED: updatePaused(dt); break;
+    case STATE.SETTINGS: updateSettings(dt); break;
+    case STATE.NAME_ENTRY: updateNameEntry(dt); break;
+    case STATE.LEADERBOARD: updateLeaderboard(dt); break;
+  }
+}
+
+function updateTitle(dt) {
+  G.titleBlink += dt;
+  if (Input.select()) {
+    G.settingsFrom = STATE.TITLE;
+    G.settingsCursor = 0;
+    G.state = STATE.SETTINGS;
+    return;
+  }
+  // B button shows leaderboard from title
+  if (Input.wasPressed('KeyX')) {
+    G.leaderboardLoading = true;
+    G.state = STATE.LEADERBOARD;
+    (async () => {
+      try {
+        const res = await fetch(API_BASE + '/api/leaderboard');
+        G.leaderboard = await res.json();
+      } catch(e) {
+        G.leaderboard = [];
+      }
+      G.leaderboardLoading = false;
+    })();
+    return;
+  }
+  if (Input.start() || Input.jump()) {
+    ensureAudio();
+    G.level = 0;
+    G.score = 0;
+    G.lives = 3;
+    G.health = G.maxHealth;
+    G.nextLifeAt = 10000;
+    initLevel();
+  }
+}
+
+function updateLevelIntro(dt) {
+  G.levelIntroTimer -= dt;
+  if (G.levelIntroTimer <= 0 || Input.start() || Input.jump()) {
+    G.state = STATE.PLAYING;
+  }
+}
+
+function updatePaused(dt) {
+  if (Input.select()) {
+    G.settingsFrom = STATE.PAUSED;
+    G.settingsCursor = 0;
+    G.state = STATE.SETTINGS;
+    return;
+  }
+  if (Input.start()) {
+    G.state = STATE.PLAYING;
+  }
+}
+
+function updateSettings(dt) {
+  // Toggle setting with A (jump) or left/right
+  const toggle = Input.jump() || Input.wasPressed('ArrowLeft') || Input.wasPressed('ArrowRight') || Input.wasPressed('KeyX');
+  if (toggle) {
+    if (G.settingsCursor === 0) {
+      G.settings.unlimitedAmmo = !G.settings.unlimitedAmmo;
+    }
+  }
+  
+  // Go back with START or SELECT
+  if (Input.start() || Input.select()) {
+    G.state = G.settingsFrom;
+  }
+}
+
+function updatePlaying(dt) {
+  if (Input.start()) {
+    G.state = STATE.PAUSED;
+    return;
+  }
+  
+  updatePlayer(dt);
+  updateElevators(dt);
+  updateEnemies(dt);
+  updateBullets(dt);
+  updateParticles(dt);
+  updateFallingLamps(dt);
+  updateCamera();
+  
+  // Lights timer
+  if (!G.lightsOn) {
+    G.lightTimer -= dt;
+    if (G.lightTimer <= 0) G.lightsOn = true;
+  }
+  
+  // Invincibility timer
+  if (G.invincibleTimer > 0) G.invincibleTimer -= dt;
+  
+  // Weapon pickup message timer
+  if (G.weaponPickupTimer > 0) G.weaponPickupTimer -= dt;
+  
+  // Periodically spawn new enemies
+  const diff = getDifficultyMultiplier(G.level);
+  if (Math.random() < diff.enemySpawnRate) {
+    const b = G.building;
+    const blueDoors = b.doors.filter(d => d.type === T.DOOR_BLUE);
+    if (blueDoors.length > 0 && G.enemies.filter(e => e.alive).length < diff.maxEnemies) {
+      const door = blueDoors[Math.floor(Math.random() * blueDoors.length)];
+      const ey = door.y * TILE - 14;
+      const ex = door.x * TILE;
+      const cfg = b.config;
+      const type = (cfg.hasDogs && Math.random() < 0.3) ? 'dog' : null;
+      const enemy = createEnemy(ex, ey, door.floor, type);
+      if (type === 'dog') enemy.y = door.y * TILE - 8;
+      G.enemies.push(enemy);
+    }
+  }
+  
+  // Check if boss should spawn on level 6 (last level in cycle) when player reaches bottom area
+  const cfgIdx = G.level % LEVEL_CONFIG.length;
+  const cfg = LEVEL_CONFIG[cfgIdx];
+  if (cfg.bossLevel && !G.bossSpawned) {
+    const b = G.building;
+    const p = G.player;
+    // Spawn boss when player gets to lower 1/3 of building
+    if (p.y >= b.height * TILE * 0.65) {
+      spawnBoss();
+    }
+  }
+  
+  // Check level complete
+  if (G.redDoorsRemaining <= 0) {
+    // If this is a boss level, need to defeat boss too
+    if (cfg.bossLevel) {
+      // Boss level complete only when boss is defeated
+      if (G.bossDefeated) {
+        G.state = STATE.LEVEL_COMPLETE;
+        G.levelCompleteTimer = 3;
+        const bonus = Math.min(1000 * (G.level + 1), 10000);
+        G.score += bonus;
+        checkBonusLife();
+        SFX.complete();
+      }
+    } else {
+      // Check if player is at exit (bottom of building)
+      const b = G.building;
+      if (G.player.y >= (b.height - 3) * TILE) {
+        G.state = STATE.LEVEL_COMPLETE;
+        G.levelCompleteTimer = 3;
+        const bonus = Math.min(1000 * (G.level + 1), 10000);
+        G.score += bonus;
+        checkBonusLife();
+        SFX.complete();
+      }
+    }
+  }
+}
+
+function updatePlayer(dt) {
+  const p = G.player;
+  const b = G.building;
+  
+  // Horizontal movement
+  if (p.inElevator) {
+    // In elevator: up/down controls
+    if (Input.up()) {
+      p.inElevator.vy = -50;
+      p.inElevator.moving = true;
+    } else if (Input.down()) {
+      p.inElevator.vy = 50;
+      p.inElevator.moving = true;
+    } else {
+      p.inElevator.vy = 0;
+      p.inElevator.moving = false;
+    }
+    
+    // Can still move left/right to exit elevator
+    if (Input.left()) {
+      p.vx = -PLAYER_SPEED;
+      p.dir = -1;
+    } else if (Input.right()) {
+      p.vx = PLAYER_SPEED;
+      p.dir = 1;
+    } else {
+      p.vx = 0;
+    }
+    
+    // Sync Y with elevator
+    p.y = p.inElevator.y - p.h;
+    p.fallStartY = p.y; // riding elevator doesn't count as falling
+    
+    // Check if player walked off elevator
+    const onElev = Math.abs((p.x + p.w / 2) - (p.inElevator.x + p.inElevator.w / 2)) < TILE;
+    if (!onElev) {
+      p.inElevator.occupied = false;
+      p.inElevator.vy = 0;
+      p.inElevator = null;
+      p.fallStartY = p.y; // record fall start when leaving elevator
+    }
+    
+    // Can't crouch in elevator
+    p.crouching = false;
+    
+  } else if (p.onElevatorTop) {
+    // Riding top plate: no control, just ride it
+    const elev = p.onElevatorTop;
+    const topY = getElevTopY(elev, b.floorH);
+    
+    // Can still move left/right
+    if (Input.left()) {
+      p.vx = -PLAYER_SPEED;
+      p.dir = -1;
+    } else if (Input.right()) {
+      p.vx = PLAYER_SPEED;
+      p.dir = 1;
+    } else {
+      p.vx = 0;
+    }
+    
+    // Sync Y with the elevator top
+    p.y = topY - p.h;
+    p.fallStartY = p.y;
+    
+    // Check if player walked off the top plate
+    const onTop = Math.abs((p.x + p.w / 2) - (elev.x + elev.w / 2)) < TILE * 1.5;
+    if (!onTop) {
+      p.onElevatorTop = null;
+      p.fallStartY = p.y;
+    }
+    
+    // Can jump off
+    if (Input.jump()) {
+      p.vy = PLAYER_JUMP;
+      p.grounded = false;
+      p.onElevatorTop = null;
+      p.jumpKicking = true;
+      p.fallStartY = p.y;
+      SFX.jump();
+    }
+    
+    p.crouching = false;
+    
+  } else {
+    // Normal movement
+    p.crouching = false;
+    
+    // Only allow horizontal movement when grounded (no air drift)
+    if (p.grounded) {
+      if (Input.left()) {
+        p.vx = -PLAYER_SPEED;
+        p.dir = -1;
+        p.walkTimer += dt;
+        if (p.walkTimer > 0.15) { p.walkFrame = (p.walkFrame + 1) % 4; p.walkTimer = 0; }
+      } else if (Input.right()) {
+        p.vx = PLAYER_SPEED;
+        p.dir = 1;
+        p.walkTimer += dt;
+        if (p.walkTimer > 0.15) { p.walkFrame = (p.walkFrame + 1) % 4; p.walkTimer = 0; }
+      } else {
+        p.vx = 0;
+        p.walkFrame = 0;
+        p.walkTimer = 0;
+      }
+    } else {
+      // Airborne: allow direction change but at reduced speed
+      if (Input.left()) {
+        p.vx = -PLAYER_SPEED * 0.6;
+        p.dir = -1;
+      } else if (Input.right()) {
+        p.vx = PLAYER_SPEED * 0.6;
+        p.dir = 1;
+      }
+      // If no input, keep current momentum (don't zero it)
+    }
+    
+    // Crouch
+    if (Input.down() && p.grounded && !p.inElevator) {
+      p.crouching = true;
+      p.vx = 0;
+    }
+    
+    // Enter door (press up near a door)
+    if (Input.up() && p.grounded) {
+      const playerCenterX = p.x + p.w / 2;
+      const playerFeetY = p.y + p.h;
+      
+      for (const door of b.doors) {
+        const doorPx = door.x * TILE;
+        const doorFeetY = door.y * TILE;
+        // More forgiving hitbox: within 6px horizontally of door center, on same floor
+        if (Math.abs(playerCenterX - (doorPx + 4)) < 8 && Math.abs(playerFeetY - doorFeetY) < 4 && !door.entered) {
+          enterDoor(door);
+          return;
+        }
+      }
+    }
+    
+    // Jump
+    if (Input.jump() && p.grounded) {
+      p.vy = PLAYER_JUMP;
+      p.grounded = false;
+      p.jumpKicking = true;
+      p.fallStartY = p.y; // record where player left the ground
+      SFX.jump();
+    }
+    
+    // Gravity
+    if (!p.grounded) {
+      p.vy += GRAVITY * dt;
+    }
+  }
+  
+  // ---- Shooting (cooldown-based, supports hold-to-fire) ----
+  const wep = WEAPONS[p.weapon] || WEAPONS.pistol;
+  p.shootCooldown -= dt;
+  if (p.shootCooldown < 0) p.shootCooldown = 0;
+  
+  const wantShoot = Input.shootHeld(); // true while X is held
+  if (wantShoot && p.shootCooldown <= 0) {
+    const playerBullets = G.bullets.filter(b => !b.isEnemy);
+    if (playerBullets.length < wep.maxOnScreen && p.weaponAmmo > 0) {
+      // Fire main bullet
+      const bx = p.dir > 0 ? p.x + p.w + 1 : p.x - wep.bulletW - 1;
+      const by = p.crouching ? p.y + 10 : p.y + 5;
+      G.bullets.push(createBullet(bx, by, p.dir, false, p.weapon));
+      
+      // Spread extra bullets - shotgun uses a wider fan
+      if (wep.spread > 0) {
+        if (p.weapon === 'shotgun') {
+          // Shotgun fan: tighter spread with consistent offsets
+          const offsets = [-8, 5, -5];
+          for (let s = 0; s < wep.spread && s < offsets.length; s++) {
+            G.bullets.push(createBullet(bx, by + offsets[s], p.dir, false, p.weapon));
+          }
+        } else {
+          for (let s = 1; s <= wep.spread; s++) {
+            const offsetY = s * 5 * (s % 2 === 0 ? 1 : -1);
+            G.bullets.push(createBullet(bx, by + offsetY, p.dir, false, p.weapon));
+          }
+        }
+      }
+      
+      p.shootCooldown = wep.fireRate;
+      p.shooting = true;
+      // Only consume ammo if unlimited ammo setting is OFF
+      if (!G.settings.unlimitedAmmo && p.weaponAmmo !== Infinity) p.weaponAmmo--;
+      // Revert to pistol when ammo runs out (skip if unlimited)
+      if (!G.settings.unlimitedAmmo && p.weaponAmmo <= 0 && p.weapon !== 'pistol') {
+        p.weapon = 'pistol';
+        p.weaponAmmo = Infinity;
+      }
+      SFX.shoot();
+    }
+  }
+  if (!wantShoot) p.shooting = false;
+  // Show muzzle flash briefly
+  if (p.shootCooldown > wep.fireRate - 0.06) p.shooting = true;
+  
+  // Apply movement
+  p.x += p.vx * dt;
+  if (!p.inElevator && !p.onElevatorTop) p.y += p.vy * dt;
+  
+  // Collision with floors
+  p.grounded = false;
+  
+  // Check feet
+  const feetY = p.y + p.h;
+  const feetTy = Math.floor(feetY / TILE);
+  const leftTx = Math.floor(p.x / TILE);
+  const rightTx = Math.floor((p.x + p.w - 1) / TILE);
+  
+  if (p.vy >= 0 && !p.inElevator && !p.onElevatorTop) {
+    for (let tx = leftTx; tx <= rightTx; tx++) {
+      if (isSolid(tx, feetTy) && !isShaft(p.x + p.w / 2, feetY - 1)) {
+        p.y = feetTy * TILE - p.h;
+        p.vy = 0;
+        p.grounded = true;
+        p.jumpKicking = false;
+        break;
+      }
+    }
+  }
+  
+  // Check elevator bottom plates
+  if (!p.inElevator && !p.onElevatorTop && p.vy >= 0) {
+    for (const elev of G.elevators) {
+      if (p.x + p.w > elev.x && p.x < elev.x + elev.w) {
+        if (feetY >= elev.y && feetY <= elev.y + elev.h + 4 && p.y + p.h - p.vy * dt <= elev.y + 2) {
+          p.y = elev.y - p.h;
+          p.vy = 0;
+          p.grounded = true;
+          p.jumpKicking = false;
+          p.inElevator = elev;
+          elev.occupied = true;
+          break;
+        }
+      }
+    }
+  }
+  
+  // Check elevator top plates
+  if (!p.inElevator && !p.onElevatorTop && p.vy >= 0 && !p.grounded) {
+    for (const elev of G.elevators) {
+      const topY = getElevTopY(elev, b.floorH);
+      if (p.x + p.w > elev.x && p.x < elev.x + elev.w) {
+        if (feetY >= topY && feetY <= topY + elev.topH + 4 && p.y + p.h - p.vy * dt <= topY + 2) {
+          p.y = topY - p.h;
+          p.vy = 0;
+          p.grounded = true;
+          p.jumpKicking = false;
+          p.onElevatorTop = elev;
+          break;
+        }
+      }
+    }
+  }
+  
+  // Wall collisions
+  const headTy = Math.floor(p.y / TILE);
+  const bodyLeftTx = Math.floor(p.x / TILE);
+  const bodyRightTx = Math.floor((p.x + p.w - 1) / TILE);
+  
+  if (isSolid(bodyLeftTx, headTy) || isSolid(bodyLeftTx, Math.floor((p.y + p.h / 2) / TILE))) {
+    p.x = (bodyLeftTx + 1) * TILE;
+    p.vx = 0;
+  }
+  if (isSolid(bodyRightTx, headTy) || isSolid(bodyRightTx, Math.floor((p.y + p.h / 2) / TILE))) {
+    p.x = bodyRightTx * TILE - p.w;
+    p.vx = 0;
+  }
+  
+  // Bounds
+  p.x = Math.max(TILE, Math.min(p.x, (b.width - 2) * TILE));
+  
+  // Track fall start position
+  if (p.vy > 0 && !p.grounded && !p.inElevator && !p.onElevatorTop) {
+    // Player is falling — fallStartY was set when they left the ground
+  } else if (p.grounded || p.inElevator || p.onElevatorTop) {
+    // Check fall distance when landing
+    const fallDist = p.y - p.fallStartY;
+    const oneFloor = G.building.floorH * TILE; // 32px
+    if (fallDist > oneFloor + 4) {
+      // Fell more than one floor — instant death
+      playerHit(G.maxHealth);
+    }
+    p.fallStartY = p.y;
+  }
+  
+  // Shaft bottom death: if player is stuck at the bottom of an elevator shaft, kill them
+  {
+    const bottomY = (b.height - 2) * TILE; // near bottom of building
+    if (p.y + p.h >= bottomY && !p.inElevator) {
+      const centerTx = Math.floor((p.x + p.w / 2) / TILE);
+      if (b.shafts && b.shafts.includes(centerTx)) {
+        // Player is at the bottom of a shaft — instant death
+        playerHit(G.maxHealth);
+      }
+    }
+  }
+  
+  // Jump kick enemies
+  if (p.jumpKicking && !p.grounded) {
+    for (const e of G.enemies) {
+      if (e.alive && rectOverlap(
+        { x: p.x, y: p.y, w: p.w, h: p.h },
+        { x: e.x, y: e.y, w: e.w, h: e.h }
+      )) {
+        if (e.isBoss) {
+          // Can't one-shot the boss with a jump kick
+          e.hp--;
+          e.hitFlashTimer = 0.12;
+          p.vy = PLAYER_JUMP * 0.5;
+          SFX.bossHit();
+          if (e.hp <= 0) {
+            e.alive = false;
+            G.score += 2000;
+            checkBonusLife();
+            G.bossDefeated = true;
+            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 15);
+            SFX.bossDeath();
+          }
+        } else {
+          e.alive = false;
+          p.vy = PLAYER_JUMP * 0.5;
+          const pts = e.isDog ? (G.lightsOn ? 200 : 250) : (G.lightsOn ? 150 : 200);
+          G.score += pts;
+          checkBonusLife();
+          spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 5);
+          SFX.hit();
+        }
+      }
+    }
+  }
+  
+  // Escalators
+  for (const esc of b.escalators) {
+    const escPx = esc.x * TILE;
+    const escPy = esc.y * TILE;
+    if (Math.abs(p.x - escPx) < TILE && Math.abs(p.y + p.h - escPy) < 4 && p.grounded) {
+      if (Input.up() && esc.dir === -1) {
+        // Ride escalator up
+        p.y -= 40 * dt;
+        p.onEscalator = true;
+      } else if (Input.down() && esc.dir === 1) {
+        // Ride escalator down
+        p.y += 40 * dt;
+        p.onEscalator = true;
+      } else {
+        p.onEscalator = false;
+      }
+    }
+  }
+}
+
+function enterDoor(door) {
+  const p = G.player;
+  G.state = STATE.ENTERING_DOOR;
+  G.doorTimer = 1.5;
+  G.doorAnim = 0;
+  p.enteringDoor = true;
+  
+  if (door.type === T.DOOR_RED) {
+    door.entered = true;
+    G.docsCollected++;
+    G.redDoorsRemaining--;
+    G.score += 500;
+    checkBonusLife();
+    SFX.door();
+  } else if (door.type === T.DOOR_QMARK) {
+    door.entered = true;
+    // Random weapon or health pickup — includes shotgun and rocket
+    const roll = Math.random();
+    if (roll < 0.17) {
+      p.weapon = 'machinegun';
+      p.weaponAmmo = WEAPONS.machinegun.ammo;
+      G.weaponPickupMsg = 'GOT M-GUN!';
+    } else if (roll < 0.34) {
+      p.weapon = 'spread';
+      p.weaponAmmo = WEAPONS.spread.ammo;
+      G.weaponPickupMsg = 'GOT SPREAD!';
+    } else if (roll < 0.50) {
+      p.weapon = 'laser';
+      p.weaponAmmo = WEAPONS.laser.ammo;
+      G.weaponPickupMsg = 'GOT LASER!';
+    } else if (roll < 0.67) {
+      p.weapon = 'shotgun';
+      p.weaponAmmo = WEAPONS.shotgun.ammo;
+      G.weaponPickupMsg = 'GOT SHOTGN!';
+    } else if (roll < 0.83) {
+      p.weapon = 'rocket';
+      p.weaponAmmo = WEAPONS.rocket.ammo;
+      G.weaponPickupMsg = 'GOT ROCKET!';
+    } else {
+      G.health = Math.min(G.maxHealth, G.health + 1);
+      G.weaponPickupMsg = 'HEALTH UP!';
+    }
+    G.weaponPickupTimer = 2.0;
+    G.score += 200;
+    checkBonusLife();
+    SFX.pickup();
+  } else if (door.type === T.DOOR_BLUE) {
+    door.entered = true;
+    SFX.door();
+  }
+}
+
+function updateDoorAnim(dt) {
+  G.doorTimer -= dt;
+  G.doorAnim += dt;
+  if (G.doorTimer <= 0) {
+    G.state = STATE.PLAYING;
+    G.player.enteringDoor = false;
+  }
+}
+
+function playerHit(damage = 1) {
+  if (G.invincibleTimer > 0) return;
+  G.health -= damage;
+  G.invincibleTimer = 1.0;
+  SFX.hit();
+  
+  if (G.health <= 0) {
+    G.lives--;
+    if (G.lives <= 0) {
+      G.state = STATE.GAME_OVER;
+      G.gameOverTimer = 4;
+      SFX.gameOver();
+    } else {
+      G.health = G.maxHealth;
+      const b = G.building;
+      const p = G.player;
+      
+      // Respawn at nearest floor to where the player was before dying.
+      // Use fallStartY (where they began falling) to find the closest floor.
+      // Place them on a walkable tile, NOT inside the elevator shaft.
+      const refY = p.fallStartY || p.y;
+      let bestFloorY = b.startY;
+      let bestX = b.startX;
+      let bestDist = Infinity;
+      
+      for (let f = 0; f < b.numFloors; f++) {
+        const floorTileY = (f + 1) * b.floorH; // tile row of this floor
+        const floorPxY = floorTileY * TILE - p.h; // player Y to stand on this floor
+        const dist = Math.abs(floorPxY - refY);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestFloorY = floorPxY;
+          // Find a walkable X position on this floor (not in shaft)
+          bestX = b.startX; // fallback
+          for (let tx = 2; tx < b.width - 2; tx++) {
+            // Check this tile isn't a shaft and the tile below feet is solid floor
+            if (b.map[floorTileY] && b.map[floorTileY][tx] === T.FLOOR &&
+                b.map[floorTileY - 1] && b.map[floorTileY - 1][tx] !== T.SHAFT &&
+                b.map[floorTileY - 1][tx] !== T.WALL) {
+              bestX = tx * TILE;
+              break;
+            }
+          }
+        }
+      }
+      
+      p.x = bestX;
+      p.y = bestFloorY;
+      p.vx = 0;
+      p.vy = 0;
+      p.grounded = true;
+      p.inElevator = null;
+      p.onElevatorTop = null;
+      p.fallStartY = p.y;
+      p.weapon = 'pistol';
+      p.weaponAmmo = Infinity;
+      G.invincibleTimer = 2.0;
+    }
+  }
+}
+
+function updateElevators(dt) {
+  for (const elev of G.elevators) {
+    if (elev.vy !== 0) {
+      elev.y += elev.vy * dt;
+      
+      // Clamp to shaft bounds
+      if (elev.y < elev.minY) { elev.y = elev.minY; elev.vy = 0; }
+      if (elev.y > elev.maxY) { elev.y = elev.maxY; elev.vy = 0; }
+      
+      // Crush enemies
+      for (const e of G.enemies) {
+        if (e.alive) {
+          const elevRect = { x: elev.x - 2, y: elev.y - 2, w: elev.w + 4, h: elev.h + 4 };
+          const enemyRect = { x: e.x, y: e.y, w: e.w, h: e.h };
+          if (rectOverlap(elevRect, enemyRect)) {
+            if (e.isBoss) {
+              // Elevator crushes also damage boss
+              e.hp -= 3;
+              e.hitFlashTimer = 0.2;
+              SFX.bossHit();
+              if (e.hp <= 0) {
+                e.alive = false;
+                G.score += 2000;
+                checkBonusLife();
+                G.bossDefeated = true;
+                spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 15);
+                SFX.bossDeath();
+              }
+            } else {
+              e.alive = false;
+              G.score += 300;
+              checkBonusLife();
+              spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 8);
+              SFX.crush();
+            }
+          }
+        }
+      }
+    }
+    
+    // Auto-move unoccupied elevators slowly
+    if (!elev.occupied) {
+      // Drift slowly in a pattern
+      if (!elev._autoDir) elev._autoDir = Math.random() < 0.5 ? 1 : -1;
+      elev.y += elev._autoDir * 15 * dt;
+      if (elev.y <= elev.minY || elev.y >= elev.maxY) {
+        elev._autoDir *= -1;
+      }
+    }
+  }
+}
+
+function updateEnemies(dt) {
+  const p = G.player;
+  const diff = getDifficultyMultiplier(G.level);
+  
+  for (const e of G.enemies) {
+    if (!e.alive) continue;
+    
+    // Hit flash timer
+    if (e.hitFlashTimer > 0) e.hitFlashTimer -= dt;
+    
+    // Basic AI: patrol, face player, shoot
+    const distX = p.x - e.x;
+    const distY = p.y - e.y;
+    const dist = Math.sqrt(distX * distX + distY * distY);
+    // Compare actual floor tile rows so enemies only shoot on the exact same floor
+    const playerFloorTile = Math.floor((p.y + p.h) / TILE);
+    const enemyFloorTile = Math.floor((e.y + e.h) / TILE);
+    const sameFloor = playerFloorTile === enemyFloorTile;
+    
+    if (e.isBoss) {
+      // Boss AI: always faces player, moves toward player aggressively
+      e.dir = distX > 0 ? 1 : -1;
+      if (sameFloor) {
+        e.vx = e.dir * ENEMY_SPEED * 0.7; // slow but relentless
+        // Boss shoots rapidly
+        e.shootTimer -= dt;
+        if (e.shootTimer <= 0 && dist < 130) {
+          // Fire two bullets
+          const bx = e.dir > 0 ? e.x + e.w : e.x - 3;
+          const by = e.y + 6;
+          G.bullets.push(createBullet(bx, by, e.dir, true));
+          // Angled shot
+          const angleB = createBullet(bx, by + 3, e.dir, true);
+          G.bullets.push(angleB);
+          e.shootTimer = 0.6 + Math.random() * 0.3;
+        }
+      } else {
+        e.vx = 0;
+      }
+    } else if (e.isDog) {
+      // Dog AI: runs toward player when on same floor and in range
+      const dogSpeed = diff.dogSpeed;
+      
+      e.dogBarkTimer -= dt;
+      if (e.dogBarkTimer <= 0 && sameFloor && dist < 80) {
+        SFX.dogBark();
+        e.dogBarkTimer = 2.0 + Math.random() * 2.0;
+      }
+      
+      if (sameFloor && dist < 100) {
+        // Charge toward player
+        e.dir = distX > 0 ? 1 : -1;
+        e.vx = e.dir * dogSpeed;
+        e.patrolState = 'walk';
+      } else {
+        // Normal patrol
+        if (e.patrolState === 'walk') {
+          e.patrolTimer -= dt;
+          if (e.patrolTimer <= 0) {
+            if (Math.random() < 0.5) {
+              e.patrolState = 'idle';
+              e.idleTimer = 0.8 + Math.random() * 1.5;
+            } else {
+              e.dir = -e.dir;
+            }
+            e.patrolTimer = 1.5 + Math.random() * 2;
+          }
+          e.vx = e.dir * ENEMY_SPEED * 1.2;
+        } else {
+          e.idleTimer -= dt;
+          if (e.idleTimer <= 0) {
+            e.patrolState = 'walk';
+            e.patrolTimer = 1.5 + Math.random() * 2;
+          }
+          e.vx = 0;
+        }
+      }
+      
+      // Dogs DO cause contact damage (charging attack)
+      if (p && !p.enteringDoor && G.invincibleTimer <= 0) {
+        if (rectOverlap({ x: p.x, y: p.y, w: p.w, h: p.h }, { x: e.x, y: e.y, w: e.w, h: e.h })) {
+          if (!p.jumpKicking) {
+            playerHit(1);
+          }
+        }
+      }
+      
+    } else {
+      // Regular cop AI: patrol, face player, shoot
+      
+      // Patrol: walk-stop-walk pattern (faithful to original GB game)
+      if (e.patrolState === 'walk') {
+        e.patrolTimer -= dt;
+        if (e.patrolTimer <= 0) {
+          // Randomly either stop and idle, or turn around
+          if (Math.random() < 0.6) {
+            // Stop and idle
+            e.patrolState = 'idle';
+            e.idleTimer = 1.0 + Math.random() * 2.5; // stand still 1-3.5s
+          } else {
+            // Just turn around and keep walking
+            e.dir = -e.dir;
+          }
+          e.patrolTimer = 1.5 + Math.random() * 2.5;
+        }
+      } else {
+        // Idle state: stand still
+        e.idleTimer -= dt;
+        if (e.idleTimer <= 0) {
+          e.patrolState = 'walk';
+          // Sometimes change direction after idle
+          if (Math.random() < 0.4) e.dir = -e.dir;
+          e.patrolTimer = 1.5 + Math.random() * 2.5;
+        }
+      }
+      
+      // If player is on same floor and visible, face them and become alert
+      if (sameFloor && dist < 120) {
+        e.dir = distX > 0 ? 1 : -1;
+        e.patrolState = 'walk'; // alert — start moving toward player
+        
+        // Sometimes crouch
+        if (Math.random() < 0.002) {
+          e.crouching = !e.crouching;
+          e.crouchTimer = 0.5 + Math.random();
+        }
+      }
+      
+      if (e.crouching) {
+        e.crouchTimer -= dt;
+        if (e.crouchTimer <= 0) e.crouching = false;
+        e.vx = 0;
+      } else if (e.patrolState === 'idle') {
+        e.vx = 0; // standing still during idle
+      } else {
+        e.vx = e.dir * diff.patrolSpeed * (G.lightsOn ? 1 : 0.6);
+      }
+      
+      // Shooting — enemy bullets fired at consistent mid-body height for clean dodges
+      e.shootTimer -= dt;
+      if (e.shootTimer <= 0 && sameFloor && dist < 110 && dist > 10) {
+        const bx = e.dir > 0 ? e.x + e.w : e.x - 3;
+        // Fire at mid-body height: crouching players can dodge below, jumping players dodge above
+        const by = e.y + 6;
+        G.bullets.push(createBullet(bx, by, e.dir, true));
+        e.shootTimer = diff.shootTimerBase + Math.random() * diff.shootTimerRandom;
+      }
+      
+      // NOTE: Regular cops do NOT cause contact damage (removed per spec change 1)
+    }
+    
+    // Walk animation
+    if (Math.abs(e.vx) > 1) {
+      e.walkTimer += dt;
+      if (e.walkTimer > 0.2) { e.walkFrame = (e.walkFrame + 1) % 4; e.walkTimer = 0; }
+    }
+    
+    // Movement
+    e.x += e.vx * dt;
+    
+    // Gravity
+    if (!e.grounded) {
+      e.vy += GRAVITY * dt;
+    }
+    e.y += e.vy * dt;
+    
+    // Floor collision
+    e.grounded = false;
+    const eFeetY = e.y + e.h;
+    const eFeetTy = Math.floor(eFeetY / TILE);
+    const eLeftTx = Math.floor(e.x / TILE);
+    const eRightTx = Math.floor((e.x + e.w - 1) / TILE);
+    
+    if (e.vy >= 0) {
+      for (let tx = eLeftTx; tx <= eRightTx; tx++) {
+        if (isSolid(tx, eFeetTy)) {
+          e.y = eFeetTy * TILE - e.h;
+          e.vy = 0;
+          e.grounded = true;
+          break;
+        }
+      }
+      
+      // Stand on elevators
+      for (const elev of G.elevators) {
+        if (e.x + e.w > elev.x && e.x < elev.x + elev.w) {
+          if (eFeetY >= elev.y && eFeetY <= elev.y + elev.h + 4) {
+            e.y = elev.y - e.h;
+            e.vy = 0;
+            e.grounded = true;
+          }
+        }
+      }
+    }
+    
+    // Wall collision
+    const eBodyLeftTx = Math.floor(e.x / TILE);
+    const eBodyRightTx = Math.floor((e.x + e.w - 1) / TILE);
+    const eHeadTy = Math.floor(e.y / TILE);
+    
+    if (isSolid(eBodyLeftTx, eHeadTy)) {
+      e.x = (eBodyLeftTx + 1) * TILE;
+      e.dir = 1;
+    }
+    if (isSolid(eBodyRightTx, eHeadTy)) {
+      e.x = eBodyRightTx * TILE - e.w;
+      e.dir = -1;
+    }
+    
+    // Bounds
+    e.x = Math.max(TILE, Math.min(e.x, (G.building.width - 2) * TILE));
+  }
+  
+  // Remove dead enemies
+  G.enemies = G.enemies.filter(e => e.alive || e._deathTimer > 0);
+}
+
+function updateBullets(dt) {
+  const p = G.player;
+  
+  for (const b of G.bullets) {
+    if (!b.alive) continue;
+    
+    b.x += b.dir * b.speed * dt;
+    
+    // Wall collision
+    const tx = Math.floor(b.x / TILE);
+    const ty = Math.floor(b.y / TILE);
+    if (isSolid(tx, ty)) {
+      if (b.explosive) {
+        rocketExplode(b.x, b.y);
+      }
+      b.alive = false;
+      continue;
+    }
+    
+    // Off screen
+    if (b.x < G.camera.x - 20 || b.x > G.camera.x + NATIVE_W + 20) {
+      b.alive = false;
+      continue;
+    }
+    
+    if (b.isEnemy) {
+      // Hit player — use crouch-aware and jump-aware hitbox
+      if (p && !p.enteringDoor && G.invincibleTimer <= 0) {
+        // When crouching, the player's effective hitbox is shorter and lower
+        // Standing: full body from p.y to p.y+14 (h=14)
+        // Crouching: body from p.y+7 to p.y+14 (h=7, head ducked below bullet line)
+        // Jumping: player can jump above bullets fired at y+6
+        const pHitbox = p.crouching
+          ? { x: p.x, y: p.y + 7, w: p.w, h: p.h - 7 }
+          : { x: p.x, y: p.y, w: p.w, h: p.h };
+        if (rectOverlap(b, pHitbox)) {
+          b.alive = false;
+          playerHit(1);
+        }
+      }
+    } else {
+      // Hit enemies
+      for (const e of G.enemies) {
+        if (e.alive && rectOverlap(b, { x: e.x, y: e.y, w: e.w, h: e.h })) {
+          if (e.isBoss) {
+            // Boss takes hits — need multiple to kill
+            if (!b.piercing) b.alive = false;
+            e.hp--;
+            e.hitFlashTimer = 0.12;
+            SFX.bossHit();
+            if (e.hp <= 0) {
+              e.alive = false;
+              G.score += 2000;
+              checkBonusLife();
+              G.bossDefeated = true;
+              spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 15);
+              SFX.bossDeath();
+            }
+            if (!b.piercing) break;
+          } else {
+            // Piercing bullets (laser, rocket) pass through enemies instead of dying
+            if (!b.piercing) {
+              b.alive = false;
+            }
+            e.alive = false;
+            // Score by enemy type
+            const pts = e.isDog
+              ? (G.lightsOn ? 200 : 250)
+              : (G.lightsOn ? 100 : 150);
+            G.score += pts;
+            checkBonusLife();
+            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 5);
+            SFX.hit();
+            if (!b.piercing) break;
+          }
+        }
+      }
+      
+      // Rocket explosion on hitting enemies too (handled above), but also on walls
+      // Check if rocket should explode mid-flight (handled in wall collision above)
+      
+      // Hit lamps
+      for (const lamp of G.building.lamps) {
+        if (lamp.active) {
+          const lx = lamp.x * TILE;
+          const ly = lamp.y * TILE;
+          if (rectOverlap(b, { x: lx, y: ly, w: TILE, h: TILE })) {
+            b.alive = false;
+            lamp.active = false;
+            G.lightsOn = false;
+            G.lightTimer = 4;
+            G.fallingLamps.push({ x: lx, y: ly, vy: 0 });
+            SFX.lamp();
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  G.bullets = G.bullets.filter(b => b.alive);
+}
+
+function updateFallingLamps(dt) {
+  for (let i = G.fallingLamps.length - 1; i >= 0; i--) {
+    const lamp = G.fallingLamps[i];
+    lamp.vy += GRAVITY * dt;
+    lamp.y += lamp.vy * dt;
+    
+    // Check if hits floor
+    const ty = Math.floor(lamp.y / TILE);
+    const tx = Math.floor(lamp.x / TILE);
+    if (isSolid(tx, ty)) {
+      // Check if hits enemy
+      for (const e of G.enemies) {
+        if (e.alive && Math.abs(e.x - lamp.x) < TILE && Math.abs(e.y + e.h - lamp.y) < TILE) {
+          if (e.isBoss) {
+            e.hp -= 2;
+            e.hitFlashTimer = 0.2;
+            SFX.bossHit();
+            if (e.hp <= 0) {
+              e.alive = false;
+              G.score += 2000;
+              checkBonusLife();
+              G.bossDefeated = true;
+              spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 15);
+              SFX.bossDeath();
+            }
+          } else {
+            e.alive = false;
+            G.score += 300;
+            checkBonusLife();
+            spawnParticles(e.x + e.w / 2, e.y + e.h / 2, 8);
+            SFX.crush();
+          }
+        }
+      }
+      G.fallingLamps.splice(i, 1);
+      continue;
+    }
+    
+    // Remove if off screen
+    if (lamp.y > G.building.height * TILE) {
+      G.fallingLamps.splice(i, 1);
+    }
+  }
+}
+
+function spawnParticles(x, y, count) {
+  for (let i = 0; i < count; i++) {
+    G.particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 80,
+      vy: (Math.random() - 0.5) * 80 - 30,
+      life: 0.3 + Math.random() * 0.3,
+      maxLife: 0.5,
+    });
+  }
+}
+
+function updateParticles(dt) {
+  for (let i = G.particles.length - 1; i >= 0; i--) {
+    const p = G.particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 100 * dt;
+    p.life -= dt;
+    if (p.life <= 0) G.particles.splice(i, 1);
+  }
+}
+
+function updateLevelComplete(dt) {
+  G.levelCompleteTimer -= dt;
+  if (G.levelCompleteTimer <= 0) {
+    G.level++;
+    G.health = G.maxHealth;
+    initLevel();
+  }
+}
+
+function updateGameOver(dt) {
+  G.gameOverTimer -= dt;
+  if (G.gameOverTimer <= 0 || Input.start()) {
+    // Go to name entry screen
+    G.nameEntry = { chars: ['A','A','A','A','A','A','A','A'], pos: 0, done: false };
+    G.state = STATE.NAME_ENTRY;
+  }
+}
+
+function updateNameEntry(dt) {
+  const ne = G.nameEntry;
+  if (ne.done) return;
+  
+  const VALID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ';
+  
+  // Navigate cursor left/right
+  if (Input.wasPressed('ArrowLeft') && ne.pos > 0) ne.pos--;
+  if (Input.wasPressed('ArrowRight') && ne.pos < 7) ne.pos++;
+  
+  // Change letter up/down
+  if (Input.wasPressed('ArrowUp')) {
+    const idx = VALID_CHARS.indexOf(ne.chars[ne.pos]);
+    ne.chars[ne.pos] = VALID_CHARS[(idx + 1) % VALID_CHARS.length];
+  }
+  if (Input.wasPressed('ArrowDown')) {
+    const idx = VALID_CHARS.indexOf(ne.chars[ne.pos]);
+    ne.chars[ne.pos] = VALID_CHARS[(idx - 1 + VALID_CHARS.length) % VALID_CHARS.length];
+  }
+  
+  // Confirm with A/Z (jump) button or Start
+  if (Input.wasPressed('KeyZ') || Input.wasPressed('Enter')) {
+    if (ne.pos < 7) {
+      ne.pos++; // advance to next character
+    } else {
+      // Submit the name
+      ne.done = true;
+      const name = ne.chars.join('').trim();
+      submitScore(name || 'ANON', G.score, G.level);
+    }
+  }
+}
+
+async function submitScore(name, score, level) {
+  G.leaderboardLoading = true;
+  G.leaderboardError = false;
+  try {
+    await fetch(API_BASE + '/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, score, level }),
+    });
+  } catch(e) { /* ignore submit errors */ }
+  
+  // Fetch leaderboard
+  try {
+    const res = await fetch(API_BASE + '/api/leaderboard');
+    G.leaderboard = await res.json();
+  } catch(e) {
+    G.leaderboard = [];
+    G.leaderboardError = true;
+  }
+  
+  G.leaderboardLoading = false;
+  G.state = STATE.LEADERBOARD;
+}
+
+function updateLeaderboard(dt) {
+  if (Input.start() || Input.wasPressed('KeyZ') || Input.wasPressed('KeyX')) {
+    G.state = STATE.TITLE;
+  }
+}
+
+// ---- DRAWING ----
+function render() {
+  // Clear with GB lightest color
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  
+  switch (G.state) {
+    case STATE.TITLE:    drawTitle(); break;
+    case STATE.LEVEL_INTRO: drawGame(); drawLevelIntro(); break;
+    case STATE.PLAYING:  drawGame(); break;
+    case STATE.ENTERING_DOOR: drawGame(); drawDoorAnim(); break;
+    case STATE.LEVEL_COMPLETE: drawGame(); drawLevelComplete(); break;
+    case STATE.GAME_OVER: drawGameOver(); break;
+    case STATE.NAME_ENTRY: drawNameEntry(); break;
+    case STATE.LEADERBOARD: drawLeaderboard(); break;
+    case STATE.PAUSED: drawGame(); drawPaused(); break;
+    case STATE.SETTINGS: drawSettings(); break;
+  }
+}
+
+function drawTitle() {
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  
+  // Title text
+  ctx.fillStyle = PAL.darkest;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('ELEVATOR', NATIVE_W / 2, 30);
+  ctx.fillText('ACTION', NATIVE_W / 2, 42);
+  
+  // Building graphic
+  drawTitleBuilding();
+  
+  // Blinking "PRESS START"
+  if (Math.floor(G.titleBlink * 2) % 2 === 0) {
+    ctx.fillStyle = PAL.dark;
+    ctx.font = '8px "Press Start 2P"';
+    ctx.textAlign = 'center';
+    ctx.fillText('PRESS START', NATIVE_W / 2, 120);
+  }
+  
+  // Hints
+  ctx.fillStyle = PAL.dark;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.fillText('B:SCORES', NATIVE_W / 2, 130);
+  ctx.fillText('SEL:SETUP', NATIVE_W / 2, 140);
+}
+
+function drawTitleBuilding() {
+  const bx = 50, by = 55, bw = 60, bh = 55;
+  
+  // Building body
+  ctx.fillStyle = PAL.dark;
+  ctx.fillRect(bx, by, bw, bh);
+  
+  // Windows
+  ctx.fillStyle = PAL.light;
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 6; col++) {
+      ctx.fillRect(bx + 4 + col * 9, by + 4 + row * 10, 6, 6);
+    }
+  }
+  
+  // Elevator shaft
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(bx + bw / 2 - 4, by, 8, bh);
+  
+  // Elevator box
+  ctx.fillStyle = PAL.light;
+  ctx.fillRect(bx + bw / 2 - 3, by + 15, 6, 6);
+  
+  // Agent on top
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(bx + bw / 2 - 2, by - 8, 4, 4); // head
+  ctx.fillRect(bx + bw / 2 - 3, by - 4, 6, 6); // body
+}
+
+function drawLevelIntro() {
+  ctx.fillStyle = PAL.darkest;
+  ctx.globalAlpha = 0.85;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  ctx.globalAlpha = 1;
+  
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillText('LEVEL ' + (G.level + 1), NATIVE_W / 2, 52);
+  
+  ctx.fillStyle = PAL.light;
+  if (G.building) {
+    ctx.fillText('FLOOR ' + G.building.numFloors, NATIVE_W / 2, 70);
+  }
+  
+  // Level name/subtitle
+  const levelName = LEVEL_NAMES[G.level % LEVEL_NAMES.length] || 'BUILDING';
+  ctx.fillStyle = PAL.light;
+  ctx.fillText(levelName, NATIVE_W / 2, 88);
+  
+  // Hint: press any button to skip
+  if (Math.floor(G.levelIntroTimer * 3) % 2 === 0) {
+    ctx.fillStyle = PAL.dark;
+    ctx.fillText('PRESS ANY', NATIVE_W / 2, 110);
+  }
+}
+
+function drawGame() {
+  ctx.save();
+  ctx.translate(-Math.round(G.camera.x), -Math.round(G.camera.y));
+  
+  const b = G.building;
+  if (!b) { ctx.restore(); return; }
+  
+  // Calculate visible tile range
+  const startTx = Math.max(0, Math.floor(G.camera.x / TILE) - 1);
+  const endTx = Math.min(b.width - 1, Math.ceil((G.camera.x + NATIVE_W) / TILE) + 1);
+  const startTy = Math.max(0, Math.floor(G.camera.y / TILE) - 1);
+  const endTy = Math.min(b.height - 1, Math.ceil((G.camera.y + NATIVE_H) / TILE) + 1);
+  
+  // Draw background
+  const bgColor = G.lightsOn ? PAL.lightest : PAL.dark;
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(G.camera.x, G.camera.y, NATIVE_W, NATIVE_H);
+  
+  // Draw tiles
+  for (let ty = startTy; ty <= endTy; ty++) {
+    for (let tx = startTx; tx <= endTx; tx++) {
+      const tile = b.map[ty][tx];
+      const px = tx * TILE;
+      const py = ty * TILE;
+      
+      switch (tile) {
+        case T.FLOOR:
+          ctx.fillStyle = PAL.dark;
+          ctx.fillRect(px, py, TILE, TILE);
+          // Floor detail line
+          ctx.fillStyle = PAL.darkest;
+          ctx.fillRect(px, py, TILE, 1);
+          break;
+          
+        case T.WALL:
+          ctx.fillStyle = PAL.dark;
+          ctx.fillRect(px, py, TILE, TILE);
+          // Brick pattern
+          ctx.fillStyle = PAL.darkest;
+          ctx.fillRect(px, py, TILE, 1);
+          ctx.fillRect(px, py + 4, TILE, 1);
+          ctx.fillRect(px + 4, py, 1, 4);
+          ctx.fillRect(px, py + 4, 1, 4);
+          break;
+          
+        case T.SHAFT:
+          ctx.fillStyle = PAL.darkest;
+          ctx.fillRect(px, py, TILE, TILE);
+          // Shaft rails
+          ctx.fillStyle = PAL.dark;
+          ctx.fillRect(px, py, 1, TILE);
+          ctx.fillRect(px + TILE - 1, py, 1, TILE);
+          break;
+      }
+    }
+  }
+  
+  // Draw escalators
+  for (const esc of b.escalators) {
+    const ex = esc.x * TILE;
+    const ey = esc.y * TILE;
+    ctx.fillStyle = PAL.dark;
+    ctx.fillRect(ex, ey - TILE * 3, TILE, TILE * 3);
+    // Escalator lines
+    ctx.fillStyle = PAL.light;
+    for (let i = 0; i < 3; i++) {
+      ctx.fillRect(ex + 2, ey - TILE * 3 + i * TILE + 2, 4, 2);
+    }
+    // Arrow
+    ctx.fillStyle = PAL.lightest;
+    const arrowY = ey - TILE * 2;
+    if (esc.dir === -1) {
+      // Up arrow
+      ctx.fillRect(ex + 3, arrowY, 2, 1);
+      ctx.fillRect(ex + 2, arrowY + 1, 4, 1);
+    } else {
+      // Down arrow
+      ctx.fillRect(ex + 2, arrowY, 4, 1);
+      ctx.fillRect(ex + 3, arrowY + 1, 2, 1);
+    }
+  }
+  
+  // Draw doors
+  for (const door of b.doors) {
+    const dx = door.x * TILE - 2; // center door on tile
+    const dy = (door.y - 3) * TILE + 2; // doors are ~2.5 tiles tall above floor
+    const dw = TILE + 4;  // slightly wider than 1 tile
+    const dh = TILE * 3 - 4;
+    
+    if (door.entered) {
+      // Entered door - draw as normal/darker
+      ctx.fillStyle = G.lightsOn ? PAL.light : PAL.dark;
+      ctx.fillRect(dx, dy, dw, dh);
+      // Door frame
+      ctx.strokeStyle = PAL.dark;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(dx + 0.5, dy + 0.5, dw - 1, dh - 1);
+    } else {
+      // Door frame background
+      ctx.fillStyle = PAL.dark;
+      ctx.fillRect(dx - 1, dy - 1, dw + 2, dh + 2);
+      
+      if (door.type === T.DOOR_RED) {
+        // Document door - darkest with exclamation mark
+        ctx.fillStyle = PAL.darkest;
+        ctx.fillRect(dx, dy, dw, dh);
+        // Exclamation mark (!) indicator - larger and clearer
+        ctx.fillStyle = PAL.lightest;
+        ctx.fillRect(dx + 4, dy + 4, 3, 8);
+        ctx.fillRect(dx + 4, dy + 14, 3, 3);
+      } else if (door.type === T.DOOR_QMARK) {
+        // Question mark door - medium shade
+        ctx.fillStyle = PAL.dark;
+        ctx.fillRect(dx, dy, dw, dh);
+        // Question mark (?)
+        ctx.fillStyle = PAL.lightest;
+        ctx.fillRect(dx + 3, dy + 4, 5, 2);
+        ctx.fillRect(dx + 6, dy + 6, 2, 3);
+        ctx.fillRect(dx + 4, dy + 9, 3, 2);
+        ctx.fillRect(dx + 4, dy + 13, 3, 3);
+      } else {
+        // Normal/blue door
+        ctx.fillStyle = G.lightsOn ? PAL.light : PAL.dark;
+        ctx.fillRect(dx, dy, dw, dh);
+        // Door panel lines
+        ctx.strokeStyle = PAL.dark;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(dx + 2, dy + 2, dw - 4, dh / 2 - 3);
+        ctx.strokeRect(dx + 2, dy + dh / 2, dw - 4, dh / 2 - 3);
+        // Door knob
+        ctx.fillStyle = PAL.darkest;
+        ctx.fillRect(dx + dw - 4, dy + dh / 2 - 1, 2, 2);
+      }
+    }
+  }
+  
+  // Draw lamps
+  for (const lamp of b.lamps) {
+    if (lamp.active) {
+      const lx = lamp.x * TILE;
+      const ly = lamp.y * TILE;
+      ctx.fillStyle = PAL.light;
+      ctx.fillRect(lx + 1, ly, TILE - 2, 3);
+      ctx.fillStyle = PAL.lightest;
+      ctx.fillRect(lx + 2, ly + 3, TILE - 4, 2);
+      // Cord
+      ctx.fillStyle = PAL.dark;
+      ctx.fillRect(lx + 3, ly - 3, 1, 3);
+    }
+  }
+  
+  // Draw falling lamps
+  for (const lamp of G.fallingLamps) {
+    ctx.fillStyle = PAL.light;
+    ctx.fillRect(lamp.x + 1, lamp.y, TILE - 2, 3);
+  }
+  
+  // Draw elevators (bottom plate + top plate)
+  for (const elev of G.elevators) {
+    const topY = getElevTopY(elev, b.floorH);
+    
+    // Cable running from top plate to bottom plate
+    ctx.fillStyle = PAL.dark;
+    ctx.fillRect(elev.x + elev.w / 2, topY + elev.topH, 1, elev.y - (topY + elev.topH));
+    
+    // Top plate
+    ctx.fillStyle = PAL.light;
+    ctx.fillRect(elev.x, topY, elev.w, elev.topH);
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(elev.x, topY, elev.w, 1);
+    
+    // Bottom plate (main elevator platform)
+    ctx.fillStyle = PAL.light;
+    ctx.fillRect(elev.x, elev.y, elev.w, elev.h);
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(elev.x, elev.y, elev.w, 1);
+    
+    // Cable above top plate
+    ctx.fillStyle = PAL.dark;
+    ctx.fillRect(elev.x + elev.w / 2, elev.minY, 1, topY - elev.minY);
+  }
+  
+  // Draw enemies
+  for (const e of G.enemies) {
+    if (!e.alive) continue;
+    drawEnemy(e);
+  }
+  
+  // Draw player
+  if (G.player && !G.player.enteringDoor) {
+    // Blink when invincible
+    if (G.invincibleTimer > 0 && Math.floor(G.invincibleTimer * 10) % 2 === 0) {
+      // skip drawing (blink)
+    } else {
+      drawPlayer(G.player);
+    }
+  }
+  
+  // Draw bullets
+  for (const b of G.bullets) {
+    if (!b.alive) continue;
+    if (b.isEnemy) {
+      ctx.fillStyle = PAL.dark;
+      ctx.fillRect(Math.round(b.x), Math.round(b.y), b.w, b.h);
+    } else if (b.weapon === 'laser') {
+      // Laser: longer, lighter beam
+      ctx.fillStyle = PAL.light;
+      ctx.fillRect(Math.round(b.x), Math.round(b.y), b.w, b.h);
+      ctx.fillStyle = PAL.lightest;
+      ctx.fillRect(Math.round(b.x) + 1, Math.round(b.y), b.w - 2, b.h);
+    } else if (b.weapon === 'rocket') {
+      // Rocket: distinct shape with body and tail
+      const rx = Math.round(b.x);
+      const ry = Math.round(b.y);
+      // Main body
+      ctx.fillStyle = PAL.darkest;
+      ctx.fillRect(rx + (b.dir > 0 ? 0 : 2), ry, 4, b.h);
+      // Nose cone
+      ctx.fillStyle = PAL.light;
+      ctx.fillRect(rx + (b.dir > 0 ? 4 : 0), ry + 1, 2, 1);
+      // Tail fins
+      ctx.fillStyle = PAL.dark;
+      ctx.fillRect(rx + (b.dir > 0 ? 0 : 4), ry, 2, b.h);
+    } else if (b.weapon === 'shotgun') {
+      // Shotgun pellet: small square
+      ctx.fillStyle = PAL.darkest;
+      ctx.fillRect(Math.round(b.x), Math.round(b.y), b.w, b.h);
+    } else if (b.weapon === 'machinegun') {
+      // Machine gun: wider bullet
+      ctx.fillStyle = PAL.darkest;
+      ctx.fillRect(Math.round(b.x), Math.round(b.y), b.w, b.h);
+    } else {
+      ctx.fillStyle = PAL.darkest;
+      ctx.fillRect(Math.round(b.x), Math.round(b.y), b.w, b.h);
+    }
+  }
+  
+  // Draw particles
+  for (const p of G.particles) {
+    const alpha = p.life / p.maxLife;
+    ctx.fillStyle = alpha > 0.5 ? PAL.darkest : PAL.dark;
+    ctx.fillRect(Math.round(p.x), Math.round(p.y), 2, 2);
+  }
+  
+  ctx.restore();
+  
+  // Draw HUD (fixed position)
+  drawHUD();
+}
+
+function drawPlayer(p) {
+  const x = Math.round(p.x);
+  const y = Math.round(p.y);
+  
+  if (p.crouching) {
+    // Crouching sprite - lighter body to stand out
+    // Body
+    ctx.fillStyle = PAL.light;
+    ctx.fillRect(x, y + 6, 8, 8);
+    // Head
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(x + 1, y + 4, 6, 4);
+    // Hat
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(x, y + 3, 8, 2);
+    // Face
+    ctx.fillStyle = PAL.lightest;
+    if (p.dir > 0) { ctx.fillRect(x + 5, y + 5, 1, 1); }
+    else { ctx.fillRect(x + 2, y + 5, 1, 1); }
+  } else {
+    // Standing/walking sprite
+    // Coat/body (lighter shade to distinguish from enemies)
+    ctx.fillStyle = PAL.light;
+    ctx.fillRect(x + 1, y + 4, 6, 6);
+    // Head
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(x + 2, y, 4, 4);
+    // Hat
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(x, y - 1, 8, 2);
+    // Belt
+    ctx.fillStyle = PAL.darkest;
+    ctx.fillRect(x + 1, y + 7, 6, 1);
+    
+    // Arms
+    ctx.fillStyle = PAL.darkest;
+    if (p.shooting) {
+      if (p.dir > 0) {
+        ctx.fillRect(x + 7, y + 5, 4, 2);
+        // Gun
+        ctx.fillRect(x + 10, y + 4, 2, 2);
+      } else {
+        ctx.fillRect(x - 3, y + 5, 4, 2);
+        ctx.fillRect(x - 4, y + 4, 2, 2);
+      }
+    } else {
+      ctx.fillRect(x, y + 5, 1, 3);
+      ctx.fillRect(x + 7, y + 5, 1, 3);
+    }
+    
+    // Legs
+    ctx.fillStyle = PAL.darkest;
+    const legOffset = p.walkFrame % 2 === 0 ? 0 : 1;
+    ctx.fillRect(x + 1 + legOffset, y + 10, 2, 4);
+    ctx.fillRect(x + 5 - legOffset, y + 10, 2, 4);
+    
+    // Face
+    ctx.fillStyle = PAL.lightest;
+    if (p.dir > 0) {
+      ctx.fillRect(x + 4, y + 1, 1, 1);
+      ctx.fillRect(x + 5, y + 1, 1, 1);
+    } else {
+      ctx.fillRect(x + 2, y + 1, 1, 1);
+      ctx.fillRect(x + 3, y + 1, 1, 1);
+    }
+  }
+}
+
+function drawEnemy(e) {
+  const x = Math.round(e.x);
+  const y = Math.round(e.y);
+  
+  // Hit flash effect
+  if (e.hitFlashTimer > 0) {
+    ctx.fillStyle = PAL.lightest;
+  } else {
+    ctx.fillStyle = PAL.darkest;
+  }
+  
+  if (e.isDog) {
+    // Dog sprite: low profile, 4-legged
+    const c = e.hitFlashTimer > 0 ? PAL.lightest : PAL.darkest;
+    ctx.fillStyle = c;
+    // Body (wide, low)
+    ctx.fillRect(x, y + 2, 10, 4);
+    // Head (front)
+    if (e.dir > 0) {
+      ctx.fillRect(x + 7, y, 3, 4);
+      // Ear
+      ctx.fillRect(x + 8, y - 2, 2, 2);
+      // Snout
+      ctx.fillRect(x + 9, y + 2, 2, 2);
+    } else {
+      ctx.fillRect(x, y, 3, 4);
+      ctx.fillRect(x, y - 2, 2, 2);
+      ctx.fillRect(x - 1, y + 2, 2, 2);
+    }
+    // 4 legs (animated with walk frame)
+    const legA = e.walkFrame % 2 === 0 ? 0 : 1;
+    ctx.fillRect(x + 1 + legA, y + 6, 2, 2);
+    ctx.fillRect(x + 7 - legA, y + 6, 2, 2);
+    ctx.fillRect(x + 3 - legA, y + 5, 2, 2);
+    ctx.fillRect(x + 5 + legA, y + 5, 2, 2);
+    // Eyes
+    ctx.fillStyle = PAL.lightest;
+    if (e.dir > 0) {
+      ctx.fillRect(x + 8, y + 1, 1, 1);
+    } else {
+      ctx.fillRect(x + 1, y + 1, 1, 1);
+    }
+    return;
+  }
+  
+  if (e.isBoss) {
+    // Boss sprite: larger 16x16, distinctive trenchcoat
+    const c = e.hitFlashTimer > 0 ? PAL.lightest : PAL.darkest;
+    ctx.fillStyle = c;
+    // Large body
+    ctx.fillRect(x + 2, y + 5, 12, 8);
+    ctx.fillRect(x, y + 6, 16, 6);
+    // Head (larger)
+    ctx.fillRect(x + 4, y, 8, 6);
+    // Big boss hat
+    ctx.fillRect(x + 2, y - 2, 12, 3);
+    ctx.fillRect(x + 3, y - 4, 10, 2);
+    // Hat brim
+    ctx.fillRect(x, y - 1, 16, 1);
+    // Legs
+    const legOff = e.walkFrame % 2 === 0 ? 0 : 2;
+    ctx.fillRect(x + 2 + legOff, y + 13, 4, 3);
+    ctx.fillRect(x + 10 - legOff, y + 13, 4, 3);
+    // Eyes
+    ctx.fillStyle = PAL.lightest;
+    if (e.dir > 0) {
+      ctx.fillRect(x + 9, y + 2, 2, 2);
+    } else {
+      ctx.fillRect(x + 5, y + 2, 2, 2);
+    }
+    // Boss HP bar
+    ctx.fillStyle = PAL.dark;
+    ctx.fillRect(x, y - 8, 16, 3);
+    ctx.fillStyle = PAL.light;
+    ctx.fillRect(x, y - 8, Math.round(16 * e.hp / e.maxHp), 3);
+    return;
+  }
+  
+  // Regular cop enemy
+  ctx.fillStyle = e.hitFlashTimer > 0 ? PAL.lightest : PAL.darkest;
+  
+  if (e.crouching) {
+    ctx.fillRect(x + 1, y + 4, 6, 4);
+    ctx.fillRect(x, y + 8, 8, 6);
+    if (e.type === 'hat') {
+      ctx.fillRect(x, y + 3, 8, 2);
+    }
+  } else {
+    // Head
+    ctx.fillRect(x + 2, y, 4, 4);
+    
+    if (e.type === 'hat') {
+      // Fedora hat
+      ctx.fillRect(x, y - 1, 8, 2);
+      ctx.fillRect(x + 1, y - 2, 6, 1);
+    }
+    
+    // Trench coat body
+    ctx.fillRect(x + 1, y + 4, 6, 6);
+    ctx.fillRect(x, y + 5, 8, 4);
+    
+    // Legs
+    const legOffset = e.walkFrame % 2 === 0 ? 0 : 1;
+    ctx.fillRect(x + 1 + legOffset, y + 10, 2, 4);
+    ctx.fillRect(x + 5 - legOffset, y + 10, 2, 4);
+  }
+  
+  // Eyes
+  ctx.fillStyle = PAL.lightest;
+  if (!e.crouching) {
+    if (e.dir > 0) {
+      ctx.fillRect(x + 4, y + 1, 1, 1);
+      ctx.fillRect(x + 5, y + 1, 1, 1);
+    } else {
+      ctx.fillRect(x + 2, y + 1, 1, 1);
+      ctx.fillRect(x + 3, y + 1, 1, 1);
+    }
+  }
+}
+
+function drawHUD() {
+  // HUD bar at top (like the GB screenshot)
+  // Background
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillRect(0, 0, NATIVE_W, 14);
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(0, 14, NATIVE_W, 1);
+  
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'left';
+  
+  // 1UP and score
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillText('1UP', 2, 7);
+  ctx.fillText(String(G.score).padStart(6, ' '), 2, 14);
+  
+  // Document count (! = X) or OK when all collected
+  ctx.fillStyle = PAL.darkest;
+  if (G.redDoorsRemaining <= 0) {
+    ctx.fillText('OK', 62, 10);
+  } else {
+    ctx.fillText('!=' + G.redDoorsRemaining, 58, 10);
+  }
+  
+  // LIFE with hearts
+  ctx.textAlign = 'right';
+  ctx.fillText('LIFE', NATIVE_W - 2, 7);
+  
+  // Hearts
+  for (let i = 0; i < G.maxHealth; i++) {
+    const hx = NATIVE_W - 40 + i * 8;
+    const hy = 8;
+    if (i < G.health) {
+      // Filled heart
+      drawHeart(hx, hy, PAL.darkest);
+    } else {
+      // Empty heart
+      drawHeart(hx, hy, PAL.light);
+    }
+  }
+  
+  // Floor numbers on right side of screen
+  if (G.building) {
+    ctx.font = '8px "Press Start 2P"';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = PAL.dark;
+    const b = G.building;
+    for (let f = 0; f < b.numFloors; f++) {
+      const floorY = (f + 1) * b.floorH * TILE - G.camera.y;
+      if (floorY > 14 && floorY < NATIVE_H) {
+        const floorNum = b.numFloors - f;
+        ctx.fillText(String(floorNum), NATIVE_W - 2, floorY - 1);
+      }
+    }
+  }
+  
+  // Lives indicator at bottom-left
+  ctx.textAlign = 'left';
+  ctx.fillStyle = PAL.darkest;
+  ctx.font = '8px "Press Start 2P"';
+  for (let i = 0; i < G.lives; i++) {
+    // Small player head icon for each life
+    ctx.fillRect(4 + i * 10, NATIVE_H - 10, 4, 4);
+    ctx.fillRect(3 + i * 10, NATIVE_H - 11, 6, 2);
+  }
+  
+  // Weapon indicator at bottom-right
+  if (G.player && G.player.weapon !== 'pistol') {
+    const wep = WEAPONS[G.player.weapon];
+    ctx.textAlign = 'right';
+    ctx.fillStyle = PAL.darkest;
+    ctx.font = '8px "Press Start 2P"';
+    const ammoStr = G.player.weaponAmmo === Infinity ? '' : ':' + G.player.weaponAmmo;
+    ctx.fillText(wep.name + ammoStr, NATIVE_W - 2, NATIVE_H - 4);
+  }
+  
+  // Weapon pickup message overlay
+  if (G.weaponPickupTimer > 0) {
+    ctx.fillStyle = PAL.darkest;
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(NATIVE_W / 2 - 50, NATIVE_H / 2 - 10, 100, 20);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = PAL.lightest;
+    ctx.font = '8px "Press Start 2P"';
+    ctx.textAlign = 'center';
+    ctx.fillText(G.weaponPickupMsg, NATIVE_W / 2, NATIVE_H / 2 + 4);
+  }
+}
+
+function drawHeart(x, y, color) {
+  ctx.fillStyle = color;
+  // Tiny 5x5 heart
+  ctx.fillRect(x, y + 1, 1, 2);
+  ctx.fillRect(x + 1, y, 1, 3);
+  ctx.fillRect(x + 2, y + 1, 1, 3);
+  ctx.fillRect(x + 3, y, 1, 3);
+  ctx.fillRect(x + 4, y + 1, 1, 2);
+  ctx.fillRect(x + 1, y + 3, 3, 1);
+  ctx.fillRect(x + 2, y + 4, 1, 1);
+}
+
+function drawDoorAnim() {
+  // Overlay showing "entering door" animation
+  if (G.doorAnim < 0.3) {
+    // Door opening
+    const progress = G.doorAnim / 0.3;
+    ctx.fillStyle = PAL.darkest;
+    ctx.globalAlpha = progress * 0.6;
+    ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+    ctx.globalAlpha = 1;
+  } else if (G.doorAnim < 1.0) {
+    // Inside door
+    ctx.fillStyle = PAL.darkest;
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+    ctx.globalAlpha = 1;
+    
+    ctx.fillStyle = PAL.lightest;
+    ctx.font = '8px "Press Start 2P"';
+    ctx.textAlign = 'center';
+    
+    // Show what was found
+    const lastDoor = G.building.doors.find(d => d.entered && d.type === T.DOOR_RED);
+    if (G.docsCollected > 0 && lastDoor) {
+      ctx.fillText('SECRET', NATIVE_W / 2, 65);
+      ctx.fillText('DOCUMENT', NATIVE_W / 2, 77);
+      ctx.fillText('FOUND!', NATIVE_W / 2, 89);
+    }
+  }
+}
+
+function drawLevelComplete() {
+  ctx.fillStyle = PAL.darkest;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  ctx.globalAlpha = 1;
+  
+  ctx.fillStyle = PAL.lightest;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('BUILDING', NATIVE_W / 2, 50);
+  ctx.fillText('CLEAR!', NATIVE_W / 2, 62);
+  
+  const bonus = Math.min(1000 * (G.level + 1), 10000);
+  ctx.fillText('BONUS', NATIVE_W / 2, 82);
+  ctx.fillText(bonus + ' PTS', NATIVE_W / 2, 94);
+}
+
+function drawGameOver() {
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  
+  ctx.fillStyle = PAL.lightest;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('GAME OVER', NATIVE_W / 2, 55);
+  
+  ctx.fillStyle = PAL.light;
+  ctx.fillText('SCORE', NATIVE_W / 2, 80);
+  ctx.fillText(String(G.score), NATIVE_W / 2, 92);
+  
+  if (G.gameOverTimer < 2) {
+    if (Math.floor(G.gameOverTimer * 2) % 2 === 0) {
+      ctx.fillStyle = PAL.light;
+      ctx.fillText('PRESS START', NATIVE_W / 2, 120);
+    }
+  }
+}
+
+function drawNameEntry() {
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  
+  // Title
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillText('GAME OVER', NATIVE_W / 2, 16);
+  
+  // Score
+  ctx.fillStyle = PAL.light;
+  ctx.fillText('SCORE ' + G.score, NATIVE_W / 2, 32);
+  
+  // Instruction
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillText('ENTER NAME', NATIVE_W / 2, 52);
+  
+  // Draw character slots
+  const ne = G.nameEntry;
+  const startX = NATIVE_W / 2 - 36; // 8 chars * 9px spacing, centered
+  
+  for (let i = 0; i < 8; i++) {
+    const cx = startX + i * 9;
+    const cy = 70;
+    
+    // Highlight current position
+    if (i === ne.pos && !ne.done) {
+      ctx.fillStyle = PAL.light;
+      ctx.fillRect(cx - 1, cy - 8, 9, 12);
+      ctx.fillStyle = PAL.darkest;
+    } else {
+      ctx.fillStyle = PAL.lightest;
+    }
+    
+    ctx.textAlign = 'left';
+    ctx.fillText(ne.chars[i], cx, cy);
+  }
+  
+  // Up/down arrows for current position
+  if (!ne.done) {
+    const arrowX = startX + ne.pos * 9 + 2;
+    ctx.fillStyle = PAL.light;
+    // Up arrow
+    ctx.fillRect(arrowX, 56, 3, 1);
+    ctx.fillRect(arrowX + 1, 55, 1, 1);
+    // Down arrow
+    ctx.fillRect(arrowX, 76, 3, 1);
+    ctx.fillRect(arrowX + 1, 77, 1, 1);
+  }
+  
+  // Instructions
+  ctx.fillStyle = PAL.dark;
+  ctx.textAlign = 'center';
+  ctx.fillText('U/D:LETTER', NATIVE_W / 2, 96);
+  ctx.fillText('L/R:MOVE', NATIVE_W / 2, 108);
+  ctx.fillText('A:NEXT/OK', NATIVE_W / 2, 120);
+  
+  if (ne.done) {
+    ctx.fillStyle = PAL.lightest;
+    ctx.fillText('SAVING...', NATIVE_W / 2, 136);
+  }
+}
+
+function drawLeaderboard() {
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  
+  // Title
+  ctx.fillStyle = PAL.lightest;
+  ctx.fillText('TOP SCORES', NATIVE_W / 2, 12);
+  
+  // Divider
+  ctx.fillStyle = PAL.dark;
+  ctx.fillRect(10, 16, NATIVE_W - 20, 1);
+  
+  if (G.leaderboardLoading) {
+    ctx.fillStyle = PAL.light;
+    ctx.fillText('LOADING...', NATIVE_W / 2, 72);
+    return;
+  }
+  
+  if (G.leaderboard.length === 0) {
+    ctx.fillStyle = PAL.light;
+    ctx.fillText('NO SCORES', NATIVE_W / 2, 72);
+    ctx.fillText('YET!', NATIVE_W / 2, 84);
+  } else {
+    // Show top 10 entries
+    const maxShow = Math.min(G.leaderboard.length, 10);
+    for (let i = 0; i < maxShow; i++) {
+      const entry = G.leaderboard[i];
+      const y = 28 + i * 11;
+      
+      // Crown for top 3
+      if (i < 3) {
+        drawCrown(4, y - 7, i);
+      }
+      
+      // Rank number
+      ctx.textAlign = 'left';
+      ctx.fillStyle = i < 3 ? PAL.lightest : PAL.light;
+      ctx.fillText(String(i + 1).padStart(2, ' ') + '.', 14, y);
+      
+      // Name
+      ctx.fillText(entry.name.padEnd(8, ' ').substring(0, 8), 40, y);
+      
+      // Score
+      ctx.textAlign = 'right';
+      ctx.fillText(String(entry.score).padStart(6, ' '), NATIVE_W - 4, y);
+    }
+  }
+  
+  // Footer
+  ctx.fillStyle = PAL.dark;
+  ctx.textAlign = 'center';
+  ctx.fillText('PRESS START', NATIVE_W / 2, 140);
+}
+
+function drawCrown(x, y, rank) {
+  // rank: 0=gold(lightest), 1=silver(light), 2=bronze(dark)
+  const colors = [PAL.lightest, PAL.light, PAL.dark];
+  ctx.fillStyle = colors[rank] || PAL.dark;
+  
+  // Crown shape (7x5 pixels)
+  // Base
+  ctx.fillRect(x, y + 4, 7, 1);
+  ctx.fillRect(x, y + 3, 7, 1);
+  // Three points
+  ctx.fillRect(x, y, 1, 4);
+  ctx.fillRect(x + 3, y, 1, 4);
+  ctx.fillRect(x + 6, y, 1, 4);
+  // Tips (gems)
+  ctx.fillRect(x, y - 1, 1, 1);
+  ctx.fillRect(x + 3, y - 1, 1, 1);
+  ctx.fillRect(x + 6, y - 1, 1, 1);
+}
+
+function drawPaused() {
+  ctx.fillStyle = PAL.darkest;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  ctx.globalAlpha = 1;
+  
+  ctx.fillStyle = PAL.lightest;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('PAUSED', NATIVE_W / 2, 60);
+  
+  ctx.fillStyle = PAL.light;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.fillText('SELECT:SETUP', NATIVE_W / 2, 82);
+}
+
+function drawSettings() {
+  // Full screen settings overlay
+  ctx.fillStyle = PAL.darkest;
+  ctx.fillRect(0, 0, NATIVE_W, NATIVE_H);
+  
+  // Title
+  ctx.fillStyle = PAL.lightest;
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('SETTINGS', NATIVE_W / 2, 24);
+  
+  // Divider
+  ctx.fillStyle = PAL.dark;
+  ctx.fillRect(20, 32, NATIVE_W - 40, 1);
+  
+  // Setting: Unlimited Ammo
+  const ammoY = 52;
+  // Cursor arrow
+  ctx.fillStyle = PAL.lightest;
+  ctx.textAlign = 'left';
+  ctx.fillText('>', 8, ammoY);
+  
+  // Label
+  ctx.fillStyle = PAL.light;
+  ctx.fillText('AMMO', 20, ammoY);
+  
+  // Value
+  ctx.textAlign = 'right';
+  ctx.fillStyle = G.settings.unlimitedAmmo ? PAL.lightest : PAL.dark;
+  ctx.fillText(G.settings.unlimitedAmmo ? 'UNLIM' : 'NORMAL', NATIVE_W - 8, ammoY);
+  
+  // Instructions
+  ctx.fillStyle = PAL.dark;
+  ctx.textAlign = 'center';
+  ctx.font = '8px "Press Start 2P"';
+  ctx.fillText('A/B:TOGGLE', NATIVE_W / 2, 90);
+  ctx.fillText('START:BACK', NATIVE_W / 2, 105);
+}
+
+// ---- GAME LOOP ----
+const TICK_RATE = 1000 / 60;
+let lastTime = 0;
+let accumulator = 0;
+
+function gameLoop(timestamp) {
+  requestAnimationFrame(gameLoop);
+  
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+  accumulator += Math.min(deltaTime, 100);
+  
+  while (accumulator >= TICK_RATE) {
+    update(TICK_RATE / 1000);
+    accumulator -= TICK_RATE;
+  }
+  
+  render();
+  Input.endFrame();
+}
+
+// ---- DETERMINISTIC HOOKS (for testing) ----
+window.advanceTime = (ms) => {
+  const steps = Math.max(1, Math.round(ms / (1000 / 60)));
+  for (let i = 0; i < steps; i++) {
+    update(1 / 60);
+    Input.endFrame();
+  }
+  render();
+};
+
+window.render_game_to_text = () => {
+  const cfg = G.building ? G.building.config : null;
+  const dogs = G.enemies ? G.enemies.filter(e => e.alive && e.isDog).length : 0;
+  const boss = G.enemies ? G.enemies.find(e => e.isBoss) : null;
+  return JSON.stringify({
+    state: G.state,
+    level: G.level,
+    score: G.score,
+    lives: G.lives,
+    health: G.health,
+    player: G.player ? {
+      x: Math.round(G.player.x),
+      y: Math.round(G.player.y),
+      dir: G.player.dir,
+      grounded: G.player.grounded,
+      inElevator: !!G.player.inElevator,
+      onElevatorTop: !!G.player.onElevatorTop,
+      weapon: G.player.weapon,
+      weaponAmmo: G.player.weaponAmmo,
+    } : null,
+    enemies: G.enemies ? G.enemies.filter(e => e.alive).length : 0,
+    dogs: dogs,
+    bossAlive: boss ? boss.alive : false,
+    bossHp: boss ? boss.hp : 0,
+    bossDefeated: G.bossDefeated,
+    bullets: G.bullets ? G.bullets.length : 0,
+    elevators: G.elevators ? G.elevators.length : 0,
+    docsCollected: G.docsCollected,
+    docsTotal: G.docsTotal,
+    redDoorsRemaining: G.redDoorsRemaining,
+    lightsOn: G.lightsOn,
+    weaponPickupMsg: G.weaponPickupMsg,
+    weaponPickupTimer: G.weaponPickupTimer,
+    nextLifeAt: G.nextLifeAt,
+    levelConfig: cfg ? {
+      floors: cfg.floors,
+      shafts: cfg.shafts,
+      enemyRate: cfg.enemyRate,
+      redDoors: cfg.redDoors,
+      qmarkDoors: cfg.qmarkDoors,
+      hasDogs: cfg.hasDogs,
+      bossLevel: cfg.bossLevel,
+    } : null,
+    settings: G.settings,
+  });
+};
+
+// ---- START ----
+G.state = STATE.TITLE;
+requestAnimationFrame(gameLoop);
+
+// Enable audio on first interaction
+document.addEventListener('click', () => ensureAudio(), { once: true });
+document.addEventListener('touchstart', () => ensureAudio(), { once: true });
+
+})();

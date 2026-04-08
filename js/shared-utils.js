@@ -379,6 +379,186 @@ function getCtaColorHex(colorId) {
     return map[colorId] || map.accent;
 }
 
+function aiflowIsIncompleteWorkshopPaymentLink(url) {
+    var raw = String(url || '').trim();
+    return !raw || /^\/workshop-payment\?id=?$/i.test(raw);
+}
+
+function aiflowBuildWorkshopPaymentLink(workshopId, fallbackWorkshopId) {
+    var wsId = String(workshopId || '').trim() || String(fallbackWorkshopId || '').trim() || 'workshop-0';
+    return '/workshop-payment?id=' + encodeURIComponent(wsId);
+}
+
+function aiflowToAbsoluteUrl(url, baseUrl) {
+    var raw = String(url || '').trim();
+    if (!raw) return null;
+    var base = String(baseUrl || '').trim();
+    if (!base && typeof window !== 'undefined' && window.location && window.location.href) base = window.location.href;
+    if (!base) base = 'https://aiflowtime-hk.web.app/';
+    try {
+        return new URL(raw, base);
+    } catch (err) {
+        return null;
+    }
+}
+
+function aiflowNormalizePathname(pathname) {
+    var path = String(pathname || '').trim() || '/';
+    path = path.replace(/\/+$/, '');
+    return path || '/';
+}
+
+function aiflowIsSamePageLink(url, opts) {
+    opts = opts || {};
+    var raw = String(url || '').trim();
+    if (!raw) return false;
+    if (raw.charAt(0) === '#') return true;
+    var currentUrl = String(opts.currentUrl || '').trim();
+    if (!currentUrl && typeof window !== 'undefined' && window.location && window.location.href) currentUrl = window.location.href;
+    if (!currentUrl) return false;
+    var target = aiflowToAbsoluteUrl(raw, opts.baseUrl || currentUrl);
+    var current = aiflowToAbsoluteUrl(currentUrl, opts.baseUrl || currentUrl);
+    if (!target || !current) return false;
+    return target.origin === current.origin &&
+        aiflowNormalizePathname(target.pathname) === aiflowNormalizePathname(current.pathname);
+}
+
+function aiflowFindVisibleIdTarget(id, root) {
+    if (typeof document === 'undefined') return null;
+    root = root && root.querySelectorAll ? root : document;
+    var safeId = String(id || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    if (!safeId) return null;
+    var nodes = root.querySelectorAll('[id="' + safeId + '"]');
+    for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i] && nodes[i].getClientRects && nodes[i].getClientRects().length) return nodes[i];
+    }
+    return null;
+}
+
+function aiflowPageHasVisibleSectionType(type, root) {
+    if (typeof document === 'undefined') return false;
+    root = root && root.querySelectorAll ? root : document;
+    var safeType = String(type || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    if (!safeType) return false;
+    var nodes = root.querySelectorAll('[data-section-type="' + safeType + '"]');
+    for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i] && nodes[i].getClientRects && nodes[i].getClientRects().length) return true;
+    }
+    return false;
+}
+
+function aiflowResolvePaymentCtaLink(rawLink, opts) {
+    opts = opts || {};
+    var raw = String(rawLink || '').trim();
+    var fallback = aiflowBuildWorkshopPaymentLink(opts.workshopId, opts.fallbackWorkshopId);
+    if (aiflowIsIncompleteWorkshopPaymentLink(raw)) return fallback;
+    if (raw === '#') return fallback;
+    if (!opts.allowSamePage && aiflowIsSamePageLink(raw, {
+        currentUrl: opts.currentUrl,
+        baseUrl: opts.baseUrl
+    })) {
+        return fallback;
+    }
+    return raw;
+}
+
+function aiflowResolveWorkshopsCtaLink(rawLink, opts) {
+    opts = opts || {};
+    var raw = String(rawLink || '').trim();
+    var workshopsUrl = String(opts.workshopsUrl || '').trim() || '/workshops';
+    var hasVisibleWorkshops = typeof opts.hasVisibleWorkshopsSection === 'boolean'
+        ? opts.hasVisibleWorkshopsSection
+        : !!aiflowFindVisibleIdTarget('workshops', opts.root) || aiflowPageHasVisibleSectionType('workshops', opts.root);
+    if (!raw) return hasVisibleWorkshops ? '#workshops' : workshopsUrl;
+    if (raw === '#workshops' && !hasVisibleWorkshops) return workshopsUrl;
+    return raw;
+}
+
+function aiflowEnsureButtonShimmerStyle() {
+    if (typeof document === 'undefined') return;
+    if (document.getElementById('aiflowButtonShimmerStyle')) return;
+    var style = document.createElement('style');
+    style.id = 'aiflowButtonShimmerStyle';
+    style.textContent =
+        '@keyframes aiflow-btn-shimmer {' +
+            '0% { left: -100%; }' +
+            '100% { left: 100%; }' +
+        '}' +
+        '.aiflow-btn-shimmer {' +
+            'position: relative;' +
+            'overflow: hidden;' +
+            'isolation: isolate;' +
+        '}' +
+        '.aiflow-btn-shimmer::after {' +
+            'content: "";' +
+            'position: absolute;' +
+            'top: 0;' +
+            'left: -100%;' +
+            'width: 60%;' +
+            'height: 100%;' +
+            'background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.35) 50%, rgba(255,255,255,0) 100%);' +
+            'animation: aiflow-btn-shimmer 2.5s ease-in-out infinite;' +
+            'box-shadow: 0 8px 24px rgba(217,119,87,0.3);' +
+            'pointer-events: none;' +
+        '}';
+    document.head.appendChild(style);
+}
+
+function aiflowSetButtonShimmer(btn, enabled) {
+    if (!btn || !btn.classList) return;
+    if (enabled) aiflowEnsureButtonShimmerStyle();
+    btn.classList.toggle('aiflow-btn-shimmer', !!enabled);
+}
+
+function aiflowCreateLayoutPendingController(options) {
+    options = options || {};
+    if (typeof document === 'undefined') {
+        return {
+            finish: function() {},
+            restart: function() {},
+            isPending: function() { return false; }
+        };
+    }
+    var bodyClass = String(options.bodyClass || 'layout-pending').trim() || 'layout-pending';
+    var timeoutMs = options.timeoutMs == null ? 6000 : Number(options.timeoutMs);
+    if (!isFinite(timeoutMs) || timeoutMs < 0) timeoutMs = 0;
+    var timer = null;
+    var pending = false;
+
+    function _setPending(next) {
+        pending = !!next;
+        if (document.body && document.body.classList) document.body.classList.toggle(bodyClass, pending);
+    }
+
+    function _clearTimer() {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+    }
+
+    function finish() {
+        _clearTimer();
+        _setPending(false);
+    }
+
+    function restart() {
+        _clearTimer();
+        _setPending(true);
+        if (timeoutMs > 0) timer = setTimeout(finish, timeoutMs);
+    }
+
+    restart();
+
+    return {
+        finish: finish,
+        restart: restart,
+        isPending: function() {
+            return pending;
+        }
+    };
+}
+
 /**
  * Normalize a Chinese/mixed date string like "2026年4月8日（星期三）"
  * into a zero-padded comparable key "2026-04-08".
@@ -441,6 +621,17 @@ function initScrollReveal(selector, opts) {
     opts = opts || {};
     var threshold = opts.threshold || 0.1;
     var activeClass = opts.activeClass || 'visible';
+    function isInViewport(el) {
+        if (!el || typeof el.getBoundingClientRect !== 'function') return false;
+        var rect = el.getBoundingClientRect();
+        var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+        var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+        return rect.width > 0 && rect.height > 0 &&
+            rect.bottom >= 0 &&
+            rect.right >= 0 &&
+            rect.top <= vh &&
+            rect.left <= vw;
+    }
 
     if (!('IntersectionObserver' in window)) {
         document.querySelectorAll(selector).forEach(function(el) { el.classList.add(activeClass); });
@@ -456,7 +647,13 @@ function initScrollReveal(selector, opts) {
         });
     }, { threshold: threshold });
 
-    document.querySelectorAll(selector).forEach(function(el) { observer.observe(el); });
+    document.querySelectorAll(selector).forEach(function(el) {
+        if (el.classList.contains(activeClass) || isInViewport(el)) {
+            el.classList.add(activeClass);
+            return;
+        }
+        observer.observe(el);
+    });
 }
 
 var _aiflowFreeMaterialConfigs = {};

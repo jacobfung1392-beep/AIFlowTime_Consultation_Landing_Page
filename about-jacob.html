@@ -39,6 +39,9 @@
             overflow-x:hidden;
             font-weight:400;
         }
+        body.layout-pending [data-section-id] {
+            opacity: 0 !important;
+        }
 
         /* Scroll animation */
         .fade-in { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease; }
@@ -176,7 +179,7 @@
         .aj-photo-wide { width:100%; max-width:480px; border-radius:18px; margin:24px auto; display:block; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Nav -->
     <nav class="aj-nav">
         <div class="aj-nav-inner">
@@ -601,6 +604,9 @@
         var _layoutQuery = new URLSearchParams(window.location.search);
         var _isPreview = _layoutQuery.has('preview');
         var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'about-jacob';
+        var _layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
+            ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+            : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
 
         function _normalizeLayoutPageStatus(status) {
             var raw = String(status || '').trim().toLowerCase();
@@ -626,6 +632,10 @@
             '</div>';
             document.body.appendChild(overlay);
             document.body.style.overflow = 'hidden';
+        }
+
+        function _finishInitialLayoutRender() {
+            _layoutPendingController.finish();
         }
         var _aboutJacobSectionTypes = {
             'aj-hero': 'aj-hero',
@@ -1079,6 +1089,7 @@
             initLayoutPreviewBridge({
                 onLayoutPreview: function(sections) {
                     applySections(sections);
+                    _finishInitialLayoutRender();
                 }
             });
         } else {
@@ -1087,17 +1098,23 @@
                 db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
                     var data = doc.exists ? (doc.data() || {}) : null;
                     if (!_layoutAllowsPublicView(data)) {
+                        _layoutPendingController.finish();
                         _showLayoutUnavailableState();
                         return;
                     }
                     if (typeof applyFirestorePageMeta === 'function') {
                         applyFirestorePageMeta(data, { fallbackTitle: document.title });
                     }
-                    if (!doc.exists || !data.sections || data.sections.length === 0) return;
+                    if (!doc.exists || !data.sections || data.sections.length === 0) {
+                        _finishInitialLayoutRender();
+                        return;
+                    }
                     console.log('[Layout] Loaded ' + _layoutDocId + ' layout from Firestore');
                     applySections(normalizeAboutJacobSections(data.sections));
+                    _finishInitialLayoutRender();
                 }).catch(function(err) {
                     console.log('[Layout] No layout config found for ' + _layoutDocId + '.', err);
+                    _finishInitialLayoutRender();
                 });
             });
         }

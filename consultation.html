@@ -44,6 +44,11 @@
             font-size: 16px;
             overflow-x: hidden;
         }
+        body.layout-pending .page-content {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
         img { max-width: 100%; height: auto; display: block; }
 
@@ -344,7 +349,7 @@
         .fade-in.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Noise Background -->
     <div id="noise-bg">
         <div class="radial-glow"></div>
@@ -594,6 +599,9 @@
             var query = new URLSearchParams(window.location.search);
             var isPreview = query.has('preview');
             var layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || query.get('layoutDoc') || 'consultation';
+            var layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
+                ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+                : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
 
             function applyConsultationBackground(sections) {
                 if (typeof syncPageBackgroundFromSections === 'function') {
@@ -601,15 +609,23 @@
                 }
             }
 
+            function finishInitialLayoutRender() {
+                layoutPendingController.finish();
+            }
+
             if (isPreview && typeof initLayoutPreviewBridge === 'function') {
                 initLayoutPreviewBridge({
                     onLayoutPreview: function(sections) {
                         applyConsultationBackground(sections || []);
+                        finishInitialLayoutRender();
                     }
                 });
             }
 
-            if (typeof initFirebase !== 'function' || typeof firebase === 'undefined' || !firebase.firestore) return;
+            if (typeof initFirebase !== 'function' || typeof firebase === 'undefined' || !firebase.firestore) {
+                finishInitialLayoutRender();
+                return;
+            }
             initFirebase(function() {
                 firebase.firestore().collection('pageLayouts').doc(layoutDocId).get().then(function(doc) {
                     var data = doc.exists ? (doc.data() || {}) : null;
@@ -617,8 +633,10 @@
                         applyFirestorePageMeta(data, { fallbackTitle: document.title });
                     }
                     applyConsultationBackground(data && Array.isArray(data.sections) ? data.sections : []);
+                    finishInitialLayoutRender();
                 }).catch(function() {
                     applyConsultationBackground([]);
+                    finishInitialLayoutRender();
                 });
             });
         })();

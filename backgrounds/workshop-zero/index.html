@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Zero Background</title>
+    <meta name="robots" content="noindex,nofollow">
+    <style>
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+        body {
+            position: relative;
+        }
+        #bg-zero-wrap {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            transform: translate3d(0, 0, 0);
+            contain: strict;
+        }
+        #bg-zero-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            opacity: 0.34;
+            transform: translateZ(0);
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-zero-wrap"><canvas id="bg-zero-canvas"></canvas></div>
+    <script>
+        (function() {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            var canvas = document.getElementById('bg-zero-canvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var wrap = document.getElementById('bg-zero-wrap');
+            var tiles = [];
+            var time = 0;
+            var viewport = { width: 0, height: 0, dpr: 1 };
+
+            function getProfile(width, height) {
+                var mobile = width < 768;
+                if (mobile) {
+                    return {
+                        tileSize: 10,
+                        gap: 1.4,
+                        layerDepth: 15,
+                        jitterRange: 1,
+                        jitterSpeed: 0.0022,
+                        pulseSpeed: 0.0028,
+                        rotationX: -24,
+                        rotationY: 11,
+                        charWidth: Math.min(width * 0.62, 320),
+                        charHeight: Math.min(height * 0.84, 720)
+                    };
+                }
+                return {
+                    tileSize: 12,
+                    gap: 2,
+                    layerDepth: 20,
+                    jitterRange: 1.5,
+                    jitterSpeed: 0.002,
+                    pulseSpeed: 0.003,
+                    rotationX: -35,
+                    rotationY: 23,
+                    charWidth: 600,
+                    charHeight: 900
+                };
+            }
+
+            function Tile(localX, localY, z, cx, cy, w, h, isBackLayer, profile) {
+                this.localX = localX;
+                this.localY = localY;
+                this.originZ = z;
+                this.cx = cx;
+                this.cy = cy;
+                this.w = w;
+                this.h = h;
+                this.isBackLayer = isBackLayer;
+                this.profile = profile;
+                this.baseAlpha = 0.16 + Math.random() * 0.32;
+                this.pulseOffset = Math.random() * Math.PI * 2;
+                this.jitterPhaseX = Math.random() * Math.PI * 2;
+                this.jitterPhaseY = Math.random() * Math.PI * 2;
+                this.screenX = 0;
+                this.screenY = 0;
+                this.depth = 0;
+                this.currentAlpha = 1;
+            }
+
+            Tile.prototype.update = function() {
+                var jx = Math.sin(time * this.profile.jitterSpeed + this.jitterPhaseX) * this.profile.jitterRange;
+                var jy = Math.cos(time * this.profile.jitterSpeed + this.jitterPhaseY) * this.profile.jitterRange;
+                var x = this.localX + jx;
+                var y = this.localY + jy;
+                var z = this.originZ;
+                var radX = this.profile.rotationX * (Math.PI / 180);
+                var radY = this.profile.rotationY * (Math.PI / 180);
+                var y1 = y * Math.cos(radX) - z * Math.sin(radX);
+                var z1 = y * Math.sin(radX) + z * Math.cos(radX);
+                var x2 = x * Math.cos(radY) + z1 * Math.sin(radY);
+                var z2 = -x * Math.sin(radY) + z1 * Math.cos(radY);
+                this.screenX = x2 + this.cx;
+                this.screenY = y1 + this.cy;
+                this.depth = z2;
+                var pulse = Math.sin(time * this.profile.pulseSpeed + this.pulseOffset);
+                this.currentAlpha = Math.max(0, Math.min(1, this.baseAlpha + pulse * 0.08));
+            };
+
+            Tile.prototype.draw = function() {
+                var front = { r: 224, g: 122, b: 95 };
+                var back = { r: 120, g: 120, b: 130 };
+                var c = this.isBackLayer ? back : front;
+                var alpha = this.currentAlpha * (this.isBackLayer ? 0.56 : 1);
+                ctx.fillStyle = "rgba(" + c.r + "," + c.g + "," + c.b + "," + alpha + ")";
+                ctx.fillRect(this.screenX, this.screenY, this.w, this.h);
+                ctx.strokeStyle = "rgba(" + c.r + "," + c.g + "," + c.b + "," + (this.isBackLayer ? 0.08 : 0.22) + ")";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(this.screenX, this.screenY, this.w, this.h);
+            };
+
+            function createTilesForCharacter(char, cx, cy, width, height, profile) {
+                var buffer = document.createElement('canvas');
+                buffer.width = width;
+                buffer.height = height;
+                var bctx = buffer.getContext('2d');
+                bctx.fillStyle = '#000';
+                bctx.font = '900 ' + Math.round(height * 0.82) + 'px "Arial Black", Arial, Helvetica, sans-serif';
+                bctx.textAlign = 'center';
+                bctx.textBaseline = 'middle';
+                bctx.fillText(char, width / 2, height / 2);
+                var data = bctx.getImageData(0, 0, width, height).data;
+                for (var y = 0; y < height; y += profile.tileSize) {
+                    for (var x = 0; x < width; x += profile.tileSize) {
+                        var index = (y * width + x) * 4 + 3;
+                        if (data[index] > 50) {
+                            var localX = x - width / 2;
+                            var localY = y - height / 2;
+                            var tileW = profile.tileSize - profile.gap;
+                            var tileH = profile.tileSize - profile.gap;
+                            var jx = (Math.random() - 0.5) * (profile.tileSize * 0.35);
+                            var jy = (Math.random() - 0.5) * (profile.tileSize * 0.35);
+                            tiles.push(new Tile(localX + jx, localY + jy, profile.layerDepth / 2, cx, cy, tileW, tileH, false, profile));
+                            tiles.push(new Tile(localX + jx, localY + jy, -profile.layerDepth / 2, cx, cy, tileW, tileH, true, profile));
+                        }
+                    }
+                }
+            }
+
+            function rebuildScene() {
+                tiles = [];
+                var profile = getProfile(viewport.width, viewport.height);
+                createTilesForCharacter('0', viewport.width / 2, viewport.height / 2, profile.charWidth, profile.charHeight, profile);
+            }
+
+            function resize(force) {
+                var width = Math.max(1, wrap ? wrap.clientWidth : window.innerWidth || document.documentElement.clientWidth || 1);
+                var height = Math.max(1, wrap ? wrap.clientHeight : window.innerHeight || document.documentElement.clientHeight || 1);
+                if (!force && width === viewport.width && height === viewport.height) return;
+                viewport.width = width;
+                viewport.height = height;
+                viewport.dpr = Math.min(window.devicePixelRatio || 1, 2);
+                canvas.width = width * viewport.dpr;
+                canvas.height = height * viewport.dpr;
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(viewport.dpr, viewport.dpr);
+                rebuildScene();
+            }
+
+            function loop(timestamp) {
+                time = timestamp;
+                ctx.clearRect(0, 0, viewport.width + 1, viewport.height + 1);
+                tiles.forEach(function(tile) { tile.update(); });
+                tiles.sort(function(a, b) { return a.depth - b.depth; });
+                tiles.forEach(function(tile) { tile.draw(); });
+                requestAnimationFrame(loop);
+            }
+
+            resize(true);
+            requestAnimationFrame(loop);
+
+            var resizeTimer = null;
+            function scheduleResize() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() { resize(true); }, 120);
+            }
+
+            window.addEventListener('resize', scheduleResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', scheduleResize);
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -7,6 +7,9 @@
  * - confirmPaymentUpload: validates screenshot upload
  * - onRegistrationCreated: Firestore trigger — recomputes workshop enrolled from pending+confirmed
  * - repairWorkshopEnrollmentCounts: one-off repair endpoint for derived counters
+ * - inspectProteinWorkshopWebhook: signed receiver used for workshop webhook smoke tests
+ * - upsertCarousel: OpenClaw HMAC webhook -> carouselProjects (template factory)
+ * - confirmPaymentUpload: optional SIMPLE_BOOKING_WEBHOOK_URL (plain JSON POST) OR HMAC Protein webhook; optional Twilio via WORKSHOP_WHATSAPP_ALERT_JSON
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -14,8 +17,10 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onDocumentWritten, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 const Stripe = require("stripe");
 const { google } = require("googleapis");
+const { defineSecret } = require("firebase-functions/params");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -24,9 +29,23 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "20
 const RESERVATION_MINUTES = 10;
 const WORKSHOP_ID_DEFAULT = "ai-beginner-2026";
 const REGION = "asia-east2";
-const BOOKING_WEBHOOK_URL = "https://cloudy-low-potato-efficiency.trycloudflare.com/webhook/booking";
+const DEFAULT_PROTEIN_WORKSHOP_WEBHOOK_URL = "https://gateway.openclaw.ai/webhook/protein-workshop-confirmed";
+/**
+ * Manual-payment confirm: if non-empty, POST plain JSON `{ id, ...registration }` here and **skip** the HMAC Protein webhook.
+ * Paste your stable HTTPS once (e.g. Named Cloudflare Tunnel → OpenClaw `/webhook/booking`). No Firebase secret for this URL.
+ * Leave "" to use PROTEIN_WORKSHOP_WEBHOOK_URL / default + HMAC instead.
+ */
+const SIMPLE_BOOKING_WEBHOOK_URL =
+  "https://stonier-pa-incorrectly.ngrok-free.dev/webhook/booking";
 const FREE_MATERIAL_COLLECTION = "freeMaterialLeads";
 const FREE_MATERIAL_ATTACHMENT_LIMIT = 7 * 1024 * 1024;
+
+/** Secret for OpenClaw / Protein webhook HMAC (set via `firebase functions:secrets:set HMAC_SECRET`). */
+const openclawCarouselHmacSecret = defineSecret("HMAC_SECRET");
+const proteinWorkshopWebhookUrl = defineSecret("PROTEIN_WORKSHOP_WEBHOOK_URL");
+const proteinWorkshopWebhookSecret = defineSecret("PROTEIN_WORKSHOP_WEBHOOK_SECRET");
+/** Optional: JSON for Twilio WhatsApp admin alert — see WORKSHOP_PAYMENT_SETUP.md. */
+const workshopWhatsAppAlertJson = defineSecret("WORKSHOP_WHATSAPP_ALERT_JSON");
 
 /**
  * Create a pending reservation and Stripe Checkout Session.
@@ -302,7 +321,16 @@ exports.getWorkshopPrice = onCall(
  * Enrollment is derived from registrations via Firestore triggers.
  */
 exports.confirmPaymentUpload = onCall(
-  { region: REGION, cors: true, invoker: "public" },
+  {
+    region: REGION,
+    cors: true,
+    invoker: "public",
+    secrets: [
+      proteinWorkshopWebhookUrl,
+      proteinWorkshopWebhookSecret,
+      workshopWhatsAppAlertJson,
+    ],
+  },
   async (request) => {
     const { registrationId, workshopId } = request.data || {};
     if (!registrationId || !workshopId) {
@@ -330,32 +358,384 @@ exports.confirmPaymentUpload = onCall(
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // Send webhook when user officially applies (confirm apply after payment proof)
+    // Notify when user officially applies (confirm apply after payment proof).
     const updatedSnap = await regRef.get();
     const updatedReg = updatedSnap.exists ? updatedSnap.data() : {};
-    const payload = { id: registrationId, ...updatedReg };
-    try {
-      const response = await fetch(BOOKING_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const text = await response.text().catch(() => "");
-      if (!response.ok) {
-        console.error("confirmPaymentUpload webhook failed", { registrationId, status: response.status, body: text.slice(0, 500) });
-      } else {
-        console.log("confirmPaymentUpload webhook sent", { registrationId, status: response.status });
-      }
-    } catch (err) {
-      console.error("confirmPaymentUpload webhook error", { registrationId, message: err && err.message ? err.message : String(err) });
-    }
+    const payload = _buildProteinWorkshopAlertPayload(registrationId, updatedReg);
+    const webhookResult = (SIMPLE_BOOKING_WEBHOOK_URL || "").trim()
+      ? await _sendSimpleBookingWebhook(registrationId, updatedReg, await _computeSimpleWebhookExtras(updatedReg))
+      : await _sendProteinWorkshopWebhook(payload);
+    const whatsappResult = await _sendTwilioWhatsAppEnrollmentAlert(payload);
 
-    return { success: true, alreadyCounted: !!reg._enrollmentCounted, alreadySubmitted: false };
+    return {
+      success: true,
+      alreadyCounted: !!reg._enrollmentCounted,
+      alreadySubmitted: false,
+      webhook: {
+        sent: !!webhookResult.sent,
+        skipped: !!webhookResult.skipped,
+        status: webhookResult.status || null,
+        reason: webhookResult.reason || null,
+      },
+      whatsappAlert: {
+        sent: !!whatsappResult.sent,
+        skipped: !!whatsappResult.skipped,
+        status: whatsappResult.status || null,
+        reason: whatsappResult.reason || null,
+      },
+    };
   }
 );
 
+function _asDate(value) {
+  if (!value) return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value.toDate === "function") {
+    const date = value.toDate();
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function _toIsoString(value) {
+  const date = _asDate(value);
+  return date ? date.toISOString() : "";
+}
+
+function _toHongKongDateTime(value) {
+  const date = _asDate(value);
+  if (!date) return "";
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Hong_Kong",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const map = {};
+  parts.forEach((part) => {
+    if (part.type !== "literal") map[part.type] = part.value;
+  });
+  if (!map.year || !map.month || !map.day || !map.hour || !map.minute) return "";
+  return `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute} HKT`;
+}
+
+function _normalizeAttendanceMode(value) {
+  const raw = _cleanText(value, 30).toLowerCase();
+  if (raw === "online") return "online";
+  if (raw === "offline") return "offline";
+  if (raw === "both" || raw === "hybrid") return "hybrid";
+  return raw || "offline";
+}
+
+function _buildProteinWorkshopAdminBrief(payload) {
+  const lines = [
+    "New workshop application confirmed",
+    `Who: ${payload.summary.who || payload.registrationId}`,
+    `What: ${payload.summary.what || payload.workshop.id || "Unknown workshop"}`,
+    `When: ${payload.summary.when || payload.submittedAtHkt || payload.submittedAt || "Unknown"}`,
+    `Format: ${payload.summary.format || payload.workshop.attendanceMode || "unknown"}`,
+    `Submitted: ${payload.submittedAtHkt || payload.submittedAt || "Unknown"}`,
+  ];
+  if (payload.applicant.email) lines.push(`Email: ${payload.applicant.email}`);
+  if (payload.applicant.phone) lines.push(`Phone: ${payload.applicant.phone}`);
+  return lines.join("\n");
+}
+
+function _buildProteinWorkshopAlertPayload(registrationId, registration) {
+  const attendanceMode = _normalizeAttendanceMode(registration.attendanceMode);
+  const submittedAt = _toIsoString(registration.applicationSubmittedAt);
+  const submittedAtHkt = _toHongKongDateTime(registration.applicationSubmittedAt);
+  const applicantPhone = _cleanText(registration.whatsapp || registration.phone, 80);
+  const workshopDate = _cleanText(registration.workshopDate, 120);
+  const workshopTime = _cleanText(registration.workshopTime, 120);
+  const summaryWhen = [workshopDate, workshopTime].filter(Boolean).join(" ").trim();
+  const payload = {
+    version: 1,
+    eventType: "workshop_application_confirmed",
+    source: "confirmPaymentUpload",
+    id: registrationId,
+    registrationId,
+    status: _cleanText(registration.status || "pending", 40),
+    submittedAt,
+    submittedAtHkt,
+    applicant: {
+      name: _cleanText(registration.name, 200),
+      email: _cleanText(registration.userEmail || registration.email, 200),
+      phone: applicantPhone,
+      whatsapp: applicantPhone,
+      ageGroup: _cleanText(registration.ageGroup, 80),
+      jobType: _cleanText(registration.jobType, 120),
+    },
+    workshop: {
+      id: _cleanText(registration.workshopId, 120),
+      title: _cleanText(registration.workshopTitle, 200),
+      date: workshopDate,
+      time: workshopTime,
+      attendanceMode,
+      selectedRound: _cleanText(registration.selectedRound, 120),
+      selectedRoundLabel: _cleanText(registration.selectedRoundLabel, 200),
+      allSessionDates: Array.isArray(registration.allSessionDates)
+        ? registration.allSessionDates.slice(0, 20).map((session) => ({
+            date: _cleanText(session && session.date, 120),
+            time: _cleanText(session && session.time, 120),
+            label: _cleanText(session && session.label, 200),
+          }))
+        : [],
+    },
+    payment: {
+      screenshotUrl: _cleanText(registration.paymentScreenshotUrl, 1000),
+      pricePaid: _cleanText(registration.pricePaid, 80),
+      discountApplied: !!registration.discountApplied,
+      promoCode: _cleanText(registration.promoCode, 80),
+    },
+    summary: {
+      who: _cleanText(registration.name || registration.userEmail || applicantPhone || registrationId, 200),
+      what: _cleanText(registration.workshopTitle || registration.workshopId, 200),
+      when: summaryWhen || submittedAtHkt || submittedAt,
+      format: attendanceMode,
+    },
+    // Keep key legacy fields at the root so older booking receivers can
+    // continue reading the event while Protein switches to the nested schema.
+    name: _cleanText(registration.name, 200),
+    userEmail: _cleanText(registration.userEmail || registration.email, 200),
+    phone: applicantPhone,
+    whatsapp: applicantPhone,
+    workshopId: _cleanText(registration.workshopId, 120),
+    workshopTitle: _cleanText(registration.workshopTitle, 200),
+    workshopDate: workshopDate,
+    workshopTime: workshopTime,
+    attendanceMode,
+    paymentScreenshotUrl: _cleanText(registration.paymentScreenshotUrl, 1000),
+    applicationSubmittedAt: submittedAt,
+    selectedRound: _cleanText(registration.selectedRound, 120),
+    selectedRoundLabel: _cleanText(registration.selectedRoundLabel, 200),
+    pricePaid: _cleanText(registration.pricePaid, 80),
+  };
+  payload.adminBrief = _buildProteinWorkshopAdminBrief(payload);
+  return payload;
+}
+
+function _combineWorkshopDateTime(reg) {
+  const d = _cleanText(reg && reg.workshopDate, 120);
+  const t = _cleanText(reg && reg.workshopTime, 80);
+  if (d && t) return `${d} ${t}`.trim();
+  return (d || t || "").trim();
+}
+
+function _registrationTimestampsToIso(reg) {
+  if (!reg || typeof reg !== "object") return {};
+  const out = { ...reg };
+  Object.keys(out).forEach((k) => {
+    const v = out[k];
+    if (v && typeof v.toDate === "function") {
+      try {
+        const d = v.toDate();
+        out[k] = d && !Number.isNaN(d.getTime()) ? d.toISOString() : null;
+      } catch (e) {
+        delete out[k];
+      }
+    }
+  });
+  return out;
+}
+
+async function _computeSimpleWebhookExtras(registration) {
+  const workshopDateTime = _combineWorkshopDateTime(registration);
+  const pricePaid = _cleanText(registration && registration.pricePaid, 80);
+  const workshopId = _cleanText(registration && registration.workshopId, 120);
+  const sum = await _computeEnrollmentCapacitySummary(workshopId, registration);
+  const extras = {
+    workshopDateTime,
+    pricePaid,
+    enrollmentCurrent: sum.enrolled,
+    enrollmentCapacity: sum.capacity,
+    enrollmentLabel: sum.label,
+    enrollmentScope: sum.scope,
+  };
+  if (sum.roundId) extras.enrollmentRoundId = sum.roundId;
+  if (sum.roundLabel) extras.enrollmentRoundLabel = sum.roundLabel;
+  if (sum.sessionId) extras.enrollmentSessionId = sum.sessionId;
+  return extras;
+}
+
 /**
- * Booking webhook is now sent from confirmPaymentUpload when user clicks "確認報名"
+ * Legacy/simple integration: JSON POST only, no HMAC. Receiver must be trusted (your OpenClaw route).
+ * @param {Record<string, unknown>} extras Merged last — adds workshopDateTime, pricePaid, enrollment* fields.
+ */
+async function _sendSimpleBookingWebhook(registrationId, reg, extras = {}) {
+  const url = (SIMPLE_BOOKING_WEBHOOK_URL || "").trim();
+  if (!url) {
+    return { sent: false, skipped: true, reason: "simple-url-not-configured" };
+  }
+  const safeReg = _registrationTimestampsToIso(reg);
+  let body;
+  try {
+    body = JSON.stringify({ id: registrationId, ...safeReg, ...extras });
+  } catch (e) {
+    body = JSON.stringify({ id: registrationId, error: "serialization_failed" });
+  }
+  try {
+    console.log("Sending webhook to:", url);
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "1",
+        "x-webhook-secret": "protein-workshop-secret-2026",
+      },
+      body,
+    });
+    const text = await response.text().catch(() => "");
+    if (!response.ok) {
+      console.error("confirmPaymentUpload simple booking webhook failed", {
+        registrationId,
+        status: response.status,
+        body: text.slice(0, 500),
+      });
+      return { sent: false, skipped: false, status: response.status };
+    }
+    console.log("confirmPaymentUpload simple booking webhook sent", { registrationId, status: response.status });
+    return { sent: true, skipped: false, status: response.status };
+  } catch (err) {
+    const cause = err && err.cause ? err.cause : null;
+    console.error("confirmPaymentUpload simple booking webhook error", {
+      registrationId,
+      message: err && err.message ? err.message : String(err),
+      causeMessage: cause && cause.message ? cause.message : "",
+      causeCode: cause && cause.code ? cause.code : "",
+    });
+    return { sent: false, skipped: false, reason: "request-error" };
+  }
+}
+
+async function _sendProteinWorkshopWebhook(payload) {
+  const configuredUrl = (proteinWorkshopWebhookUrl.value() || "").trim();
+  const webhookUrl = configuredUrl || DEFAULT_PROTEIN_WORKSHOP_WEBHOOK_URL;
+  const webhookSecret = (proteinWorkshopWebhookSecret.value() || "").trim();
+
+  if (!webhookUrl) {
+    console.warn("confirmPaymentUpload Protein webhook skipped: missing webhook URL", {
+      registrationId: payload.registrationId,
+    });
+    return { sent: false, skipped: true, reason: "missing-url" };
+  }
+  if (!webhookSecret) {
+    console.warn("confirmPaymentUpload Protein webhook skipped: missing webhook secret", {
+      registrationId: payload.registrationId,
+    });
+    return { sent: false, skipped: true, reason: "missing-secret" };
+  }
+
+  const body = JSON.stringify(payload);
+  const timestamp = new Date().toISOString();
+  const signature = crypto
+    .createHmac("sha256", webhookSecret)
+    .update(`${timestamp}.${body}`)
+    .digest("hex");
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-aiflowtime-event": payload.eventType,
+        "x-aiflowtime-registration-id": payload.registrationId,
+        "x-aiflowtime-signature": signature,
+        "x-aiflowtime-timestamp": timestamp,
+      },
+      body,
+    });
+    const text = await response.text().catch(() => "");
+    if (!response.ok) {
+      console.error("confirmPaymentUpload Protein webhook failed", {
+        registrationId: payload.registrationId,
+        status: response.status,
+        body: text.slice(0, 500),
+      });
+      return { sent: false, skipped: false, status: response.status };
+    }
+    console.log("confirmPaymentUpload Protein webhook sent", {
+      registrationId: payload.registrationId,
+      status: response.status,
+    });
+    return { sent: true, skipped: false, status: response.status };
+  } catch (err) {
+    const cause = err && err.cause ? err.cause : null;
+    console.error("confirmPaymentUpload Protein webhook error", {
+      registrationId: payload.registrationId,
+      message: err && err.message ? err.message : String(err),
+      causeMessage: cause && cause.message ? cause.message : cause ? String(cause) : "",
+      causeCode: cause && cause.code ? cause.code : "",
+      causeErrno: cause && typeof cause.errno === "number" ? cause.errno : "",
+      stack: err && err.stack ? String(err.stack).split("\n").slice(0, 6).join(" | ") : "",
+    });
+    return { sent: false, skipped: false, reason: "request-error" };
+  }
+}
+
+/**
+ * Optional admin alert via Twilio WhatsApp API.
+ * Secret WORKSHOP_WHATSAPP_ALERT_JSON: {"accountSid","authToken","from","to"} — values use whatsapp:+E164 prefixes.
+ */
+async function _sendTwilioWhatsAppEnrollmentAlert(payload) {
+  let cfg = {};
+  try {
+    cfg = JSON.parse((workshopWhatsAppAlertJson.value() || "{}").trim() || "{}");
+  } catch (e) {
+    return { sent: false, skipped: true, reason: "twilio-json-invalid" };
+  }
+  const sid = (cfg.accountSid || "").trim();
+  const token = (cfg.authToken || "").trim();
+  const from = (cfg.from || "").trim();
+  const to = (cfg.to || "").trim();
+  if (!sid || !token || !from || !to) {
+    return { sent: false, skipped: true, reason: "twilio-not-configured" };
+  }
+  const brief = payload.adminBrief || _buildProteinWorkshopAdminBrief(payload);
+  const bodyStr = brief.length > 1550 ? brief.slice(0, 1547) + "..." : brief;
+  const params = new URLSearchParams();
+  params.set("To", to);
+  params.set("From", from);
+  params.set("Body", bodyStr);
+  const auth = Buffer.from(`${sid}:${token}`).toString("base64");
+  try {
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(sid)}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+      },
+      body: params.toString(),
+    });
+    const txt = await res.text().catch(() => "");
+    if (!res.ok) {
+      console.error("confirmPaymentUpload Twilio WhatsApp failed", {
+        registrationId: payload.registrationId,
+        status: res.status,
+        body: txt.slice(0, 500),
+      });
+      return { sent: false, skipped: false, status: res.status };
+    }
+    console.log("confirmPaymentUpload Twilio WhatsApp sent", {
+      registrationId: payload.registrationId,
+      status: res.status,
+    });
+    return { sent: true, skipped: false, status: res.status };
+  } catch (err) {
+    console.error("confirmPaymentUpload Twilio WhatsApp error", {
+      registrationId: payload.registrationId,
+      message: err && err.message ? err.message : String(err),
+    });
+    return { sent: false, skipped: false, reason: "request-error" };
+  }
+}
+
+/**
+ * Protein booking webhook is now sent from confirmPaymentUpload when user clicks "確認報名"
  * (confirm apply after uploading payment proof). No longer triggered on document create.
  */
 function isEnrolledStatus(reg) {
@@ -837,6 +1217,103 @@ async function inspectWorkshopEnrollmentMapping(workshopId) {
   return summary;
 }
 
+/**
+ * Live enrolled vs capacity for the applicant's session/round or whole workshop (matches recompute logic).
+ */
+async function _computeEnrollmentCapacitySummary(workshopId, registration) {
+  if (!workshopId || workshopId === "webhook-test") {
+    return { enrolled: 0, capacity: 0, label: "0/0", scope: "none" };
+  }
+  const workshopRef = db.collection("workshops").doc(workshopId);
+  const [workshopSnap, regsSnap] = await Promise.all([
+    workshopRef.get(),
+    db.collection("registrations").where("workshopId", "==", workshopId).get(),
+  ]);
+  if (!workshopSnap.exists) {
+    return { enrolled: 0, capacity: 0, label: "0/0", scope: "unknown" };
+  }
+  const workshop = workshopSnap.data();
+  const enrolledRegs = [];
+  regsSnap.forEach((doc) => {
+    const r = doc.data();
+    r._id = doc.id;
+    if (isEnrolledStatus(r)) enrolledRegs.push(r);
+  });
+  const totalEnrolled = enrolledRegs.length;
+
+  if (workshop.courseType === "continuous" && Array.isArray(workshop.rounds) && workshop.rounds.length) {
+    const matchedRound = resolveLegacyRoundMatch(registration, workshop.rounds);
+    const perRound = {};
+    workshop.rounds.forEach((round) => {
+      const rid = round.id || round;
+      if (rid) perRound[rid] = 0;
+    });
+    enrolledRegs.forEach((r) => {
+      const m = resolveLegacyRoundMatch(r, workshop.rounds);
+      const rid = m && (m.id || m) ? m.id || m : "";
+      if (rid && perRound[rid] !== undefined) perRound[rid] += 1;
+    });
+    if (matchedRound) {
+      const roundId = matchedRound.id || matchedRound;
+      const cap = matchedRound.capacity || 0;
+      const en = perRound[roundId] || 0;
+      return {
+        enrolled: en,
+        capacity: cap,
+        label: `${en}/${cap}`,
+        scope: "round",
+        roundId: _cleanText(roundId, 120),
+        roundLabel: _cleanText(matchedRound.label, 200),
+      };
+    }
+    const capSum = workshop.rounds.reduce((s, round) => s + (round.capacity || 0), 0);
+    const cap = capSum || workshop.capacity || 0;
+    return { enrolled: totalEnrolled, capacity: cap, label: `${totalEnrolled}/${cap}`, scope: "workshop" };
+  }
+
+  if (Array.isArray(workshop.sessions) && workshop.sessions.length > 1) {
+    const sortedSessions = sortSessions(workshop.sessions);
+    sortedSessions.forEach((session, index) => {
+      if (!session.id) session.id = sessionStableId(session, index);
+    });
+    const matchedSession = resolveLegacySessionMatch(registration, sortedSessions);
+    const perSession = {};
+    sortedSessions.forEach((s) => {
+      perSession[s.id] = 0;
+    });
+    enrolledRegs.forEach((r) => {
+      const m = resolveLegacySessionMatch(r, sortedSessions);
+      if (m && m.id) perSession[m.id] = (perSession[m.id] || 0) + 1;
+    });
+    if (matchedSession && matchedSession.id) {
+      const cap =
+        matchedSession.capacity !== undefined && matchedSession.capacity !== null
+          ? matchedSession.capacity
+          : workshop.capacity || 0;
+      const en = perSession[matchedSession.id] || 0;
+      return {
+        enrolled: en,
+        capacity: cap,
+        label: `${en}/${cap}`,
+        scope: "session",
+        sessionId: matchedSession.id,
+        sessionDate: _cleanText(matchedSession.date, 120),
+        sessionTime: _cleanText(matchedSession.time, 80),
+      };
+    }
+    const cap = workshop.capacity || 0;
+    return { enrolled: totalEnrolled, capacity: cap, label: `${totalEnrolled}/${cap}`, scope: "workshop" };
+  }
+
+  const cap = workshop.capacity || 0;
+  return {
+    enrolled: totalEnrolled,
+    capacity: cap,
+    label: `${totalEnrolled}/${cap}`,
+    scope: "workshop",
+  };
+}
+
 async function forceWorkshopEnrollmentSync(workshopId) {
   const workshopRef = db.collection("workshops").doc(workshopId);
   const [workshopSnap, regsSnap] = await Promise.all([
@@ -1071,6 +1548,7 @@ exports.createWebhookTestRegistration = onCall(
       workshopTime: "23:59",
       selectedRound: "webhook-test-round",
       selectedRoundLabel: "Webhook Test Round",
+      attendanceMode: "offline",
       userId: "webhook-test-user",
       userEmail: "webhook-test@aiflowtime.local",
       name: "Webhook Test",
@@ -1078,13 +1556,13 @@ exports.createWebhookTestRegistration = onCall(
       phone: "0000 0000",
       jobType: "tech",
       reasons: ["Webhook test"],
-      aiProblem: "Testing sendBookingWebhook logs",
+      aiProblem: "Testing Protein workshop webhook logs",
       expectation: "Verify trigger and response logs",
       pricePaid: "HK$0",
       discountApplied: false,
       promoCode: "",
       status: "pending",
-      paymentScreenshotUrl: "",
+      paymentScreenshotUrl: "https://example.com/test-payment-proof.png",
       applicationSubmittedAt: null,
       _webhookTest: true,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -1102,13 +1580,92 @@ exports.createWebhookTestRegistration = onCall(
   }
 );
 
+exports.inspectProteinWorkshopWebhook = onRequest(
+  {
+    region: REGION,
+    cors: true,
+    secrets: [proteinWorkshopWebhookSecret],
+  },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).json({ ok: false, error: "POST required" });
+      return;
+    }
+
+    const timestamp = _cleanText(req.get("x-aiflowtime-timestamp"), 80);
+    const signature = _cleanText(req.get("x-aiflowtime-signature"), 200);
+    const rawBody = req.rawBody ? req.rawBody.toString("utf8") : JSON.stringify(req.body || {});
+    const secret = (proteinWorkshopWebhookSecret.value() || "").trim();
+    if (!timestamp || !signature || !rawBody || !secret) {
+      res.status(400).json({ ok: false, error: "Missing signature inputs" });
+      return;
+    }
+
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(`${timestamp}.${rawBody}`)
+      .digest("hex");
+    const actualBuf = Buffer.from(signature, "utf8");
+    const expectedBuf = Buffer.from(expected, "utf8");
+    if (actualBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(actualBuf, expectedBuf)) {
+      res.status(401).json({ ok: false, error: "Invalid signature" });
+      return;
+    }
+
+    const payload = req.body || {};
+    const brief = payload.adminBrief || _buildProteinWorkshopAdminBrief(payload);
+    console.log("inspectProteinWorkshopWebhook verified", {
+      registrationId: payload.registrationId || payload.id || "",
+      eventType: payload.eventType || "",
+    });
+    res.status(200).json({
+      ok: true,
+      registrationId: payload.registrationId || payload.id || "",
+      eventType: payload.eventType || "",
+      format: (payload.summary && payload.summary.format) || payload.attendanceMode || "",
+      brief,
+    });
+  }
+);
+
 /**
- * Image proxy — serves Firebase Storage files through the app domain.
- * Bypasses DNS issues with firebasestorage.googleapis.com.
- * Usage: /api/storageProxy?path=workshop-images/file.jpg
+ * Image/video proxy — serves Firebase Storage through Cloud Functions.
+ * iOS Safari requires Accept-Ranges + 206 Partial Content for reliable <video> playback.
  */
+function _storageProxyParseRange(rangeHeader, size) {
+  if (!rangeHeader || !/^bytes=/i.test(String(rangeHeader))) return null;
+  const total = Number(size);
+  if (!Number.isFinite(total) || total <= 0) return null;
+  const spec = String(rangeHeader).replace(/^bytes=/i, "").trim();
+  const dash = spec.indexOf("-");
+  if (dash < 0) return null;
+  const startRaw = spec.slice(0, dash);
+  const endRaw = spec.slice(dash + 1);
+  let start;
+  let end;
+  if (startRaw === "" && endRaw !== "") {
+    const suffix = parseInt(endRaw, 10);
+    if (!Number.isFinite(suffix) || suffix <= 0) return null;
+    start = Math.max(0, total - suffix);
+    end = total - 1;
+  } else if (startRaw !== "" && endRaw === "") {
+    start = parseInt(startRaw, 10);
+    if (!Number.isFinite(start) || start < 0) return null;
+    end = total - 1;
+  } else if (startRaw !== "" && endRaw !== "") {
+    start = parseInt(startRaw, 10);
+    end = parseInt(endRaw, 10);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  } else {
+    return null;
+  }
+  if (start > end || start >= total) return null;
+  end = Math.min(end, total - 1);
+  return { start, end, length: end - start + 1 };
+}
+
 exports.storageProxy = onRequest(
-  { region: REGION, timeoutSeconds: 30, cors: true },
+  { region: REGION, timeoutSeconds: 120, cors: true },
   async (req, res) => {
     const filePath = req.query.path;
     if (!filePath) {
@@ -1126,12 +1683,69 @@ exports.storageProxy = onRequest(
       }
 
       const [metadata] = await file.getMetadata();
-      res.set("Content-Type", metadata.contentType || "application/octet-stream");
+      const contentType = metadata.contentType || "application/octet-stream";
+      const size = Number(metadata.size);
+      if (!Number.isFinite(size) || size < 0) {
+        res.status(500).send("Invalid file metadata");
+        return;
+      }
+
+      res.set("Accept-Ranges", "bytes");
       res.set("Cache-Control", "public, max-age=86400");
-      file.createReadStream().pipe(res);
+      res.set("Access-Control-Allow-Origin", "*");
+      res.set("Access-Control-Expose-Headers", "Content-Range, Accept-Ranges, Content-Length");
+
+      if (req.method === "HEAD") {
+        res.set("Content-Type", contentType);
+        res.set("Content-Length", String(size));
+        res.status(200).end();
+        return;
+      }
+
+      if (req.method !== "GET") {
+        res.status(405).send("Method not allowed");
+        return;
+      }
+
+      const rangeHeader = req.get("range") || req.get("Range");
+      const parsed = rangeHeader ? _storageProxyParseRange(rangeHeader, size) : null;
+      if (rangeHeader && parsed == null) {
+        res.status(416);
+        res.set("Content-Range", `bytes */${size}`);
+        res.end("Range Not Satisfiable");
+        return;
+      }
+
+      if (parsed) {
+        res.status(206);
+        res.set("Content-Range", `bytes ${parsed.start}-${parsed.end}/${size}`);
+        res.set("Content-Length", String(parsed.length));
+        res.set("Content-Type", contentType);
+        file
+          .createReadStream({ start: parsed.start, end: parsed.end })
+          .on("error", (streamErr) => {
+            console.error("storageProxy stream error:", streamErr);
+            if (!res.headersSent) res.status(500).end();
+            else res.destroy(streamErr);
+          })
+          .pipe(res);
+        return;
+      }
+
+      res.status(200);
+      res.set("Content-Length", String(size));
+      res.set("Content-Type", contentType);
+      file
+        .createReadStream()
+        .on("error", (streamErr) => {
+          console.error("storageProxy stream error:", streamErr);
+          if (!res.headersSent) res.status(500).end();
+          else res.destroy(streamErr);
+        })
+        .pipe(res);
     } catch (err) {
       console.error("storageProxy error:", err);
-      res.status(500).send("Error fetching file");
+      if (!res.headersSent) res.status(500).send("Error fetching file");
     }
   }
 );
@@ -1743,6 +2357,7 @@ exports.resolvePageSlug = onRequest(
       const upstream = await fetch(upstreamUrl.toString(), {
         method: req.method,
         redirect: "follow",
+        cache: "no-store",
       });
 
       if (!upstream.ok) {
@@ -1751,7 +2366,9 @@ exports.resolvePageSlug = onRequest(
         return;
       }
 
-      res.set("Cache-Control", "no-cache");
+      res.set("Cache-Control", "private, no-store, no-cache, max-age=0, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       res.set("Content-Type", upstream.headers.get("content-type") || "text/html; charset=utf-8");
 
       if (req.method === "HEAD") {
@@ -1770,6 +2387,541 @@ exports.resolvePageSlug = onRequest(
       res.status(200).send(body);
     } catch (err) {
       console.error("resolvePageSlug error:", err);
+      res.status(500).send("Server error");
+    }
+  }
+);
+
+// ----- Carousel OpenClaw webhook (HMAC + template factory; Admin SDK -> carouselProjects) -----
+function _ccEsc(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function _ccRt(text, opts) {
+  opts = opts || {};
+  const html = _ccEsc(text).replace(/\n/g, "<br>");
+  return {
+    html,
+    text,
+    fontSize: opts.fontSize || 32,
+    fontFamily: opts.fontFamily || "Noto Sans TC",
+    color: opts.color || "#ffffff",
+    bold: !!opts.bold,
+    italic: !!opts.italic,
+    underline: !!opts.underline,
+    strikethrough: !!opts.strikethrough,
+  };
+}
+
+const _carouselTemplateFactories = {
+  titleGold: (payload) => ({
+    bg: {
+      type: "photo",
+      color: "#2a1f0a",
+      overlay: 0.45,
+      image: "",
+      imageX: 50,
+      imageY: 50,
+      imageFit: "cover",
+      imageScale: 100,
+    },
+    components: [
+      { type: "label", data: { text: _ccRt(payload.label || "訊息策略", { fontSize: 24, color: "#c9a84c" }) } },
+      {
+        type: "heading",
+        data: {
+          text: _ccRt(payload.headline || payload.heading || "標題", {
+            fontSize: 110,
+            fontFamily: "Noto Serif TC",
+            bold: true,
+            color: "#ffffff",
+          }),
+        },
+      },
+      {
+        type: "body",
+        data: { text: _ccRt(payload.body || "內容...", { fontSize: 32, color: "rgba(255,255,255,0.88)" }) },
+      },
+    ],
+  }),
+
+  /** 五連發戰術弧（與 carousel-creator.html 中 ARC5_TEMPLATES 一致；圖片請用 https URL） */
+  arcCover: (payload) => {
+    const p = payload || {};
+    const img = String(p.coverImageUrl || p.imageUrl || "").trim();
+    return {
+      bg: {
+        type: "photo",
+        color: "#0a0a0a",
+        overlay: 0.52,
+        image: img,
+        imageX: 50,
+        imageY: 50,
+        imageFit: "cover",
+        imageScale: 100,
+      },
+      components: [
+        { type: "label", data: { text: _ccRt(p.kicker || p.label || "系列標籤", { fontSize: 22, color: "#c9a84c" }) } },
+        {
+          type: "heading",
+          data: {
+            text: _ccRt(p.headline || p.heading || "用一行鉤子抓住注意力", {
+              fontSize: 100,
+              fontFamily: "Noto Serif TC",
+              bold: true,
+              color: "#ffffff",
+            }),
+          },
+        },
+        {
+          type: "body",
+          data: {
+            text: _ccRt(
+              p.sub || p.body || "副標：補一句承上啟下",
+              { fontSize: 30, color: "rgba(255,255,255,0.88)" }
+            ),
+          },
+        },
+      ],
+    };
+  },
+
+  arcInsight: (payload) => {
+    const p = payload || {};
+    const img = String(p.imageUrl || "").trim();
+    return {
+      bg: { type: "photo", color: "#111208", overlay: 0.46, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "label", data: { text: _ccRt(p.label || "論點", { fontSize: 24, color: "#c9a84c" }) } },
+        {
+          type: "heading",
+          data: {
+            text: _ccRt(p.headline || p.heading || "中間頁：一個清楚主張", {
+              fontSize: 96,
+              fontFamily: "Noto Serif TC",
+              bold: true,
+              color: "#ffffff",
+            }),
+          },
+        },
+        {
+          type: "body",
+          data: {
+            text: _ccRt(p.body || "用 2–4 行說清楚「所以怎樣」", {
+              fontSize: 30,
+              color: "rgba(255,255,255,0.88)",
+            }),
+          },
+        },
+        {
+          type: "image",
+          data: { src: img, width: 78, posX: 50, posY: 50, borderRadius: 12, objectFit: "cover" },
+        },
+      ],
+    };
+  },
+
+  arcProof: (payload) => {
+    const p = payload || {};
+    const img = String(p.imageUrl || "").trim();
+    return {
+      bg: {
+        type: "cream",
+        color: "#f5f0e8",
+        overlay: 0,
+        image: "",
+        imageX: 50,
+        imageY: 50,
+        imageFit: "cover",
+        imageScale: 100,
+      },
+      components: [
+        {
+          type: "image",
+          data: { src: img, width: 92, posX: 50, posY: 50, borderRadius: 14, objectFit: "cover" },
+        },
+        {
+          type: "heading",
+          data: {
+            text: _ccRt(p.headline || p.heading || "數據、截圖或新聞畫面", {
+              fontSize: 88,
+              fontFamily: "Noto Serif TC",
+              bold: true,
+              color: "#2c2416",
+            }),
+          },
+        },
+        {
+          type: "body",
+          data: {
+            text: _ccRt(p.body || "一句話解讀圖片", { fontSize: 28, color: "#6b5a3e" }),
+          },
+        },
+      ],
+    };
+  },
+
+  arcBridge: (payload) => {
+    const p = payload || {};
+    const img = String(p.imageUrl || "").trim();
+    return {
+      bg: { type: "photo", color: "#0d1015", overlay: 0.42, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        {
+          type: "quote",
+          data: {
+            label: _ccRt(p.quoteLabel || p.label || "他們心裡在想", {
+              fontSize: 22,
+              color: "rgba(255,255,255,0.5)",
+            }),
+            text: _ccRt(p.quote || p.body || "「一句真實的原話或內心獨白。」", {
+              fontSize: 34,
+              fontFamily: "Noto Serif TC",
+              italic: true,
+              color: "rgba(255,255,255,0.92)",
+            }),
+          },
+        },
+        {
+          type: "image",
+          data: { src: img, width: 70, posX: 50, posY: 50, borderRadius: 12, objectFit: "cover" },
+        },
+      ],
+    };
+  },
+
+  arcCtaFinal: (payload) => {
+    const p = payload || {};
+    return {
+      bg: { type: "photo", color: "#0d100a", overlay: 0.5, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "label", data: { text: _ccRt(p.label || "下一步", { fontSize: 24, color: "#c9a84c" }) } },
+        {
+          type: "heading",
+          data: {
+            text: _ccRt(p.headline || p.heading || "把學習變成行動", {
+              fontSize: 102,
+              fontFamily: "Noto Serif TC",
+              bold: true,
+              italic: true,
+              color: "#ffffff",
+            }),
+          },
+        },
+        {
+          type: "cta",
+          data: {
+            sub: _ccRt(p.sub || p.body || "留言關鍵字或點連結加入 Workshop", {
+              fontSize: 28,
+              color: "rgba(255,255,255,0.78)",
+            }),
+            keyword: String(p.keyword || "報名").trim() || "報名",
+          },
+        },
+      ],
+    };
+  },
+
+  /** IG 教學卡風格（cream bg, orange accent）— 5 templateIds */
+  cardFeature: (payload) => {
+    const p = payload || {};
+    return {
+      bg: { type: "cream", color: "#faf8f5", overlay: 0, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "label", data: { text: _ccRt(p.badge || p.label || "功能名稱", { fontSize: 26, color: "#e8734a" }) } },
+        { type: "heading", data: { text: _ccRt(p.headline || p.heading || "Feature Title", { fontSize: 96, fontFamily: "Noto Serif TC", bold: true, color: "#1a1a1a" }) } },
+        { type: "body", data: { text: _ccRt(p.body || "功能描述…", { fontSize: 30, color: "#444444" }) } },
+        { type: "pills", data: { items: (Array.isArray(p.pills) ? p.pills : [p.pill1, p.pill2, p.pill3, p.pill4].filter(Boolean)).map(function(t) { return _ccRt(String(t), { fontSize: 24, color: "#ffffff" }); }) } },
+      ],
+    };
+  },
+
+  cardIconList: (payload) => {
+    const p = payload || {};
+    const items = Array.isArray(p.items) ? p.items : [];
+    return {
+      bg: { type: "cream", color: "#faf8f5", overlay: 0, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "heading", data: { text: _ccRt(p.headline || p.heading || "List Title", { fontSize: 88, fontFamily: "Noto Serif TC", bold: true, color: "#1a1a1a" }) } },
+        { type: "body", data: { text: _ccRt(p.sub || p.body || "Subtitle here", { fontSize: 28, color: "#444444" }) } },
+        { type: "iconList", data: { items: items.map(function(it) {
+          return {
+            icon: it.icon || "◆",
+            title: _ccRt(it.title || "Title", { fontSize: 28, bold: true, color: "#1a1a1a" }),
+            body: _ccRt(it.body || it.desc || "Description", { fontSize: 22, color: "#666666" }),
+          };
+        }) } },
+      ],
+    };
+  },
+
+  cardNumberedImg: (payload) => {
+    const p = payload || {};
+    const items = Array.isArray(p.items) ? p.items : [];
+    const img = String(p.imageUrl || "").trim();
+    return {
+      bg: { type: "cream", color: "#faf8f5", overlay: 0, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "heading", data: { text: _ccRt(p.headline || p.heading || "Numbered List + Screenshot", { fontSize: 82, fontFamily: "Noto Serif TC", bold: true, color: "#1a1a1a" }) } },
+        { type: "numberedList", data: { items: items.map(function(it, i) {
+          return {
+            num: it.num || String(i + 1),
+            title: _ccRt(it.title || "Item " + (i + 1), { fontSize: 28, bold: true, color: "#1a1a1a" }),
+            body: _ccRt(it.body || it.desc || "", { fontSize: 22, color: "#666666" }),
+          };
+        }) } },
+        { type: "image", data: { src: img, width: 88, posX: 50, posY: 50, borderRadius: 12, objectFit: "cover" } },
+        { type: "body", data: { text: _ccRt(p.annotation || p.note || "", { fontSize: 26, italic: true, color: "#666666" }) } },
+      ],
+    };
+  },
+
+  cardStepsGuide: (payload) => {
+    const p = payload || {};
+    const items = Array.isArray(p.steps) ? p.steps : (Array.isArray(p.items) ? p.items : []);
+    return {
+      bg: { type: "cream", color: "#faf8f5", overlay: 0, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "label", data: { text: _ccRt(p.label || "GUIDE", { fontSize: 22, color: "#e8734a" }) } },
+        { type: "heading", data: { text: _ccRt(p.headline || p.heading || "Step-by-Step Guide", { fontSize: 86, fontFamily: "Noto Serif TC", bold: true, color: "#1a1a1a" }) } },
+        { type: "numberedList", data: { items: items.map(function(it, i) {
+          return {
+            num: it.num || String(i + 1),
+            title: _ccRt(it.title || "Step " + (i + 1), { fontSize: 28, bold: true, color: "#1a1a1a" }),
+            body: _ccRt(it.body || it.desc || "", { fontSize: 22, color: "#666666" }),
+          };
+        }) } },
+      ],
+    };
+  },
+
+  cardDarkShowcase: (payload) => {
+    const p = payload || {};
+    const img = String(p.imageUrl || "").trim();
+    return {
+      bg: { type: "photo", color: "#0d0d0d", overlay: 0.12, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 },
+      components: [
+        { type: "heading", data: { text: _ccRt(p.headline || p.heading || "Showcase Title", { fontSize: 92, fontFamily: "Noto Serif TC", bold: true, italic: true, color: "#ffffff" }) } },
+        { type: "body", data: { text: _ccRt(p.body || "Description…", { fontSize: 28, color: "rgba(255,255,255,0.78)" }) } },
+        { type: "image", data: { src: img, width: 90, posX: 50, posY: 50, borderRadius: 14, objectFit: "cover" } },
+      ],
+    };
+  },
+};
+
+function _openclawHexSigEqual(received, expectedHex) {
+  if (typeof received !== "string" || typeof expectedHex !== "string" || received.length !== expectedHex.length) {
+    return false;
+  }
+  try {
+    return crypto.timingSafeEqual(Buffer.from(received, "utf8"), Buffer.from(expectedHex, "utf8"));
+  } catch {
+    return false;
+  }
+}
+
+function _normalizeCarouselSlide(rawSlide) {
+  const slide = rawSlide && typeof rawSlide === "object" ? JSON.parse(JSON.stringify(rawSlide)) : {};
+  if (!slide.bg || typeof slide.bg !== "object") {
+    slide.bg = { type: "photo", color: "#1a1508", overlay: 0.42, image: "", imageX: 50, imageY: 50, imageFit: "cover", imageScale: 100 };
+  }
+  if (!Array.isArray(slide.components)) slide.components = [];
+  if (!Array.isArray(slide.objects)) slide.objects = [];
+  slide.components = slide.components.map((comp) => {
+    const next = comp && typeof comp === "object" ? { ...comp } : { type: "body", data: { text: _ccRt("") } };
+    if (next.scale == null || Number.isNaN(Number(next.scale))) next.scale = 1;
+    if (next.offsetX == null || Number.isNaN(Number(next.offsetX))) next.offsetX = 0;
+    if (next.offsetY == null || Number.isNaN(Number(next.offsetY))) next.offsetY = 0;
+    return next;
+  });
+  slide.objects = slide.objects.map((obj, index) => {
+    const next = obj && typeof obj === "object" ? { ...obj } : { type: "rect" };
+    if (!next.id) next.id = "bot-obj-" + index;
+    if (next.x == null || Number.isNaN(Number(next.x))) next.x = 160;
+    if (next.y == null || Number.isNaN(Number(next.y))) next.y = 160;
+    if (next.w == null || Number.isNaN(Number(next.w))) next.w = 240;
+    if (next.h == null || Number.isNaN(Number(next.h))) next.h = 120;
+    if (next.rotation == null || Number.isNaN(Number(next.rotation))) next.rotation = 0;
+    if (next.scale == null || Number.isNaN(Number(next.scale))) next.scale = 1;
+    if (!next.layer) next.layer = "front";
+    if (next.zIndex == null || Number.isNaN(Number(next.zIndex))) next.zIndex = index + 1;
+    return next;
+  });
+  return slide;
+}
+
+exports.upsertCarousel = onRequest(
+  {
+    region: REGION,
+    timeoutSeconds: 30,
+    cors: false,
+    invoker: "public",
+    secrets: [openclawCarouselHmacSecret],
+  },
+  async (req, res) => {
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+
+    const secretValue = openclawCarouselHmacSecret.value();
+    if (!secretValue) {
+      console.error("upsertCarousel: HMAC_SECRET not configured");
+      res.status(500).send("Server misconfiguration");
+      return;
+    }
+
+    const rawBuf =
+      req.rawBody !== undefined && req.rawBody !== null
+        ? Buffer.isBuffer(req.rawBody)
+          ? req.rawBody
+          : Buffer.from(String(req.rawBody), "utf8")
+        : Buffer.from(JSON.stringify(req.body && typeof req.body === "object" ? req.body : {}), "utf8");
+
+    const sigHeader = req.headers["x-openclaw-signature"];
+    const sig = Array.isArray(sigHeader) ? sigHeader[0] : sigHeader;
+    const expected = crypto.createHmac("sha256", secretValue).update(rawBuf).digest("hex");
+
+    if (!_openclawHexSigEqual(String(sig || ""), expected)) {
+      res.status(401).send("Unauthorized");
+      return;
+    }
+
+    let body;
+    try {
+      body = JSON.parse(rawBuf.toString("utf8"));
+    } catch (e) {
+      res.status(400).send("Invalid JSON body");
+      return;
+    }
+
+    const idempotencyKey = body && body.idempotencyKey;
+    const templateId = body && body.templateId;
+    const payload = (body && body.payload && typeof body.payload === "object") ? body.payload : {};
+    const name = body && body.name;
+    const rawSlidesBody = Array.isArray(body && body.slides) &&
+      body.slides.some((item) => item && typeof item === "object" && (item.bg || Array.isArray(item.components) || Array.isArray(item.objects)))
+      ? body.slides
+      : null;
+    const slidesSpecRaw = body && body.slidesSpec ? body.slidesSpec : (rawSlidesBody ? null : body && body.slides);
+    const projectDimRaw = body && body.projectDim;
+
+    if (!idempotencyKey || typeof idempotencyKey !== "string" || idempotencyKey.length > 200) {
+      res.status(400).send("idempotencyKey required");
+      return;
+    }
+
+    const SLIDES_SPEC_MAX = 24;
+    let slidesSpec = null;
+    let rawSlides = null;
+    if (rawSlidesBody) {
+      if (rawSlidesBody.length === 0) {
+        res.status(400).send("slides must be a non-empty array");
+        return;
+      }
+      if (rawSlidesBody.length > SLIDES_SPEC_MAX) {
+        res.status(400).send("slides too long");
+        return;
+      }
+      rawSlides = rawSlidesBody;
+    }
+    if (slidesSpecRaw !== undefined && slidesSpecRaw !== null) {
+      if (!Array.isArray(slidesSpecRaw) || slidesSpecRaw.length === 0) {
+        res.status(400).send("slidesSpec must be a non-empty array");
+        return;
+      }
+      if (slidesSpecRaw.length > SLIDES_SPEC_MAX) {
+        res.status(400).send("slidesSpec too long");
+        return;
+      }
+      slidesSpec = slidesSpecRaw;
+    }
+
+    if (!rawSlides && !slidesSpec) {
+      if (!templateId || typeof templateId !== "string") {
+        res.status(400).send("templateId required (or send slidesSpec/slides)");
+        return;
+      }
+      if (!_carouselTemplateFactories[templateId]) {
+        res.status(400).send("Invalid templateId");
+        return;
+      }
+    } else if (slidesSpec) {
+      for (let si = 0; si < slidesSpec.length; si++) {
+        const item = slidesSpec[si];
+        if (!item || typeof item !== "object") {
+          res.status(400).send("slidesSpec[" + si + "] invalid");
+          return;
+        }
+        const tid = item.templateId;
+        if (!tid || typeof tid !== "string" || !_carouselTemplateFactories[tid]) {
+          res.status(400).send("Invalid templateId at slidesSpec[" + si + "]");
+          return;
+        }
+        if (item.payload !== undefined && item.payload !== null && typeof item.payload !== "object") {
+          res.status(400).send("slidesSpec[" + si + "].payload must be an object");
+          return;
+        }
+      }
+    } else {
+      for (let si = 0; si < rawSlides.length; si++) {
+        const slide = rawSlides[si];
+        if (!slide || typeof slide !== "object") {
+          res.status(400).send("slides[" + si + "] invalid");
+          return;
+        }
+      }
+    }
+
+    try {
+      const existing = await db
+        .collection("carouselProjects")
+        .where("automation.idempotencyKey", "==", idempotencyKey)
+        .limit(1)
+        .get();
+
+      if (!existing.empty) {
+        res.status(200).json({ status: "exists", id: existing.docs[0].id });
+        return;
+      }
+
+      let slides;
+      if (rawSlides) {
+        slides = rawSlides.map(_normalizeCarouselSlide);
+      } else if (slidesSpec) {
+        slides = slidesSpec.map((item) => {
+          const fac = _carouselTemplateFactories[item.templateId];
+          const pl = (item.payload && typeof item.payload === "object") ? item.payload : {};
+          return fac(pl);
+        });
+      } else {
+        slides = [_carouselTemplateFactories[templateId](payload)];
+      }
+
+      const docRef = await db.collection("carouselProjects").add({
+        name: (typeof name === "string" && name.trim()) || "Automated Carousel",
+        ownerUid: "OPENCLAW_BOT_SYSTEM_USER",
+        projectDim: projectDimRaw && typeof projectDimRaw === "object" && Number(projectDimRaw.w) > 0 && Number(projectDimRaw.h) > 0
+          ? { w: Number(projectDimRaw.w), h: Number(projectDimRaw.h), name: projectDimRaw.name || "IG 貼文" }
+          : { w: 1080, h: 1350, name: "IG 貼文" },
+        slides,
+        automation: {
+          status: "ready",
+          idempotencyKey,
+          lastTriggeredAt: admin.firestore.Timestamp.now(),
+          triggerSource: "openclaw-bot",
+        },
+        createdAt: admin.firestore.Timestamp.now(),
+        updatedAt: admin.firestore.Timestamp.now(),
+      });
+
+      res.status(201).json({ status: "created", id: docRef.id });
+    } catch (err) {
+      console.error("upsertCarousel error:", err);
       res.status(500).send("Server error");
     }
   }

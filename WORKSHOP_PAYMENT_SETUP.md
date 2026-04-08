@@ -112,3 +112,27 @@ In `ai-beginner-workshop.html`, replace the placeholder Firebase config with you
 - **“This workshop is full”** → Capacity is reached; increase `capacity` or use another workshop ID.
 - **Webhook signature failed** → Ensure `stripe.webhook_secret` is the one for this endpoint and you’re using the raw body for verification.
 - **Payment succeeds but seat not confirmed** → Check function logs for `stripeWebhook` and that `metadata.reservationId` is set on the Checkout Session.
+
+## 10. Manual Payment WhatsApp Alerts
+
+Manual-payment workshop applications can now trigger a signed webhook from `confirmPaymentUpload` when the applicant uploads a screenshot and presses the final confirm button.
+
+For the Protein-side verification contract and example WhatsApp brief, see `PROTEIN_WORKSHOP_WEBHOOK.md`.
+
+## 11. Admin WhatsApp alert (Twilio, no OpenClaw)
+
+After manual payment **confirm**, `confirmPaymentUpload` can send the same brief text to **your** WhatsApp via [Twilio WhatsApp](https://www.twilio.com/docs/whatsapp).
+
+1. Twilio Console: enable **WhatsApp** (sandbox for quick tests, or approved sender for production).
+2. Put credentials in **one** Firebase secret as JSON (minified on one line is fine):
+
+```bash
+printf '%s' '{"accountSid":"ACxxxxxxxx","authToken":"your_auth_token","from":"whatsapp:+14155238886","to":"whatsapp:+852xxxxxxxx"}' | firebase functions:secrets:set WORKSHOP_WHATSAPP_ALERT_JSON --data-file=-
+firebase deploy --only functions:confirmPaymentUpload
+```
+
+- `from`: Twilio WhatsApp-enabled number (sandbox uses a shared Twilio `whatsapp:+1…`).
+- `to`: **your** mobile in E.164 with `whatsapp:` prefix (e.g. Hong Kong `whatsapp:+852…`).
+- Leave any field empty to **disable** the alert (same function still runs; `whatsappAlert.skipped` will be true).
+
+Callable response includes `whatsappAlert: { sent, skipped, status, reason }` for debugging.

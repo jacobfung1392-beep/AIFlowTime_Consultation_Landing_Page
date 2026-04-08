@@ -338,5 +338,10 @@ service cloud.firestore {
           'jacobfung@aiflowtime.com'
         ];
     }
+
+    // Carousel Builder cloud projects (distinct from /projects business docs): admin only
+    match /carouselProjects/{projectId} {
+      allow read, write: if isAdmin();
+    }
   }
 }

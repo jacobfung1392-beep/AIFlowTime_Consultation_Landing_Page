@@ -5,7 +5,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>AIFlowTime - 連結</title>
     <meta name="description" content="AIFlowTime 的所有連結 - 諮詢、工作坊、內容">
     <meta name="theme-color" content="#0b2a63">
@@ -21,9 +21,6 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load Three.js from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <style>
         :root {
@@ -52,29 +49,9 @@
             color: #ffffff;
         }
         
-        /* Cosmic Canvas Background */
-        #cosmic-canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -2;
-            pointer-events: none;
-            background:
-                radial-gradient(circle at 22% 18%, rgba(41, 98, 255, 0.34), transparent 28%),
-                radial-gradient(circle at 78% 24%, rgba(56, 189, 248, 0.22), transparent 24%),
-                linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%);
-            overflow: hidden;
-        }
-        
-        #cosmic-canvas-container canvas {
-            display: block;
-            width: 100% !important;
-            height: 100% !important;
-            position: absolute;
-            top: 0;
-            left: 0;
+        body.layout-page-bg-active,
+        body.layout-page-bg-active.dark-mode {
+            background: transparent;
         }
         
         body::before {
@@ -95,6 +72,10 @@
                 radial-gradient(circle at 18% 16%, rgba(59, 130, 246, 0.22), transparent 24%),
                 radial-gradient(circle at 72% 18%, rgba(103, 232, 249, 0.12), transparent 22%),
                 linear-gradient(180deg, rgba(8, 32, 74, 0.2) 0%, rgba(4, 13, 33, 0.05) 100%);
+        }
+
+        body.layout-page-bg-active::before {
+            background: transparent !important;
         }
         
         /* Background Grid */
@@ -400,8 +381,18 @@
             color: #ffffff;
         }
 
+        /* Hero must never start invisible — mobile WebViews often skip IntersectionObserver for above-the-fold content */
+        header.linktree-hero.fade-in.fade-pending {
+            opacity: 1 !important;
+            transform: translateZ(0) translateY(0) !important;
+        }
+        header.linktree-hero.fade-in {
+            contain: none;
+            will-change: auto;
+        }
+
         .linktree-header.linktree-hero {
-            min-height: calc(100svh - 60px);
+            min-height: calc(100svh - 120px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -411,12 +402,105 @@
             margin: 0 auto;
             padding: 76px 24px 42px;
             position: relative;
-            z-index: 1;
+            z-index: 5;
+        }
+
+        /* ---- Fixed Nav Header (matches workshop pages) ---- */
+        .lt-site-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .lt-site-header .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 72rem;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+        .lt-site-header .logo {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+        .lt-site-header .logo:hover { color: #D97757; }
+        .lt-site-header .logo span { color: #D97757; }
+        .lt-site-header .nav-desktop { display: none; }
+        .lt-site-header .nav-desktop a {
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            margin-left: 32px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        .lt-site-header .nav-desktop a:hover { color: #D97757; }
+        .lt-site-header .nav-desktop .nav-cta-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            height: 40px; padding: 0 20px; margin-left: 24px;
+            background: #D97757; color: #fff !important;
+            border-radius: 10px; font-size: 14px; font-weight: 700;
+            text-decoration: none; transition: all 0.3s; border: none;
+        }
+        .lt-site-header .nav-desktop .nav-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(217,119,87,0.3); }
+        .lt-site-header .nav-mobile { display: flex; align-items: center; }
+        .lt-site-header .hamburger {
+            width: 44px; height: 44px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px;
+            background: none; border: none; cursor: pointer; padding: 10px;
+            border-radius: 8px; transition: background 0.3s;
+        }
+        .lt-site-header .hamburger:hover { background: rgba(217,119,87,0.12); }
+        .lt-site-header .hamburger .bar {
+            display: block; width: 24px; height: 2px;
+            background: #ffffff; transition: all 0.3s ease; border-radius: 2px;
+        }
+        .lt-site-header .hamburger.active .bar:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .lt-site-header .hamburger.active .bar:nth-child(2) { opacity: 0; }
+        .lt-site-header .hamburger.active .bar:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+        .lt-site-header .mobile-menu {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: rgba(10,10,15,0.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 24px;
+            transform: translateY(-100%); opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; z-index: 99;
+        }
+        .lt-site-header .mobile-menu.active { transform: translateY(0); opacity: 1; visibility: visible; }
+        .lt-site-header .mobile-menu a {
+            display: flex; align-items: center; color: #ffffff; text-decoration: none;
+            padding: 16px 0; font-size: 18px; font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.08); min-height: 44px;
+        }
+        .lt-site-header .mobile-menu a:last-child { border-bottom: none; }
+        .lt-site-header .mobile-menu a:hover { color: #D97757; }
+        .lt-site-header .mobile-menu .mob-cta {
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 16px; width: 100%; height: 48px;
+            background: #D97757; color: #fff !important;
+            border-radius: 12px; font-weight: 700; font-size: 16px;
+        }
+        @media (min-width: 768px) {
+            .lt-site-header .nav-desktop { display: flex; align-items: center; }
+            .lt-site-header .nav-mobile { display: none; }
+            .lt-site-header .mobile-menu { display: none; }
         }
 
         .linktree-hero .hero-media-wrap {
             width: min(100%, 480px);
             margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
         }
 
         .linktree-hero .hero-media-wrap.hero-media-pending {
@@ -435,6 +519,53 @@
             height: auto;
             border-radius: 0;
             box-shadow: none;
+        }
+
+        .lt-video-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lt-managed-video {
+            background: rgba(8, 20, 48, 0.4);
+        }
+
+        .lt-video-hint {
+            pointer-events: none;
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 28px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(7, 27, 66, 0.76);
+            border: 1px solid rgba(125, 211, 252, 0.24);
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.24s ease, transform 0.24s ease;
+        }
+
+        .lt-video-wrap.lt-video-loading .lt-video-hint,
+        .lt-video-wrap.lt-video-blocked .lt-video-hint,
+        .lt-video-wrap.lt-video-error .lt-video-hint {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .lt-video-wrap.lt-video-ready.lt-video-has-frame .lt-video-hint,
+        .lt-video-wrap.lt-video-playing .lt-video-hint {
+            opacity: 0;
+            transform: translateY(6px);
         }
 
         .linktree-hero .hero-badge {
@@ -637,6 +768,7 @@
             flex-shrink: 0;
             border-radius: 0.75rem 0.75rem 0 0;
             background: rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         .link-item--with-image .link-item-image-wrap img,
         .link-item--with-image .link-item-image-wrap video {
@@ -647,6 +779,29 @@
         }
         .link-item--with-image .link-content {
             padding: 1rem 1.5rem;
+        }
+        /* Video cards: outer .link-item is a div; text row is an <a>. Media uses .lt-link-card-media-hit overlay (video not wrapped in <a> for iOS). */
+        .link-item--with-image > a.link-content {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .link-item--with-image .link-item-image-wrap.lt-video-wrap {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .link-item--with-image .link-item-image-wrap.lt-video-wrap .lt-link-card-media-hit {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            cursor: pointer;
+            text-indent: -9999px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .link-item--with-image .link-item-image-wrap.lt-video-wrap video {
+            pointer-events: none;
         }
         
         .link-text {
@@ -801,6 +956,28 @@
             object-fit: cover;
             object-position: center;
         }
+        .link-item--tools-grid-with-media > .link-tools-grid-body > a.link-tools-grid-text {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0.06);
+        }
+        .link-item--tools-grid-with-media .link-tools-grid-media.lt-video-wrap {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .link-item--tools-grid-with-media .link-tools-grid-media.lt-video-wrap .lt-link-card-media-hit {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            cursor: pointer;
+            text-indent: -9999px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .link-item--tools-grid-with-media .link-tools-grid-media.lt-video-wrap video {
+            pointer-events: none;
+        }
         
         .link-item:hover .link-icon {
             opacity: 1;
@@ -874,9 +1051,14 @@
             );
         }
         
-        /* Hide layout sections until Firestore layout is applied (prevents flash of default order) */
-        body.layout-pending [data-section-id] {
+        /* Keep default content visible while the managed layout hydrates. */
+        body.layout-pending [data-section-id^="_tpl_"] {
             opacity: 0 !important;
+        }
+
+        /* Avoid flash: first paint uses default hero width; CMS heroMediaSizePercent applies on second pass. */
+        body.layout-pending .linktree-hero:not([data-layout-hero-baked]) .hero-media-wrap {
+            opacity: 0
         }
         
         /*
@@ -952,7 +1134,7 @@
 
             .linktree-header.linktree-hero {
                 min-height: auto;
-                padding: 54px 18px 28px;
+                padding: 72px 18px 28px;
             }
             
             .profile-avatar {
@@ -1332,12 +1514,9 @@
         }
     </style>
 </head>
-<body class="layout-pending">
+<body>
     <!-- Safari Theme Color Helper - Must be at top for Safari to detect -->
     <div style="position: fixed; top: 0; left: 0; right: 0; height: 100vh; width: 100%; background: linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%); pointer-events: none; z-index: -3;"></div>
-    
-    <!-- Cosmic Canvas Background -->
-    <div id="cosmic-canvas-container"></div>
     
     <!-- Background Grid (keeping for now, can be removed if desired) -->
     <div class="background-grid-container" style="opacity: 0.3;">
@@ -1353,11 +1532,38 @@
     
     <!-- Dark Mode Toggle - REMOVED FOR LINKTREE PAGE (Always Night Mode) -->
     
-    <!-- Safari Color Detection Bar - Visible deep space area for Safari to sample -->
-    <div style="width: 100%; height: 60px; background: linear-gradient(90deg, #0b2a63 0%, #123879 48%, #0a2250 100%); position: relative; z-index: 10;"></div>
+    <!-- Fixed Nav Header (same as workshop pages) -->
+    <header class="lt-site-header">
+        <div class="header-inner">
+            <a href="/linktree" class="logo">AI<span>FLOW</span>TIME</a>
+            <nav class="nav-desktop">
+                <a href="/ai-beginner-workshop#workshops">工作坊</a>
+                <a href="/about-jacob">About Jacob</a>
+                <a href="/consultation">諮詢服務</a>
+                <a href="/ai-beginner-workshop#workshops" class="nav-cta-btn">瀏覽所有工作坊</a>
+            </nav>
+            <div class="nav-mobile">
+                <button class="hamburger" aria-label="開啟選單" aria-expanded="false" onclick="toggleMobileMenu()">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+        <nav class="mobile-menu" id="mobileMenu" aria-hidden="true">
+            <a href="/ai-beginner-workshop#workshops" onclick="closeMobileMenu()">工作坊</a>
+            <a href="/about-jacob" onclick="closeMobileMenu()">About Jacob</a>
+            <a href="/consultation" onclick="closeMobileMenu()">諮詢服務</a>
+            <a href="/ai-beginner-workshop#workshops" class="mob-cta" onclick="closeMobileMenu()">瀏覽所有工作坊</a>
+        </nav>
+    </header>
     
-    <!-- Header (content from layout editor) -->
-    <header class="linktree-header hero linktree-hero fade-in" data-section-id="lt-header" data-section-type="hero"></header>
+    <!-- BAKE_LAYOUT_HERO:linktree:BEGIN -->
+<!-- baked-at: 2026-04-08T03:23:03.821Z (pageLayouts/linktree) -->
+<header class="linktree-header hero linktree-hero fade-in" data-section-id="lt-header" data-section-type="hero" data-layout-hero-baked="1">
+<div class="hero-media-wrap hero-media-ready" style="width:min(100%,240px)"><img class="hero-media" src="https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=workshop-images%2Flayout_1772762253456_v08pk5.png" alt="AIFlowTime的世界"></div><h1 class="hero-title">AIFlowTime的世界</h1><p class="hero-tagline"><span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><b>AI </b></span></span></span>不只是「效率」的代名詞。它可以很好玩，讓我們創造出意想不到的事物。更重要的是，它能幫助我們<span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><b><span style="color:rgb(249, 195, 1)">探索自己</span></b></span></span></span>——更清醒地感<span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><span style="font-size:18px"><span style="font-size:17px"><span style="font-size:16px">受生活與當下</span></span></span></span></span></span>。繼續探索吧！這將會是一場屬於你的<b><span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><span style="color:rgb(249, 195, 1)">星際航行</span></span></span></span></b>。</p>
+</header>
+<!-- BAKE_LAYOUT_HERO:linktree:END -->
     
     <!-- Links Container -->
     <div class="links-container">
@@ -1471,6 +1677,7 @@
             
             // Step 1: Mark elements for animation (add pending state)
             fadeElements.forEach(el => {
+                if (el.matches && el.matches('header.linktree-hero')) return;
                 if (!el.classList.contains('animated')) {
                     el.classList.add('fade-pending');
                 }
@@ -1506,6 +1713,7 @@
             
             // Step 3: Observe all elements that need animation
             fadeElements.forEach(el => {
+                if (el.matches && el.matches('header.linktree-hero')) return;
                 if (!el.classList.contains('animated')) {
                     observer.observe(el);
                 }
@@ -1536,1074 +1744,6 @@
             profileAvatar.src = 'Landing-page-logo.png';
         }
         
-        // --- Cosmic Orbit 3D Background ---
-        function initCosmicBackground() {
-            // Detect mobile device early for performance optimizations
-            const isMobile = window.innerWidth < 768;
-            
-            // --- Configuration ---
-            const CONFIG = {
-                orbitSpeedMultiplier: 0.1, 
-                cometInterval: 600, 
-                ufoInterval: 900, 
-                colors: {
-                    sun: 0xffaa00,
-                    sunEmissive: 0xff4500,
-                    orbitLine: 0x4faebd
-                }
-            };
-
-            // --- Texture Generator (Procedural Patterns) ---
-            function createPlanetTexture(baseColorHex, type) {
-                // Lower texture resolution on mobile for better performance
-                const size = isMobile ? 256 : 512;
-                const canvas = document.createElement('canvas');
-                canvas.width = size;
-                canvas.height = size;
-                const ctx = canvas.getContext('2d');
-                const baseColor = new THREE.Color(baseColorHex);
-
-                if (type === 'earth') {
-                    ctx.fillStyle = '#006994'; 
-                    ctx.fillRect(0, 0, size, size);
-                    const landColors = ['#3a5f0b', '#4a6f2b', '#8b4513']; 
-                    for(let i=0; i<15; i++) {
-                        const cx = Math.random() * size;
-                        const cy = Math.random() * size;
-                        const rBase = Math.random() * (size / 5) + 30;
-                        ctx.fillStyle = landColors[Math.floor(Math.random()*landColors.length)];
-                        ctx.beginPath();
-                        for(let a=0; a<=Math.PI*2; a+=0.4) {
-                            const r = rBase + (Math.random()-0.5)*30;
-                            const x = cx + Math.cos(a)*r;
-                            const y = cy + Math.sin(a)*r;
-                            if(a===0) ctx.moveTo(x,y);
-                            else ctx.lineTo(x,y);
-                        }
-                        ctx.fill();
-                    }
-                    ctx.fillStyle = '#ffffff';
-                    for(let i=0; i<12; i++) {
-                         ctx.globalAlpha = 0.2 + Math.random()*0.3;
-                         const cx = Math.random() * size;
-                         const cy = Math.random() * size;
-                         const rx = Math.random() * (size/2) + 50;
-                         const ry = Math.random() * 40 + 10;
-                         const rotation = (Math.random() - 0.5) * 0.5;
-                         ctx.save();
-                         ctx.translate(cx, cy);
-                         ctx.rotate(rotation);
-                         ctx.beginPath();
-                         ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI*2);
-                         ctx.fill();
-                         ctx.restore();
-                    }
-                    ctx.globalAlpha = 1.0;
-                } else {
-                    ctx.fillStyle = '#' + baseColor.getHexString();
-                    ctx.fillRect(0, 0, size, size);
-                    if (type === 'gas' || type === 'sun') {
-                        const bands = 20;
-                        for (let i = 0; i < bands; i++) {
-                            const y = Math.random() * size;
-                            const h = Math.random() * (size / 8) + 10;
-                            ctx.globalAlpha = 0.1;
-                            ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#000000';
-                            ctx.fillRect(0, y, size, h);
-                            for(let k=0; k<3; k++){
-                                 ctx.globalAlpha = 0.05;
-                                 ctx.beginPath();
-                                 ctx.arc(Math.random()*size, y + h/2, h*0.8, 0, Math.PI*2);
-                                 ctx.fill();
-                            }
-                        }
-                    } else {
-                        for (let i = 0; i < 150; i++) {
-                            const x = Math.random() * size;
-                            const y = Math.random() * size;
-                            const r = Math.random() * 40 + 5;
-                            ctx.globalAlpha = 0.08;
-                            ctx.fillStyle = Math.random() > 0.5 ? '#ffffff' : '#000000';
-                            ctx.beginPath();
-                            ctx.arc(x, y, r, 0, Math.PI * 2);
-                            ctx.fill();
-                        }
-                    }
-                }
-                const colorTexture = new THREE.CanvasTexture(canvas);
-                let bumpTexture = null;
-                if (type === 'rocky' || type === 'earth') {
-                    const bumpCanvas = document.createElement('canvas');
-                    bumpCanvas.width = size;
-                    bumpCanvas.height = size;
-                    const bCtx = bumpCanvas.getContext('2d');
-                    bCtx.fillStyle = '#808080';
-                    bCtx.fillRect(0, 0, size, size);
-                    for (let i = 0; i < 80; i++) {
-                        const x = Math.random() * size;
-                        const y = Math.random() * size;
-                        const r = Math.random() * 30 + 5;
-                        if (Math.random() > 0.4) {
-                            bCtx.globalAlpha = 0.15;
-                            bCtx.fillStyle = '#ffffff';
-                        } else {
-                            bCtx.globalAlpha = 0.2;
-                            bCtx.fillStyle = '#000000';
-                        }
-                        bCtx.beginPath();
-                        bCtx.arc(x, y, r, 0, Math.PI * 2);
-                        bCtx.fill();
-                    }
-                    bumpTexture = new THREE.CanvasTexture(bumpCanvas);
-                }
-                return { map: colorTexture, bumpMap: bumpTexture };
-            }
-
-            function createSaturnRingTexture() {
-                 // Lower texture resolution on mobile for better performance
-                 const size = isMobile ? 256 : 512;
-                 const canvas = document.createElement('canvas');
-                 canvas.width = size;
-                 canvas.height = size;
-                 const ctx = canvas.getContext('2d');
-                 const centerX = size/2;
-                 const centerY = size/2;
-                 ctx.clearRect(0,0,size,size);
-                 const imageData = ctx.createImageData(size, size);
-                 const data = imageData.data;
-                 for(let y=0; y<size; y++){
-                     for(let x=0; x<size; x++){
-                         const dx = x - centerX;
-                         const dy = y - centerY;
-                         const dist = Math.sqrt(dx*dx + dy*dy);
-                         const r = dist / (size/2); 
-                         if (r > 0.5 && r < 1.0) {
-                             const idx = (y*size + x)*4;
-                             data[idx] = 210;
-                             data[idx+1] = 180;
-                             data[idx+2] = 140;
-                             const noise = Math.random();
-                             const band = Math.sin(r * 80);
-                             let alpha = (noise * 0.4 + band * 0.1 + 0.3) * 255;
-                             if(r < 0.55) alpha *= (r-0.5)/0.05;
-                             if(r > 0.95) alpha *= (1.0-r)/0.05;
-                             data[idx+3] = alpha; 
-                         }
-                     }
-                 }
-                 ctx.putImageData(imageData, 0, 0);
-                 return new THREE.CanvasTexture(canvas);
-            }
-
-            function createMilkyWayTexture() {
-                // Lower texture resolution on mobile for better performance
-                const size = isMobile ? 512 : 1024;
-                const canvas = document.createElement('canvas');
-                canvas.width = size;
-                canvas.height = size;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#071b42';
-                ctx.fillRect(0, 0, size, size);
-                const gradient = ctx.createRadialGradient(size / 2, size / 2, size / 4, size / 2, size / 2, size);
-                gradient.addColorStop(0, 'rgba(67, 126, 255, 0.26)');
-                gradient.addColorStop(0.5, 'rgba(84, 192, 255, 0.14)'); 
-                gradient.addColorStop(1, 'rgba(8, 32, 74, 0)');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, size, size);
-                for (let i = 0; i < 50; i++) {
-                    const x = Math.random() * size;
-                    const y = Math.random() * size;
-                    const radius = Math.random() * 200 + 50;
-                    const cloudGrad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-                    cloudGrad.addColorStop(0, 'rgba(200, 220, 255, 0.05)');
-                    cloudGrad.addColorStop(1, 'rgba(0,0,0,0)');
-                    ctx.fillStyle = cloudGrad;
-                    ctx.beginPath();
-                    ctx.arc(x, y, radius, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                for(let i=0; i<5000; i++) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                    ctx.beginPath();
-                    ctx.arc(Math.random()*size, Math.random()*size, Math.random()*0.8, 0, Math.PI*2);
-                    ctx.fill();
-                }
-                return new THREE.CanvasTexture(canvas);
-            }
-
-            function createSmokeTexture() {
-                const size = 128;
-                const canvas = document.createElement('canvas');
-                canvas.width = size;
-                canvas.height = size;
-                const ctx = canvas.getContext('2d');
-                const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-                grad.addColorStop(0, 'rgba(255,255,255,0.8)');
-                grad.addColorStop(0.3, 'rgba(200,220,255,0.4)');
-                grad.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0,0,size,size);
-                return new THREE.CanvasTexture(canvas);
-            }
-
-            function createSunShaderOverlay(parentEl) {
-                const overlay = document.createElement('div');
-                overlay.style.position = 'absolute';
-                overlay.style.left = '0';
-                overlay.style.top = '0';
-                overlay.style.width = '0';
-                overlay.style.height = '0';
-                overlay.style.transform = 'translate(-50%, -50%)';
-                overlay.style.pointerEvents = 'none';
-                overlay.style.zIndex = '1';
-                overlay.style.opacity = '0';
-
-                const canvas = document.createElement('canvas');
-                canvas.setAttribute('aria-hidden', 'true');
-                canvas.style.width = '100%';
-                canvas.style.height = '100%';
-                canvas.style.display = 'block';
-                overlay.appendChild(canvas);
-                parentEl.appendChild(overlay);
-
-                const gl = canvas.getContext('webgl', {
-                    alpha: true,
-                    premultipliedAlpha: true,
-                    antialias: false,
-                    powerPreference: 'high-performance'
-                });
-
-                if (!gl) {
-                    overlay.remove();
-                    return {
-                        isReady: false,
-                        update: function() {},
-                        destroy: function() {}
-                    };
-                }
-
-                const vertexShaderSource = `
-                    attribute vec2 position;
-                    void main() {
-                        gl_Position = vec4(position, 0.0, 1.0);
-                    }
-                `;
-
-                const fragmentShaderSource = `
-                    precision highp float;
-
-                    uniform vec2 u_resolution;
-                    uniform float u_time;
-                    uniform float u_pitch;
-                    uniform float u_yaw;
-
-                    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-                    vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-                    vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
-                    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-                    float snoise(vec3 v) {
-                        const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
-                        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-                        vec3 i = floor(v + dot(v, C.yyy));
-                        vec3 x0 = v - i + dot(i, C.xxx);
-                        vec3 g = step(x0.yzx, x0.xyz);
-                        vec3 l = 1.0 - g;
-                        vec3 i1 = min(g.xyz, l.zxy);
-                        vec3 i2 = max(g.xyz, l.zxy);
-                        vec3 x1 = x0 - i1 + C.xxx;
-                        vec3 x2 = x0 - i2 + C.yyy;
-                        vec3 x3 = x0 - D.yyy;
-                        i = mod289(i);
-                        vec4 p = permute(permute(permute(
-                                    i.z + vec4(0.0, i1.z, i2.z, 1.0))
-                                + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-                                + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-                        float n_ = 0.142857142857;
-                        vec3 ns = n_ * D.wyz - D.xzx;
-                        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-                        vec4 x_ = floor(j * ns.z);
-                        vec4 y_ = floor(j - 7.0 * x_);
-                        vec4 x = x_ * ns.x + ns.yyyy;
-                        vec4 y = y_ * ns.x + ns.yyyy;
-                        vec4 h = 1.0 - abs(x) - abs(y);
-                        vec4 b0 = vec4(x.xy, y.xy);
-                        vec4 b1 = vec4(x.zw, y.zw);
-                        vec4 s0 = floor(b0) * 2.0 + 1.0;
-                        vec4 s1 = floor(b1) * 2.0 + 1.0;
-                        vec4 sh = -step(h, vec4(0.0));
-                        vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-                        vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-                        vec3 p0 = vec3(a0.xy, h.x);
-                        vec3 p1 = vec3(a0.zw, h.y);
-                        vec3 p2 = vec3(a1.xy, h.z);
-                        vec3 p3 = vec3(a1.zw, h.w);
-                        vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
-                        p0 *= norm.x;
-                        p1 *= norm.y;
-                        p2 *= norm.z;
-                        p3 *= norm.w;
-                        vec4 m = max(0.6 - vec4(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), 0.0);
-                        m = m * m;
-                        return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
-                    }
-
-                    float fbm(vec3 x) {
-                        float v = 0.0;
-                        float a = 0.5;
-                        for (int i = 0; i < 4; ++i) {
-                            v += a * (snoise(x) * 0.5 + 0.5);
-                            x = x * 2.0;
-                            a *= 0.5;
-                        }
-                        return v;
-                    }
-
-                    vec3 rotate3D(vec3 p, float pitch, float yaw) {
-                        float cy = cos(pitch);
-                        float sy = sin(pitch);
-                        float y = p.y * cy - p.z * sy;
-                        float z = p.y * sy + p.z * cy;
-
-                        float cx = cos(yaw);
-                        float sx = sin(yaw);
-                        float x = p.x * cx + z * sx;
-                        float nz = -p.x * sx + z * cx;
-
-                        return vec3(x, y, nz);
-                    }
-
-                    vec3 getSunColor(float t) {
-                        t = clamp(t, 0.0, 1.0);
-                        vec3 c1 = vec3(0.18, 0.07, 0.05);
-                        vec3 c2 = vec3(0.48, 0.11, 0.04);
-                        vec3 c3 = vec3(0.75, 0.21, 0.05);
-                        vec3 c4 = vec3(0.90, 0.29, 0.10);
-                        vec3 c5 = vec3(1.0, 0.44, 0.26);
-                        vec3 c6 = vec3(1.0, 0.76, 0.03);
-                        vec3 c7 = vec3(1.0, 1.0, 1.0);
-
-                        if (t < 0.16) return mix(c1, c2, t / 0.16);
-                        if (t < 0.33) return mix(c2, c3, (t - 0.16) / 0.17);
-                        if (t < 0.50) return mix(c3, c4, (t - 0.33) / 0.17);
-                        if (t < 0.66) return mix(c4, c5, (t - 0.50) / 0.16);
-                        if (t < 0.83) return mix(c5, c6, (t - 0.66) / 0.17);
-                        return mix(c6, c7, (t - 0.83) / 0.17);
-                    }
-
-                    void main() {
-                        vec2 uv = (gl_FragCoord.xy / u_resolution.xy - 0.5) * 2.8;
-                        float r = length(uv);
-                        vec4 finalColor = vec4(0.0);
-
-                        if (r < 1.0) {
-                            float z = sqrt(1.0 - r * r);
-                            vec3 rotated = rotate3D(vec3(uv.x, uv.y, z), u_pitch, u_yaw);
-
-                            float n = fbm(rotated * 2.5 - vec3(0.0, u_time * 0.4, -u_time * 0.2));
-                            float pulse = 1.0 + sin(u_time * 1.5) * 0.05;
-
-                            n *= pow(z, 0.4) * pulse;
-                            finalColor = vec4(getSunColor(n), 1.0);
-                        } else {
-                            float dist = r - 1.0;
-                            float glow = exp(-dist * 8.0) * 0.4;
-                            glow *= (1.0 - smoothstep(1.1, 1.4, r));
-
-                            vec4 glowColor = vec4(vec3(1.0, 0.4, 0.05) * glow, glow);
-                            vec4 flareColor = vec4(0.0);
-
-                            if (r < 1.25) {
-                                float flareZ = sqrt(max(0.0, 1.56 - r * r));
-                                vec3 rotatedFlare = rotate3D(vec3(uv.x, uv.y, flareZ), u_pitch, u_yaw);
-                                float flareNoise = fbm(rotatedFlare * 5.0 - vec3(0.0, u_time * 1.5, -u_time * 0.8));
-
-                                float flareThreshold = 0.65 + dist * 1.8;
-                                if (flareNoise > flareThreshold) {
-                                    float alpha = smoothstep(0.0, 0.15, flareNoise - flareThreshold);
-                                    alpha *= smoothstep(0.25, 0.0, dist);
-
-                                    vec3 flareCol = mix(vec3(0.9, 0.2, 0.0), vec3(1.0, 0.8, 0.1), (flareNoise - flareThreshold) * 3.0);
-                                    flareColor = vec4(flareCol * alpha, alpha);
-                                }
-                            }
-
-                            finalColor = flareColor + glowColor * (1.0 - flareColor.a);
-                        }
-
-                        gl_FragColor = finalColor;
-                    }
-                `;
-
-                function compileShader(type, source) {
-                    const shader = gl.createShader(type);
-                    gl.shaderSource(shader, source);
-                    gl.compileShader(shader);
-                    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                        console.error('Cosmic sun shader compile error:', gl.getShaderInfoLog(shader));
-                        gl.deleteShader(shader);
-                        return null;
-                    }
-                    return shader;
-                }
-
-                const vertexShader = compileShader(gl.VERTEX_SHADER, vertexShaderSource);
-                const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
-                if (!vertexShader || !fragmentShader) {
-                    overlay.remove();
-                    return {
-                        isReady: false,
-                        update: function() {},
-                        destroy: function() {}
-                    };
-                }
-
-                const program = gl.createProgram();
-                gl.attachShader(program, vertexShader);
-                gl.attachShader(program, fragmentShader);
-                gl.linkProgram(program);
-
-                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                    console.error('Cosmic sun shader link error:', gl.getProgramInfoLog(program));
-                    overlay.remove();
-                    return {
-                        isReady: false,
-                        update: function() {},
-                        destroy: function() {}
-                    };
-                }
-
-                gl.useProgram(program);
-
-                const positionBuffer = gl.createBuffer();
-                gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-                    -1, -1,  1, -1, -1,  1,
-                    -1,  1,  1, -1,  1,  1
-                ]), gl.STATIC_DRAW);
-
-                const positionLocation = gl.getAttribLocation(program, 'position');
-                gl.enableVertexAttribArray(positionLocation);
-                gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-                const uResolution = gl.getUniformLocation(program, 'u_resolution');
-                const uTime = gl.getUniformLocation(program, 'u_time');
-                const uPitch = gl.getUniformLocation(program, 'u_pitch');
-                const uYaw = gl.getUniformLocation(program, 'u_yaw');
-
-                let time = 0;
-                let yaw = 0;
-                let pitch = 0;
-                let velocityYaw = 0.005;
-                let velocityPitch = 0;
-
-                function resizeCanvas(sizePx) {
-                    const cssSize = Math.max(96, Math.round(sizePx));
-                    overlay.style.width = cssSize + 'px';
-                    overlay.style.height = cssSize + 'px';
-
-                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-                    const displaySize = Math.max(96, Math.round(cssSize * dpr));
-                    if (canvas.width !== displaySize || canvas.height !== displaySize) {
-                        canvas.width = displaySize;
-                        canvas.height = displaySize;
-                        gl.viewport(0, 0, canvas.width, canvas.height);
-                    }
-                }
-
-                return {
-                    isReady: true,
-                    update: function(centerX, centerY, sizePx) {
-                        if (!Number.isFinite(centerX) || !Number.isFinite(centerY) || !Number.isFinite(sizePx)) {
-                            overlay.style.opacity = '0';
-                            return;
-                        }
-
-                        resizeCanvas(sizePx);
-                        overlay.style.left = centerX + 'px';
-                        overlay.style.top = centerY + 'px';
-                        overlay.style.opacity = '1';
-
-                        time += 0.02;
-                        yaw += velocityYaw;
-                        pitch += velocityPitch;
-                        velocityYaw *= 0.985;
-                        velocityPitch += (-pitch) * 0.02;
-                        velocityPitch *= 0.96;
-
-                        if (Math.abs(velocityYaw) < 0.0035) {
-                            velocityYaw = 0.0035 * Math.sign(velocityYaw || 1);
-                        }
-
-                        gl.uniform2f(uResolution, canvas.width, canvas.height);
-                        gl.uniform1f(uTime, time);
-                        gl.uniform1f(uPitch, pitch);
-                        gl.uniform1f(uYaw, yaw);
-                        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-                        gl.clear(gl.COLOR_BUFFER_BIT);
-                        gl.drawArrays(gl.TRIANGLES, 0, 6);
-                    },
-                    destroy: function() {
-                        overlay.remove();
-                    }
-                };
-            }
-
-            // --- Scene Setup ---
-            const container = document.getElementById('cosmic-canvas-container');
-            if (!container) return;
-            
-            // Ensure container has proper dimensions
-            container.style.width = '100%';
-            container.style.height = '100%';
-            container.style.position = 'fixed';
-            container.style.top = '0';
-            container.style.left = '0';
-            container.style.zIndex = '-2';
-            container.style.background = 'radial-gradient(circle at 22% 18%, rgba(41, 98, 255, 0.34), transparent 28%), radial-gradient(circle at 78% 24%, rgba(56, 189, 248, 0.22), transparent 24%), linear-gradient(180deg, #071b42 0%, #08204a 42%, #040d21 100%)';
-            
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x071b42);
-            scene.fog = new THREE.FogExp2(0x0f2348, 0.02);
-            
-            // Get proper dimensions
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            
-            const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-            camera.position.set(0, 30, 60);
-            
-            // Check if Three.js is loaded
-            if (typeof THREE === 'undefined') {
-                console.error('Three.js not loaded');
-                return;
-            }
-            
-            // Try WebGL first, fallback to Canvas if needed
-            let renderer;
-            try {
-                renderer = new THREE.WebGLRenderer({ 
-                    antialias: false, // Disable antialiasing on mobile for performance
-                    alpha: false, // Set to false to ensure background shows
-                    powerPreference: "high-performance"
-                });
-                renderer.setClearColor(0x071b42, 1); // Deep space background
-            } catch (e) {
-                console.error('WebGL not supported:', e);
-                // Try with different settings
-                try {
-                    renderer = new THREE.WebGLRenderer({ 
-                        antialias: false,
-                        alpha: false
-                    });
-                    renderer.setClearColor(0x071b42, 1);
-                } catch (e2) {
-                    console.error('WebGL completely failed:', e2);
-                    return;
-                }
-            }
-            
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio on mobile
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            
-            // Ensure canvas fills container
-            renderer.domElement.style.width = '100%';
-            renderer.domElement.style.height = '100%';
-            renderer.domElement.style.display = 'block';
-            
-            container.appendChild(renderer.domElement);
-            const sunOverlay = createSunShaderOverlay(container);
-
-            // --- Lighting ---
-            const ambientLight = new THREE.AmbientLight(0x404060, 0.7); 
-            scene.add(ambientLight);
-            const sunLight = new THREE.PointLight(0xffffff, 1.5, 100);
-            sunLight.position.set(0, 0, 0);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 1024;
-            sunLight.shadow.mapSize.height = 1024;
-            scene.add(sunLight);
-            const rimLight = new THREE.DirectionalLight(0xaaccff, 0.4);
-            rimLight.position.set(0, 20, 10);
-            scene.add(rimLight);
-
-            // --- Objects ---
-            const mwTexture = createMilkyWayTexture();
-            // Reduce geometry complexity on mobile (isMobile already defined at function start)
-            const mwGeo = new THREE.SphereGeometry(500, isMobile ? 32 : 64, isMobile ? 32 : 64); 
-            mwGeo.scale(-1, 1, 1); 
-            const mwMat = new THREE.MeshBasicMaterial({
-                map: mwTexture,
-                side: THREE.BackSide,
-                transparent: true,
-                opacity: 0.8,
-                fog: false
-            });
-            const milkyWay = new THREE.Mesh(mwGeo, mwMat);
-            milkyWay.rotation.x = Math.PI / 4;
-            milkyWay.rotation.z = Math.PI / 6;
-            scene.add(milkyWay);
-
-            const sunGeometry = new THREE.SphereGeometry(4, isMobile ? 32 : 64, isMobile ? 32 : 64);
-            const sunTextures = createPlanetTexture(CONFIG.colors.sun, 'sun'); 
-            const sunMaterial = new THREE.MeshStandardMaterial({
-                map: sunTextures.map,
-                emissive: CONFIG.colors.sunEmissive,
-                emissiveIntensity: 0.6,
-                emissiveMap: sunTextures.map,
-                roughness: 0.4,
-                metalness: 0.1
-            });
-            const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-            scene.add(sun);
-            const sunGlowGeo = new THREE.SphereGeometry(4.8, 32, 32);
-            const sunGlowMat = new THREE.MeshBasicMaterial({
-                color: 0xff8800,
-                transparent: true,
-                opacity: 0.2,
-                side: THREE.BackSide
-            });
-            const sunGlow = new THREE.Mesh(sunGlowGeo, sunGlowMat);
-            scene.add(sunGlow);
-            const SUN_OVERLAY_RADIUS = 4.8;
-            const SUN_OVERLAY_SCALE = 1.18;
-            const sunWorldCenter = new THREE.Vector3(0, 0, 0);
-            const sunWorldEdge = new THREE.Vector3(SUN_OVERLAY_RADIUS, 0, 0);
-            const sunScreenCenter = new THREE.Vector3();
-            const sunScreenEdge = new THREE.Vector3();
-            if (sunOverlay.isReady) {
-                sun.visible = false;
-                sunGlow.visible = false;
-            }
-
-            const planetsData = [
-                { name: "Mercury", size: 0.8, color: 0xA5A5A5, distance: 9, speed: 2.5, type: 'rocky' },
-                { name: "Venus", size: 1.2, color: 0xE6B8B8, distance: 14, speed: 2.0, type: 'gas' }, 
-                { name: "Earth", size: 1.3, color: 0x4faebd, distance: 20, speed: 1.5, type: 'earth', hasMoon: true }, 
-                { name: "Mars", size: 1.0, color: 0xff6b6b, distance: 26, speed: 1.2, type: 'rocky' }, 
-                { name: "Saturn", size: 2.8, color: 0xf4d03f, distance: 38, speed: 0.6, type: 'gas', hasRings: true }, 
-                { name: "Neptune", size: 2.2, color: 0x5D3FD3, distance: 50, speed: 0.4, type: 'gas' } 
-            ];
-            const planets = [];
-            function createOrbitLine(radius) {
-                const points = [];
-                const divisions = 128;
-                for (let i = 0; i <= divisions; i++) {
-                    const theta = (i / divisions) * Math.PI * 2;
-                    points.push(new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius));
-                }
-                const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                const material = new THREE.LineBasicMaterial({ 
-                    color: CONFIG.colors.orbitLine, 
-                    transparent: true, 
-                    opacity: 0.1 
-                });
-                return new THREE.Line(geometry, material);
-            }
-
-            planetsData.forEach(data => {
-                const planetGroup = new THREE.Group();
-                planetGroup.userData = {
-                    angle: Math.random() * Math.PI * 2,
-                    distance: data.distance,
-                    speed: data.speed * CONFIG.orbitSpeedMultiplier,
-                    rotationSpeed: Math.random() * 0.005 + 0.002
-                };
-                const textures = createPlanetTexture(data.color, data.type);
-                const geometry = new THREE.SphereGeometry(data.size, isMobile ? 32 : 64, isMobile ? 32 : 64);
-                const material = new THREE.MeshStandardMaterial({
-                    map: textures.map,
-                    roughness: 0.7,
-                    metalness: 0.1
-                });
-                if (textures.bumpMap) {
-                    material.bumpMap = textures.bumpMap;
-                    material.bumpScale = 0.05; 
-                }
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
-                let tiltGroup;
-                if (data.name === "Saturn") {
-                    tiltGroup = new THREE.Group();
-                    tiltGroup.add(mesh);
-                    const innerRadius = data.size * 1.4;
-                    const outerRadius = data.size * 2.8;
-                    const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 128);
-                    const pos = ringGeo.attributes.position;
-                    const uv = ringGeo.attributes.uv;
-                    for (let i = 0; i < pos.count; i++) {
-                         const x = pos.getX(i);
-                         const y = pos.getY(i);
-                         const u = (x / outerRadius) * 0.5 + 0.5;
-                         const v = (y / outerRadius) * 0.5 + 0.5;
-                         uv.setXY(i, u, v);
-                    }
-                    const ringTexture = createSaturnRingTexture();
-                    const ringMat = new THREE.MeshStandardMaterial({
-                        map: ringTexture,
-                        side: THREE.DoubleSide,
-                        transparent: true,
-                        opacity: 0.9,
-                        roughness: 0.8
-                    });
-                    const ring = new THREE.Mesh(ringGeo, ringMat);
-                    ring.rotation.x = -Math.PI / 2; 
-                    tiltGroup.add(ring);
-                    tiltGroup.rotation.z = 27 * (Math.PI / 180);
-                    planetGroup.add(tiltGroup);
-                } else {
-                    planetGroup.add(mesh);
-                }
-                if (data.hasMoon) {
-                    const moonGroup = new THREE.Group();
-                    planetGroup.add(moonGroup);
-                    planetGroup.userData.moonGroup = moonGroup;
-                    const moonTextures = createPlanetTexture(0xcccccc, 'rocky');
-                    const moonGeo = new THREE.SphereGeometry(data.size * 0.27, 32, 32);
-                    const moonMat = new THREE.MeshStandardMaterial({
-                        map: moonTextures.map,
-                        bumpMap: moonTextures.bumpMap,
-                        bumpScale: 0.02,
-                        roughness: 0.8,
-                        metalness: 0.1
-                    });
-                    const moonMesh = new THREE.Mesh(moonGeo, moonMat);
-                    moonMesh.position.set(data.size * 2.5, 0, 0);
-                    moonMesh.castShadow = true;
-                    moonMesh.receiveShadow = true;
-                    moonGroup.add(moonMesh);
-                    moonGroup.rotation.x = 0.5;
-                    moonGroup.rotation.z = 0.2;
-                }
-                scene.add(planetGroup);
-                const planetObj = { 
-                    group: planetGroup, 
-                    mesh: mesh, 
-                    name: data.name,
-                    tiltGroup: tiltGroup
-                };
-                planets.push(planetObj);
-                scene.add(createOrbitLine(data.distance));
-            });
-
-            // Reduce star count on mobile for performance (Optimized: 1000 mobile, 3000 desktop)
-            const starsGeometry = new THREE.BufferGeometry();
-            const starsCount = isMobile ? 1000 : 3000; // Optimized star count
-            const posArray = new Float32Array(starsCount * 3);
-            for(let i = 0; i < starsCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 250;
-            }
-            starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const starsMaterial = new THREE.PointsMaterial({
-                size: isMobile ? 0.2 : 0.15, // Slightly larger on mobile for visibility
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.8
-            });
-            const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
-            scene.add(starsMesh);
-
-            const transientObjects = []; 
-            const smokeParticles = [];
-            const smokeTexture = createSmokeTexture();
-
-            function getSafeFlightPath(startRadius, targetSpread) {
-                const center = new THREE.Vector3(0, 0, 0);
-                const start = new THREE.Vector3();
-                const end = new THREE.Vector3();
-                const line = new THREE.Line3();
-                const closest = new THREE.Vector3();
-                let safe = false;
-                let attempts = 0;
-                while (!safe && attempts < 20) {
-                    attempts++;
-                    const angle = Math.random() * Math.PI * 2;
-                    start.set(
-                        Math.cos(angle) * startRadius,
-                        (Math.random() - 0.5) * 50, 
-                        Math.sin(angle) * startRadius
-                    );
-                    end.set(
-                        (Math.random() - 0.5) * targetSpread,
-                        (Math.random() - 0.5) * 20,
-                        (Math.random() - 0.5) * targetSpread
-                    );
-                    line.set(start, end);
-                    line.closestPointToPoint(center, true, closest);
-                    if (closest.length() > 12) {
-                        safe = true;
-                    }
-                }
-                return { start, end };
-            }
-
-            function spawnSmoke(position) {
-                const material = new THREE.SpriteMaterial({ 
-                    map: smokeTexture, 
-                    color: 0xcccccc,
-                    transparent: true,
-                    opacity: 0.6 
-                });
-                const sprite = new THREE.Sprite(material);
-                sprite.position.copy(position);
-                sprite.position.x += (Math.random() - 0.5) * 0.2;
-                sprite.position.y += (Math.random() - 0.5) * 0.2;
-                sprite.position.z += (Math.random() - 0.5) * 0.2;
-                sprite.scale.set(1.5, 1.5, 1.5);
-                scene.add(sprite);
-                smokeParticles.push({
-                    mesh: sprite,
-                    life: 1.0,
-                    growSpeed: 0.03 + Math.random() * 0.02
-                });
-            }
-
-            function spawnComet() {
-                const headGeo = new THREE.SphereGeometry(0.3, 8, 8);
-                const headMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                const head = new THREE.Mesh(headGeo, headMat);
-                const path = getSafeFlightPath(90, 60);
-                head.position.copy(path.start);
-                head.lookAt(path.end); 
-                scene.add(head);
-                transientObjects.push({
-                    type: 'comet',
-                    mesh: head,
-                    velocity: new THREE.Vector3().subVectors(path.end, path.start).normalize().multiplyScalar(0.6),
-                    life: 400
-                });
-            }
-            
-            function spawnUFO() {
-                const ufoGroup = new THREE.Group();
-                const bodyGeo = new THREE.CylinderGeometry(0.5, 1.5, 0.5, 16);
-                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.8, roughness: 0.2 });
-                const body = new THREE.Mesh(bodyGeo, bodyMat);
-                ufoGroup.add(body);
-                const domeGeo = new THREE.SphereGeometry(0.8, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-                const domeMat = new THREE.MeshStandardMaterial({ color: 0x88ffff, transparent: true, opacity: 0.7, metalness: 0.9 });
-                const dome = new THREE.Mesh(domeGeo, domeMat);
-                dome.position.y = 0;
-                ufoGroup.add(dome);
-                for(let i=0; i<6; i++) {
-                    const lightGeo = new THREE.SphereGeometry(0.15, 8, 8);
-                    const lightMat = new THREE.MeshBasicMaterial({ color: 0xaaaaff });
-                    const light = new THREE.Mesh(lightGeo, lightMat);
-                    const angle = (i/6) * Math.PI * 2;
-                    light.position.set(Math.cos(angle)*1.2, -0.1, Math.sin(angle)*1.2);
-                    ufoGroup.add(light);
-                    if(!ufoGroup.userData.lights) ufoGroup.userData.lights = [];
-                    ufoGroup.userData.lights.push(lightMat);
-                }
-                const path = getSafeFlightPath(70, 50);
-                ufoGroup.position.copy(path.start);
-                ufoGroup.lookAt(path.end);
-                ufoGroup.rotateX(0.2);
-                scene.add(ufoGroup);
-                transientObjects.push({
-                    type: 'ufo',
-                    mesh: ufoGroup,
-                    velocity: new THREE.Vector3().subVectors(path.end, path.start).normalize().multiplyScalar(0.2),
-                    life: 700,
-                    blinkCounter: 0
-                });
-            }
-
-            const cameraStates = [
-                { type: 'overview', duration: 400 },
-                { type: 'planet_close', duration: 350 },
-                { type: 'mid_orbit', duration: 350 },
-                { type: 'sun_gaze', duration: 250 }
-            ];
-            let currentCameraStateIdx = 0;
-            let stateTimer = 0;
-            let currentFocusTarget = null;
-            const camPos = new THREE.Vector3(0, 40, 70);
-            const camLook = new THREE.Vector3(0, 0, 0);
-            const targetCamPos = new THREE.Vector3(0, 40, 70);
-            const targetCamLook = new THREE.Vector3(0, 0, 0);
-
-            function updateCameraLogic() {
-                stateTimer++;
-                const state = cameraStates[currentCameraStateIdx];
-                if (stateTimer > state.duration) {
-                    stateTimer = 0;
-                    currentCameraStateIdx = (currentCameraStateIdx + 1) % cameraStates.length;
-                    const newState = cameraStates[currentCameraStateIdx];
-                    if (newState.type === 'overview') {
-                        targetCamPos.set(0, 60, 90);
-                        targetCamLook.set(0, 0, 0);
-                    } else if (newState.type === 'planet_close') {
-                        const randomIdx = Math.floor(Math.random() * planets.length);
-                        currentFocusTarget = planets[randomIdx];
-                    } else if (newState.type === 'mid_orbit') {
-                        const angle = Math.random() * Math.PI * 2;
-                        targetCamPos.set(Math.cos(angle)*25, 10, Math.sin(angle)*25);
-                        targetCamLook.set(0, 5, 0);
-                    } else if (newState.type === 'sun_gaze') {
-                        targetCamPos.set(20, 5, 20);
-                        targetCamLook.set(0, 0, 0);
-                    }
-                }
-                if (state.type === 'planet_close' && currentFocusTarget) {
-                    const tPos = currentFocusTarget.group.position;
-                    let offset = 8;
-                    if (currentFocusTarget.name === "Saturn") offset = 12;
-                    if (currentFocusTarget.name === "Mercury") offset = 5;
-                    targetCamPos.set(tPos.x + offset, tPos.y + offset * 0.5, tPos.z + offset);
-                    targetCamLook.copy(tPos);
-                }
-                camPos.lerp(targetCamPos, 0.005);
-                camLook.lerp(targetCamLook, 0.01);
-                camera.position.copy(camPos);
-                camera.lookAt(camLook);
-            }
-
-            // Performance optimizations: 30fps limit and page visibility detection
-            let frameCount = 0;
-            let lastFrameTime = performance.now();
-            const targetFPS = 30; // 30fps instead of 60fps
-            const frameInterval = 1000 / targetFPS;
-            let isPageVisible = !document.hidden;
-            let animationId = null;
-            
-            // Pause animation when page is not visible
-            document.addEventListener('visibilitychange', () => {
-                isPageVisible = !document.hidden;
-                if (isPageVisible && !animationId) {
-                    animate();
-                }
-            });
-            
-            function animate() {
-                animationId = requestAnimationFrame(animate);
-                
-                // Skip frame if page is not visible
-                if (!isPageVisible) {
-                    return;
-                }
-                
-                // Frame rate limiting: skip frames to achieve 30fps
-                const now = performance.now();
-                const elapsed = now - lastFrameTime;
-                
-                if (elapsed < frameInterval) {
-                    return; // Skip this frame
-                }
-                
-                lastFrameTime = now - (elapsed % frameInterval);
-                frameCount++;
-                const time = Date.now() * 0.0005;
-                planets.forEach(p => {
-                    const data = p.group.userData;
-                    data.angle += data.speed * 0.01;
-                    p.group.position.x = Math.cos(data.angle) * data.distance;
-                    p.group.position.z = Math.sin(data.angle) * data.distance;
-                    p.mesh.rotation.y += data.rotationSpeed;
-                    if (p.group.userData.moonGroup) {
-                        p.group.userData.moonGroup.rotation.y += 0.02;
-                    }
-                });
-                if (!sunOverlay.isReady) {
-                    sunGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.03);
-                }
-                if (frameCount % CONFIG.cometInterval === 0 && Math.random() > 0.4) spawnComet();
-                if (frameCount % CONFIG.ufoInterval === 0 && Math.random() > 0.3) spawnUFO();
-                if (typeof transientObjects !== 'undefined') {
-                    for (let i = transientObjects.length - 1; i >= 0; i--) {
-                        const obj = transientObjects[i];
-                        obj.mesh.position.add(obj.velocity);
-                        obj.life--;
-                        if (obj.type === 'comet') {
-                            spawnSmoke(obj.mesh.position);
-                        }
-                        if (obj.type === 'ufo') {
-                            obj.mesh.rotation.y += 0.1;
-                            obj.blinkCounter++;
-                            if (obj.blinkCounter % 10 === 0) {
-                                obj.mesh.userData.lights.forEach(mat => {
-                                    mat.color.setHex(Math.random() > 0.5 ? 0x8899aa : 0xaaaaff);
-                                });
-                            }
-                        }
-                        if (obj.life <= 0) {
-                            scene.remove(obj.mesh);
-                            transientObjects.splice(i, 1);
-                        }
-                    }
-                }
-                for (let i = smokeParticles.length - 1; i >= 0; i--) {
-                    const p = smokeParticles[i];
-                    p.life -= 0.015;
-                    p.mesh.material.opacity = p.life * 0.5;
-                    const scale = p.mesh.scale.x + p.growSpeed;
-                    p.mesh.scale.set(scale, scale, scale);
-                    if (p.life <= 0) {
-                        scene.remove(p.mesh);
-                        smokeParticles.splice(i, 1);
-                    }
-                }
-                starsMesh.rotation.y += 0.00005;
-                updateCameraLogic();
-                if (sunOverlay.isReady) {
-                    const viewWidth = renderer.domElement.clientWidth || window.innerWidth;
-                    const viewHeight = renderer.domElement.clientHeight || window.innerHeight;
-                    sunScreenCenter.copy(sunWorldCenter).project(camera);
-                    sunScreenEdge.copy(sunWorldEdge).project(camera);
-                    if (sunScreenCenter.z >= -1 && sunScreenCenter.z <= 1) {
-                        const centerX = (sunScreenCenter.x * 0.5 + 0.5) * viewWidth;
-                        const centerY = (-sunScreenCenter.y * 0.5 + 0.5) * viewHeight;
-                        const edgeX = (sunScreenEdge.x * 0.5 + 0.5) * viewWidth;
-                        const edgeY = (-sunScreenEdge.y * 0.5 + 0.5) * viewHeight;
-                        const diameter = Math.max(96, Math.hypot(edgeX - centerX, edgeY - centerY) * 2 * SUN_OVERLAY_SCALE);
-                        sunOverlay.update(centerX, centerY, diameter);
-                    } else {
-                        sunOverlay.update(NaN, NaN, NaN);
-                    }
-                }
-                renderer.render(scene, camera);
-            }
-
-            window.addEventListener('resize', () => {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
-            });
-
-            // Start animation only if page is visible
-            if (isPageVisible) {
-                animate();
-            }
-        }
-        
-        // Delayed loading: Wait 1.5 seconds before initializing background animation
-        // This allows page content to load first for better perceived performance
-        function initCosmicBackgroundDelayed() {
-            // Check if Three.js is loaded
-            if (typeof THREE === 'undefined') {
-                console.warn('Three.js not loaded yet, retrying...');
-                setTimeout(initCosmicBackgroundDelayed, 200);
-                return;
-            }
-            
-            initCosmicBackground();
-        }
-        
-        // Initialize when DOM is ready, but delay background animation
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                // Delay background animation by 1.5 seconds to prioritize content loading
-                setTimeout(initCosmicBackgroundDelayed, 1500);
-            });
-        } else {
-            // DOM already loaded, delay background animation
-            setTimeout(initCosmicBackgroundDelayed, 1500);
-        }
         
         // WhatsApp / Lead Magnet Modal Functions
         let activeWhatsAppModalConfig = null;
@@ -2814,10 +1954,10 @@
                 
                 var nextUrl = String(modalConfig.redirectUrl || '').trim();
                 if (nextUrl) {
-                    setTimeout(() => {
+                setTimeout(() => {
                         console.log('Redirecting after lead magnet submit...');
                         window.location.href = nextUrl;
-                    }, 500);
+                }, 500);
                 }
             } else {
                 console.warn('Form validation failed:', { name: !!name, whatsapp: !!whatsapp, consent: consent });
@@ -2875,6 +2015,7 @@
         var _layoutQuery = new URLSearchParams(window.location.search);
         var _isPreview = _layoutQuery.has('preview');
         var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'linktree';
+        if (!_isPreview && document.body) document.body.classList.add('layout-pending');
 
         function _normalizeLayoutPageStatus(status) {
             var raw = String(status || '').trim().toLowerCase();
@@ -2906,6 +2047,46 @@
 
         function createDefaultGooeyFlowSection() {
             return { id: 'lt-flow-ai', type: 'gooey-flow', visible: true, content: { wordsText: LINKTREE_DEFAULT_GOOEY_WORDS } };
+        }
+
+        function createDefaultLinktreeHeaderSection() {
+            return {
+                id: 'lt-header',
+                type: 'hero',
+                visible: true,
+                content: {
+                    title: 'AIFlowTime的世界',
+                    subtitle: '用 AI 換時間｜建立會自己跑的工作系統\n專為斜槓族、AI 新手、小生意老闆而設',
+                    ctaVisible: true,
+                    ctaText: '立即預留名額',
+                    ctaActionId: 'go-to-payment',
+                    secondaryCtaVisible: true,
+                    secondaryCtaText: '了解更多',
+                    secondaryCtaActionId: 'learn-more',
+                    gifUrl: 'Landing-page-logo.png'
+                }
+            };
+        }
+
+        function _ltLooksLikeLegacyCosmicCode(content) {
+            var c = content || {};
+            if (String(c.sourceType || '') !== 'code') return false;
+            var code = String(c.code || '');
+            return code.indexOf('id="cosmos"') !== -1 &&
+                code.indexOf('function drawSun(time)') !== -1 &&
+                code.indexOf('function drawPlanet(planet, time)') !== -1;
+        }
+
+        function _ltNormalizeBackgroundSection(section) {
+            if (!section || section.type !== 'page-background') return section;
+            var next = JSON.parse(JSON.stringify(section));
+            next.content = next.content || {};
+            if (_ltLooksLikeLegacyCosmicCode(next.content)) {
+                next.content.sourceType = 'iframe';
+                next.content.iframeUrl = '/backgrounds/cosmic-orbit/index.html';
+                next.content.code = '';
+            }
+            return next;
         }
 
         function _ltIsIncompletePaymentLink(url) {
@@ -2979,6 +2160,7 @@
             var raw = content && typeof content === 'object' ? content : {};
             var next = JSON.parse(JSON.stringify(raw || {}));
             next.ctaVisible = raw.ctaVisible !== false;
+            next.ctaShimmer = raw.ctaShimmer === true || String(raw.ctaShimmer || '').toLowerCase() === 'true';
             if (!String(next.title || '').replace(/<[^>]+>/g, ' ').trim() && sectionId === 'lt-header') {
                 next.title = 'AIFlowTime的世界';
             }
@@ -2988,11 +2170,14 @@
                 if (!String(next.secondaryCtaText || '').trim()) next.secondaryCtaText = '了解更多';
                 next.secondaryCtaVisible = raw.secondaryCtaVisible === undefined ? true : raw.secondaryCtaVisible !== false;
                 if (!String(next.secondaryCtaActionId || '').trim()) next.secondaryCtaActionId = 'learn-more';
-            } else {
+                } else {
                 next.secondaryCtaVisible = raw.secondaryCtaVisible === true || (raw.secondaryCtaVisible !== false && !!String(next.secondaryCtaText || '').trim());
             }
             next.ctaLink = _ltResolveHeroButtonUrl(sectionId, next, next.ctaActionId, raw.ctaLink || next.ctaLink);
             next.secondaryCtaLink = _ltResolveHeroButtonUrl(sectionId, next, next.secondaryCtaActionId, raw.secondaryCtaLink || next.secondaryCtaLink);
+            var hms = parseInt(raw.heroMediaSizePercent != null ? raw.heroMediaSizePercent : next.heroMediaSizePercent, 10);
+            if (isNaN(hms)) hms = 100;
+            next.heroMediaSizePercent = Math.max(30, Math.min(100, hms));
             return next;
         }
 
@@ -3010,7 +2195,23 @@
             return ' href="' + _escHtml(href) + '"';
         }
 
+        var LINKTREE_DEFAULT_PAGE_BACKGROUND = {
+            id: 'lt-page-background',
+            type: 'page-background',
+            visible: true,
+            content: {
+                sourceType: 'iframe',
+                iframeUrl: '/backgrounds/cosmic-orbit/index.html',
+                css: '',
+                code: '',
+                imageUrl: '',
+                opacity: 100,
+                fixed: false
+            }
+        };
+
         var LINKTREE_DEFAULT_SECTIONS = [
+            JSON.parse(JSON.stringify(LINKTREE_DEFAULT_PAGE_BACKGROUND)),
             { id: 'lt-header', type: 'hero', visible: true, content: { title: 'AIFlowTime的世界', subtitle: '用 AI 換時間｜建立會自己跑的工作系統\n專為斜槓族、AI 新手、小生意老闆而設', ctaVisible: true, ctaText: '立即預留名額', ctaActionId: 'go-to-payment', secondaryCtaVisible: true, secondaryCtaText: '了解更多', secondaryCtaActionId: 'learn-more', gifUrl: 'Landing-page-logo.png' } },
             createDefaultGooeyFlowSection(),
             { id: 'lt-services', type: 'link-list', visible: true, content: { sectionTitle: '', links: [
@@ -3131,7 +2332,28 @@
 
         function ensureLinktreeManagedSections(sections) {
             var next = Array.isArray(sections) && sections.length ? sections.slice() : LINKTREE_DEFAULT_SECTIONS.slice();
+            next = next.map(_ltNormalizeBackgroundSection);
             next = migrateStandaloneLeadMagnetSections(next);
+            if (!next.some(function(s) { return s && s.type === 'page-background'; })) {
+                next.unshift(JSON.parse(JSON.stringify(LINKTREE_DEFAULT_PAGE_BACKGROUND)));
+            }
+            var headerSection = null;
+            next = next.filter(function(section) {
+                if (!section) return false;
+                if (section.id !== 'lt-header') return true;
+                if (!headerSection) headerSection = section;
+                return false;
+            });
+            var defaultHeader = createDefaultLinktreeHeaderSection();
+            headerSection = Object.assign({}, defaultHeader, headerSection || {}, { id: 'lt-header', type: 'hero', visible: true });
+            headerSection.content = Object.assign({}, defaultHeader.content, (headerSection && headerSection.content) || {});
+            var bgIdx = -1;
+            for (var bgInsertIdx = 0; bgInsertIdx < next.length; bgInsertIdx++) {
+                if (next[bgInsertIdx] && next[bgInsertIdx].type === 'page-background') { bgIdx = bgInsertIdx; break; }
+            }
+            next = bgIdx >= 0
+                ? next.slice(0, bgIdx + 1).concat([headerSection]).concat(next.slice(bgIdx + 1))
+                : [headerSection].concat(next);
             if (!next.some(function(s) { return s && s.id === 'lt-flow-ai'; })) {
                 var flowSection = createDefaultGooeyFlowSection();
                 var headerIdx = -1;
@@ -3172,6 +2394,244 @@
             return safe.toUpperCase() === 'AI'
                 ? '<span class="ai-text">' + _escHtml(safe) + '</span>'
                 : _escHtml(safe);
+        }
+
+        var _ltManagedVideoObserver = null;
+        var _ltLikelyRestrictedAutoplay = /Instagram|FBAN|FBAV|FB_IAB|Line\//i.test(navigator.userAgent || '');
+
+        /** @param {boolean} lazy below-the-fold cards: no src until near viewport (saves bandwidth; hero should be false) */
+        function _ltRenderManagedVideo(src, className, inlineStyle, hintText, lazy) {
+            var poster = _ltDeriveManagedVideoPosterUrl(src);
+            var wantLazy = !!lazy;
+            var attrs = ['class="' + _escHtml(className || 'lt-managed-video') + '"'];
+            if (!wantLazy) attrs.push('src="' + _escHtml(src || '') + '"');
+            attrs.push('data-video-src="' + _escHtml(src || '') + '"');
+            attrs.push('muted', 'autoplay', 'loop', 'playsinline', 'webkit-playsinline', 'disablepictureinpicture');
+            if (wantLazy) {
+                attrs.push('preload="none"', 'data-lt-lazy="1"');
+            } else {
+                attrs.push('preload="auto"');
+            }
+            if (poster) attrs.push('poster="' + _escHtml(poster) + '"');
+            if (inlineStyle) attrs.push('style="' + _escHtml(inlineStyle) + '"');
+            return '<video ' + attrs.join(' ') + '></video>';
+        }
+
+        function _ltDeriveManagedVideoPosterUrl(src) {
+            var raw = String(src || '').trim();
+            if (!raw) return '';
+            if (/storageProxy\?path=/i.test(raw)) {
+                try {
+                    var proxyUrl = new URL(raw, window.location.origin);
+                    var pathVal = proxyUrl.searchParams.get('path') || '';
+                    if (!/\.(mp4|mov|webm)$/i.test(pathVal)) return '';
+                    proxyUrl.searchParams.set('path', pathVal.replace(/\.(mp4|mov|webm)$/i, '.jpg'));
+                    return proxyUrl.toString();
+                } catch (err) {
+                    return raw.replace(/\.(mp4|mov|webm)(?=(?:[?#].*)?$)/i, '.jpg');
+                }
+            }
+            return raw.replace(/\.(mp4|mov|webm)(?=(?:[?#].*)?$)/i, '.jpg');
+        }
+
+        function _ltPrimeManagedVideoFrame(video) {
+            if (!video || video.dataset.ltFramePrimed === '1') return;
+            var wrap = video.closest('.lt-video-wrap') || video.parentElement;
+            var prime = function() {
+                if (video.dataset.ltFramePrimed === '1') return;
+                video.dataset.ltFramePrimed = '1';
+                if (wrap) wrap.classList.add('lt-video-has-frame');
+                try {
+                    if (isFinite(video.duration) && video.duration > 0.08) {
+                        video.currentTime = 0.08;
+                    }
+                } catch (err) {}
+            };
+            if (video.readyState >= 2) prime();
+            else video.addEventListener('loadeddata', prime, { once: true });
+        }
+
+        function _ltAttemptManagedVideoPlayback(video) {
+            if (!video) return;
+            var wrap = video.closest('.lt-video-wrap') || video.parentElement;
+            try {
+                video.autoplay = true;
+                video.defaultMuted = true;
+                video.muted = true;
+                video.setAttribute('muted', '');
+                video.playsInline = true;
+                video.setAttribute('playsinline', '');
+                var playPromise = video.play();
+                if (playPromise && typeof playPromise.then === 'function') {
+                    playPromise.then(function() {
+                        if (wrap) {
+                            wrap.classList.remove('lt-video-loading', 'lt-video-blocked', 'lt-video-error');
+                            wrap.classList.add('lt-video-playing', 'lt-video-ready');
+                        }
+                        try {
+                            video.controls = false;
+                            video.removeAttribute('controls');
+                        } catch (err1) {}
+                    }).catch(function() {
+                        if (wrap) {
+                            wrap.classList.remove('lt-video-loading', 'lt-video-playing');
+                            wrap.classList.add('lt-video-blocked', 'lt-video-ready');
+                        }
+                        try {
+                            video.controls = true;
+                            video.setAttribute('controls', '');
+                        } catch (err2) {}
+                        _ltPrimeManagedVideoFrame(video);
+                    });
+                } else if (wrap) {
+                    wrap.classList.remove('lt-video-loading', 'lt-video-blocked', 'lt-video-error');
+                    wrap.classList.add('lt-video-playing', 'lt-video-ready');
+                }
+            } catch (err) {
+                if (wrap) {
+                    wrap.classList.remove('lt-video-loading', 'lt-video-playing');
+                    wrap.classList.add('lt-video-blocked', 'lt-video-ready');
+                }
+                _ltPrimeManagedVideoFrame(video);
+            }
+        }
+
+        /** iOS Safari: programmatic autoplay often fails; user tap on wrap counts as gesture for play(). */
+        function _ltBindIosFriendlyVideoTap(wrap, video) {
+            if (!wrap || !video || video.dataset.ltTapBound === '1') return;
+            video.dataset.ltTapBound = '1';
+            function tryPlayFromGesture() {
+                try {
+                    video.muted = true;
+                    video.defaultMuted = true;
+                    video.setAttribute('muted', '');
+                    video.playsInline = true;
+                    video.setAttribute('playsinline', '');
+                    var pp = video.play();
+                    if (pp && typeof pp.then === 'function') {
+                        pp.then(function() {
+                            var w = video.closest('.lt-video-wrap') || video.parentElement;
+                            if (w) {
+                                w.classList.remove('lt-video-blocked', 'lt-video-loading');
+                                w.classList.add('lt-video-playing', 'lt-video-ready');
+                            }
+                            try {
+                                video.controls = false;
+                                video.removeAttribute('controls');
+                            } catch (e1) {}
+                        }).catch(function() {
+                            try {
+                                video.controls = true;
+                                video.setAttribute('controls', '');
+                            } catch (e2) {}
+                        });
+                    }
+                } catch (e) {
+                    try {
+                        video.controls = true;
+                        video.setAttribute('controls', '');
+                    } catch (e3) {}
+                }
+            }
+            wrap.addEventListener('touchend', function(ev) {
+                if (ev.target.closest && ev.target.closest('a')) return;
+                if (video.paused) tryPlayFromGesture();
+            }, { passive: true });
+            wrap.addEventListener('click', function(ev) {
+                if (ev.target.closest && ev.target.closest('a')) return;
+                if (video.paused) tryPlayFromGesture();
+            });
+        }
+
+        function _ltLoadManagedVideo(video) {
+            if (!video) return;
+            var src = video.getAttribute('src') || video.getAttribute('data-video-src');
+            if (!src) return;
+            var wrap = video.closest('.lt-video-wrap') || video.parentElement;
+            if (video.dataset.ltLoaded === '1') {
+                _ltAttemptManagedVideoPlayback(video);
+                _ltBindIosFriendlyVideoTap(wrap, video);
+                return;
+            }
+            video.dataset.ltLoaded = '1';
+            video.autoplay = true;
+            video.defaultMuted = true;
+            video.muted = true;
+            video.setAttribute('muted', '');
+            video.playsInline = true;
+            video.setAttribute('playsinline', '');
+            video.preload = 'auto';
+            if (wrap) wrap.classList.add('lt-video-loading');
+            video.addEventListener('loadedmetadata', function() {
+                if (wrap) wrap.classList.add('lt-video-ready');
+                _ltPrimeManagedVideoFrame(video);
+            }, { once: true });
+            video.addEventListener('canplay', function() {
+                if (wrap) {
+                    wrap.classList.remove('lt-video-loading');
+                    wrap.classList.add('lt-video-ready');
+                }
+                _ltAttemptManagedVideoPlayback(video);
+            }, { once: true });
+            video.addEventListener('loadeddata', function() {
+                if (wrap) wrap.classList.add('lt-video-ready');
+                _ltAttemptManagedVideoPlayback(video);
+            }, { once: true });
+            video.addEventListener('error', function() {
+                if (wrap) {
+                    wrap.classList.remove('lt-video-loading', 'lt-video-playing');
+                    wrap.classList.add('lt-video-error');
+                }
+            }, { once: true });
+            if (!video.getAttribute('src')) video.src = src;
+            if (video.readyState >= 2) {
+                if (wrap) {
+                    wrap.classList.remove('lt-video-loading');
+                    wrap.classList.add('lt-video-ready');
+                }
+                _ltPrimeManagedVideoFrame(video);
+                _ltAttemptManagedVideoPlayback(video);
+                _ltBindIosFriendlyVideoTap(wrap, video);
+                return;
+            }
+            video.load();
+            _ltBindIosFriendlyVideoTap(wrap, video);
+        }
+
+        function _ltInitManagedVideos(scope) {
+            var root = scope || document;
+            var videos = root.querySelectorAll('video[data-video-src]:not([data-lt-init="1"])');
+            if (!videos.length) return;
+            videos.forEach(function(video) {
+                var isLazy = video.getAttribute('data-lt-lazy') === '1';
+                if (isLazy) {
+                    if (typeof IntersectionObserver === 'undefined') {
+                        video.dataset.ltInit = '1';
+                        _ltLoadManagedVideo(video);
+                        return;
+                    }
+                    if (!_ltManagedVideoObserver) {
+                        _ltManagedVideoObserver = new IntersectionObserver(
+                            function(entries) {
+                                entries.forEach(function(entry) {
+                                    if (!entry.isIntersecting) return;
+                                    var v = entry.target;
+                                    if (!v || v.tagName !== 'VIDEO') return;
+                                    _ltManagedVideoObserver.unobserve(v);
+                                    if (v.dataset.ltInit === '1') return;
+                                    v.dataset.ltInit = '1';
+                                    _ltLoadManagedVideo(v);
+                                });
+                            },
+                            { root: null, rootMargin: '320px 0px 400px 0px', threshold: 0.01 }
+                        );
+                    }
+                    _ltManagedVideoObserver.observe(video);
+                    return;
+                }
+                video.dataset.ltInit = '1';
+                _ltLoadManagedVideo(video);
+            });
         }
 
         function _gooeySectionMarkup(filterId) {
@@ -3289,9 +2749,16 @@
             };
         }
 
-        function applySections(sections) {
+        function applySections(sections, layoutOpts) {
+            layoutOpts = layoutOpts || {};
+            var deferHeroMediaReveal = !!layoutOpts.deferHeroMediaReveal;
+            var skipBakedHeroOnHydrate = !!layoutOpts.skipBakedHeroOnHydrate;
+            if (!sections || !sections.length) {
+                sections = LINKTREE_DEFAULT_SECTIONS;
+            }
+            sections = ensureLinktreeManagedSections(sections);
             if (typeof syncPageBackgroundFromSections === 'function') {
-                syncPageBackgroundFromSections(sections || [], { wrapperId: 'layout-page-bg' });
+                syncPageBackgroundFromSections(sections, { wrapperId: 'layout-page-bg' });
             }
             var allSecs = document.querySelectorAll('[data-section-id]');
             allSecs.forEach(function(el) {
@@ -3300,11 +2767,6 @@
                 el.style.order = '';
                 el.style.opacity = '';
             });
-
-            if (!sections || !sections.length) {
-                sections = LINKTREE_DEFAULT_SECTIONS;
-            }
-            sections = ensureLinktreeManagedSections(sections);
 
             var matched = 0;
             var order = 0;
@@ -3335,14 +2797,17 @@
                 el.style.display = (sec.type === 'lead-magnet') ? 'none' : '';
                 el.style.opacity = (sec.type === 'lead-magnet') ? '' : '1';
                 el.style.order = order++;
-                applyContent(el, sec);
+                applyContent(el, sec, { skipIfBakedHero: skipBakedHeroOnHydrate });
             });
 
             if (matched === 0) {
                 console.warn('[Layout] No sections matched — showing default layout');
                 allSecs.forEach(function(el) { el.style.display = ''; el.style.opacity = '1'; });
             }
-            document.body.classList.remove('layout-pending');
+            if (!deferHeroMediaReveal || matched === 0) {
+                document.body.classList.remove('layout-pending');
+            }
+            _ltInitManagedVideos(document);
 
             document.querySelectorAll('.floating-icon-wrap').forEach(function(el) { el.remove(); });
             sections.forEach(function(sec) {
@@ -3351,24 +2816,34 @@
             });
         }
 
-        function applyContent(el, sec) {
+        function applyContent(el, sec, contentOpts) {
+            contentOpts = contentOpts || {};
             var c = sec.content || {};
             var type = sec.type;
 
             switch (type) {
                 case 'hero':
+                    if (contentOpts.skipIfBakedHero && el.getAttribute('data-layout-hero-baked') === '1') break;
+                    el.removeAttribute('data-layout-hero-baked');
                     var heroCfg = _ltNormalizeHeroContent(sec.id, c);
+                    if (heroCfg.ctaShimmer && typeof aiflowEnsureButtonShimmerStyle === 'function') aiflowEnsureButtonShimmerStyle();
                     var titleHtml = _richTextHtml(heroCfg.title || '');
                     var subtitleHtml = _richTextHtml(heroCfg.subtitle || '');
                     var badgeText = _richTextHtml(heroCfg.badge || '');
                     var mediaHtml = '';
                     if (heroCfg.gifUrl) {
-                        var heroSrc = _escHtml(heroCfg.gifUrl);
+                        var heroSrc = String(heroCfg.gifUrl);
                         var heroIsVideo = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(heroCfg.gifUrl);
-                        mediaHtml = '<div class="hero-media-wrap hero-media-ready">' +
+                        var _hms = parseInt(heroCfg.heroMediaSizePercent, 10);
+                        var _wrapW = '';
+                        if (!isNaN(_hms) && _hms < 100) {
+                            var _pct = Math.max(30, Math.min(100, _hms));
+                            _wrapW = ' style="width:min(100%,' + Math.round(480 * _pct / 100) + 'px)"';
+                        }
+                        mediaHtml = '<div class="hero-media-wrap hero-media-ready' + (heroIsVideo ? ' lt-video-wrap' : '') + '"' + _wrapW + '>' +
                             (heroIsVideo
-                                ? '<video class="hero-media" src="' + heroSrc + '" autoplay loop muted playsinline></video>'
-                                : '<img class="hero-media" src="' + heroSrc + '" alt="' + _escHtml(String(heroCfg.title || 'AIFlowTime').replace(/<[^>]+>/g, ' ').trim() || 'AIFlowTime') + '">') +
+                                ? _ltRenderManagedVideo(heroSrc, 'hero-media lt-managed-video', '', '影片預覽', false)
+                                : '<img class="hero-media" src="' + _escHtml(heroSrc) + '" alt="' + _escHtml(String(heroCfg.title || 'AIFlowTime').replace(/<[^>]+>/g, ' ').trim() || 'AIFlowTime') + '">') +
                             '</div>';
                     }
                     var ctaHtml = _richTextHtml(heroCfg.ctaText || '');
@@ -3377,7 +2852,7 @@
                     var learnVisible = heroCfg.secondaryCtaVisible !== false && String(learnHtml || '').replace(/<[^>]+>/g, ' ').trim();
                     var buttons = [];
                     if (ctaVisible) {
-                        buttons.push('<a class="btn-primary"' + _ltHeroButtonAttrs(heroCfg.ctaLink) + _ltHeroButtonStyle({ bg: heroCfg.ctaBgColor, text: heroCfg.ctaTextColor }, false) + '>' + ctaHtml + '</a>');
+                        buttons.push('<a class="btn-primary' + (heroCfg.ctaShimmer ? ' aiflow-btn-shimmer' : '') + '"' + _ltHeroButtonAttrs(heroCfg.ctaLink) + _ltHeroButtonStyle({ bg: heroCfg.ctaBgColor, text: heroCfg.ctaTextColor }, false) + '>' + ctaHtml + '</a>');
                     }
                     if (learnVisible) {
                         buttons.push('<a class="btn-outline"' + _ltHeroButtonAttrs(heroCfg.secondaryCtaLink) + _ltHeroButtonStyle({ bg: heroCfg.secondaryCtaBgColor, text: heroCfg.secondaryCtaTextColor, border: heroCfg.secondaryCtaBorderColor }, true) + '>' + learnHtml + '</a>');
@@ -3423,34 +2898,72 @@
                             });
                         } else {
                         c.links.forEach(function(lnk) {
-                            var a = document.createElement('a');
                             var popupConfig = _getLinkLeadMagnetConfig(lnk);
-                            a.className = 'link-item fade-in' + (lnk.imageUrl ? ' link-item--with-image' : '');
+                            var rowInner = '<div class="link-text">';
+                            rowInner += '<div class="link-title">';
+                            if (lnk.badgeText) {
+                                rowInner += '<span class="link-title-row"><span class="link-title-text">' + _richTextHtml(lnk.label) + '</span><span class="pixelated-text link-badge">' + _richTextHtml(lnk.badgeText) + '</span></span>';
+                            } else {
+                                rowInner += '<span class="link-title-text">' + _richTextHtml(lnk.label) + '</span>';
+                            }
+                            rowInner += '</div>';
+                            if (lnk.description) rowInner += '<div class="link-description">' + _richTextHtml(lnk.description) + '</div>';
+                            rowInner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>';
+
+                            var _rawMedia = lnk.imageUrl ? String(lnk.imageUrl) : '';
+                            var _mediaFixed = _rawMedia && typeof fixStorageUrl === 'function' ? fixStorageUrl(_rawMedia) : _rawMedia;
+                            var _isVid = false;
+                            if (_rawMedia) {
+                                _isVid = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(_rawMedia);
+                                if (!_isVid) { var _pm = _rawMedia.match(/[?&]path=([^&]+)/); if (_pm) _isVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_pm[1])); }
+                                if (!_isVid) { var _om = _rawMedia.match(/\/o\/([^?]+)/); if (_om) _isVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_om[1])); }
+                            }
+
+                            if (_rawMedia && _isVid) {
+                                var card = document.createElement('div');
+                                card.className = 'link-item fade-in link-item--with-image';
+                                var vidWrap = document.createElement('div');
+                                vidWrap.className = 'link-item-image-wrap lt-video-wrap';
+                                vidWrap.innerHTML = _ltRenderManagedVideo(_mediaFixed, 'lt-managed-video', 'width:100%;height:100%;object-fit:cover;display:block;', '影片預覽', true);
+                                var mediaHit = document.createElement('a');
+                                mediaHit.className = 'lt-link-card-media-hit';
+                                mediaHit.href = lnk.url || '#';
+                                mediaHit.setAttribute('aria-hidden', 'true');
+                                mediaHit.setAttribute('tabindex', '-1');
+                                if (lnk.url && lnk.url.indexOf('http') === 0) { mediaHit.target = '_blank'; mediaHit.rel = 'noopener noreferrer'; }
+                                vidWrap.appendChild(mediaHit);
+                                card.appendChild(vidWrap);
+                                var linkRow = document.createElement('a');
+                                linkRow.className = 'link-content';
+                                linkRow.href = lnk.url || '#';
+                                if (lnk.url && lnk.url.indexOf('http') === 0) { linkRow.target = '_blank'; linkRow.rel = 'noopener noreferrer'; }
+                                linkRow.innerHTML = rowInner;
+                                card.appendChild(linkRow);
+                                if (popupConfig) {
+                                    function _openLeadMagnet(e) {
+                                        e.preventDefault();
+                                        if (typeof openWhatsAppModal === 'function') openWhatsAppModal(popupConfig);
+                                    }
+                                    linkRow.addEventListener('click', _openLeadMagnet);
+                                    mediaHit.addEventListener('click', _openLeadMagnet);
+                                } else if ((lnk.url || '') === '#') {
+                                    function _noopHash(e) { e.preventDefault(); }
+                                    linkRow.addEventListener('click', _noopHash);
+                                    mediaHit.addEventListener('click', _noopHash);
+                                }
+                                el.appendChild(card);
+                                return;
+                            }
+
+                            var a = document.createElement('a');
+                            a.className = 'link-item fade-in' + (_rawMedia ? ' link-item--with-image' : '');
                             a.href = lnk.url || '#';
                             if (lnk.url && lnk.url.indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
                             var inner = '';
-                            if (lnk.imageUrl) {
-                                var _rawMedia = String(lnk.imageUrl);
-                                var _mediaFixed = typeof fixStorageUrl === 'function' ? fixStorageUrl(_rawMedia) : _rawMedia;
-                                var _isVid = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(_rawMedia);
-                                if (!_isVid) { var _pm = _rawMedia.match(/[?&]path=([^&]+)/); if (_pm) _isVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_pm[1])); }
-                                if (!_isVid) { var _om = _rawMedia.match(/\/o\/([^?]+)/); if (_om) _isVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_om[1])); }
-                                if (_isVid) {
-                                    inner += '<div class="link-item-image-wrap"><video src="' + _escHtml(_mediaFixed) + '" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video></div>';
-                                } else {
-                                    inner += '<div class="link-item-image-wrap"><img src="' + _escHtml(_mediaFixed) + '" alt="" loading="lazy"></div>';
-                                }
+                            if (_rawMedia) {
+                                inner += '<div class="link-item-image-wrap"><img src="' + _escHtml(_mediaFixed) + '" alt="" loading="lazy"></div>';
                             }
-                            inner += '<div class="link-content"><div class="link-text">';
-                            inner += '<div class="link-title">';
-                            if (lnk.badgeText) {
-                                inner += '<span class="link-title-row"><span class="link-title-text">' + _richTextHtml(lnk.label) + '</span><span class="pixelated-text link-badge">' + _richTextHtml(lnk.badgeText) + '</span></span>';
-                            } else {
-                                inner += '<span class="link-title-text">' + _richTextHtml(lnk.label) + '</span>';
-                            }
-                            inner += '</div>';
-                            if (lnk.description) inner += '<div class="link-description">' + _richTextHtml(lnk.description) + '</div>';
-                            inner += '</div><svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';
+                            inner += '<div class="link-content">' + rowInner + '</div>';
                             a.innerHTML = inner;
                             if (popupConfig) {
                                 a.addEventListener('click', function(e) {
@@ -3480,13 +2993,8 @@
                     if (c.tools) {
                         el.innerHTML = '';
                         c.tools.forEach(function(tool) {
-                            var a = document.createElement('a');
                             var cardMediaRaw = String(tool.cardMediaUrl || '').trim();
                             var hasCardMedia = !!cardMediaRaw;
-                            a.className = 'link-item fade-in link-item--tools-grid' + (hasCardMedia ? ' link-item--tools-grid-with-media' : '');
-                            a.href = tool.url || '#';
-                            a.target = '_blank';
-                            a.rel = 'noopener noreferrer';
                             var inner = '';
                             inner += '<div class="link-title">';
                             var nameHtml = _richTextHtml(tool.name || '');
@@ -3498,7 +3006,7 @@
                                     '<img class="link-tools-grid-logo" src="' + _escHtml(tool.logoUrl) + '" alt="' + _escHtml(namePlain || 'Tool') + '">';
                                 if (badgeHtml) {
                                     inner += '<span class="link-title-row"><span class="link-title-text">' + nameHtml + '</span><span class="pixelated-text link-badge">' + badgeHtml + '</span></span>';
-                                } else {
+                            } else {
                                     inner += '<span class="link-title-text">' + nameHtml + '</span>';
                                 }
                                 inner += '</span>';
@@ -3510,15 +3018,58 @@
                             inner += '</div>';
                             if (descHtml) inner += '<div class="link-description">' + descHtml + '</div>';
                             var textCol = '<div class="link-text">' + inner + '</div>';
+
+                            var _cmVid = false;
                             if (hasCardMedia) {
                                 var _cm = cardMediaRaw;
-                                var _cmFixed = typeof fixStorageUrl === 'function' ? fixStorageUrl(_cm) : _cm;
-                                var _cmVid = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(_cm);
-                                if (!_cmVid) { var _p = _cm.match(/[?&]path=([^&]+)/); if (_p) _cmVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_p[1])); }
-                                if (!_cmVid) { var _o = _cm.match(/\/o\/([^?]+)/); if (_o) _cmVid = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_o[1])); }
-                                var mediaInner = _cmVid
-                                    ? '<video src="' + _escHtml(_cmFixed) + '" autoplay loop muted playsinline></video>'
-                                    : '<img src="' + _escHtml(_cmFixed) + '" alt="" loading="lazy">';
+                                var _cmVidTest = /\.(mp4|webm|mov)(?:[?#]|$)/i.test(_cm);
+                                if (!_cmVidTest) { var _p = _cm.match(/[?&]path=([^&]+)/); if (_p) _cmVidTest = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_p[1])); }
+                                if (!_cmVidTest) { var _o = _cm.match(/\/o\/([^?]+)/); if (_o) _cmVidTest = /\.(mp4|webm|mov)$/i.test(decodeURIComponent(_o[1])); }
+                                _cmVid = _cmVidTest;
+                            }
+
+                            if (hasCardMedia && _cmVid) {
+                                var _cmFixed = typeof fixStorageUrl === 'function' ? fixStorageUrl(cardMediaRaw) : cardMediaRaw;
+                                var card = document.createElement('div');
+                                card.className = 'link-item fade-in link-item--tools-grid link-item--tools-grid-with-media';
+                                var body = document.createElement('div');
+                                body.className = 'link-tools-grid-body';
+                                var linkCol = document.createElement('a');
+                                linkCol.className = 'link-tools-grid-text';
+                                linkCol.href = tool.url || '#';
+                                linkCol.target = '_blank';
+                                linkCol.rel = 'noopener noreferrer';
+                                linkCol.innerHTML = textCol;
+                                var mediaCol = document.createElement('div');
+                                mediaCol.className = 'link-tools-grid-media lt-video-wrap';
+                                mediaCol.innerHTML = _ltRenderManagedVideo(_cmFixed, 'lt-managed-video', '', '影片預覽', true);
+                                var toolMediaHit = document.createElement('a');
+                                toolMediaHit.className = 'lt-link-card-media-hit';
+                                toolMediaHit.href = tool.url || '#';
+                                toolMediaHit.target = '_blank';
+                                toolMediaHit.rel = 'noopener noreferrer';
+                                toolMediaHit.setAttribute('aria-hidden', 'true');
+                                toolMediaHit.setAttribute('tabindex', '-1');
+                                if ((tool.url || '') === '#') {
+                                    toolMediaHit.addEventListener('click', function(e) { e.preventDefault(); });
+                                }
+                                mediaCol.appendChild(toolMediaHit);
+                                body.appendChild(linkCol);
+                                body.appendChild(mediaCol);
+                                card.appendChild(body);
+                                el.appendChild(card);
+                                return;
+                            }
+
+                            var a = document.createElement('a');
+                            a.className = 'link-item fade-in link-item--tools-grid' + (hasCardMedia ? ' link-item--tools-grid-with-media' : '');
+                            a.href = tool.url || '#';
+                            a.target = '_blank';
+                            a.rel = 'noopener noreferrer';
+                            if (hasCardMedia) {
+                                var _cm2 = cardMediaRaw;
+                                var _cmFixed2 = typeof fixStorageUrl === 'function' ? fixStorageUrl(_cm2) : _cm2;
+                                var mediaInner = '<img src="' + _escHtml(_cmFixed2) + '" alt="" loading="lazy">';
                                 a.innerHTML = '<div class="link-tools-grid-body">' +
                                     '<div class="link-tools-grid-text">' + textCol + '</div>' +
                                     '<div class="link-tools-grid-media">' + mediaInner + '</div>' +
@@ -3763,11 +3314,20 @@
                 }
             });
         } else {
+            var initialFallback = ensureLinktreeManagedSections(LINKTREE_DEFAULT_SECTIONS);
+            initialFallback = _ensureFloatingIcons(initialFallback);
+            applySections(initialFallback, { deferHeroMediaReveal: true, skipBakedHeroOnHydrate: true });
+            setTimeout(function() {
+                if (document.body && document.body.classList.contains('layout-pending')) {
+                    document.body.classList.remove('layout-pending');
+                }
+            }, 8000);
             initFirebase(function() {
                 var db = firebase.firestore();
                 db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
                     var data = doc.exists ? (doc.data() || {}) : null;
                     if (!_layoutAllowsPublicView(data)) {
+                        document.body.classList.remove('layout-pending');
                         _showLayoutUnavailableState();
                         return;
                     }

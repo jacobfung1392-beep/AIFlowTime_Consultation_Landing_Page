@@ -65,16 +65,32 @@ This file captures **non-obvious architecture, decisions, and pitfalls** from ex
 ### Page background (HTML / code mode)
 
 - Code snippets are injected into an **`iframe`** via `srcdoc` (see `page-background-runtime.js` and `preparePageBackgroundEffectSrcdoc` in `page-background-presets.js`).
+- In `layout-editor.html`, code mode now has a **structured editor** (`HTML`, `CSS`, `JavaScript`, and newline-separated external library URLs) plus a **raw code fallback**. Structured inputs are compiled back into the existing `content.code` string before preview/save so old runtimes and saved pages stay compatible.
+- Custom background animations are now saved **manually** from the page-background editor via **`儲存目前動畫為預設`**. Presets persist in layout-editor config and now preserve structured editor fields (`codeEditorMode`, `codeHtml`, `codeCss`, `codeJs`, `codeLibraryUrls`) instead of collapsing everything to raw code.
 - **Mobile viewport:** Wrapper injects viewport meta + minimal reset so effects using `100vw`/`100vh` behave more like a real phone tab.
+- There is now an **iframe URL mode** for hosted background pages (for example Linktree cosmic at `backgrounds/cosmic-orbit/index.html`) so heavy background code can run isolated from the main page.
+- Pitfall: when extracting a background into its own hosted page, do **not** keep the original page-level negative `z-index` on the animation container inside the hosted page itself, or the iframe can load but show only the page's fallback background.
 
 ### Toolbar / save
 
 - **Save layout** was moved into the same sticky bar as **Apply changes** and **Save as preset** (between “套用” and “儲存為預設”).
 - **Apply** re-renders the edit form so new hero button options show up in dropdowns without a full reload.
 
+### Mobile editor behavior
+
+- Desktop remains a **3-panel** editor, but at **`<=900px`** the layout editor switches to a **single-surface mobile model** instead of trying to show sidebar + form + preview together.
+- **Default phone view:** the middle **settings/edit panel** only.
+- The old left sidebar (`.panel-left`) is reused as a **mobile `Sections` sheet** opened from a button in the sticky workbar, not from a second floating button.
+- The live preview (`#previewPanel`) is reused as a **fullscreen mobile overlay** opened from the phone-only **`Live View`** floating button. Do **not** create a second iframe/runtime for mobile preview.
+- Mobile state currently lives in `layout-editor.html` as **`_mobileSectionsOpen`**, **`_mobilePreviewOpen`**, **`_currentPreviewMode`**, with UI syncing handled by **`_syncMobileEditorUi()`**.
+- For touch usability, section rows now expose **move up / move down** buttons as a fallback to drag-and-drop. If future section-row actions are added, keep them touch-safe at phone sizes.
+- Selecting a section from the mobile `Sections` sheet closes that sheet automatically. Selecting a section from preview click-to-select closes the preview overlay and returns focus to the editor.
+- `openAddModal()` now explicitly closes mobile editor overlays first so modal stacks do not fight the mobile sheet/preview surfaces.
+
 ### Admin login
 
 - Layout editor uses **Firebase Auth** (`GoogleAuthProvider`, `signInWithPopup` after init).
+- If popup login is blocked in some environments, layout editor now falls back to **`signInWithRedirect`**.
 - **CSP / extensions:** Host-wide CSP may block random fonts from **browser extensions** (e.g. Perplexity) — harmless noise.
 - **ERR_BLOCKED_BY_CLIENT** on `firestore.googleapis.com` is usually **ad blockers**; allowlist the site for CMS use.
 
@@ -88,6 +104,8 @@ This file captures **non-obvious architecture, decisions, and pitfalls** from ex
 - **Hero `applyContent`:** Builds workshop-style DOM (media, badge, title, tagline, `cta-group`, scroll hint).
 - **Lead magnet:** WhatsApp/modal pattern generalized per link with `activeWhatsAppModalConfig`.
 - **Helpers like `_richTextHtml` / `_escHtml`:** Must be defined **before** code that calls them during first layout pass (ordering bug caused `ReferenceError` historically).
+- Linktree's default page background now points at the hosted cosmic iframe page rather than the old inline Three.js block.
+- For backward compatibility, Linktree runtime upgrades the old saved `page-background` cosmic **code preset** to the hosted iframe background at runtime.
 
 ### Workshop landing (`Kimi_Agent_AI Workshop Landing Page/index.html`)
 
@@ -128,4 +146,4 @@ This file captures **non-obvious architecture, decisions, and pitfalls** from ex
 
 ---
 
-*Last aligned with work on: layout editor login fix (deprecated types order), hero parity linktree/workshop-0, lead-magnet→link-list, text-adjustment selectors, page-background iframe viewport, save button placement.*
+*Last aligned with work on: mobile layout editor shell (sections sheet + live preview overlay), page-background manual preset save + structured preset persistence, page-background structured code editor, layout editor login fix (deprecated types order), hero parity linktree/workshop-0, lead-magnet→link-list, text-adjustment selectors, page-background iframe viewport, save button placement.*

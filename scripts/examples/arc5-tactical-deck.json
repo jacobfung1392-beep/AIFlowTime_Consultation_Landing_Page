@@ -1,0 +1,49 @@
+{
+  "name": "五連發戰術弧（範例）",
+  "idempotencyKey": "arc5-tactical-example-v2",
+  "slides": [
+    {
+      "templateId": "arcCover",
+      "payload": {
+        "coverImageUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1600&auto=format&fit=crop",
+        "kicker": "AI 槓桿",
+        "headline": "專業人士最該怕的不是 AI",
+        "sub": "而是「沒有槓桿」地在加班。"
+      }
+    },
+    {
+      "templateId": "arcInsight",
+      "payload": {
+        "label": "論點",
+        "headline": "勞力變便宜，判斷變昂貴",
+        "body": "重複性產出會被工具吃掉；你要往「定義問題、取捨、驗收」上移。",
+        "imageUrl": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1200&auto=format&fit=crop"
+      }
+    },
+    {
+      "templateId": "arcProof",
+      "payload": {
+        "imageUrl": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&auto=format&fit=crop",
+        "headline": "證據：趨勢與數據都在同一個方向",
+        "body": "關鍵不是蒐集更多工具，而是組一條可複製的交付鏈。"
+      }
+    },
+    {
+      "templateId": "arcBridge",
+      "payload": {
+        "quoteLabel": "客戶心裡",
+        "quote": "「我知道要學，但我不知道從哪一步開始才不會白做工。」",
+        "imageUrl": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop"
+      }
+    },
+    {
+      "templateId": "arcCtaFinal",
+      "payload": {
+        "label": "下一步",
+        "headline": "用客戶聽得懂的語言，把專業變成交付",
+        "sub": "到 aiflowtime-hk.web.app 了解 Workshop／社群與實作路徑。",
+        "keyword": "報名"
+      }
+    }
+  ]
+}

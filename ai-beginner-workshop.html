@@ -48,6 +48,11 @@
             overflow-x: hidden;
             font-weight: 400;
         }
+        body.layout-pending #main-content {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
         
         /* Scroll animation */
         .fade-in {
@@ -847,8 +852,8 @@
             font-weight: 700;
             padding: 2px 8px;
             border-radius: 20px;
-            background: var(--accent);
-            color: #fff;
+            background: var(--lc-mode-tag-bg, var(--accent));
+            color: var(--lc-mode-tag-text, #fff);
             line-height: 1.4;
             margin-top: 3px;
         }
@@ -1696,6 +1701,13 @@
             background: rgba(217,119,87,0.06); border-top: 3px solid var(--accent);
             text-align: center; font-weight: 600; font-size: 1rem; color: var(--text);
         }
+        .sec-learning-outcomes .lo-demo-sub {
+            margin-top: 8px;
+            font-size: 0.92rem;
+            font-weight: 400;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
 
         /* =============================================
            NEW SECTION TYPES — Audience Fit
@@ -1727,32 +1739,32 @@
         ============================================= */
         .sec-logistics-card { padding: 80px 0; background: var(--bg-cream); }
         .sec-logistics-card .lc-card {
-            max-width: 560px; margin: 0 auto; background: #fff; border-radius: 20px;
-            border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
+            max-width: 560px; margin: 0 auto; background: var(--lc-card-bg, #fff); border-radius: 20px;
+            border: 1px solid var(--lc-card-border, rgba(0,0,0,0.06)); box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden;
         }
         .sec-logistics-card .lc-rows { display: flex; flex-direction: column; }
         .sec-logistics-card .lc-row {
             display: flex; align-items: center; gap: 16px; padding: 18px 24px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid var(--lc-divider, rgba(0,0,0,0.05));
         }
         .sec-logistics-card .lc-row:last-child { border-bottom: none; }
         .sec-logistics-card .lc-icon {
             flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
-            background: rgba(217,119,87,0.1); color: var(--accent);
+            background: var(--lc-icon-bg, rgba(217,119,87,0.1)); color: var(--lc-icon-color, var(--accent));
             display: flex; align-items: center; justify-content: center;
         }
-        .sec-logistics-card .lc-label { flex-shrink: 0; width: 56px; font-size: 0.88rem; font-weight: 600; color: var(--text-light); }
-        .sec-logistics-card .lc-val { flex: 1; text-align: right; font-size: 1.05rem; font-weight: 600; color: var(--text); }
-        .sec-logistics-card .lc-capacity { padding: 18px 24px; border-top: 1px solid rgba(0,0,0,0.05); }
+        .sec-logistics-card .lc-label { flex-shrink: 0; width: 56px; font-size: 0.88rem; font-weight: 600; color: var(--lc-label, var(--text-light)); }
+        .sec-logistics-card .lc-val { flex: 1; text-align: right; font-size: 1.05rem; font-weight: 600; color: var(--lc-value, var(--text)); }
+        .sec-logistics-card .lc-capacity { padding: 18px 24px; border-top: 1px solid var(--lc-divider, rgba(0,0,0,0.05)); }
         .sec-logistics-card .lc-cap-bar { display: flex; gap: 5px; margin-bottom: 8px; }
         .sec-logistics-card .lc-cap-rect {
             flex: 1; height: 8px; border-radius: 4px; background: rgba(0,0,0,0.06); transition: background 0.3s;
         }
-        .sec-logistics-card .lc-cap-rect.filled { background: var(--accent); }
-        .sec-logistics-card .lc-cap-text { text-align: center; font-size: 0.85rem; color: var(--text-light); }
-        .sec-logistics-card .lc-cap-text span { color: var(--accent); font-weight: 700; }
+        .sec-logistics-card .lc-cap-rect.filled { background: var(--lc-capacity-fill, var(--accent)); }
+        .sec-logistics-card .lc-cap-text { text-align: center; font-size: 0.85rem; color: var(--lc-capacity-text, var(--text-light)); }
+        .sec-logistics-card .lc-cap-text span { color: var(--lc-capacity-fill, var(--accent)); font-weight: 700; }
         .sec-logistics-card .lc-cta {
-            display: flex; justify-content: center; padding: 18px 24px; border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex; justify-content: center; padding: 18px 24px; border-top: 1px solid var(--lc-divider, rgba(0,0,0,0.05));
         }
         .sec-logistics-card .lc-cta .btn { width: 100%; text-align: center; }
 
@@ -2001,7 +2013,7 @@
         .sec-photo-block .pb-caption { text-align: center; font-size: 0.9rem; color: var(--text-light); margin-top: 12px; }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Skip navigation link for accessibility -->
     <a href="#main-content" class="skip-link">跳至主要內容</a>
     
@@ -2053,21 +2065,20 @@
     </header>
 
     <main id="main-content">
-    <!-- Hero Section -->
-    <section class="hero" data-section-id="hero_default" data-section-type="hero">
-        <div class="container">
-            <div class="hero-gif-wrap hero-media-pending" style="text-align: center; margin-bottom: 24px;">
-                <video src="Capy Yawn.mp4" aria-label="Capy" class="hero-gif" autoplay loop muted playsinline preload="auto"></video>
-            </div>
-            <div class="hero-content">
-                <h1>把 AI 變成你的時間槓桿</h1>
-                <p class="hero-subtitle" style="font-size:clamp(16px, 2.2vw, 20px); color:var(--text); font-weight:500; line-height:1.7; max-width:560px; margin:0 auto 40px;">學會建立<span style="color:var(--accent); font-weight:800; font-size:1.15em;">可複製的工作系統</span>，每週多出 <span style="color:var(--accent); font-weight:800; font-size:1.15em;">5–10 小時</span>，從混亂走向<span style="color:var(--accent); font-weight:800; font-size:1.15em;">掌控</span>。</p>
-                <div class="hero-cta">
-                    <a href="#workshops" class="btn btn-shimmer">立即預留名額</a>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- BAKE_LAYOUT_HERO:workshop-main:BEGIN -->
+<!-- baked-at: 2026-04-08T03:23:03.821Z (pageLayouts/workshop-main) -->
+<section class="hero" data-section-id="hero_default" data-section-type="hero" data-layout-hero-baked="1">
+<div class="container">
+<div class="hero-gif-wrap hero-media-ready" style="text-align: center; margin-bottom: 24px;"><img class="hero-gif" src="https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=workshop-images%2Flayout_1773372703126_yjiavc.gif" alt="把 AI 變成你的       時間槓桿" loading="eager" decoding="async"></div>
+<div class="hero-content">
+<h1><span style="font-size:49px"><b>把 AI 變成你的<br></b></span><span style="color:rgb(217, 119, 87)"><span style="font-size:54px"><b><span style="font-size:59px">時間槓桿</span></b></span></span></h1>
+<p class="hero-subtitle" style="font-size:clamp(16px, 2.2vw, 20px); color:var(--text); font-weight:500; line-height:1.7; max-width:560px; margin:0 auto 40px;">每週多返<span style="font-size:21px"><b><span style="color:rgb(250, 196, 0)">5粒鐘</span></b></span>，你會<span style="color:rgb(211, 192, 192)"><span style="color:rgb(249, 195, 1)"><span style="color:rgb(217, 119, 87)"><span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><span style="font-size:20px"><span style="color:rgb(214, 179, 179)"><span style="color:rgb(249, 195, 1)"><span style="font-size:19px"><span style="font-size:18px"><span style="font-size:17px"><span style="color:rgb(190, 162, 162)"></span></span></span></span></span></span></span></span></span></span></span></span></span><span style="color:rgb(59, 59, 59)"><span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><span style="font-size:20px"><span style="font-size:19px"><span style="font-size:18px"><span style="font-size:17px"><span style="font-size:18px"><span style="font-size:19px"><span style="font-size:20px"><span style="font-size:21px"><span style="font-size:22px"><span style="font-size:21px"><span style="font-size:20px"><span style="font-size:19px"><span style="font-size:18px"><span style="font-size:19px"><span style="font-size:20px"><span style="font-size:21px"><span style="font-size:22px"><span style="font-size:23px"><b>用嚟做咩</b></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>？</span></p>
+<div class="hero-cta">
+<a href="#workshops" class="btn btn-shimmer">工作坊一覽</a>
+</div>
+</div>
+</section>
+<!-- BAKE_LAYOUT_HERO:workshop-main:END -->
 
     <!-- Pain Points Section -->
     <section id="pain-points" data-section-id="pain-points_default" data-section-type="pain-points">
@@ -2505,10 +2516,14 @@
     <!-- Template: Learning Outcomes -->
     <section class="sec-learning-outcomes" data-section-id="_tpl_learning-outcomes" data-section-type="learning-outcomes" style="display:none;">
         <div class="container">
+            <div class="section-label lo-label" style="display:none;"></div>
             <h2 class="lo-title section-header"><span></span></h2>
             <div class="lo-list"></div>
             <div class="lo-tools"></div>
-            <div class="lo-demo-box"></div>
+            <div class="lo-demo-box" style="display:none;">
+                <div class="lo-demo-main"></div>
+                <div class="lo-demo-sub" style="display:none;"></div>
+            </div>
         </div>
     </section>
 
@@ -2681,6 +2696,9 @@
                     window.setTimeout(initWorkshopPage, 50);
                 } else {
                     console.warn('[Layout] applyLayoutConfig was not ready in time.');
+                    if (typeof _layoutPendingController !== 'undefined' && _layoutPendingController && typeof _layoutPendingController.finish === 'function') {
+                        _layoutPendingController.finish();
+                    }
                 }
                 return;
             }
@@ -3224,6 +3242,10 @@
         var _layoutQuery = new URLSearchParams(window.location.search);
         var _isPreviewMode = _layoutQuery.has('preview');
         var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'workshop-main';
+        var _currentLayoutSections = [];
+        var _layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
+            ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+            : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
 
         function _normalizeLayoutPageStatus(status) {
             var raw = String(status || '').trim().toLowerCase();
@@ -3235,6 +3257,79 @@
         function _layoutAllowsPublicView(data) {
             if (_isPreviewMode) return true;
             return _normalizeLayoutPageStatus(data && data.pageStatus) === 'published';
+        }
+
+        function _layoutHasVisibleSectionType(type) {
+            for (var i = 0; i < _currentLayoutSections.length; i++) {
+                if (_currentLayoutSections[i] && _currentLayoutSections[i].type === type && _currentLayoutSections[i].visible !== false) return true;
+            }
+            return false;
+        }
+
+        function _defaultLayoutWorkshopId() {
+            for (var i = 0; i < _currentLayoutSections.length; i++) {
+                var sec = _currentLayoutSections[i];
+                if (!sec || sec.type !== 'logistics-card' || !sec.content) continue;
+                var wsId = String(sec.content.workshopId || '').trim();
+                if (wsId) return wsId;
+            }
+            return _layoutDocId === 'workshop-c' ? 'workshop-c' : 'workshop-0';
+        }
+
+        function _resolveLayoutPaymentLink(rawLink, workshopId) {
+            if (typeof aiflowResolvePaymentCtaLink === 'function') {
+                return aiflowResolvePaymentCtaLink(rawLink, {
+                    workshopId: String(workshopId || '').trim() || _defaultLayoutWorkshopId(),
+                    currentUrl: window.location.href
+                });
+            }
+            return String(rawLink || '').trim() || ('/workshop-payment?id=' + encodeURIComponent(String(workshopId || '').trim() || _defaultLayoutWorkshopId()));
+        }
+
+        function _resolveLayoutFinalCtaLink(rawLink) {
+            if (typeof aiflowResolveWorkshopsCtaLink === 'function') {
+                return aiflowResolveWorkshopsCtaLink(rawLink, {
+                    hasVisibleWorkshopsSection: _layoutHasVisibleSectionType('workshops'),
+                    workshopsUrl: '/workshops'
+                });
+            }
+            return String(rawLink || '').trim() || '/workshops';
+        }
+
+        function _applyLogisticsCardCta(el, ctaText, ctaLink, workshopId) {
+            if (!el) return;
+            var ctaBtn = el.querySelector('.lc-cta-btn');
+            if (!ctaBtn) return;
+            if (ctaText) ctaBtn.textContent = ctaText;
+            ctaBtn.href = _resolveLayoutPaymentLink(ctaLink, workshopId);
+        }
+
+        function _setLogisticsCardTheme(el, c) {
+            if (!el) return;
+            var card = el.querySelector('.lc-card');
+            if (!card) return;
+            function setVar(name, value) {
+                if (value) card.style.setProperty(name, value);
+                else card.style.removeProperty(name);
+            }
+            c = c || {};
+            setVar('--lc-card-bg', c.colorCardBg || '');
+            setVar('--lc-card-border', c.colorCardBorder || '');
+            setVar('--lc-divider', c.colorRowDivider || '');
+            setVar('--lc-icon-bg', c.colorIconBg || '');
+            setVar('--lc-icon-color', c.colorIconFg || '');
+            setVar('--lc-label', c.colorLabel || '');
+            setVar('--lc-value', c.colorValue || '');
+            setVar('--lc-mode-tag-bg', c.colorModeTagBg || '');
+            setVar('--lc-mode-tag-text', c.colorModeTagText || '');
+            setVar('--lc-capacity-fill', c.colorCapacityFill || '');
+            setVar('--lc-capacity-text', c.colorCapacityText || '');
+            var ctaBtn = el.querySelector('.lc-cta-btn');
+            if (ctaBtn) {
+                ctaBtn.style.background = c.colorCtaBg || '';
+                ctaBtn.style.color = c.colorCtaText || '';
+                ctaBtn.style.borderColor = c.colorCtaBg || '';
+            }
         }
 
         function _showLayoutUnavailableState() {
@@ -3258,13 +3353,18 @@
             });
         }
 
+        function _finishInitialWorkshopLayoutRender() {
+            revealHeroMedia();
+            _layoutPendingController.finish();
+        }
+
         function applyLayoutConfig() {
             if (_isPreviewMode) {
                 initLayoutPreviewBridge({
                     onLayoutPreview: function(sections) {
                         var scrollY = window.scrollY || window.pageYOffset || 0;
                         applySections(sections);
-                        revealHeroMedia();
+                        _finishInitialWorkshopLayoutRender();
                         window.scrollTo(0, scrollY);
                     }
                 });
@@ -3276,6 +3376,7 @@
             db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
                 var data = doc.exists ? (doc.data() || {}) : null;
                 if (!_layoutAllowsPublicView(data)) {
+                    _layoutPendingController.finish();
                     _showLayoutUnavailableState();
                     return;
                 }
@@ -3283,15 +3384,15 @@
                     applyFirestorePageMeta(data, { fallbackTitle: document.title });
                 }
                 if (!doc.exists || !data.sections || data.sections.length === 0) {
-                    revealHeroMedia();
+                    _finishInitialWorkshopLayoutRender();
                     return;
                 }
                 console.log('[Layout] Loaded ' + _layoutDocId + ' layout from Firestore (' + data.sections.length + ' sections)');
                 applySections(data.sections);
-                revealHeroMedia();
+                _finishInitialWorkshopLayoutRender();
             }).catch(function(err) {
                 console.log('[Layout] No layout config found for ' + _layoutDocId + '.', err);
-                revealHeroMedia();
+                _finishInitialWorkshopLayoutRender();
             });
         }
 
@@ -3299,6 +3400,7 @@
             var sections = rawSections.slice().sort(function(a, b) {
                 return (a.order || 0) - (b.order || 0);
             });
+            _currentLayoutSections = sections.slice();
             if (typeof syncPageBackgroundFromSections === 'function') {
                 syncPageBackgroundFromSections(sections, { wrapperId: 'layout-page-bg' });
             }
@@ -3446,9 +3548,18 @@
             _setMediaSource(media, url, altText);
         }
 
-        function _loadLogisticsCard(el, workshopId, ctaText, ctaLink) {
+        function _loadLogisticsCard(el, content) {
+            var cfg = content || {};
+            var workshopId = cfg.workshopId || '';
+            _applyLogisticsCardCta(el, cfg.ctaText, cfg.ctaLink, workshopId);
+            _setLogisticsCardTheme(el, cfg);
+            if (el && el._logisticsCardUnsub) {
+                el._logisticsCardUnsub();
+                el._logisticsCardUnsub = null;
+            }
+            if (!workshopId) return;
             var db = firebase.firestore();
-            db.collection('workshops').doc(workshopId).onSnapshot(function(snap) {
+            el._logisticsCardUnsub = db.collection('workshops').doc(workshopId).onSnapshot(function(snap) {
                 if (!snap.exists) return;
                 var d = snap.data();
                 var durEl = el.querySelector('.lc-duration');
@@ -3506,9 +3617,8 @@
                 }
                 var ctaBtn = el.querySelector('.lc-cta-btn');
                 if (ctaBtn) {
-                    if (ctaText) ctaBtn.textContent = ctaText;
-                    var link = ctaLink || '/workshop-payment?id=' + workshopId;
-                    ctaBtn.href = link;
+                    if (cfg.ctaText) ctaBtn.textContent = cfg.ctaText;
+                    ctaBtn.href = _resolveLayoutPaymentLink(cfg.ctaLink, workshopId);
                 }
             });
         }
@@ -3922,14 +4032,37 @@
 
             switch (type) {
                 case 'hero':
+                    el.removeAttribute('data-layout-hero-baked');
                     var h1 = el.querySelector('h1');
                     if (h1) _setRichText(h1, c.title || '');
                     var sub = el.querySelector('.hero-subtitle');
                     if (sub) _setRichText(sub, c.subtitle || '');
+                    var heroShimmerEnabled = c.ctaShimmer === undefined
+                        ? true
+                        : (c.ctaShimmer === true || String(c.ctaShimmer || '').toLowerCase() === 'true');
                     var cta = el.querySelector('.hero-cta .btn');
                     if (cta) cta.innerHTML = _richTextHtml(c.ctaText || '');
                     if (cta && c.ctaLink) cta.href = c.ctaLink;
-                    if (c.gifUrl) _swapMediaElement(el, '.hero-gif', c.gifUrl, c.title || 'Hero media');
+                    if (cta) cta.classList.remove('btn-shimmer');
+                    if (cta && typeof aiflowSetButtonShimmer === 'function') aiflowSetButtonShimmer(cta, heroShimmerEnabled);
+                    var heroGifWrap = el.querySelector('.hero-gif-wrap');
+                    if (c.gifUrl) {
+                        _swapMediaElement(el, '.hero-gif', c.gifUrl, c.title || 'Hero media');
+                        heroGifWrap = el.querySelector('.hero-gif-wrap');
+                    }
+                    if (heroGifWrap) {
+                        if (!c.gifUrl) {
+                            heroGifWrap.style.maxWidth = '';
+                        } else {
+                            var _hmsHero = parseInt(c.heroMediaSizePercent, 10);
+                            if (isNaN(_hmsHero) || _hmsHero >= 100) {
+                                heroGifWrap.style.maxWidth = '';
+                            } else {
+                                var _pctH = Math.max(30, Math.min(100, _hmsHero));
+                                heroGifWrap.style.maxWidth = 'min(100%, ' + Math.round(420 * _pctH / 100) + 'px)';
+                            }
+                        }
+                    }
                     break;
 
                 case 'pain-points':
@@ -4144,7 +4277,7 @@
                     if (ctaP) _setRichText(ctaP, c.subtitle || '');
                     var ctaBtn = el.querySelector('.btn');
                     if (ctaBtn) ctaBtn.innerHTML = _richTextHtml(c.ctaText || '');
-                    if (ctaBtn && c.ctaLink) ctaBtn.href = c.ctaLink;
+                    if (ctaBtn) ctaBtn.href = _resolveLayoutFinalCtaLink(c.ctaLink);
                     var contactLinks = el.querySelectorAll('.contact-info a');
                     if (contactLinks.length >= 1) {
                         contactLinks[0].style.display = c.showWhatsapp !== false && c.whatsappUrl ? '' : 'none';
@@ -4194,6 +4327,16 @@
                     break;
 
                 case 'learning-outcomes':
+                    var loLabel = el.querySelector('.lo-label');
+                    if (loLabel) {
+                        if (c.sectionLabel) {
+                            _setRichText(loLabel, c.sectionLabel);
+                            loLabel.style.display = '';
+                        } else {
+                            loLabel.style.display = 'none';
+                            loLabel.innerHTML = '';
+                        }
+                    }
                     var loTitle = el.querySelector('.lo-title span');
                     if (loTitle) _setRichText(loTitle, c.sectionTitle || '');
                     if (c.items) {
@@ -4204,8 +4347,13 @@
                                 var safeTitle = _richTextHtml(item.title || '');
                                 var safeDesc = _richTextHtml(item.description || '');
                                 var safeMore = _richTextHtml(item.moreText || '');
+                                var hasCardStyle = !!(item.cardBgColor || item.cardBorderColor);
+                                var cardStyle = hasCardStyle
+                                    ? 'background:' + _escHtml(item.cardBgColor || 'transparent') + ';border:1px solid ' + _escHtml(item.cardBorderColor || 'rgba(0,0,0,0.06)') + ';border-bottom:none;border-radius:18px;padding:20px 18px;margin-bottom:12px;'
+                                    : '';
                                 var div = document.createElement('div');
                                 div.className = 'lo-item';
+                                if (cardStyle) div.style.cssText = cardStyle;
                                 div.innerHTML = '<div class="lo-num">' + (idx + 1) + '</div>' +
                                     '<div><div class="lo-item-title">' + safeTitle + '</div>' +
                                     '<div class="lo-item-desc">' + safeDesc +
@@ -4226,15 +4374,48 @@
                         });
                     }
                     var loDemo = el.querySelector('.lo-demo-box');
-                    if (loDemo) _setRichText(loDemo, c.demoText || '');
-                    if (loDemo) loDemo.style.display = c.demoText ? '' : 'none';
+                    if (loDemo) {
+                        var loDemoMain = loDemo.querySelector('.lo-demo-main');
+                        var loDemoSub = loDemo.querySelector('.lo-demo-sub');
+                        if (loDemoMain) _setRichText(loDemoMain, c.demoText || '');
+                        if (loDemoSub) {
+                            if (c.demoSubtext) {
+                                _setRichText(loDemoSub, c.demoSubtext || '');
+                                loDemoSub.style.display = '';
+                            } else {
+                                loDemoSub.style.display = 'none';
+                                loDemoSub.innerHTML = '';
+                            }
+                        }
+                        loDemo.style.display = (c.demoText || c.demoSubtext) ? '' : 'none';
+                    }
                     break;
 
                 case 'audience-fit':
                     var afForTitle = el.querySelector('.af-for-title');
-                    if (afForTitle) _setRichText(afForTitle, c.forTitle || '');
+                    if (afForTitle) {
+                        var afForTitleRaw = c.forTitle || '';
+                        var afForTitleText = String(afForTitleRaw).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+                        if (c.forTitle_visible === false || !afForTitleText) {
+                            afForTitle.innerHTML = '';
+                            afForTitle.style.display = 'none';
+                        } else {
+                            _setRichText(afForTitle, afForTitleRaw);
+                            afForTitle.style.display = '';
+                        }
+                    }
                     var afNotForTitle = el.querySelector('.af-notfor-title');
-                    if (afNotForTitle) _setRichText(afNotForTitle, c.notForTitle || '');
+                    if (afNotForTitle) {
+                        var afNotForTitleRaw = c.notForTitle || '';
+                        var afNotForTitleText = String(afNotForTitleRaw).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+                        if (c.notForTitle_visible === false || !afNotForTitleText) {
+                            afNotForTitle.innerHTML = '';
+                            afNotForTitle.style.display = 'none';
+                        } else {
+                            _setRichText(afNotForTitle, afNotForTitleRaw);
+                            afNotForTitle.style.display = '';
+                        }
+                    }
                     var afForList = el.querySelector('.af-for-list');
                     if (afForList && c.forItems) {
                         afForList.innerHTML = '';
@@ -4256,9 +4437,9 @@
                     break;
 
                 case 'logistics-card':
-                    if (c.workshopId) {
-                        _loadLogisticsCard(el, c.workshopId, c.ctaText, c.ctaLink);
-                    }
+                    _applyLogisticsCardCta(el, c.ctaText, c.ctaLink, c.workshopId);
+                    if (c.workshopId) _loadLogisticsCard(el, c);
+                    else _setLogisticsCardTheme(el, c);
                     break;
 
                 case 'transformation':

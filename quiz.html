@@ -40,6 +40,11 @@
             font-weight: 400;
             min-height: 100vh;
         }
+        body.layout-pending #quizMain {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
         /* ---- Header ---- */
         header {
@@ -889,7 +894,7 @@
         }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Header -->
     <header>
         <div class="header-inner">

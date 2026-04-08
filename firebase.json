@@ -225,6 +225,159 @@
         ]
       },
       {
+        "source": "/linktree",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/linktree.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/about-jacob",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/consultation",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/quiz",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/ai-beginner-workshop",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/workshop-c",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/countdown",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/backgrounds/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
         "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|avif|ico)",
         "headers": [
           {

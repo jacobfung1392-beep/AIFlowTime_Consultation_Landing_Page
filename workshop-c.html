@@ -40,6 +40,11 @@
             font-size: 16px;
             overflow-x: hidden;
         }
+        body.layout-pending .page-content {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
         /* =============================================
            FIXED NOISE BACKGROUND
@@ -608,7 +613,7 @@
 
         .master-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 20px;
             padding: 24px 0;
             border-bottom: 1px solid var(--border);
@@ -631,6 +636,19 @@
             font-weight: 600;
             color: var(--text);
             line-height: 1.2;
+        }
+        .master-main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .master-details {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            max-width: 560px;
         }
 
         .master-sub {
@@ -676,6 +694,12 @@
             height: 8px;
             border-radius: 50%;
             background: var(--accent);
+        }
+        .tool-chip-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 8px;
+            object-fit: cover;
         }
 
         /* =============================================
@@ -762,8 +786,8 @@
            LOGISTICS — row-based card
         ============================================= */
         .wsc-logistics-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--wsc-card-bg, var(--bg-card));
+            border: 1px solid var(--wsc-card-border, var(--border));
             border-radius: 20px;
             overflow: hidden;
             margin-top: 48px;
@@ -774,7 +798,7 @@
             align-items: center;
             gap: 16px;
             padding: 20px 28px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--wsc-divider, var(--border));
         }
         .wsc-logistics-row:last-child { border-bottom: none; }
         .wsc-logistics-icon {
@@ -782,21 +806,21 @@
             width: 44px; height: 44px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 12px;
-            background: var(--accent-dim);
-            color: var(--accent);
+            background: var(--wsc-icon-bg, var(--accent-dim));
+            color: var(--wsc-icon-color, var(--accent));
         }
         .wsc-logistics-label {
             flex-shrink: 0;
             width: 60px;
             font-size: 0.9rem;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--wsc-label, var(--text-muted));
         }
         .wsc-logistics-val {
             flex: 1;
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--text);
+            color: var(--wsc-value, var(--text));
             text-align: right;
             line-height: 1.5;
         }
@@ -806,12 +830,26 @@
         }
         .wsc-logistics-val .session-label {
             font-size: 0.78rem;
-            color: var(--text-dim);
+            color: var(--wsc-label, var(--text-dim));
             font-weight: 500;
+        }
+        .wsc-logistics-val .session-mode-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1.35;
+            background: var(--wsc-mode-tag-bg, var(--accent));
+            color: var(--wsc-mode-tag-text, #fff);
+            vertical-align: middle;
         }
         .wsc-logistics-capacity {
             padding: 20px 28px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--wsc-divider, var(--border));
         }
         .wsc-cap-bar { display: flex; gap: 6px; margin-bottom: 10px; }
         .wsc-cap-rect {
@@ -820,16 +858,16 @@
             transition: background 0.3s;
         }
         .wsc-cap-rect.filled {
-            background: var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
+            background: var(--wsc-capacity-fill, var(--accent));
+            box-shadow: none;
         }
         .wsc-cap-text {
-            text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--text-dim);
+            text-align: center; font-size: 0.9rem; font-weight: 600; color: var(--wsc-capacity-text, var(--text-dim));
         }
-        .wsc-cap-text span { color: var(--accent); font-weight: 700; }
+        .wsc-cap-text span { color: var(--wsc-capacity-fill, var(--accent)); font-weight: 700; }
         .wsc-logistics-cta {
             display: flex; justify-content: center; padding: 20px 28px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--wsc-divider, var(--border));
         }
 
         @media (max-width: 480px) {
@@ -1075,7 +1113,7 @@
         }
     </style>
 </head>
-<body>
+<body class="layout-pending">
 
 <!-- =============================================
      FIXED NOISE BACKGROUND
@@ -1132,21 +1170,23 @@
 
     <main id="main-content">
 
-    <!-- HERO -->
-    <section class="hero" data-section-id="wc-hero" data-section-type="hero">
-        <div class="hero-badge">✦ WORKSHOP C &nbsp;·&nbsp; 視覺升級</div>
-        <h1 class="hero-title">下一級<br><span class="accent">視覺</span></h1>
-        <p class="hero-subtitle-en">NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY</p>
-        <p class="hero-tagline">你不是不會設計。<br><strong>你只是還沒學會用 AI 做決定。</strong></p>
-        <div class="cta-group">
-            <a href="/workshop-payment?id=workshop-c" class="btn-primary">立即預留席位 →</a>
-            <a href="#what-you-learn" class="btn-outline">了解內容</a>
-        </div>
-        <div class="scroll-hint">
-            <span>SCROLL</span>
-            <div class="scroll-arrow"></div>
-        </div>
-    </section>
+    <!-- BAKE_LAYOUT_HERO:workshop-c:BEGIN -->
+<!-- baked-at: 2026-04-08T03:23:03.821Z (pageLayouts/workshop-c) -->
+<section class="hero" data-section-id="wc-hero" data-section-type="hero" data-layout-hero-baked="1">
+<div class="hero-badge">✦ WORKSHOP C · 視覺升級</div>
+<h1 class="hero-title">把 AI 變成你的時間槓桿</h1>
+<p class="hero-subtitle-en">NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY</p>
+<p class="hero-tagline">學會建立可複製的工作系統，每週多出 5–10 小時，從混亂走向掌控。</p>
+<div class="cta-group">
+<a href="#workshops" class="btn-primary">立即預留名額</a>
+<a href="#what-you-learn" class="btn-outline">了解內容</a>
+</div>
+<div class="scroll-hint">
+<span>SCROLL</span>
+<div class="scroll-arrow"></div>
+</div>
+</section>
+<!-- BAKE_LAYOUT_HERO:workshop-c:END -->
 
     <!-- VIDEO SECTION -->
     <section class="video-section reveal" data-section-id="wc-video" data-section-type="video">
@@ -1630,6 +1670,9 @@ function toggleFaq(el) {
 var _layoutQuery = new URLSearchParams(window.location.search);
 var _isPreviewMode = _layoutQuery.has('preview');
 var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'workshop-c';
+var _layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
+    ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+    : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
 
 function _normalizeLayoutPageStatus(status) {
     var raw = String(status || '').trim().toLowerCase();
@@ -1657,11 +1700,16 @@ function _showLayoutUnavailableState() {
     document.body.style.overflow = 'hidden';
 }
 
+function _finishInitialLayoutRender() {
+    _layoutPendingController.finish();
+}
+
 function applyLayoutConfig() {
     if (_isPreviewMode) {
         initLayoutPreviewBridge({
             onLayoutPreview: function(sections) {
                 applySections(sections);
+                _finishInitialLayoutRender();
             }
         });
         return;
@@ -1671,16 +1719,22 @@ function applyLayoutConfig() {
         db.collection('pageLayouts').doc(_layoutDocId).get().then(function(doc) {
             var data = doc.exists ? (doc.data() || {}) : null;
             if (!_layoutAllowsPublicView(data)) {
+                _layoutPendingController.finish();
                 _showLayoutUnavailableState();
                 return;
             }
             if (typeof applyFirestorePageMeta === 'function') {
                 applyFirestorePageMeta(data, { fallbackTitle: document.title });
             }
-            if (!doc.exists || !data.sections || data.sections.length === 0) return;
+            if (!doc.exists || !data.sections || data.sections.length === 0) {
+                _finishInitialLayoutRender();
+                return;
+            }
             applySections(data.sections);
+            _finishInitialLayoutRender();
         }).catch(function(err) {
             console.log('[Layout] No layout config found for ' + _layoutDocId + '.', err);
+            _finishInitialLayoutRender();
         });
     });
 }
@@ -1728,10 +1782,99 @@ function _wcNormalizeLayoutSections(rawSections) {
     });
 }
 
+var _wcCurrentLayoutSections = [];
+window._wcLatestHeroConfig = null;
+window._wcLatestLogisticsConfig = null;
+window._wcLatestFinalCtaConfig = null;
+window._wcLatestWorkshopData = null;
+window._wcLatestWorkshopDataId = '';
+window._wcWorkshopUnsub = null;
+window._wcCurrentWorkshopDocId = '';
+window._wcFirebaseReady = false;
+
+function _wcHasVisibleSectionType(type) {
+    for (var i = 0; i < _wcCurrentLayoutSections.length; i++) {
+        if (_wcCurrentLayoutSections[i] && _wcCurrentLayoutSections[i].type === type && _wcCurrentLayoutSections[i].visible !== false) return true;
+    }
+    return false;
+}
+
+function _wcCurrentWorkshopId() {
+    for (var i = 0; i < _wcCurrentLayoutSections.length; i++) {
+        var sec = _wcCurrentLayoutSections[i];
+        if (!sec || sec.type !== 'logistics-card' || !sec.content) continue;
+        var wsId = String(sec.content.workshopId || '').trim();
+        if (wsId) return wsId;
+    }
+    return 'workshop-c';
+}
+
+function _wcSetCssVar(el, name, value) {
+    if (!el || !name) return;
+    if (value) el.style.setProperty(name, value);
+    else el.style.removeProperty(name);
+}
+
+function _wcModeLabel(mode) {
+    var m = String(mode || 'offline').trim().toLowerCase();
+    if (m === 'online') return '線上';
+    if (m === 'both' || m === 'hybrid') return '實體 + 線上';
+    return '實體';
+}
+
+function _wcModePillHtml(mode) {
+    return '<span class="session-mode-pill">' + _escHtml(_wcModeLabel(mode)) + '</span>';
+}
+
+function _wcApplyLogisticsTheme(el, c) {
+    if (!el) return;
+    var card = el.querySelector('.wsc-logistics-card');
+    if (!card) return;
+    c = c || {};
+    _wcSetCssVar(card, '--wsc-card-bg', c.colorCardBg || '');
+    _wcSetCssVar(card, '--wsc-card-border', c.colorCardBorder || '');
+    _wcSetCssVar(card, '--wsc-divider', c.colorRowDivider || '');
+    _wcSetCssVar(card, '--wsc-icon-bg', c.colorIconBg || '');
+    _wcSetCssVar(card, '--wsc-icon-color', c.colorIconFg || '');
+    _wcSetCssVar(card, '--wsc-label', c.colorLabel || '');
+    _wcSetCssVar(card, '--wsc-value', c.colorValue || '');
+    _wcSetCssVar(card, '--wsc-mode-tag-bg', c.colorModeTagBg || '');
+    _wcSetCssVar(card, '--wsc-mode-tag-text', c.colorModeTagText || '');
+    _wcSetCssVar(card, '--wsc-capacity-fill', c.colorCapacityFill || '');
+    _wcSetCssVar(card, '--wsc-capacity-text', c.colorCapacityText || '');
+    var ctaBtn = el.querySelector('.wsc-logistics-cta .btn-primary');
+    if (ctaBtn) {
+        ctaBtn.style.background = c.colorCtaBg || '';
+        ctaBtn.style.color = c.colorCtaText || '';
+        ctaBtn.style.borderColor = c.colorCtaBg || '';
+    }
+}
+
+function _wcResolvePaymentLink(rawLink, workshopId) {
+    if (typeof aiflowResolvePaymentCtaLink === 'function') {
+        return aiflowResolvePaymentCtaLink(rawLink, {
+            workshopId: String(workshopId || '').trim() || _wcCurrentWorkshopId(),
+            currentUrl: window.location.href
+        });
+    }
+    return String(rawLink || '').trim() || '/workshop-payment?id=workshop-c';
+}
+
+function _wcResolveFinalCtaLink(rawLink) {
+    if (typeof aiflowResolveWorkshopsCtaLink === 'function') {
+        return aiflowResolveWorkshopsCtaLink(rawLink, {
+            hasVisibleWorkshopsSection: _wcHasVisibleSectionType('workshops'),
+            workshopsUrl: '/workshops'
+        });
+    }
+    return String(rawLink || '').trim() || '/workshops';
+}
+
 function applySections(rawSections) {
     var sections = _wcNormalizeLayoutSections(rawSections).slice().sort(function(a, b) {
         return (a.order || 0) - (b.order || 0);
     });
+    _wcCurrentLayoutSections = sections.slice();
     if (typeof syncPageBackgroundFromSections === 'function') {
         syncPageBackgroundFromSections(sections, { wrapperId: 'layout-page-bg' });
     }
@@ -1880,18 +2023,20 @@ function _wcNormalizeLearningContent(content) {
         return {
             title: item.title || item.text || '',
             description: item.description || item.sub || item.moreText || '',
-            moreText: item.moreText || ''
+            moreText: item.moreText || '',
+            cardBgColor: item.cardBgColor || '',
+            cardBorderColor: item.cardBorderColor || ''
         };
     }).filter(function(item) {
         return String(item.title || '').trim() !== '';
     });
     if (!items.length) {
         items = [
-            { title: '控制風格參數，建立視覺一致性', description: 'Midjourney Stylization', moreText: '' },
-            { title: '定義品牌視覺調性與色彩語言', description: 'Brand Visual Language', moreText: '' },
-            { title: '用 FloraFauna 快速迭代商業素材', description: 'Workflow Automation', moreText: '' },
-            { title: '用 Higgsfield 生成品牌短影片', description: 'AI Video Generation', moreText: '' },
-            { title: '一小時從構想到成品，整套流程', description: 'End-to-End Production', moreText: '' }
+            { title: '控制風格參數，建立視覺一致性', description: 'Midjourney Stylization', moreText: '', cardBgColor: '', cardBorderColor: '' },
+            { title: '定義品牌視覺調性與色彩語言', description: 'Brand Visual Language', moreText: '', cardBgColor: '', cardBorderColor: '' },
+            { title: '用 FloraFauna 快速迭代商業素材', description: 'Workflow Automation', moreText: '', cardBgColor: '', cardBorderColor: '' },
+            { title: '用 Higgsfield 生成品牌短影片', description: 'AI Video Generation', moreText: '', cardBgColor: '', cardBorderColor: '' },
+            { title: '一小時從構想到成品，整套流程', description: 'End-to-End Production', moreText: '', cardBgColor: '', cardBorderColor: '' }
         ];
     }
     return {
@@ -1906,6 +2051,7 @@ function _wcNormalizeLearningContent(content) {
 
 function _wcNormalizeAudienceContent(content) {
     var legacy = content || {};
+    var hasOwn = function(key) { return Object.prototype.hasOwnProperty.call(legacy, key); };
     function normList(list) {
         return (Array.isArray(list) ? list : []).map(function(item) {
             if (typeof item === 'string') return { text: item };
@@ -1935,11 +2081,13 @@ function _wcNormalizeAudienceContent(content) {
         ];
     }
     return {
-        sectionLabel: legacy.sectionLabel || '— 適合對象 —',
-        sectionTitle: legacy.sectionTitle || '這堂課適合你嗎？',
-        forTitle: legacy.forTitle || '✓ FOR YOU IF',
+        sectionLabel: hasOwn('sectionLabel') ? legacy.sectionLabel : '— 適合對象 —',
+        sectionTitle: hasOwn('sectionTitle') ? legacy.sectionTitle : '這堂課適合你嗎？',
+        forTitle: hasOwn('forTitle') ? legacy.forTitle : '✓ FOR YOU IF',
+        forTitle_visible: legacy.forTitle_visible !== false,
         forItems: forItems,
-        notForTitle: legacy.notForTitle || '✕ NOT FOR YOU IF',
+        notForTitle: hasOwn('notForTitle') ? legacy.notForTitle : '✕ NOT FOR YOU IF',
+        notForTitle_visible: legacy.notForTitle_visible !== false,
         notForItems: notForItems
     };
 }
@@ -1974,6 +2122,8 @@ function _wcNormalizeFaqContent(content) {
 function applyContentToSection(el, type, c) {
     switch (type) {
         case 'hero':
+            el.removeAttribute('data-layout-hero-baked');
+            window._wcLatestHeroConfig = c || {};
             var h1 = el.querySelector('.hero-title');
             if (h1) h1.innerHTML = _wcRichHtml(c.title || '');
             var sub = el.querySelector('.hero-tagline');
@@ -1986,8 +2136,10 @@ function applyContentToSection(el, type, c) {
                 eyebrow.style.display = '';
             }
             var cta = el.querySelector('.btn-primary');
+            var heroShimmerEnabled = c.ctaShimmer === true || String(c.ctaShimmer || '').toLowerCase() === 'true';
             if (cta) cta.innerHTML = _wcRichHtml(c.ctaText || '');
-            if (cta && c.ctaLink) cta.href = c.ctaLink;
+            if (cta) cta.href = _wcResolvePaymentLink(c.ctaLink, _wcCurrentWorkshopId());
+            if (cta && typeof aiflowSetButtonShimmer === 'function') aiflowSetButtonShimmer(cta, heroShimmerEnabled);
             var ctaSecondary = el.querySelector('.btn-outline');
             if (ctaSecondary) {
                 ctaSecondary.innerHTML = _wcRichHtml(c.secondaryCtaText || '了解內容');
@@ -2094,10 +2246,21 @@ function applyContentToSection(el, type, c) {
                 masterList.innerHTML = learningContent.items.map(function(item, idx) {
                     var num = String(idx + 1).padStart(2, '0');
                     var delay = idx === 0 ? '' : (' reveal-delay-' + ((idx % 2) + 1));
-                    return '<div class="master-item reveal' + delay + '">' +
+                    var hasCardStyle = !!(item.cardBgColor || item.cardBorderColor);
+                    var cardStyle = '';
+                    if (hasCardStyle) {
+                        cardStyle =
+                            'padding:24px 20px;border-radius:20px;' +
+                            'background:' + _escHtml(item.cardBgColor || 'transparent') + ';' +
+                            'border:1px solid ' + _escHtml(item.cardBorderColor || 'var(--border)') + ';';
+                    }
+                    var detailsHtml = item.moreText ? '<div class="master-details">' + _wcRichHtml(item.moreText || '') + '</div>' : '';
+                    return '<div class="master-item reveal' + delay + '"' + (hasCardStyle ? ' style="border-bottom:none;padding:0;"' : '') + '>' +
+                        '<div style="display:flex;align-items:center;gap:20px;width:100%;' + cardStyle + '">' +
                         '<span class="master-num">' + num + '</span>' +
-                        '<span class="master-text">' + _wcRichHtml(item.title) + '</span>' +
+                        '<div class="master-main"><span class="master-text">' + _wcRichHtml(item.title) + '</span>' + detailsHtml + '</div>' +
                         '<span class="master-sub">' + _wcRichHtml(item.description) + '</span>' +
+                        '</div>' +
                     '</div>';
                 }).join('');
             }
@@ -2106,7 +2269,10 @@ function applyContentToSection(el, type, c) {
                 if (learningContent.tools && learningContent.tools.length) {
                     toolsRow.style.display = '';
                     toolsRow.innerHTML = learningContent.tools.map(function(tool) {
-                        return '<div class="tool-chip"><div class="tool-chip-dot"></div> ' + _escHtml(tool.name || '') + '</div>';
+                        var iconHtml = tool.iconUrl
+                            ? '<img class="tool-chip-icon" src="' + _escHtml(tool.iconUrl) + '" alt="">'
+                            : '<div class="tool-chip-dot"></div>';
+                        return '<div class="tool-chip">' + iconHtml + ' ' + _escHtml(tool.name || '') + '</div>';
                     }).join('');
                 } else {
                     toolsRow.style.display = 'none';
@@ -2127,14 +2293,18 @@ function applyContentToSection(el, type, c) {
             if (h2af) h2af.innerHTML = _wcRichHtml(audienceContent.sectionTitle || '');
             var forGrid = el.querySelector('.for-grid');
             if (forGrid) {
+                var forTitleHtml = _wcRichHtml(audienceContent.forTitle || '');
+                var notForTitleHtml = _wcRichHtml(audienceContent.notForTitle || '');
+                var showForTitle = audienceContent.forTitle_visible !== false && String(audienceContent.forTitle || '').trim() !== '';
+                var showNotForTitle = audienceContent.notForTitle_visible !== false && String(audienceContent.notForTitle || '').trim() !== '';
                 forGrid.innerHTML = '<div class="for-card for-yes reveal reveal-delay-1">' +
-                    '<div class="for-card-label">' + _wcRichHtml(audienceContent.forTitle) + '</div>' +
+                    (showForTitle ? '<div class="for-card-label">' + forTitleHtml + '</div>' : '') +
                     '<ul class="for-list">' + audienceContent.forItems.map(function(item) {
                         return '<li>' + _wcRichHtml(item.text || '') + '</li>';
                     }).join('') + '</ul>' +
                 '</div>' +
                 '<div class="for-card for-no reveal reveal-delay-2">' +
-                    '<div class="for-card-label">' + _wcRichHtml(audienceContent.notForTitle) + '</div>' +
+                    (showNotForTitle ? '<div class="for-card-label">' + notForTitleHtml + '</div>' : '') +
                     '<ul class="for-list">' + audienceContent.notForItems.map(function(item) {
                         return '<li>' + _wcRichHtml(item.text || '') + '</li>';
                     }).join('') + '</ul>' +
@@ -2176,16 +2346,27 @@ function applyContentToSection(el, type, c) {
             break;
 
         case 'logistics-card':
+            window._wcLatestLogisticsConfig = c || {};
             var lLabel = el.querySelector('.section-label');
             if (lLabel) lLabel.innerHTML = _wcRichHtml(c.sectionLabel || '');
             var lTitle = el.querySelector('.section-title');
             if (lTitle) lTitle.innerHTML = _wcRichHtml(c.sectionTitle || '');
+            _wcApplyLogisticsTheme(el, c);
             var lCta = el.querySelector('.wsc-logistics-cta .btn-primary');
             if (lCta) lCta.innerHTML = _wcRichHtml(c.ctaText || '');
-            if (lCta && c.ctaLink) lCta.href = c.ctaLink;
+            if (lCta) lCta.href = _wcResolvePaymentLink(c.ctaLink, c.workshopId);
+            var desiredWorkshopId = String(c.workshopId || '').trim() || 'workshop-c';
+            if (window._wcFirebaseReady && typeof _wcSubscribeWorkshopData === 'function') {
+                if (window._wcCurrentWorkshopDocId !== desiredWorkshopId) {
+                    _wcSubscribeWorkshopData(desiredWorkshopId);
+                } else if (window._wcLatestWorkshopData) {
+                    _wcApplyWorkshopData(window._wcLatestWorkshopData, window._wcLatestWorkshopDataId || desiredWorkshopId);
+                }
+            }
             break;
 
         case 'final-cta':
+            window._wcLatestFinalCtaConfig = c || {};
             var labelFinal = el.querySelector('.section-label');
             if (labelFinal) labelFinal.innerHTML = _wcRichHtml(c.sectionLabel || '— 最後 —');
             var title = el.querySelector('.final-cta-title');
@@ -2194,7 +2375,7 @@ function applyContentToSection(el, type, c) {
             if (subFc) subFc.innerHTML = _wcRichHtml(c.subtitle || '');
             var ctaFc = el.querySelector('.btn-primary');
             if (ctaFc) ctaFc.innerHTML = _wcRichHtml(c.ctaText || '');
-            if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
+            if (ctaFc) ctaFc.href = _wcResolveFinalCtaLink(c.ctaLink);
             break;
 
         case 'free-material-download':
@@ -2262,100 +2443,110 @@ applyLayoutConfig();
 // =============================================
 // FIREBASE — Load Workshop C data (real-time)
 // =============================================
-initFirebase(function(app) {
-    try {
-        var db = firebase.firestore(app);
+function _wcApplyWorkshopData(d, workshopId) {
+    if (!d) return;
+    window._wcLatestWorkshopData = d || {};
+    window._wcLatestWorkshopDataId = String(workshopId || '').trim() || window._wcCurrentWorkshopDocId || 'workshop-c';
 
-        db.collection('workshops').doc('workshop-c').onSnapshot(function(snap) {
-            if (!snap.exists) return;
-            var d = snap.data();
+    document.getElementById('wscDuration').textContent = d.duration || '待定';
 
-            // Duration
-            document.getElementById('wscDuration').textContent = d.duration || '待定';
+    var dateEl = document.getElementById('wscDate');
+    var timeEl = document.getElementById('wscTime');
 
-            // Multi-session date/time
-            var dateEl = document.getElementById('wscDate');
-            var timeEl = document.getElementById('wscTime');
-
-            if (d.courseType === 'continuous' && d.rounds && d.rounds.length) {
-                var dateHtml = '', timeHtml = '';
-                var cSortedRounds = d.rounds.slice().sort(function(a, b) {
-                    var aDates = (a.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
-                    var bDates = (b.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
-                    var aMin = aDates[0] || '', bMin = bDates[0] || '';
-                    return aMin < bMin ? -1 : aMin > bMin ? 1 : 0;
-                });
-                cSortedRounds.forEach(function(round) {
-                    dateHtml += '<span class="session-line" style="font-weight:700;opacity:.7;font-size:13px;">' + (round.label || '') + '</span>';
-                    timeHtml += '<span class="session-line">&nbsp;</span>';
-                    (round.sessions || []).filter(function(s) { return s.visible !== false; }).forEach(function(s) {
-                        var lbl = s.label ? '<span class="session-label">' + s.label + '</span> ' : '';
-                        dateHtml += '<span class="session-line">' + lbl + (s.date || '待定') + '</span>';
-                        timeHtml += '<span class="session-line">' + lbl + (s.time || '待定') + '</span>';
-                    });
-                });
-                dateEl.innerHTML = dateHtml;
-                timeEl.innerHTML = timeHtml;
-            } else if (d.sessions && d.sessions.length) {
-                var sorted = sortSessionsList(d.sessions.filter(function(s) { return s.visible !== false; }));
-                var dateHtml = '', timeHtml = '';
-                for (var i = 0; i < sorted.length; i++) {
-                    var s = sorted[i];
-                    var lbl = s.label ? '<span class="session-label">' + s.label + '</span> ' : '';
-                    dateHtml += '<span class="session-line">' + lbl + (s.date || '待定') + '</span>';
-                    timeHtml += '<span class="session-line">' + lbl + (s.time || '待定') + '</span>';
-                }
-                dateEl.innerHTML = dateHtml;
-                timeEl.innerHTML = timeHtml;
-            } else {
-                dateEl.textContent = d.date || '即將公佈';
-                timeEl.textContent = d.time || '待定';
-            }
-
-            // Price
-            var priceEl = document.getElementById('wscPrice');
-            if (d.price) priceEl.textContent = d.price;
-            else if (d.priceHkd) priceEl.textContent = 'HKD ' + d.priceHkd;
-            else priceEl.textContent = '待定';
-
-            // Mode / Location
-            var modeEl = document.getElementById('wscMode');
-            var modeLabel = '';
-            if (d.mode === 'online') modeLabel = '💻 線上';
-            else if (d.mode === 'both') modeLabel = '🏢 實體 + 💻 線上';
-            else modeLabel = '🏢 實體';
-            var displayLoc = d.district || d.location || '';
-            if (displayLoc && d.mode !== 'online') modeLabel += '　' + displayLoc;
-            modeEl.textContent = modeLabel;
-
-            // Capacity bar
-            var cap = d.capacity || 0;
-            var enrolled = d.enrolled || 0;
-            var capContainer = document.getElementById('wscCapacity');
-            if (cap > 0) {
-                capContainer.innerHTML = buildCapacityBar(cap, enrolled, {
-                    barClass: 'wsc-cap-bar', rectClass: 'wsc-cap-rect',
-                    textClass: 'wsc-cap-text', format: 'enrolled', spanWrap: true
-                });
-                capContainer.style.display = '';
-            } else {
-                capContainer.style.display = 'none';
-            }
-
-            // CTA links
-            var rawCta = (d.ctaLink || '').trim();
-            var isSelf = !rawCta || rawCta === '#' || rawCta === '#waitlist'
-                || rawCta === '/workshop-c'
-                || rawCta.indexOf('workshop-c.html') !== -1
-                || rawCta.indexOf('aiflowtime-hk.web.app/workshop-c') !== -1;
-            var ctaLink = isSelf ? '/workshop-payment?id=workshop-c' : rawCta;
-            document.getElementById('ws-cta-link').href = ctaLink;
-            document.getElementById('final-cta-link').href = ctaLink;
-
-        }, function(err) {
-            console.warn('Workshop C snapshot error:', err);
+    if (d.courseType === 'continuous' && d.rounds && d.rounds.length) {
+        var dateHtml = '', timeHtml = '';
+        var cSortedRounds = d.rounds.slice().sort(function(a, b) {
+            var aDates = (a.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
+            var bDates = (b.sessions || []).map(function(s) { return _normDateKey(s.date); }).filter(Boolean).sort();
+            var aMin = aDates[0] || '', bMin = bDates[0] || '';
+            return aMin < bMin ? -1 : aMin > bMin ? 1 : 0;
         });
+        cSortedRounds.forEach(function(round) {
+            dateHtml += '<span class="session-line" style="font-weight:700;opacity:.7;font-size:13px;">' + _escHtml(round.label || '') + '</span>';
+            timeHtml += '<span class="session-line">&nbsp;</span>';
+            (round.sessions || []).filter(function(s) { return s.visible !== false; }).forEach(function(s) {
+                var lbl = s.label ? '<span class="session-label">' + _escHtml(s.label) + '</span> ' : '';
+                var modePill = _wcModePillHtml(s.mode || d.mode || 'offline');
+                dateHtml += '<span class="session-line">' + lbl + _escHtml(s.date || '待定') + modePill + '</span>';
+                timeHtml += '<span class="session-line">' + lbl + _escHtml(s.time || '待定') + '</span>';
+            });
+        });
+        dateEl.innerHTML = dateHtml;
+        timeEl.innerHTML = timeHtml;
+    } else if (d.sessions && d.sessions.length) {
+        var sorted = sortSessionsList(d.sessions.filter(function(s) { return s.visible !== false; }));
+        var sessionDateHtml = '', sessionTimeHtml = '';
+        for (var i = 0; i < sorted.length; i++) {
+            var s = sorted[i];
+            var sessionLabel = s.label ? '<span class="session-label">' + _escHtml(s.label) + '</span> ' : '';
+            var sessionPill = _wcModePillHtml(s.mode || d.mode || 'offline');
+            sessionDateHtml += '<span class="session-line">' + sessionLabel + _escHtml(s.date || '待定') + sessionPill + '</span>';
+            sessionTimeHtml += '<span class="session-line">' + sessionLabel + _escHtml(s.time || '待定') + '</span>';
+        }
+        dateEl.innerHTML = sessionDateHtml;
+        timeEl.innerHTML = sessionTimeHtml;
+    } else {
+        dateEl.innerHTML = '<span class="session-line">' + _escHtml(d.date || '即將公佈') + _wcModePillHtml(d.mode || 'offline') + '</span>';
+        timeEl.textContent = d.time || '待定';
+    }
 
+    var priceEl = document.getElementById('wscPrice');
+    if (d.price) priceEl.textContent = d.price;
+    else if (d.priceHkd) priceEl.textContent = 'HKD ' + d.priceHkd;
+    else priceEl.textContent = '待定';
+
+    var modeEl = document.getElementById('wscMode');
+    var modeLabel = _wcModeLabel(d.mode);
+    var displayLoc = d.district || d.location || '';
+    if (displayLoc && d.mode !== 'online') modeLabel += '　' + displayLoc;
+    modeEl.textContent = modeLabel;
+
+    var cap = d.capacity || 0;
+    var enrolled = d.enrolled || 0;
+    var capContainer = document.getElementById('wscCapacity');
+    if (cap > 0) {
+        capContainer.innerHTML = buildCapacityBar(cap, enrolled, {
+            barClass: 'wsc-cap-bar', rectClass: 'wsc-cap-rect',
+            textClass: 'wsc-cap-text', format: 'enrolled', spanWrap: true
+        });
+        capContainer.style.display = '';
+    } else {
+        capContainer.style.display = 'none';
+    }
+
+    var resolvedWorkshopId = String(workshopId || '').trim() || _wcCurrentWorkshopId();
+    var heroConfig = window._wcLatestHeroConfig || {};
+    var heroRawLink = String(heroConfig.ctaLink || '').trim() || String(d.ctaLink || '').trim();
+    var heroLink = _wcResolvePaymentLink(heroRawLink, resolvedWorkshopId);
+    document.getElementById('ws-cta-link').href = heroLink;
+
+    var finalConfig = window._wcLatestFinalCtaConfig || {};
+    var finalRawLink = String(finalConfig.ctaLink || '').trim();
+    var finalLink = finalRawLink ? _wcResolveFinalCtaLink(finalRawLink) : heroLink;
+    document.getElementById('final-cta-link').href = finalLink;
+}
+
+function _wcSubscribeWorkshopData(workshopId) {
+    var wsId = String(workshopId || '').trim() || 'workshop-c';
+    if (!(window.firebase && typeof firebase.firestore === 'function')) return;
+    if (window._wcWorkshopUnsub) {
+        window._wcWorkshopUnsub();
+        window._wcWorkshopUnsub = null;
+    }
+    window._wcCurrentWorkshopDocId = wsId;
+    window._wcWorkshopUnsub = firebase.firestore().collection('workshops').doc(wsId).onSnapshot(function(snap) {
+        if (!snap.exists) return;
+        _wcApplyWorkshopData(snap.data() || {}, wsId);
+    }, function(err) {
+        console.warn('Workshop C snapshot error:', err);
+    });
+}
+
+initFirebase(function() {
+    try {
+        window._wcFirebaseReady = true;
+        var initialWorkshopId = String((window._wcLatestLogisticsConfig && window._wcLatestLogisticsConfig.workshopId) || '').trim() || _wcCurrentWorkshopId();
+        _wcSubscribeWorkshopData(initialWorkshopId);
     } catch(e) {
         console.error('Firebase init error:', e);
     }

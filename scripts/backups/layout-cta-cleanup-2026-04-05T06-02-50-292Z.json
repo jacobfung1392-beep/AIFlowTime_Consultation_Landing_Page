@@ -1,0 +1,718 @@
+[
+  {
+    "id": "workshop-0",
+    "original": {
+      "updatedBy": "jacobfung1392@gmail.com",
+      "pageStatus": "published",
+      "metaTitle": "",
+      "metaDescription": "",
+      "pageName": "AI起動班 指令+工具",
+      "pageSlug": "beginnerjumpstart",
+      "sections": [
+        {
+          "id": "page-background_1774491654718_zw3b8",
+          "type": "page-background",
+          "visible": true,
+          "order": 0,
+          "content": {
+            "sourceType": "iframe",
+            "imageUrl": "",
+            "css": "",
+            "code": "",
+            "codeEditorMode": "structured",
+            "codeHtml": "",
+            "codeCss": "",
+            "codeJs": "",
+            "codeLibraryUrls": "",
+            "iframeUrl": "/backgrounds/cosmic-orbit/index.html",
+            "opacity": 100,
+            "fixed": true
+          }
+        },
+        {
+          "id": "w0-hero",
+          "type": "hero",
+          "visible": true,
+          "order": 1,
+          "content": {
+            "badge": "",
+            "eyebrowText": "",
+            "title": "<span style=\"color:#ffffff\"><span style=\"font-size:40px\"><span style=\"font-size:41px\"><span style=\"font-size:42px\"><span style=\"font-size:43px\"><span style=\"font-size:44px\"><span style=\"font-size:45px\">上完呢堂<br>你就真係<span style=\"color:rgb(249, 195, 1)\">識AI</span></span></span></span></span></span></span></span>",
+            "subtitle": "<span style=\"color:#ffc800\"><span style=\"font-size:25px\"><b><span style=\"font-size:26px\"><span style=\"font-size:27px\"><span style=\"font-size:28px\"><span style=\"font-size:29px\"><span style=\"font-size:30px\"><span style=\"font-size:31px\"><span style=\"font-size:32px\"><span style=\"font-size:33px\"><span style=\"font-size:34px\"><span style=\"font-size:35px\"><span style=\"font-size:36px\"><span style=\"font-size:37px\"><span style=\"font-size:38px\"><span style=\"font-size:39px\"><span style=\"font-size:40px\"><span style=\"font-size:41px\"><span style=\"font-size:42px\"><span style=\"font-size:43px\"><span style=\"font-size:42px\"><span style=\"font-size:41px\">2小時</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><br></b></span></span><span style=\"color:rgb(255, 200, 0);font-size:25px\"></span><span style=\"font-size:24px\"><span style=\"font-size:23px\"><span style=\"font-size:22px\"><span style=\"font-size:21px\"><span style=\"font-size:20px\"><span style=\"font-size:19px\"><span style=\"color:rgb(255, 255, 255)\"></span></span></span></span></span></span></span><span style=\"font-size:18px\"><span style=\"font-size:17px\"><span style=\"color:rgb(255, 255, 255)\">- ⁠⁠AI本質，究竟係咩嚟㗎 ？<br>- ⁠掌握2026<b><u><span style=\"color:rgb(249, 195, 1)\">最新指令玩法</span></u></b><br></span><span style=\"color:rgb(255, 255, 255)\">- ⁠⁠完全搞清最Hit嗰堆<b><u><span style=\"color:rgb(249, 195, 1)\">AI工具嘅分別和應用</span></u></b>！<br></span><span style=\"color:rgb(255, 255, 255)\">- ⁠⁠製作你自己用得着，屬於你的專屬指令！</span></span></span><span style=\"color:rgb(255, 255, 255);font-size:19px\"></span><span style=\"font-size:24px\"><span style=\"font-size:23px\"><span style=\"font-size:22px\"><span style=\"font-size:21px\"><span style=\"font-size:20px\"><span style=\"font-size:19px\"><span style=\"color:rgb(255, 255, 255)\"><br></span></span></span></span></span></span></span><span style=\"color:#ffc800\"><span style=\"font-size:25px\"></span></span>",
+            "ctaVisible": true,
+            "ctaText": "立即預留名額",
+            "ctaLink": "/workshop-payment?id=workshop-0",
+            "ctaActionId": "go-to-payment",
+            "ctaBgColor": "#ffbb00",
+            "ctaTextColor": "#061b43",
+            "secondaryCtaText": "了解更多",
+            "secondaryCtaLink": "#experience",
+            "secondaryCtaVisible": false,
+            "secondaryCtaActionId": "learn-more",
+            "secondaryCtaBgColor": "#111118",
+            "secondaryCtaTextColor": "#dad5cf",
+            "secondaryCtaBorderColor": "#403b36",
+            "buttonOptions": [
+              {
+                "id": "go-to-payment",
+                "label": "Go to payment / 立即報名",
+                "url": "/workshop-payment?id=workshop-0"
+              },
+              {
+                "id": "book-appointment",
+                "label": "Book appointment / 預約諮詢",
+                "url": "/consultation"
+              },
+              {
+                "id": "learn-more",
+                "label": "Learn more / 了解更多",
+                "url": "#experience"
+              },
+              {
+                "id": "page:workshop-main",
+                "label": "工作坊主頁面 — /workshops",
+                "url": "/workshops"
+              },
+              {
+                "id": "page:countdown",
+                "label": "倒數優惠頁 Countdown — /countdown",
+                "url": "/countdown"
+              },
+              {
+                "id": "page:consultation",
+                "label": "諮詢頁 Consultation — /consultation",
+                "url": "/consultation"
+              },
+              {
+                "id": "page:about-jacob",
+                "label": "About Jacob — /about-jacob",
+                "url": "/about-jacob"
+              },
+              {
+                "id": "page:quiz",
+                "label": "AI 診斷 Quiz — /quiz",
+                "url": "/quiz"
+              },
+              {
+                "id": "page:aibootcamp",
+                "label": "AI起動班 指令+工具 Copy — /aibootcamp",
+                "url": "/aibootcamp"
+              },
+              {
+                "id": "page:linktree",
+                "label": "Linktree — /linktree",
+                "url": "/linktree"
+              },
+              {
+                "id": "page:workshop-0",
+                "label": "Workshop 0 落地頁 — /beginnerjumpstart",
+                "url": "/beginnerjumpstart"
+              },
+              {
+                "id": "page:workshop-c",
+                "label": "Workshop C 落地頁 — /workshop-c",
+                "url": "/workshop-c"
+              }
+            ],
+            "gifUrl": "https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=layout-images%2Flayout_1775012020660_e3qtz5.png",
+            "showScrollHint": false,
+            "scrollHintColor": "#ffffff",
+            "scrollHintDotColor": "#f4997b",
+            "badge_visible": true,
+            "subtitle_visible": true
+          }
+        },
+        {
+          "id": "learning-outcomes_1775368300795_zmij4",
+          "type": "learning-outcomes",
+          "visible": true,
+          "order": 2,
+          "content": {
+            "sectionTitle": "2 小時實戰流程",
+            "tools": [
+              {
+                "id": "9zoxx8rUA5JlNCs7JkvP",
+                "name": "Perplexity",
+                "iconUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/ai-tools%2F1774490650463_Perplexity.jpg?alt=media&token=b1c76c08-1190-4aa2-8258-c1c7c911e9ff"
+              },
+              {
+                "iconUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/ai-tools%2F1774490652632_Poe.jpg?alt=media&token=54f5b630-507e-435a-8263-9226a816b683",
+                "name": "Poe",
+                "id": "vecoHh2x6BJC6mvzX6rJ"
+              },
+              {
+                "id": "JhzXCMwC4yDhkQg4oiTI",
+                "name": "Gemini",
+                "iconUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/ai-tools%2F1774492814757_Gemini.jpg?alt=media&token=5a52d6fa-475e-41d5-b9e1-92add3d8b7e7"
+              }
+            ],
+            "demoText": "現場完成 1 個品牌視覺專案示範",
+            "sectionTitle_visible": true,
+            "demoSubtext": "",
+            "sectionLabel_visible": true,
+            "demoSubtext_visible": true,
+            "sectionLabel": "Whats in store for you?",
+            "items": [
+              {
+                "title": "<span style=\"font-size:18px\">Layer 0: 認識 AI 的黑盒</span>",
+                "description": "<span style=\"font-size:16px\">消除對 AI 的恐懼，<span style=\"color:rgb(249, 195, 1)\">建立掌控感</span>。</span>",
+                "moreText": "這不是魔法，這是機率。懂了這個，你就知道怎麼讓 AI 說實話。"
+              },
+              {
+                "title": "<span style=\"font-size:18px\">一個你自己設計嘅Prompt，上完堂即刻用得</span>",
+                "description": "<span style=\"font-size:10px\"><span style=\"font-size:16px\">課堂即場做出一套你帶得走的有效 Prompt。</span></span>",
+                "moreText": ""
+              },
+              {
+                "title": "<span style=\"font-size:18px\">10個職場常用Prompt<br><span style=\"font-size:17px\"><span style=\"font-size:16px\"><span style=\"font-size:15px\">覆email/寫報告/做summary</span></span></span></span>",
+                "description": "<span style=\"font-size:16px\">現場帶走多種情境的 Prompt 範例，下課即用。<br></span>",
+                "moreText": ""
+              },
+              {
+                "title": "<span style=\"font-size:17px\"><span style=\"font-size:18px\">無限擴張的 <span style=\"font-size:19px\"><span style=\"font-size:20px\"><span style=\"font-size:21px\"><b><span style=\"color:rgb(249, 195, 1)\">AI 大腦</span></b></span></span></span></span></span>",
+                "description": "<span style=\"font-size:16px\">為你的每個 Project 建立獨立的 AI 思維模型，讓它成為你最懂你風格的創意夥伴。</span>",
+                "moreText": ""
+              }
+            ],
+            "demoText_visible": true
+          }
+        },
+        {
+          "id": "w0-transformation",
+          "type": "transformation",
+          "visible": true,
+          "order": 3,
+          "content": {
+            "colorTitle": "",
+            "colorCardBorder": "",
+            "colorCardBg": "#6b6b6b",
+            "colorBeforeLabel": "#ffffff",
+            "colorBodyText": "",
+            "sectionTitle_visible": true,
+            "colorAfterLabel": "#ffc800",
+            "colorDivider": "",
+            "sectionTitle": "<span style=\"font-size:12px\"></span><span style=\"font-size:20px\">不單學懂清楚表達<br>更掌握最有<span style=\"color:#fac400\">創意</span>同埋<span style=\"color:#fac400\">系統</span>嘅<br>Prompting 玩法！</span>",
+            "cards": [
+              {
+                "afterText": "ChatGPT一次就出到你想要嘅嘢，<br>唔使改5次",
+                "beforeText": "唔清楚 AI 嘅能力邊界",
+                "theme": "<span style=\"font-size:17px\"><b><span style=\"color:#ffffff\"><span style=\"font-size:20px\">認識「AI」呢個夥伴</span></span></b></span>"
+              },
+              {
+                "afterText": "同一封email，以前寫30分鐘，而家5分鐘",
+                "theme": "<span style=\"color:#ffffff\"><b>用第一性原則拆解</b></span>",
+                "beforeText": "遇到問題先 Google 再自己摸索"
+              },
+              {
+                "afterText": "一個人做晒文案、圖片、排版，唔使請人",
+                "beforeText": "所有嘢自己做，產出有限",
+                "theme": "<span style=\"color:#ffffff\"><b>一個人 = 一支團隊</b></span>"
+              }
+            ]
+          }
+        },
+        {
+          "id": "w0-audience",
+          "type": "audience-fit",
+          "visible": true,
+          "order": 4,
+          "content": {
+            "forItems": [
+              {
+                "text": "用過 ChatGPT，但總覺得回覆不夠準"
+              },
+              {
+                "text": "想靠 AI 提升工作效率，卻不知從何下手"
+              },
+              {
+                "text": "試過網上的 Prompt 範本，但套不到自己的情境"
+              },
+              {
+                "text": "想學會一套方法，而不是只背指令"
+              }
+            ],
+            "sectionTitle": "適合你嗎？",
+            "notForItems": [
+              {
+                "text": "<span style=\"color:#ffffff\">只是想隨便玩玩，不打算認真學</span>"
+              },
+              {
+                "text": "<span style=\"color:#ffffff\">期望一個 Prompt 解決所有問題</span>"
+              },
+              {
+                "text": "<span style=\"color:#ffffff\">已經可以穩定用AI完成80%以上嘅日常工作</span>"
+              }
+            ],
+            "forTitle": "適合你，如果你是...",
+            "forTitle_visible": true,
+            "sectionTitle_visible": true,
+            "notForTitle": "<span style=\"color:#ffffff\">不適合你，如果你...</span>",
+            "sectionLabel_visible": true,
+            "sectionLabel": "Who is this for?",
+            "notForTitle_visible": true
+          }
+        },
+        {
+          "id": "w0-experience",
+          "type": "learning-outcomes",
+          "visible": true,
+          "order": 5,
+          "content": {
+            "sectionTitle": "你會帶走什麼",
+            "tools": [
+              {
+                "id": "9zoxx8rUA5JlNCs7JkvP",
+                "name": "Perplexity",
+                "iconUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/ai-tools%2F1774490650463_Perplexity.jpg?alt=media&token=b1c76c08-1190-4aa2-8258-c1c7c911e9ff"
+              },
+              {
+                "iconUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/ai-tools%2F1774490652632_Poe.jpg?alt=media&token=54f5b630-507e-435a-8263-9226a816b683",
+                "name": "Poe",
+                "id": "vecoHh2x6BJC6mvzX6rJ"
+              },
+              {
+                "id": "JhzXCMwC4yDhkQg4oiTI",
+                "name": "Gemini",
+                "iconUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/ai-tools%2F1774492814757_Gemini.jpg?alt=media&token=5a52d6fa-475e-41d5-b9e1-92add3d8b7e7"
+              }
+            ],
+            "demoText": "現場完成 1 個品牌視覺專案示範",
+            "sectionTitle_visible": true,
+            "demoSubtext": "",
+            "sectionLabel_visible": true,
+            "demoSubtext_visible": true,
+            "sectionLabel": "What to take away",
+            "items": [
+              {
+                "title": "<span style=\"font-size:18px\">系統性輸出技巧</span>",
+                "description": "<span style=\"font-size:16px\">Jacob 的 Prompt 技巧，讓你的構思過程從單點突破變為「系統性輸出」。</span>",
+                "moreText": ""
+              },
+              {
+                "title": "<span style=\"font-size:18px\">一個你自己設計嘅Prompt，上完堂即刻用得</span>",
+                "description": "<span style=\"font-size:10px\"><span style=\"font-size:16px\">課堂即場做出一套你帶得走的有效 Prompt。</span></span>",
+                "moreText": ""
+              },
+              {
+                "title": "<span style=\"font-size:18px\">10個職場常用Prompt，覆email/寫報告/做summary</span>",
+                "description": "<span style=\"font-size:16px\">現場帶走多種情境的 Prompt 範例，下課即用。</span>",
+                "moreText": ""
+              },
+              {
+                "title": "<span style=\"font-size:17px\"><span style=\"font-size:18px\">無限擴張的 AI 大腦</span></span>",
+                "description": "<span style=\"font-size:16px\">為你的每個 Project 建立獨立的 AI 思維模型，讓它成為你最懂你風格的創意夥伴。</span>",
+                "moreText": ""
+              }
+            ],
+            "demoText_visible": true
+          }
+        },
+        {
+          "id": "testimonial-marquee_1775092698801_6e6ja",
+          "type": "testimonial-marquee",
+          "visible": true,
+          "order": 6,
+          "content": {
+            "sectionLabel_visible": true,
+            "slides": [
+              {
+                "imageUrl": "",
+                "imageAlt": "",
+                "textAbove": "學員手寫評語範例（上方說明）"
+              },
+              {
+                "textAbove": "上傳第二張截圖或相片",
+                "imageUrl": "",
+                "imageAlt": ""
+              }
+            ],
+            "durationSec": "55",
+            "sectionTitle_visible": true,
+            "intro": "",
+            "sectionLabel": "TESTIMONIALS",
+            "sectionTitle": "學員分享",
+            "intro_visible": true
+          }
+        },
+        {
+          "id": "w0-logistics",
+          "type": "logistics-card",
+          "visible": true,
+          "order": 7,
+          "content": {
+            "sectionLabel": "WORKSHOP INFO",
+            "sectionTitle": "工作坊資訊",
+            "workshopId": "workshop-0",
+            "ctaText": "立即報名 →",
+            "ctaLink": "/workshop-payment?id=workshop-0",
+            "sectionTitle_visible": true,
+            "sectionLabel_visible": true
+          }
+        },
+        {
+          "id": "w0-cta",
+          "type": "final-cta",
+          "visible": true,
+          "order": 8,
+          "content": {
+            "subtitle": "<span style=\"font-size:17px\"><span style=\"color:#ffffff\">無論你想提升效率、增加競爭力，還是為職涯轉型鋪路，AIFLOWTIME都能為你提供最適合的學習路徑</span></span>",
+            "showWhatsapp": false,
+            "instagramUrl": "https://instagram.com/aiflowtime",
+            "showInstagram": true,
+            "whatsappUrl": "https://wa.me/85262880186",
+            "title": "<span style=\"font-size:28px\"><span style=\"font-size:20px\">唔使同人比，自己學好AI<br><span style=\"font-size:32px\"><span style=\"color:#ffc800\">慢慢黎!</span></span></span></span>",
+            "ctaLink": "#workshops",
+            "ctaText": "瀏覽所有工作坊"
+          }
+        },
+        {
+          "id": "free-material-download_1774498055469_bmtqh",
+          "type": "free-material-download",
+          "visible": true,
+          "order": 9,
+          "content": {
+            "sectionLabel_visible": true,
+            "materialTitle": "Workshop 0  - Prompting 免費教材",
+            "imageUrl": "https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=workshop-images%2Flayout_1774505121976_ntlk6t.jpg",
+            "title_visible": true,
+            "emailSubject": "你的 AIFlowTime 免費教材已送達",
+            "submitText": "立即寄送",
+            "consentText": "我同意 AIFLOWTIME 以電郵向我發送這份資料及相關更新。",
+            "nameFieldLabel": "Name",
+            "ctaText": "領取免費筆記",
+            "sectionLabel": "<span style=\"font-size:11px\">FREE RESOURCE</span>",
+            "documents": [
+              {
+                "assetId": "",
+                "storagePath": "",
+                "url": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/layout-documents%2F1774508534057_v535s3.pdf?alt=media&token=470d6dce-45c9-43c7-b4b1-bd2498b864ab",
+                "name": "AIFlowTime Prompt Pack 2026 Mar",
+                "fileName": "AIFlowTime Prompt Pack 2026 Mar"
+              }
+            ],
+            "title": "<span style=\"font-size:28px\"><span style=\"color:#ffffff\">免費領取 <br></span><span style=\"color:#f5876b\">AI Prompt 筆記</span></span>",
+            "helperNote": "<span style=\"font-size:11px\"><span style=\"color:#ffffff\">我們只會把資料寄送到你的 email，不會公開分享。</span></span>",
+            "imageAlt": "",
+            "successMessage_visible": true,
+            "deliveryMode": "attachment",
+            "consentText_visible": true,
+            "pdfUrl": "https://firebasestorage.googleapis.com/v0/b/aiflowtime-hk.firebasestorage.app/o/layout-documents%2F1774508534057_v535s3.pdf?alt=media&token=470d6dce-45c9-43c7-b4b1-bd2498b864ab",
+            "description": "<span style=\"color:#ffffff\">請填寫你的姓名和電郵，我們會將工作坊精華筆記寄送給你！</span>",
+            "fileName": "AIFlowTime Prompt Pack 2026 Mar",
+            "emailFieldLabel": "Email",
+            "helperNote_visible": true,
+            "successMessage": "收到申請！筆記正在飛往你的信箱途中 ✉️ 感謝你與 AIFlowTime 一起探索 AI！",
+            "description_visible": true
+          }
+        }
+      ],
+      "updatedAt": {
+        "_seconds": 1775368939,
+        "_nanoseconds": 308000000
+      }
+    },
+    "changes": [
+      {
+        "sectionId": "w0-cta",
+        "sectionType": "final-cta",
+        "field": "content.ctaLink",
+        "before": "#workshops",
+        "after": "/workshops",
+        "reason": "replace dead workshops anchor with catalog URL"
+      }
+    ]
+  },
+  {
+    "id": "workshop-c",
+    "original": {
+      "pageStatus": "published",
+      "updatedBy": "jacobfung1392@gmail.com",
+      "pageName": "Workshop C 落地頁",
+      "sections": [
+        {
+          "id": "wc-hero",
+          "type": "hero",
+          "visible": true,
+          "order": 0,
+          "content": {
+            "title": "把 AI 變成你的時間槓桿",
+            "subtitle": "學會建立可複製的工作系統，每週多出 5–10 小時，從混亂走向掌控。",
+            "ctaText": "立即預留名額",
+            "ctaLink": "#workshops",
+            "gifUrl": "Capy Yawn.mp4",
+            "showScrollHint": true,
+            "scrollHintColor": "#8a8a8a",
+            "scrollHintDotColor": "#d97757",
+            "subtitle_visible": true
+          }
+        },
+        {
+          "id": "wc-video",
+          "type": "video",
+          "visible": true,
+          "order": 1,
+          "content": {
+            "videoUrl": "",
+            "posterUrl": "",
+            "caption": "",
+            "caption_visible": true
+          }
+        },
+        {
+          "id": "wc-image-chain",
+          "type": "image-chain",
+          "visible": true,
+          "order": 2,
+          "content": {
+            "sectionTitle": "從生成圖片 到設計視覺",
+            "cards": [
+              {
+                "imageUrl": "",
+                "label": "Example 1",
+                "alt": ""
+              },
+              {
+                "imageUrl": "",
+                "label": "Example 2",
+                "alt": ""
+              },
+              {
+                "imageUrl": "",
+                "label": "Example 3",
+                "alt": ""
+              },
+              {
+                "imageUrl": "",
+                "label": "",
+                "alt": ""
+              }
+            ],
+            "sectionTitle_visible": true
+          }
+        },
+        {
+          "id": "wc-problem",
+          "type": "problem-grid",
+          "visible": true,
+          "order": 3,
+          "content": {
+            "sectionLabel": "— 問題在哪 —",
+            "sectionTitle": "你用 AI 做出來的圖，<br>是不是都<span style=\"font-size:29px\"><span style=\"font-size:30px\"><span style=\"font-size:31px\"><span style=\"font-size:32px\"><span style=\"font-size:33px\"><span style=\"font-size:34px\"><span style=\"font-size:35px\"><span style=\"font-size:36px\"><span style=\"color:rgb(217, 119, 87)\">這個樣子</span></span></span></span></span></span></span></span></span>？",
+            "items": [
+              {
+                "text": "忙到沒時間，現在終於能喘口氣。"
+              },
+              {
+                "text": "想到就能做到，不必再等別人幫忙。"
+              },
+              {
+                "text": "不是 AI 不行，是之前沒人教你怎麼用。"
+              }
+            ],
+            "insightQuote_visible": true,
+            "cards": [
+              {
+                "description": "寫文案、回訊息、做圖、記帳——以前全部自己來。現在讓 AI 處理重複性工作，每天省下 2–3 小時。",
+                "title": "忙到沒時間，現在終於能喘口氣。"
+              },
+              {
+                "description": "想做好看的社群圖、寫吸引人的文案——現在 AI 幫你補足技能缺口，一個人也能把想法變成成品。",
+                "title": "想到就能做到，不必再等別人幫忙。"
+              },
+              {
+                "description": "學會怎麼跟 AI 溝通之後，你會發現同一個工具，能交出完全不同等級的成果。",
+                "title": "不是 AI 不行，是之前沒人教你怎麼用。"
+              }
+            ],
+            "sectionTitle_visible": true,
+            "insightQuote": "AI不是未來，而是現在。學懂與AI協作，是未來3年能否轉營的關鍵。"
+          }
+        },
+        {
+          "id": "wc-mindset",
+          "type": "mindset-shift",
+          "visible": true,
+          "order": 4,
+          "content": {
+            "beforeText": "你一直在生成圖片。",
+            "afterText": "是時候開始設計視覺。",
+            "description": "問題不是工具。是視覺決策能力。",
+            "beforeText_visible": true,
+            "description_visible": true,
+            "afterText_visible": true
+          }
+        },
+        {
+          "id": "wc-learning",
+          "type": "learning-outcomes",
+          "visible": true,
+          "order": 5,
+          "content": {
+            "sectionLabel": "",
+            "sectionTitle": "你會掌握什麼",
+            "items": [
+              {
+                "description": "學會精準控制 AI 圖像的風格、色調和構圖。",
+                "moreText": "",
+                "title": "控制風格參數"
+              },
+              {
+                "title": "建立品牌視覺語調",
+                "moreText": "",
+                "description": "為你的品牌定義一致的視覺語言。"
+              },
+              {
+                "title": "快速輸出商業素材",
+                "moreText": "",
+                "description": "一小時內從構想到成品。"
+              }
+            ],
+            "tools": [
+              {
+                "name": "Midjourney"
+              },
+              {
+                "name": "FloraFauna"
+              },
+              {
+                "name": "Higgsfield"
+              }
+            ],
+            "demoText": "現場完成 1 個品牌視覺專案示範",
+            "sectionTitle_visible": true,
+            "demoText_visible": true,
+            "sectionLabel_visible": true
+          }
+        },
+        {
+          "id": "wc-audience",
+          "type": "audience-fit",
+          "visible": true,
+          "order": 6,
+          "content": {
+            "sectionLabel": "",
+            "sectionTitle": "",
+            "forTitle": "適合你，如果你是...",
+            "forItems": [
+              {
+                "text": "自媒體經營者"
+              },
+              {
+                "text": "創業者"
+              },
+              {
+                "text": "品牌經營者"
+              },
+              {
+                "text": "設計師"
+              }
+            ],
+            "notForTitle": "不適合你，如果你...",
+            "notForItems": [
+              {
+                "text": "只是想玩玩看 AI"
+              },
+              {
+                "text": "想用一鍵模板解決一切"
+              },
+              {
+                "text": "不打算實際應用於品牌"
+              }
+            ]
+          }
+        },
+        {
+          "id": "wc-logistics",
+          "type": "logistics-card",
+          "visible": true,
+          "order": 7,
+          "content": {
+            "sectionLabel": "WORKSHOP INFO",
+            "sectionTitle": "工作坊資訊",
+            "workshopId": "",
+            "ctaText": "立即報名 →",
+            "ctaLink": "/workshop-payment?id="
+          }
+        },
+        {
+          "id": "wc-instructor",
+          "type": "about",
+          "visible": true,
+          "order": 8,
+          "content": {
+            "sectionTitle": "關於講師",
+            "name": "Jacob",
+            "role": "AIFLOWTIME 創辦人",
+            "bio": "Jacob 相信 AI 不應該讓人感到技術複雜。它本來就是為了打破門檻而存在，讓普通人也能完成幾年前只屬於專家的事情。",
+            "badges": "KIMI 品牌合作, Higgsfield 品牌合作",
+            "photoUrl": "About_Jacob.webp",
+            "linkUrl": "/about-jacob",
+            "linkText": "了解更多關於 Jacob →",
+            "tagline": "每日用 AI 創作內容、教學、經營生意"
+          }
+        },
+        {
+          "id": "wc-faq",
+          "type": "faq",
+          "visible": true,
+          "order": 9,
+          "content": {
+            "sectionTitle": "常見問題",
+            "items": [
+              {
+                "answer": "完全不需要！我們的課程專為零技術背景的香港在職人士設計。",
+                "question": "需要編程背景嗎？"
+              },
+              {
+                "answer": "我們提供線上及實體兩種模式。",
+                "question": "課程是線上還是實體？"
+              },
+              {
+                "answer": "我們的課程內容全部取材自香港真實職場場景。",
+                "question": "學完真的有幫助嗎？"
+              }
+            ]
+          }
+        },
+        {
+          "id": "wc-final-cta",
+          "type": "final-cta",
+          "visible": true,
+          "order": 10,
+          "content": {
+            "title": "唔使同人比，自己學好AI，慢慢黎。",
+            "subtitle": "無論你想提升效率、增加競爭力，還是為職涯轉型鋪路，AIFLOWTIME都能為你提供最適合的學習路徑",
+            "ctaText": "瀏覽所有工作坊",
+            "ctaLink": "#workshops",
+            "whatsappUrl": "https://wa.me/85262880186",
+            "instagramUrl": "https://instagram.com/aiflowtime",
+            "showWhatsapp": true,
+            "showInstagram": true
+          }
+        }
+      ],
+      "updatedAt": {
+        "_seconds": 1775003413,
+        "_nanoseconds": 836000000
+      }
+    },
+    "changes": [
+      {
+        "sectionId": "wc-logistics",
+        "sectionType": "logistics-card",
+        "field": "content.ctaLink",
+        "before": "/workshop-payment?id=",
+        "after": "/workshop-payment?id=workshop-c",
+        "reason": "repair broken logistics CTA"
+      },
+      {
+        "sectionId": "wc-final-cta",
+        "sectionType": "final-cta",
+        "field": "content.ctaLink",
+        "before": "#workshops",
+        "after": "/workshops",
+        "reason": "replace dead workshops anchor with catalog URL"
+      }
+    ]
+  }
+]

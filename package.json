@@ -1,12 +1,17 @@
 {
   "scripts": {
-    "optimize:images": "node scripts/optimize-images.js"
+    "optimize:images": "node scripts/optimize-images.js",
+    "carousel:trigger": "node scripts/trigger-carousel.js",
+    "bake:layout": "node scripts/bake-layout-heroes.js",
+    "bake:linktree": "node scripts/bake-layout-heroes.js linktree",
+    "deploy:hosting:baked": "npm run bake:layout && npx firebase deploy --only hosting"
   },
   "dependencies": {
     "firebase-tools": "^15.8.0",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "jsdom": "^26.0.0",
     "firebase-admin": "^13.7.0",
     "gifsicle": "^7.0.1",
     "googleapis": "^144.0.0"

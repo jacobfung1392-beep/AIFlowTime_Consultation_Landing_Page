@@ -1,0 +1,66 @@
+{
+  "name": "IG 教學卡範例（5 張）",
+  "idempotencyKey": "card-tutorial-example-v1",
+  "slides": [
+    {
+      "templateId": "cardFeature",
+      "payload": {
+        "badge": "6 UI/UX Pro Max",
+        "headline": "UI/UX Pro Max",
+        "body": "Give it your project brief and it generates a complete design system, palette, font pairing, style direction, and UX rules.",
+        "pills": ["design system for…", "build a dashboard", "SaaS UI", "e-commerce app"]
+      }
+    },
+    {
+      "templateId": "cardIconList",
+      "payload": {
+        "headline": "Understand the Nodes",
+        "sub": "These START and CONTROL your workflow:",
+        "items": [
+          { "icon": "👆", "title": "Manual Trigger", "body": "You click a button to run it yourself" },
+          { "icon": "🔗", "title": "Webhook", "body": "Receives data from any external app instantly" },
+          { "icon": "⏰", "title": "Schedule Trigger", "body": "Runs your workflow at a set time" },
+          { "icon": "🔀", "title": "IF Node", "body": "Checks a condition, sends data down true or false path" },
+          { "icon": "🔃", "title": "Switch", "body": "Like IF but routes into multiple different paths" },
+          { "icon": "📦", "title": "Split in Batches", "body": "Repeats an action for every item in a list" },
+          { "icon": "⏸", "title": "Wait", "body": "Pauses the workflow for X seconds/minutes" }
+        ]
+      }
+    },
+    {
+      "templateId": "cardNumberedImg",
+      "payload": {
+        "headline": "Save These Marketplaces For Claude Skills",
+        "items": [
+          { "num": "1", "title": "github.com/wondelai/skills", "body": "Open-source Skills repo" },
+          { "num": "2", "title": "BehiSecc/awesome-claude-skills/", "body": "Community curated list" },
+          { "num": "3", "title": "Smithery.ai", "body": "Search & install platform" }
+        ],
+        "imageUrl": "",
+        "annotation": "→ You can download as many skills as you want here!"
+      }
+    },
+    {
+      "templateId": "cardStepsGuide",
+      "payload": {
+        "label": "GUIDE",
+        "headline": "How to prompt Claude Code",
+        "steps": [
+          { "num": "1", "title": "Screenshot", "body": "Start with a screenshot. Drag it into Claude and say 'Build me something that looks like this.'" },
+          { "num": "2", "title": "Prompting", "body": "Describe the end result, never the steps." },
+          { "num": "3", "title": "Context", "body": "Point Claude to your files. Don't re-explain — just point." },
+          { "num": "4", "title": "Workflow", "body": "One step at a time. Each conversation is a sprint." },
+          { "num": "5", "title": "Memory", "body": "Create a CLAUDE.md memory file." }
+        ]
+      }
+    },
+    {
+      "templateId": "cardDarkShowcase",
+      "payload": {
+        "headline": "Pack Shot Generation",
+        "body": "One product photo → AI generates multiple angles/views using image gen models (Nano Banana 2/Pro), auto-saved into SKU folders.",
+        "imageUrl": ""
+      }
+    }
+  ]
+}

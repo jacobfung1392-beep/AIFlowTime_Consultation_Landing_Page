@@ -16,6 +16,13 @@
         activeAxisKey: '',
         previewMode: false
     };
+    var _layoutPendingController = typeof global.aiflowCreateLayoutPendingController === 'function'
+        ? global.aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+        : { finish: function() { if (typeof document !== 'undefined' && document.body) document.body.classList.remove('layout-pending'); } };
+
+    function _finishInitialQuizLayoutRender() {
+        _layoutPendingController.finish();
+    }
 
     function _fallbackConfig() {
         if (typeof buildQuizLayoutConfig === 'function') return buildQuizLayoutConfig(getDefaultQuizLayoutSections());
@@ -1178,6 +1185,7 @@
     function loadQuizLayoutFromFirestore() {
         if (typeof firebase === 'undefined' || !firebase.firestore) {
             applyLayoutSections(getDefaultQuizLayoutSections());
+            _finishInitialQuizLayoutRender();
             return;
         }
         var db = firebase.firestore();
@@ -1188,8 +1196,10 @@
             }
             var sections = data && Array.isArray(data.sections) && data.sections.length ? data.sections : getDefaultQuizLayoutSections();
             applyLayoutSections(sections);
+            _finishInitialQuizLayoutRender();
         }).catch(function() {
             applyLayoutSections(getDefaultQuizLayoutSections());
+            _finishInitialQuizLayoutRender();
         });
     }
 
@@ -1200,11 +1210,13 @@
 
         if (_quizApp.previewMode) {
             applyLayoutSections(getDefaultQuizLayoutSections());
+            _finishInitialQuizLayoutRender();
             if (typeof initLayoutPreviewBridge === 'function') {
                 initLayoutPreviewBridge({
                     onLayoutPreview: function(sections) {
                         var scrollY = window.scrollY || window.pageYOffset || 0;
                         applyLayoutSections(sections);
+                        _finishInitialQuizLayoutRender();
                         window.scrollTo(0, scrollY);
                     }
                 });

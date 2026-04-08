@@ -14,12 +14,28 @@
         if (node && node.parentNode) node.parentNode.removeChild(node);
     }
 
+    function setBodyBackgroundActive(active) {
+        if (!document.body || !document.body.classList) return;
+        document.body.classList.toggle('layout-page-bg-active', !!active);
+    }
+
+    function normalizeIframeUrl(raw) {
+        var u = String(raw || '').trim();
+        if (!u) return '';
+        if (/^javascript:/i.test(u)) return '';
+        if (/^https?:\/\//i.test(u)) return u;
+        if (u.charAt(0) === '/') return u;
+        return '/' + u.replace(/^\/+/, '');
+    }
+
     function normalizeContent(content) {
         var next = content && typeof content === 'object' ? JSON.parse(JSON.stringify(content)) : {};
-        next.sourceType = String(next.sourceType || 'css');
+        var st = String(next.sourceType || 'css');
+        next.sourceType = ['css', 'image', 'code', 'iframe'].indexOf(st) >= 0 ? st : 'css';
         next.imageUrl = String(next.imageUrl || '');
         next.css = String(next.css || '');
         next.code = String(next.code || '');
+        next.iframeUrl = normalizeIframeUrl(next.iframeUrl);
         next.opacity = clampOpacity(next.opacity);
         next.fixed = !!next.fixed;
         if (next.sourceType === 'code' && typeof global.normalizePageBackgroundEffectCode === 'function') {
@@ -53,19 +69,24 @@
         removeNode(opts.wrapperId || 'layout-page-bg');
         removeNode(opts.styleId || 'layout-page-bg-style');
         (opts.legacyIds || []).forEach(removeNode);
+        setBodyBackgroundActive(false);
     }
 
     function createWrapper(opts, opacity) {
         var wrapper = document.createElement('div');
         wrapper.id = opts.wrapperId || 'layout-page-bg';
         wrapper.setAttribute('aria-hidden', 'true');
+        var position = opts.position === 'absolute' ? 'absolute' : 'fixed';
         wrapper.style.cssText = [
-            'position:fixed',
+            'position:' + position,
             'inset:0',
             'z-index:' + (opts.zIndex != null ? opts.zIndex : -1),
             'pointer-events:none',
             'overflow:hidden',
-            'opacity:' + opacity
+            'opacity:' + opacity,
+            'background:transparent',
+            '-webkit-transform:translateZ(0)',
+            'transform:translateZ(0)'
         ].join(';') + ';';
         return wrapper;
     }
@@ -84,6 +105,7 @@
             cssWrap.style.cssText += normalized.css + ';';
             if (normalized.fixed) cssWrap.style.backgroundAttachment = 'fixed';
             document.body.appendChild(cssWrap);
+            setBodyBackgroundActive(true);
             return cssWrap;
         }
 
@@ -96,6 +118,7 @@
             img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
             imageWrap.appendChild(img);
             document.body.appendChild(imageWrap);
+            setBodyBackgroundActive(true);
             return imageWrap;
         }
 
@@ -104,11 +127,30 @@
             var codeWrap = createWrapper(opts, opacity);
             var iframe = document.createElement('iframe');
             iframe.setAttribute('aria-hidden', 'true');
-            iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;background:transparent;';
+            iframe.setAttribute('title', 'Background');
+            iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;background:transparent;-webkit-transform:translateZ(0);transform:translateZ(0);';
             iframe.srcdoc = prepareCodeSrcdoc(normalized.code);
             codeWrap.appendChild(iframe);
             document.body.appendChild(codeWrap);
+            setBodyBackgroundActive(true);
             return codeWrap;
+        }
+
+        if (normalized.sourceType === 'iframe') {
+            if (!normalized.iframeUrl) return null;
+            var url = normalized.iframeUrl;
+            var wrapIframe = createWrapper(opts, opacity);
+            var bgFrame = document.createElement('iframe');
+            bgFrame.setAttribute('aria-hidden', 'true');
+            bgFrame.setAttribute('title', 'Background');
+            bgFrame.referrerPolicy = 'strict-origin-when-cross-origin';
+            bgFrame.style.cssText = 'width:100%;height:100%;border:none;display:block;background:transparent;-webkit-transform:translateZ(0);transform:translateZ(0);';
+            bgFrame.src = url;
+            bgFrame.loading = 'eager';
+            wrapIframe.appendChild(bgFrame);
+            document.body.appendChild(wrapIframe);
+            setBodyBackgroundActive(true);
+            return wrapIframe;
         }
 
         return null;

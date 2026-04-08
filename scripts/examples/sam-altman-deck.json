@@ -1,0 +1,42 @@
+{
+  "name": "Sam Altman — AI 槓桿系列",
+  "idempotencyKey": "sam-altman-5deck-example",
+  "defaultTemplateId": "titleGold",
+  "slides": [
+    {
+      "payload": {
+        "label": "導言",
+        "headline": "Sam Altman 沒說透的 AI 秘密：槓桿（Leverage）",
+        "body": "在 AI 時代，如何讓自己更難被取代？關鍵不是更忙，而是更有槓桿。"
+      }
+    },
+    {
+      "payload": {
+        "label": "核心",
+        "headline": "槓桿 > 勞力",
+        "body": "單純出卖時間會越來越便宜；價值來自你能調度多少 AI 與系統，放大產出。"
+      }
+    },
+    {
+      "payload": {
+        "label": "行動 1",
+        "headline": "下指令（Direct），不要只自己動手（Do）",
+        "body": "把自己定位成「主管」：定義目標、拆任務、驗收成敗，讓 AI 去執行可自動化的部分。"
+      }
+    },
+    {
+      "payload": {
+        "label": "行動 2",
+        "headline": "累積無形資本（Judgment）",
+        "body": "當內容與流程能被複製，真正的護城河是判斷力、品味與決策品質。"
+      }
+    },
+    {
+      "payload": {
+        "label": "CTA",
+        "headline": "想把 AI 變成槓桿、而不是焦慮來源？",
+        "body": "到 aiflowtime-hk.web.app 了解 Workshop／社群，用客戶聽得懂的語言把專業變成交付。"
+      }
+    }
+  ]
+}

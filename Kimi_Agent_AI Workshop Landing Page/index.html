@@ -49,26 +49,6 @@
             transition: opacity .35s ease;
         }
 
-        /* =============================================
-           BACKGROUND "0" ANIMATION CANVAS
-        ============================================= */
-        #bg-zero-wrap {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-            -webkit-transform: translate3d(0, 0, 0);
-            transform: translate3d(0, 0, 0);
-            will-change: transform;
-        }
-        #bg-zero-canvas {
-            display: block;
-            width: 100%; height: 100%;
-            opacity: 0.3;
-        }
-
         .page-content { position: relative; z-index: 1; }
 
         /* =============================================
@@ -457,6 +437,27 @@
         .lo-tool-box img {
             width: 28px; height: 28px; border-radius: 8px; object-fit: cover;
         }
+        .lo-demo-box {
+            max-width: 540px;
+            margin: 28px auto 0;
+            padding: 20px 24px;
+            border-radius: 16px;
+            background: rgba(217,119,87,0.08);
+            border: 1px solid rgba(217,119,87,0.18);
+            text-align: center;
+        }
+        .lo-demo-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .lo-demo-subtext {
+            margin-top: 8px;
+            font-size: 0.92rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
         .lo-acc-tri {
             width: 0;
             height: 0;
@@ -830,8 +831,8 @@
            LOGISTICS
         ============================================= */
         .logistics-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            background: var(--lc-card-bg, var(--bg-card));
+            border: 1px solid var(--lc-card-border, var(--border));
             border-radius: var(--radius);
             overflow: hidden;
             max-width: 640px;
@@ -842,7 +843,7 @@
             align-items: center;
             gap: 16px;
             padding: 20px 28px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--lc-divider, var(--border));
         }
         .logistics-row:last-child { border-bottom: none; }
         .logistics-icon {
@@ -850,15 +851,15 @@
             width: 44px; height: 44px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 12px;
-            background: var(--accent-dim);
-            color: var(--accent);
+            background: var(--lc-icon-bg, var(--accent-dim));
+            color: var(--lc-icon-color, var(--accent));
         }
         .logistics-label {
             flex-shrink: 0;
             width: 60px;
             font-size: 14px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--lc-label, var(--text-muted));
             font-family: 'Courier Prime', monospace;
             letter-spacing: 0.05em;
         }
@@ -866,7 +867,7 @@
             flex: 1;
             font-size: 17px;
             font-weight: 600;
-            color: var(--text);
+            color: var(--lc-value, var(--text));
             text-align: right;
             line-height: 1.5;
         }
@@ -881,42 +882,66 @@
         }
         .logistics-session-block {
             padding: 20px 28px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--lc-divider, var(--border));
         }
         .logistics-session-block:last-child { border-bottom: none; }
         .logistics-session-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 16px;
+        }
+        .logistics-session-copy {
+            flex: 1;
+            min-width: 0;
+        }
+        .logistics-session-topline {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
         }
         .logistics-session-label {
             font-size: 0.78rem;
             font-weight: 600;
-            color: var(--text-muted);
+            color: var(--lc-label, var(--text-muted));
             white-space: nowrap;
         }
         .logistics-session-datetime {
-            flex: 1;
             font-size: 1rem;
             font-weight: 600;
-            color: var(--text);
+            color: var(--lc-value, var(--text));
             text-align: right;
+        }
+        .logistics-mode-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1.35;
+            background: var(--lc-mode-tag-bg, var(--accent));
+            color: var(--lc-mode-tag-text, #fff);
+            white-space: nowrap;
         }
         .logistics-session-cap {
             margin-top: 12px;
         }
         .logistics-cta {
             display: flex; justify-content: center; padding: 20px 28px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--lc-divider, var(--border));
         }
         .ws0-cap-bar { display: flex; gap: 6px; margin-bottom: 10px; }
         .ws0-cap-rect {
             flex: 1; height: 10px; border-radius: 5px;
             background: rgba(255,255,255,0.08); transition: background 0.3s;
         }
-        .ws0-cap-rect.filled { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-        .ws0-cap-text { text-align: center; font-size: 14px; font-weight: 600; color: var(--text-dim); }
-        .ws0-cap-text span { color: var(--accent); font-weight: 700; }
+        .ws0-cap-rect.filled { background: var(--lc-capacity-fill, var(--accent)); box-shadow: none; }
+        .ws0-cap-text { text-align: center; font-size: 14px; font-weight: 600; color: var(--lc-capacity-text, var(--text-dim)); }
+        .ws0-cap-text span { color: var(--lc-capacity-fill, var(--accent)); font-weight: 700; }
 
         @media (max-width: 480px) {
             .logistics-row { padding: 16px 20px; gap: 12px; }
@@ -966,7 +991,9 @@
 <body class="layout-loading">
     <script>
     window.addEventListener('pageshow', function(e) {
-        if (e.persisted) document.body.classList.add('layout-loading');
+        if (!e.persisted) return;
+        if (typeof finishInitialLayoutRender === 'function') finishInitialLayoutRender();
+        else document.body.classList.remove('layout-loading');
     });
     </script>
     <div class="page-content">
@@ -1000,23 +1027,20 @@
 
         <main id="main-content">
 
-        <!-- HERO -->
-        <section class="hero" id="hero" data-section-id="w0-hero" data-section-type="hero">
-            <div class="hero-media-wrap hero-media-pending" style="display:none;">
-                <img class="hero-media" src="" alt="Hero media" style="display:none;">
-            </div>
-            <div class="hero-badge"></div>
-            <h1 class="hero-title"></h1>
-            <p class="hero-tagline"></p>
-            <div class="cta-group">
-                <a href="/workshop-payment?id=workshop-0" class="btn-primary"></a>
-                <a href="#experience" class="btn-outline">了解更多</a>
-            </div>
-            <div class="scroll-hint">
-                <div class="scroll-hint-pill"><div class="scroll-hint-dot"></div></div>
-                <span>SCROLL</span>
-            </div>
-        </section>
+        <!-- BAKE_LAYOUT_HERO:workshop-0:BEGIN -->
+<!-- baked-at: 2026-04-08T03:23:03.821Z (pageLayouts/workshop-0) -->
+<section class="hero" id="hero" data-section-id="w0-hero" data-section-type="hero" data-layout-hero-baked="1">
+<div class="hero-media-wrap hero-media-ready"><img class="hero-media" src="https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=layout-images%2Flayout_1775012020660_e3qtz5.png" alt="上完呢堂你就真係識AI"></div>
+<div class="hero-badge" style="display:none;"></div>
+<h1 class="hero-title"><span style="color:#ffffff"><span style="font-size:40px"><span style="font-size:41px"><span style="font-size:42px"><span style="font-size:43px"><span style="font-size:44px"><span style="font-size:45px">上完呢堂<br>你就真係<span style="color:rgb(249, 195, 1)">識AI</span></span></span></span></span></span></span></span></h1>
+<p class="hero-tagline"><span style="color:#ffc800"><span style="font-size:25px"><b><span style="font-size:26px"><span style="font-size:27px"><span style="font-size:28px"><span style="font-size:29px"><span style="font-size:30px"><span style="font-size:31px"><span style="font-size:32px"><span style="font-size:33px"><span style="font-size:34px"><span style="font-size:35px"><span style="font-size:36px"><span style="font-size:37px"><span style="font-size:38px"><span style="font-size:39px"><span style="font-size:40px"><span style="font-size:41px"><span style="font-size:42px"><span style="font-size:43px"><span style="font-size:42px"><span style="font-size:41px">2小時</span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><br></b></span></span><span style="color:rgb(255, 200, 0);font-size:25px"></span><span style="font-size:24px"><span style="font-size:23px"><span style="font-size:22px"><span style="font-size:21px"><span style="font-size:20px"><span style="font-size:19px"><span style="color:rgb(255, 255, 255)"></span></span></span></span></span></span></span><span style="font-size:18px"><span style="font-size:17px"><span style="color:rgb(255, 255, 255)">- ⁠⁠AI本質，究竟係咩嚟㗎 ？<br>- ⁠掌握2026<b><u><span style="color:rgb(249, 195, 1)">最新指令玩法</span></u></b><br></span><span style="color:rgb(255, 255, 255)">- ⁠⁠完全搞清最Hit嗰堆<b><u><span style="color:rgb(249, 195, 1)">AI工具嘅分別和應用</span></u></b>！<br></span><span style="color:rgb(255, 255, 255)">- ⁠⁠製作你自己用得着，屬於你的專屬指令！</span></span></span><span style="color:rgb(255, 255, 255);font-size:19px"></span><span style="font-size:24px"><span style="font-size:23px"><span style="font-size:22px"><span style="font-size:21px"><span style="font-size:20px"><span style="font-size:19px"><span style="color:rgb(255, 255, 255)"><br></span></span></span></span></span></span></span><span style="color:#ffc800"><span style="font-size:25px"></span></span></p>
+<div class="cta-group">
+<a href="/workshop-payment?id=workshop-0" class="btn-primary aiflow-btn-shimmer" style="background:#ffbb00;color:#000000">立即預留名額</a>
+<a href="#" class="btn-outline" style="display:none !important;"></a>
+</div>
+<div class="scroll-hint" style="display:none;color:#ffffff"><div class="scroll-hint-pill" style="border-color:#ffffff;"><div class="scroll-hint-dot" style="background:#f4997b;"></div></div><span>SCROLL</span></div>
+</section>
+<!-- BAKE_LAYOUT_HERO:workshop-0:END -->
 
         <!-- TRANSFORMATION -->
         <section id="transformation" data-section-id="w0-transformation" data-section-type="transformation">
@@ -1074,6 +1098,10 @@
                 </div>
                 <div class="card-grid lo-takeaway-grid"></div>
                 <div class="lo-tools" style="display:none;"></div>
+                <div class="lo-demo-box" style="display:none;">
+                    <div class="lo-demo-text"></div>
+                    <div class="lo-demo-subtext" style="display:none;"></div>
+                </div>
             </div>
         </section>
 
@@ -1210,6 +1238,7 @@
 
     function _showLayoutUnavailableState() {
         if (document.getElementById('layoutUnavailableState')) return;
+        finishInitialLayoutRender();
         var overlay = document.createElement('div');
         overlay.id = 'layoutUnavailableState';
         overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(245,244,242,0.98);';
@@ -1229,13 +1258,30 @@
     }
 
     var WORKSHOP0_ZERO_BG_CODE = window.WORKSHOP0_ZERO_BG_CODE || '';
+    var WORKSHOP0_ZERO_BG_IFRAME_URL = window.WORKSHOP0_ZERO_BG_IFRAME_URL || '/backgrounds/workshop-zero/index.html';
+
+    function _w0NormalizeBackgroundContent(rawContent) {
+        var next = Object.assign({}, _getDefaultWorkshop0BackgroundContent(), rawContent || {});
+        if (next.sourceType === 'iframe' && !String(next.iframeUrl || '').trim()) {
+            next.iframeUrl = WORKSHOP0_ZERO_BG_IFRAME_URL;
+        }
+        if (next.sourceType === 'code' && typeof normalizePageBackgroundEffectCode === 'function') {
+            next.code = normalizePageBackgroundEffectCode(next.code);
+            if (String(next.code || '').trim() === String(WORKSHOP0_ZERO_BG_CODE || '').trim()) {
+                next.sourceType = 'iframe';
+                next.iframeUrl = WORKSHOP0_ZERO_BG_IFRAME_URL;
+            }
+        }
+        return next;
+    }
 
     function _getDefaultWorkshop0BackgroundContent() {
         return {
-            sourceType: 'code',
+            sourceType: 'iframe',
             imageUrl: '',
             css: '',
-            code: WORKSHOP0_ZERO_BG_CODE,
+            code: '',
+            iframeUrl: WORKSHOP0_ZERO_BG_IFRAME_URL,
             opacity: 100,
             fixed: false
         };
@@ -1256,10 +1302,7 @@
         sections = sections.map(function(sec) {
             if (!sec || sec.type !== 'page-background') return sec;
             var next = Object.assign({}, sec);
-            next.content = Object.assign({}, _getDefaultWorkshop0BackgroundContent(), next.content || {});
-            if (typeof normalizePageBackgroundEffectCode === 'function') {
-                next.content.code = normalizePageBackgroundEffectCode(next.content.code);
-            }
+            next.content = _w0NormalizeBackgroundContent(next.content);
             return next;
         });
         return sections;
@@ -1299,9 +1342,11 @@
         document.body.classList.remove('layout-loading');
     }
 
+    var _w0PageBackgroundOpts = { wrapperId: 'w0-page-bg', legacyIds: ['bg-zero-wrap'], zIndex: 0 };
+
     function applyLayoutConfig() {
-        _applyPageBackground(_getDefaultWorkshop0BackgroundContent());
         if (_isPreviewMode) {
+            _applyPageBackground(_getDefaultWorkshop0BackgroundContent());
             finishInitialLayoutRender();
             initLayoutPreviewBridge({
                 onLayoutPreview: function(sections) {
@@ -1341,7 +1386,7 @@
 
     function _applyPageBackground(c) {
         if (typeof applyPageBackgroundContent === 'function') {
-            applyPageBackgroundContent(c, { wrapperId: 'w0-page-bg', legacyIds: ['bg-zero-wrap'] });
+            applyPageBackgroundContent(c, _w0PageBackgroundOpts);
         }
     }
 
@@ -1353,7 +1398,7 @@
         });
         _w0CurrentLayoutSections = sections.slice();
         if (typeof syncPageBackgroundFromSections === 'function') {
-            syncPageBackgroundFromSections(sections, { wrapperId: 'w0-page-bg', legacyIds: ['bg-zero-wrap'] });
+            syncPageBackgroundFromSections(sections, _w0PageBackgroundOpts);
         }
         var main = document.getElementById('main-content');
         if (!main) return;
@@ -1389,8 +1434,12 @@
             if (!el && sec.visible !== false && reusableStaticTypes[sec.type] && !claimedStaticTypes[sec.type]) {
                 var fallbackStatic = main.querySelector('[data-section-type="' + sec.type + '"]');
                 if (fallbackStatic) {
+                    var previousSectionId = fallbackStatic.getAttribute('data-section-id');
                     el = fallbackStatic;
                     el.setAttribute('data-section-id', sec.id);
+                    if (previousSectionId && previousSectionId !== sec.id) {
+                        delete existingEls[previousSectionId];
+                    }
                     existingEls[sec.id] = el;
                     claimedStaticTypes[sec.type] = true;
                 }
@@ -1401,6 +1450,12 @@
                 if (template) {
                     el = template.cloneNode(true);
                     el.setAttribute('data-section-id', sec.id);
+                    if (template.id) {
+                        el.id = template.id + '--' + String(sec.id || '')
+                            .replace(/[^a-z0-9_-]+/gi, '-')
+                            .replace(/^-+|-+$/g, '')
+                            .toLowerCase();
+                    }
                     main.appendChild(el);
                 } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download' || sec.type === 'problem-grid') {
                     el = document.createElement('section');
@@ -1428,13 +1483,13 @@
             if (sec.content) applyContentToSection(el, sec.type, sec.content);
         });
 
+        finishInitialLayoutRender();
         initScrollReveal('.reveal', { threshold: 0.12 });
         // In layout-editor preview mode, force scroll-reveal elements visible immediately.
         // Otherwise desktop may keep them opacity:0, making font-size changes look like they didn't apply.
         if (_isPreviewMode) {
             document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
         }
-        finishInitialLayoutRender();
     }
 
     var _W0_AF_SVG_YES = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -1739,6 +1794,104 @@
         return !raw || /^\/workshop-payment\?id=?$/i.test(raw);
     }
 
+    function _w0PaymentLinkForWorkshop(workshopId) {
+        var wsId = String(workshopId || '').trim() || _w0WorkshopIdFromSections();
+        return '/workshop-payment?id=' + encodeURIComponent(wsId || 'workshop-0');
+    }
+
+    function _w0AbsoluteUrl(url) {
+        try {
+            return new URL(String(url || ''), window.location.origin);
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function _w0NormalizePathname(pathname) {
+        var path = String(pathname || '').trim() || '/';
+        return path.replace(/\/+$/, '') || '/';
+    }
+
+    function _w0IsSamePageLink(url) {
+        var raw = String(url || '').trim();
+        if (!raw) return false;
+        if (raw.charAt(0) === '#') return true;
+        var target = _w0AbsoluteUrl(raw);
+        var current = _w0AbsoluteUrl(window.location.href);
+        if (!target || !current) return false;
+        return target.origin === current.origin &&
+            _w0NormalizePathname(target.pathname) === _w0NormalizePathname(current.pathname);
+    }
+
+    function _w0HasVisibleSectionType(type) {
+        if (Array.isArray(_w0CurrentLayoutSections) && _w0CurrentLayoutSections.length) {
+            for (var i = 0; i < _w0CurrentLayoutSections.length; i++) {
+                var sec = _w0CurrentLayoutSections[i];
+                if (sec && sec.type === type && sec.visible !== false) return true;
+            }
+            return false;
+        }
+        var nodes = document.querySelectorAll('[data-section-type="' + String(type || '') + '"]');
+        for (var j = 0; j < nodes.length; j++) {
+            if (nodes[j].style.display !== 'none') return true;
+        }
+        return false;
+    }
+
+    function _w0ResolveLogisticsCtaLink(url, workshopId) {
+        var raw = String(url || '').trim();
+        var fallback = _w0PaymentLinkForWorkshop(workshopId);
+        if (_w0IsIncompletePaymentLink(raw)) return fallback;
+        if (_w0IsSamePageLink(raw)) return fallback;
+        return raw;
+    }
+
+    function _w0ResolveFinalCtaLink(url) {
+        var raw = String(url || '').trim();
+        if (!raw) return _w0HasVisibleSectionType('workshops') ? '#workshops' : '/workshops';
+        if (raw === '#workshops' && !_w0HasVisibleSectionType('workshops')) return '/workshops';
+        return raw;
+    }
+
+    function _w0SetCssVar(el, name, value) {
+        if (!el || !name) return;
+        if (value) el.style.setProperty(name, value);
+        else el.style.removeProperty(name);
+    }
+
+    function _w0ModeLabel(mode) {
+        var m = String(mode || 'offline').trim().toLowerCase();
+        if (m === 'online') return '線上';
+        if (m === 'both' || m === 'hybrid') return '實體 + 線上';
+        return '實體';
+    }
+
+    function _w0ModePillHtml(mode) {
+        return '<span class="logistics-mode-pill">' + _escHtml(_w0ModeLabel(mode)) + '</span>';
+    }
+
+    function _w0ApplyLogisticsTheme(sectionEl, c) {
+        var card = sectionEl ? sectionEl.querySelector('.logistics-card') : document.getElementById('logisticsCard');
+        if (!card) return;
+        _w0SetCssVar(card, '--lc-card-bg', c.colorCardBg || '');
+        _w0SetCssVar(card, '--lc-card-border', c.colorCardBorder || '');
+        _w0SetCssVar(card, '--lc-divider', c.colorRowDivider || '');
+        _w0SetCssVar(card, '--lc-icon-bg', c.colorIconBg || '');
+        _w0SetCssVar(card, '--lc-icon-color', c.colorIconFg || '');
+        _w0SetCssVar(card, '--lc-label', c.colorLabel || '');
+        _w0SetCssVar(card, '--lc-value', c.colorValue || '');
+        _w0SetCssVar(card, '--lc-mode-tag-bg', c.colorModeTagBg || '');
+        _w0SetCssVar(card, '--lc-mode-tag-text', c.colorModeTagText || '');
+        _w0SetCssVar(card, '--lc-capacity-fill', c.colorCapacityFill || '');
+        _w0SetCssVar(card, '--lc-capacity-text', c.colorCapacityText || '');
+        var ctaBtn = card.querySelector('.logistics-cta .btn-primary');
+        if (ctaBtn) {
+            ctaBtn.style.background = c.colorCtaBg || '';
+            ctaBtn.style.color = c.colorCtaText || '';
+            ctaBtn.style.borderColor = c.colorCtaBg || '';
+        }
+    }
+
     function _w0WorkshopIdFromSections() {
         for (var i = 0; i < _w0CurrentLayoutSections.length; i++) {
             var sec = _w0CurrentLayoutSections[i];
@@ -1822,6 +1975,7 @@
         var raw = content && typeof content === 'object' ? content : {};
         var next = JSON.parse(JSON.stringify(raw || {}));
         next.ctaVisible = raw.ctaVisible !== false;
+        next.ctaShimmer = raw.ctaShimmer === true || String(raw.ctaShimmer || '').toLowerCase() === 'true';
         next.buttonOptions = _w0NormalizeHeroButtonOptions(secId, next);
         if (!String(next.ctaActionId || '').trim()) next.ctaActionId = 'go-to-payment';
         if (secId === 'w0-hero') {
@@ -1833,10 +1987,13 @@
         }
         next.ctaLink = _w0ResolveHeroButtonUrl(secId, next, next.ctaActionId, raw.ctaLink || next.ctaLink);
         next.secondaryCtaLink = _w0ResolveHeroButtonUrl(secId, next, next.secondaryCtaActionId, raw.secondaryCtaLink || next.secondaryCtaLink);
+        var hmsW = parseInt(raw.heroMediaSizePercent != null ? raw.heroMediaSizePercent : next.heroMediaSizePercent, 10);
+        if (isNaN(hmsW)) hmsW = 100;
+        next.heroMediaSizePercent = Math.max(30, Math.min(100, hmsW));
         return next;
     }
 
-    function _w0ApplyHeroButton(btn, visible, html, href, colors, isSecondary) {
+    function _w0ApplyHeroButton(btn, visible, html, href, colors, isSecondary, shimmer) {
         if (!btn) return false;
         var hasText = String(html || '').replace(/<[^>]+>/g, ' ').trim() !== '';
         var show = visible !== false && hasText;
@@ -1848,12 +2005,14 @@
         btn.style.color = colors && colors.text ? colors.text : '';
         if (isSecondary) btn.style.borderColor = colors && colors.border ? colors.border : '';
         btn.style.justifyContent = 'center';
+        if (typeof aiflowSetButtonShimmer === 'function') aiflowSetButtonShimmer(btn, !isSecondary && !!shimmer);
         return true;
     }
 
     function applyContentToSection(el, type, c) {
         switch (type) {
             case 'hero':
+                el.removeAttribute('data-layout-hero-baked');
                 var heroCfg = _w0NormalizeHeroContent(el.getAttribute('data-section-id'), c);
                 var h1 = el.querySelector('.hero-title');
                 if (h1) h1.innerHTML = heroCfg.title ? _w0RichTextHtml(heroCfg.title) : '';
@@ -1872,7 +2031,8 @@
                     _w0RichTextHtml(heroCfg.ctaText || ''),
                     heroCfg.ctaLink,
                     { bg: heroCfg.ctaBgColor, text: heroCfg.ctaTextColor },
-                    false
+                    false,
+                    heroCfg.ctaShimmer
                 );
                 var secondaryShown = _w0ApplyHeroButton(
                     secondary,
@@ -1880,7 +2040,8 @@
                     _w0RichTextHtml(heroCfg.secondaryCtaText || ''),
                     heroCfg.secondaryCtaLink,
                     { bg: heroCfg.secondaryCtaBgColor, text: heroCfg.secondaryCtaTextColor, border: heroCfg.secondaryCtaBorderColor },
-                    true
+                    true,
+                    false
                 );
                 var ctaGroup = el.querySelector('.cta-group');
                 if (ctaGroup) ctaGroup.style.display = (ctaShown || secondaryShown) ? 'flex' : 'none';
@@ -1909,6 +2070,13 @@
                         mediaWrap.style.display = '';
                         mediaWrap.classList.remove('hero-media-pending');
                         mediaWrap.classList.add('hero-media-ready');
+                        var _hmsW0 = parseInt(heroCfg.heroMediaSizePercent, 10);
+                        if (!isNaN(_hmsW0) && _hmsW0 < 100) {
+                            var _pctW0 = Math.max(30, Math.min(100, _hmsW0));
+                            mediaWrap.style.maxWidth = 'min(100%, ' + Math.round(480 * _pctW0 / 100) + 'px)';
+                        } else {
+                            mediaWrap.style.maxWidth = '';
+                        }
                     } else {
                         mediaWrap.style.display = 'none';
                     }
@@ -2007,7 +2175,7 @@
                     if (lead) {
                         var rawFt = c.forTitle == null ? '' : String(c.forTitle);
                         var ft = rawFt.trim();
-                        if (ft) {
+                        if (c.forTitle_visible !== false && ft) {
                             lead.innerHTML = rawFt;
                             lead.style.display = '';
                             lead.setAttribute('aria-hidden', 'false');
@@ -2018,9 +2186,19 @@
                         }
                     }
                 }
-                if (c.notForTitle) {
-                    var sub = el.querySelector('.audience-sub-title');
-                    if (sub) sub.innerHTML = String(c.notForTitle);
+                var sub = el.querySelector('.audience-sub-title');
+                if (sub) {
+                    var rawNft = c.notForTitle == null ? '' : String(c.notForTitle);
+                    var nft = rawNft.trim();
+                    if (c.notForTitle_visible !== false && nft) {
+                        sub.innerHTML = rawNft;
+                        sub.style.display = '';
+                        sub.setAttribute('aria-hidden', 'false');
+                    } else {
+                        sub.innerHTML = '';
+                        sub.style.display = 'none';
+                        sub.setAttribute('aria-hidden', 'true');
+                    }
                 }
                 if (Array.isArray(c.forItems)) {
                     _w0RebuildAudienceItems(el.querySelector('.w0-af-for-list'), 'yes', c.forItems);
@@ -2048,8 +2226,13 @@
                             var safeTitle = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.title || '') : _escHtml(item.title || '');
                             var safeDesc = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(item.description || '') : _escHtml(item.description || '');
                             var safeMore = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(more) : _escHtml(more);
+                            var cardStyle = '';
+                            if (item.cardBgColor || item.cardBorderColor) {
+                                cardStyle = 'background:' + _escHtml(item.cardBgColor || 'var(--bg-card)') + ';border-color:' + _escHtml(item.cardBorderColor || 'var(--border)') + ';';
+                            }
                             var d = document.createElement('div');
                             d.className = 'card lo-accordion-card reveal reveal-delay-' + (i + 1);
+                            if (cardStyle) d.style.cssText = cardStyle;
                             d.innerHTML = '<p class="card-number">' + num + '</p>' +
                                 '<h3>' + safeTitle + '</h3>' +
                                 '<p class="lo-card-summary">' + safeDesc + '</p>' +
@@ -2074,6 +2257,33 @@
                 } else if (loToolsWrap) {
                     loToolsWrap.style.display = 'none';
                 }
+                var loDemoBox = el.querySelector('.lo-demo-box');
+                if (loDemoBox) {
+                    var loDemoText = String(c.demoText || '').trim();
+                    var loDemoSub = String(c.demoSubtext || '').trim();
+                    var loDemoMainEl = loDemoBox.querySelector('.lo-demo-text');
+                    var loDemoSubEl = loDemoBox.querySelector('.lo-demo-subtext');
+                    if (loDemoText || loDemoSub) {
+                        loDemoBox.style.display = '';
+                        if (loDemoMainEl) {
+                            loDemoMainEl.innerHTML = loDemoText ? _w0RichTextHtml(c.demoText || '') : '';
+                        }
+                        if (loDemoSubEl) {
+                            if (loDemoSub) {
+                                loDemoSubEl.style.display = '';
+                                loDemoSubEl.innerHTML = _w0RichTextHtml(c.demoSubtext || '');
+                            } else {
+                                loDemoSubEl.style.display = 'none';
+                                loDemoSubEl.innerHTML = '';
+                            }
+                        }
+                    } else {
+                        loDemoBox.style.display = 'none';
+                    }
+                }
+                el.querySelectorAll('.reveal').forEach(function(node) {
+                    node.classList.add('visible');
+                });
                 break;
 
             case 'testimonials':
@@ -2086,13 +2296,20 @@
                 if (lLabel && c.sectionLabel) lLabel.innerHTML = c.sectionLabel;
                 var lTitle = el.querySelector('.section-title');
                 if (lTitle && c.sectionTitle) lTitle.innerHTML = c.sectionTitle;
+                _w0ApplyLogisticsTheme(el, c);
                 var lCta = el.querySelector('.logistics-cta .btn-primary');
+                var wsId = String(c.workshopId || '').trim() || 'workshop-0';
                 if (lCta && c.ctaText) lCta.textContent = c.ctaText;
-                if (lCta && c.ctaLink) lCta.href = c.ctaLink;
-                var wsId = c.workshopId || 'workshop-0';
+                if (lCta) lCta.href = _w0ResolveLogisticsCtaLink(c.ctaLink, wsId);
+                window._w0LatestLogisticsConfig = {
+                    workshopId: wsId,
+                    ctaLink: String(c.ctaLink || '').trim()
+                };
                 if (window._w0LogisticsWsId !== wsId) {
                     window._w0LogisticsWsId = wsId;
                     _w0LoadLogisticsFromWorkshop(wsId);
+                } else if (window._w0LatestLogisticsWorkshopData) {
+                    _w0ApplyLogisticsData(window._w0LatestLogisticsWorkshopData, window._w0LatestLogisticsWorkshopId || wsId);
                 }
                 break;
 
@@ -2103,7 +2320,7 @@
                 if (descFc && c.subtitle) descFc.innerHTML = c.subtitle;
                 var ctaFc = el.querySelector('.btn-primary');
                 if (ctaFc && c.ctaText) ctaFc.textContent = c.ctaText;
-                if (ctaFc && c.ctaLink) ctaFc.href = c.ctaLink;
+                if (ctaFc) ctaFc.href = _w0ResolveFinalCtaLink(c.ctaLink);
                 var waLink = el.querySelector('.cta-wa-link');
                 if (waLink) {
                     waLink.style.display = c.showWhatsapp !== false && c.whatsappUrl ? '' : 'none';
@@ -2225,6 +2442,9 @@
 
     var _w0LogisticsUnsub = null;
     window._w0LogisticsWsId = null;
+    window._w0LatestLogisticsConfig = null;
+    window._w0LatestLogisticsWorkshopData = null;
+    window._w0LatestLogisticsWorkshopId = '';
 
     function _w0LoadLogisticsFromWorkshop(wsId) {
         if (_w0LogisticsUnsub) { _w0LogisticsUnsub(); _w0LogisticsUnsub = null; }
@@ -2239,6 +2459,8 @@
     }
 
     function _w0ApplyLogisticsData(d, wsId) {
+        window._w0LatestLogisticsWorkshopData = d || null;
+        window._w0LatestLogisticsWorkshopId = String(wsId || '').trim();
         document.getElementById('lDuration').textContent = d.duration || '待定';
         var sessionsContainer = document.getElementById('lSessionsContainer');
         var globalCap = d.capacity || 0;
@@ -2247,15 +2469,21 @@
             var html = '';
             for (var i = 0; i < sessions.length; i++) {
                 var s = sessions[i];
-                var lbl = s.label || '';
-                var dt = (s.date || '待定') + (s.time ? '  ' + s.time : '');
+                var lbl = _escHtml(s.label || '');
+                var dt = _escHtml((s.date || '待定') + (s.time ? '  ' + s.time : ''));
+                var modePill = _w0ModePillHtml(s.mode || d.mode || 'offline');
                 var cap = s.capacity !== undefined ? s.capacity : globalCap;
                 var enrolled = s.enrolled || 0;
                 html += '<div class="logistics-session-block">';
                 html += '<div class="logistics-session-header">';
                 html += '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>';
+                html += '<div class="logistics-session-copy">';
+                html += '<div class="logistics-session-topline">';
                 if (lbl) html += '<div class="logistics-session-label">' + lbl + '</div>';
+                html += modePill;
+                html += '</div>';
                 html += '<div class="logistics-session-datetime">' + dt + '</div>';
+                html += '</div>';
                 html += '</div>';
                 if (cap > 0) {
                     html += '<div class="logistics-session-cap">' + buildCapacityBar(cap, enrolled, {
@@ -2270,12 +2498,17 @@
 
         if (d.sessions && d.sessions.length) {
             var sorted = sortSessionsList(d.sessions.filter(function(s) { return s.visible !== false; }));
-            renderSessionBlocks(sorted);
+            if (sorted.length) {
+                renderSessionBlocks(sorted);
+            } else {
+                sessionsContainer.innerHTML = '';
+            }
         } else {
-            var dt = (d.date || '即將公佈') + (d.time ? '  ' + d.time : '');
+            var dt = _escHtml((d.date || '即將公佈') + (d.time ? '  ' + d.time : ''));
+            var singleModePill = _w0ModePillHtml(d.mode || 'offline');
             sessionsContainer.innerHTML = '<div class="logistics-session-block"><div class="logistics-session-header">' +
                 '<div class="logistics-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
-                '<div class="logistics-session-datetime">' + dt + '</div></div>' +
+                '<div class="logistics-session-copy"><div class="logistics-session-topline">' + singleModePill + '</div><div class="logistics-session-datetime">' + dt + '</div></div></div>' +
                 (globalCap > 0 ? '<div class="logistics-session-cap">' + buildCapacityBar(globalCap, d.enrolled || 0, { barClass: 'ws0-cap-bar', rectClass: 'ws0-cap-rect', textClass: 'ws0-cap-text', format: 'enrolled', spanWrap: true }) + '</div>' : '') +
                 '</div>';
         }
@@ -2287,7 +2520,7 @@
 
         var modeEl = document.getElementById('lMode');
         if (modeEl) {
-            var m = d.mode === 'online' ? '線上' : d.mode === 'both' ? '實體 + 線上' : '實體';
+            var m = _w0ModeLabel(d.mode);
             var displayLoc = d.district || d.location || '';
             if (displayLoc && d.mode !== 'online') m += ' · ' + displayLoc;
             modeEl.textContent = m;
@@ -2295,9 +2528,11 @@
 
         var ctaEl = document.getElementById('w0-cta-link');
         if (ctaEl) {
-            var rawCta = (d.ctaLink || '').trim();
-            var isSelf = !rawCta || rawCta === '#' || rawCta.indexOf(wsId) !== -1;
-            ctaEl.href = isSelf ? '/workshop-payment?id=' + wsId : rawCta;
+            var cfg = window._w0LatestLogisticsConfig || {};
+            var effectiveWsId = String(cfg.workshopId || '').trim() || String(wsId || '').trim() || 'workshop-0';
+            var rawCta = String(cfg.ctaLink || '').trim();
+            if (!rawCta) rawCta = String(d.ctaLink || '').trim();
+            ctaEl.href = _w0ResolveLogisticsCtaLink(rawCta, effectiveWsId);
         }
     }
 
@@ -2313,174 +2548,7 @@
     });
     </script>
 
-    <!-- Background "0" Glassmorphism Animation -->
     <script>
-    (function() {
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-        const CONFIG = {
-            tileSize: 12,
-            gap: 2,
-            layerDepth: 20,
-            charScale: 0.8,
-            colors: {
-                front: { r: 224, g: 122, b: 95 },
-                back:  { r: 120, g: 120, b: 130 }
-            },
-            animation: {
-                jitterRange: 1.5,
-                jitterSpeed: 0.002,
-                pulseSpeed: 0.003
-            },
-            rotation: { x: -35, y: 23, z: 0 },
-            models: ['0']
-        };
-
-        const canvas = document.getElementById('bg-zero-canvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-
-        let tiles = [];
-        let time = 0;
-
-        class Tile {
-            constructor(localX, localY, z, cx, cy, w, h, isBackLayer) {
-                this.localX = localX;
-                this.localY = localY;
-                this.originZ = z;
-                this.cx = cx;
-                this.cy = cy;
-                this.w = w;
-                this.h = h;
-                this.isBackLayer = isBackLayer;
-                this.baseAlpha = 0.15 + Math.random() * 0.35;
-                this.pulseOffset = Math.random() * Math.PI * 2;
-                this.jitterPhaseX = Math.random() * Math.PI * 2;
-                this.jitterPhaseY = Math.random() * Math.PI * 2;
-                this.screenX = 0;
-                this.screenY = 0;
-                this.depth = 0;
-                this.currentAlpha = 1;
-            }
-
-            update(timestamp) {
-                const jx = Math.sin(time * CONFIG.animation.jitterSpeed + this.jitterPhaseX) * CONFIG.animation.jitterRange;
-                const jy = Math.cos(time * CONFIG.animation.jitterSpeed + this.jitterPhaseY) * CONFIG.animation.jitterRange;
-                let x = this.localX + jx;
-                let y = this.localY + jy;
-                let z = this.originZ;
-                const radX = CONFIG.rotation.x * (Math.PI / 180);
-                const radY = CONFIG.rotation.y * (Math.PI / 180);
-                const radZ = CONFIG.rotation.z * (Math.PI / 180);
-                let y1 = y * Math.cos(radX) - z * Math.sin(radX);
-                let z1 = y * Math.sin(radX) + z * Math.cos(radX);
-                let x2 = x * Math.cos(radY) + z1 * Math.sin(radY);
-                let z2 = -x * Math.sin(radY) + z1 * Math.cos(radY);
-                let x3 = x2 * Math.cos(radZ) - y1 * Math.sin(radZ);
-                let y3 = x2 * Math.sin(radZ) + y1 * Math.cos(radZ);
-                this.screenX = x3 + this.cx;
-                this.screenY = y3 + this.cy;
-                this.depth = z2;
-                const pulse = Math.sin(time * CONFIG.animation.pulseSpeed + this.pulseOffset);
-                this.currentAlpha = Math.max(0, Math.min(1, this.baseAlpha + (pulse * 0.1)));
-            }
-
-            draw(ctx) {
-                const c = this.isBackLayer ? CONFIG.colors.back : CONFIG.colors.front;
-                let alpha = this.currentAlpha;
-                if (this.isBackLayer) alpha *= 0.6;
-                ctx.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
-                ctx.beginPath();
-                ctx.rect(this.screenX, this.screenY, this.w, this.h);
-                ctx.fill();
-                const borderAlpha = this.isBackLayer ? 0.1 : 0.3;
-                ctx.strokeStyle = `rgba(${c.r}, ${c.g}, ${c.b}, ${borderAlpha})`;
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-        }
-
-        function generateScene() {
-            tiles = [];
-            const dpr = window.devicePixelRatio || 1;
-            const screenW = canvas.width / dpr;
-            const screenH = canvas.height / dpr;
-            const isDesktop = screenW >= 768;
-            const charBaseW = isDesktop ? 600 : Math.min(screenW * 0.85, 420);
-            const charBaseH = isDesktop ? 900 : Math.min(screenH * 0.65, 630);
-            const cx = screenW / 2;
-            const cy = screenH / 2;
-            createTilesForCharacter('0', cx, cy, charBaseW, charBaseH);
-        }
-
-        function createTilesForCharacter(char, cx, cy, w, h) {
-            const buffer = document.createElement('canvas');
-            buffer.width = w;
-            buffer.height = h;
-            const bctx = buffer.getContext('2d');
-            bctx.fillStyle = '#000';
-            bctx.font = `900 ${h * 0.8}px Arial, Helvetica, sans-serif`;
-            bctx.textAlign = 'center';
-            bctx.textBaseline = 'middle';
-            bctx.fillText(char, w / 2, h / 2);
-            const idata = bctx.getImageData(0, 0, w, h);
-            const data = idata.data;
-            const step = CONFIG.tileSize;
-            for (let y = 0; y < h; y += step) {
-                for (let x = 0; x < w; x += step) {
-                    const index = (y * w + x) * 4 + 3;
-                    if (data[index] > 50) {
-                        const localX = x - w / 2;
-                        const localY = y - h / 2;
-                        const tileW = CONFIG.tileSize - CONFIG.gap;
-                        const tileH = CONFIG.tileSize - CONFIG.gap;
-                        const jX = (Math.random() - 0.5) * 4;
-                        const jY = (Math.random() - 0.5) * 4;
-                        tiles.push(new Tile(localX + jX, localY + jY, CONFIG.layerDepth / 2, cx, cy, tileW, tileH, false));
-                        tiles.push(new Tile(localX + jX, localY + jY, -CONFIG.layerDepth / 2, cx, cy, tileW, tileH, true));
-                    }
-                }
-            }
-        }
-
-        var lastInitWidth = 0;
-
-        function init(force) {
-            const wrap = document.getElementById('bg-zero-wrap');
-            const screenW = wrap ? wrap.clientWidth : window.innerWidth;
-            const screenH = wrap ? wrap.clientHeight : window.innerHeight;
-            if (!force && Math.abs(screenW - lastInitWidth) < 5) return;
-            lastInitWidth = screenW;
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = screenW * dpr;
-            canvas.height = screenH * dpr;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(dpr, dpr);
-            generateScene();
-        }
-
-        function loop(timestamp) {
-            time = timestamp;
-            const dpr = window.devicePixelRatio || 1;
-            const screenW = canvas.width / dpr;
-            const screenH = canvas.height / dpr;
-            ctx.clearRect(0, 0, screenW + 1, screenH + 1);
-            tiles.forEach(tile => tile.update(timestamp));
-            tiles.sort((a, b) => a.depth - b.depth);
-            tiles.forEach(tile => tile.draw(ctx));
-            requestAnimationFrame(loop);
-        }
-
-        init(true);
-        requestAnimationFrame(loop);
-
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => init(false), 250);
-        });
-    })();
-
     // Lock pinch/double-tap zoom on mobile browsers
     (function lockPageZoom() {
         var lastTouchEnd = 0;

@@ -38,6 +38,13 @@ yarn-error.log*
 # Temporary files
 *.tmp
 *.temp
+*.bak
+
+# Local game / tooling artifacts (not for hosting)
+elevator-action-gb/*.db
+elevator-action-gb/*.db-shm
+elevator-action-gb/*.db-wal
+extensions/
 
 # Build outputs (if any)
 dist/

@@ -6,6 +6,7 @@
         return JSON.parse(JSON.stringify(value));
     }
 
+    var WORKSHOP0_ZERO_BG_IFRAME_URL = '/backgrounds/workshop-zero/index.html';
     var WORKSHOP0_ZERO_BG_CODE = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -460,18 +461,29 @@ body {
         {
             id: 'workshop0-zero',
             name: 'AI 起動班 Zero',
-            badge: 'Workshop 0',
-            description: '起動班目前使用的立體 0 字粒子背景，已修正手機版顯示。',
+            badge: '穩定',
+            description: '起動班目前使用的立體 0 字粒子背景，改為獨立頁面載入以避免主頁初始化時閃出舊動畫。',
             previewHtml: '<div style="width:100%;height:100%;background:linear-gradient(160deg,#0f172a 0%,#1e293b 100%);position:relative;overflow:hidden;"><div style="position:absolute;inset:14% 28%;border:12px solid rgba(224,122,95,0.72);border-radius:999px;filter:drop-shadow(0 18px 24px rgba(0,0,0,0.3));"></div><div style="position:absolute;inset:28% 40%;border:8px solid rgba(255,255,255,0.16);border-radius:999px;"></div><div style="position:absolute;left:16%;top:20%;width:10px;height:10px;background:rgba(224,122,95,0.42);box-shadow:14px 26px 0 rgba(224,122,95,0.28),30px 10px 0 rgba(224,122,95,0.2),110px 38px 0 rgba(255,255,255,0.12),126px 18px 0 rgba(224,122,95,0.2),138px 64px 0 rgba(224,122,95,0.26);"></div></div>',
-            code: WORKSHOP0_ZERO_BG_CODE
+            sourceType: 'iframe',
+            code: '',
+            iframeUrl: WORKSHOP0_ZERO_BG_IFRAME_URL
         },
         {
             id: 'linktree-cosmic',
-            name: 'Linktree 宇宙星球',
+            name: 'Linktree 宇宙星球（內嵌程式碼 · 舊）',
             badge: 'Linktree',
-            description: '把 Linktree 的深空、行星、星塵氛圍抽成可重用的背景動畫。',
+            description: '以 srcdoc 內嵌整段動畫。若與頁面其他腳本衝突，請改用最穩定 iframe 託管版本。',
             previewHtml: '<div style="width:100%;height:100%;background:radial-gradient(circle at 22% 18%, rgba(59,130,246,0.34), transparent 24%), radial-gradient(circle at 76% 22%, rgba(56,189,248,0.22), transparent 24%), radial-gradient(circle at 50% 45%, rgba(255,155,58,0.38), transparent 18%), linear-gradient(180deg,#071b42 0%,#08204a 58%,#040d21 100%);position:relative;overflow:hidden;"><div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px);background-size:22px 22px;opacity:0.28;"></div><div style="position:absolute;left:50%;top:46%;width:26px;height:26px;border-radius:50%;margin:-13px 0 0 -13px;background:radial-gradient(circle at 35% 35%, #fff7c2 0%, #ffb347 48%, #ff7b22 100%);box-shadow:0 0 28px rgba(255,140,46,0.48);"></div><div style="position:absolute;left:22%;top:30%;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #4faebd 48%, #11243e 100%);"></div><div style="position:absolute;left:68%;top:22%;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #f4d03f 48%, #473a0b 100%);box-shadow:0 0 18px rgba(244,208,63,0.22);"></div><div style="position:absolute;left:67%;top:22%;width:42px;height:14px;border-radius:50%;border:2px solid rgba(255,235,160,0.68);transform:translate(-9px,7px) rotate(-14deg);"></div><div style="position:absolute;left:62%;top:62%;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #5d3fd3 48%, #140d31 100%);"></div></div>',
             code: LINKTREE_COSMIC_BG_CODE
+        },
+        {
+            id: 'linktree-cosmic-hosted',
+            name: 'Linktree 宇宙星球（託管 iframe）',
+            badge: '穩定',
+            description: '與內嵌程式碼同款視覺，改為獨立頁面載入，避免與主頁腳本互相干擾。',
+            previewHtml: '<div style="width:100%;height:100%;background:radial-gradient(circle at 22% 18%, rgba(59,130,246,0.34), transparent 24%), radial-gradient(circle at 76% 22%, rgba(56,189,248,0.22), transparent 24%), radial-gradient(circle at 50% 45%, rgba(255,155,58,0.38), transparent 18%), linear-gradient(180deg,#071b42 0%,#08204a 58%,#040d21 100%);position:relative;overflow:hidden;"><div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px);background-size:22px 22px;opacity:0.28;"></div><div style="position:absolute;left:50%;top:46%;width:26px;height:26px;border-radius:50%;margin:-13px 0 0 -13px;background:radial-gradient(circle at 35% 35%, #fff7c2 0%, #ffb347 48%, #ff7b22 100%);box-shadow:0 0 28px rgba(255,140,46,0.48);"></div><div style="position:absolute;left:22%;top:30%;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #4faebd 48%, #11243e 100%);"></div><div style="position:absolute;left:68%;top:22%;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #f4d03f 48%, #473a0b 100%);box-shadow:0 0 18px rgba(244,208,63,0.22);"></div><div style="position:absolute;left:67%;top:22%;width:42px;height:14px;border-radius:50%;border:2px solid rgba(255,235,160,0.68);transform:translate(-9px,7px) rotate(-14deg);"></div><div style="position:absolute;left:62%;top:62%;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff 0%, #5d3fd3 48%, #140d31 100%);"></div></div>',
+            code: '',
+            iframeUrl: '/backgrounds/cosmic-orbit/index.html'
         }
     ];
 
@@ -521,7 +533,10 @@ body {
     }
 
     function addCustomPreset(preset) {
-        if (!preset || !preset.id || !preset.code) return;
+        if (!preset || !preset.id) return;
+        var hasCode = !!(preset.code && String(preset.code).trim());
+        var hasIframe = !!(preset.iframeUrl && String(preset.iframeUrl).trim());
+        if (!hasCode && !hasIframe) return;
         if (!Array.isArray(global._bgAnimCustomPresets)) global._bgAnimCustomPresets = [];
         for (var i = 0; i < global._bgAnimCustomPresets.length; i++) {
             if (global._bgAnimCustomPresets[i].id === preset.id) {
@@ -548,6 +563,7 @@ body {
         global.BACKGROUND_ANIMATION_PRESETS = getAllPresets();
     }
 
+    global.WORKSHOP0_ZERO_BG_IFRAME_URL = WORKSHOP0_ZERO_BG_IFRAME_URL;
     global.WORKSHOP0_ZERO_BG_CODE = WORKSHOP0_ZERO_BG_CODE;
     global.LINKTREE_COSMIC_BG_CODE = LINKTREE_COSMIC_BG_CODE;
     global._bgAnimCustomPresets = [];

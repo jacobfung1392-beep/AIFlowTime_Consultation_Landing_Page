@@ -34,6 +34,11 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
+        body.layout-pending .page-content {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
         /* =============================================
            BACKGROUND "0" ANIMATION (same as Workshop 0)
@@ -200,7 +205,7 @@
         }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Background "0" animation (same as Workshop 0) -->
     <div id="bg-zero-wrap"><canvas id="bg-zero-canvas"></canvas></div>
     <!-- Noise overlay -->
@@ -424,6 +429,13 @@
         var _countdownQuery = new URLSearchParams(window.location.search);
         var _countdownIsPreview = _countdownQuery.get('preview') === '1';
         var _countdownLayoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _countdownQuery.get('layoutDoc') || 'countdown';
+        var _countdownPendingController = typeof aiflowCreateLayoutPendingController === 'function'
+            ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+            : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
+
+        function _finishInitialCountdownLayoutRender() {
+            _countdownPendingController.finish();
+        }
         initFirebase(function() {
             var db = firebase.firestore();
             var countdownSection = document.getElementById('countdown-block');
@@ -519,6 +531,7 @@
                 initLayoutPreviewBridge({
                     onLayoutPreview: function(sections) {
                         applySections(sections);
+                        _finishInitialCountdownLayoutRender();
                     }
                 });
                 return;
@@ -532,7 +545,10 @@
                 if (doc.exists && doc.data().sections && doc.data().sections.length) {
                     applySections(doc.data().sections);
                 }
-            }).catch(function() {});
+                _finishInitialCountdownLayoutRender();
+            }).catch(function() {
+                _finishInitialCountdownLayoutRender();
+            });
         });
     </script>
 </body>

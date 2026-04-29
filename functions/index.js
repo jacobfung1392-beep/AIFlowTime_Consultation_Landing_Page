@@ -10,6 +10,7 @@
  * - inspectProteinWorkshopWebhook: signed receiver used for workshop webhook smoke tests
  * - upsertCarousel: OpenClaw HMAC webhook -> carouselProjects (template factory)
  * - confirmPaymentUpload: optional SIMPLE_BOOKING_WEBHOOK_URL (plain JSON POST) OR HMAC Protein webhook; optional Twilio via WORKSHOP_WHATSAPP_ALERT_JSON
+ * - publicWorkshopEvents: GET JSON — all Firestore `workshops` (optional ?visibleOnly=1)
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
@@ -2923,6 +2924,85 @@ exports.upsertCarousel = onRequest(
     } catch (err) {
       console.error("upsertCarousel error:", err);
       res.status(500).send("Server error");
+    }
+  }
+);
+
+/**
+ * Recursively convert Firestore Timestamps (and nested data) for JSON responses.
+ */
+function _serializeFirestoreValueForJson(val) {
+  if (val === null || val === undefined) return val;
+  if (val instanceof admin.firestore.Timestamp) return val.toDate().toISOString();
+  if (val instanceof Date) return val.toISOString();
+  if (Array.isArray(val)) return val.map(_serializeFirestoreValueForJson);
+  if (typeof val === "object") {
+    const out = {};
+    for (const k of Object.keys(val)) {
+      out[k] = _serializeFirestoreValueForJson(val[k]);
+    }
+    return out;
+  }
+  return val;
+}
+
+/**
+ * GET — public JSON list of workshop documents (Firestore `workshops`).
+ * Query: ?visibleOnly=1 — only rows where visible !== false and archived !== true.
+ *
+ * URL (direct):
+ *   https://asia-east2-aiflowtime-hk.cloudfunctions.net/publicWorkshopEvents
+ * URL (via hosting rewrite):
+ *   https://aiflowtime-hk.web.app/api/workshop-events
+ */
+exports.publicWorkshopEvents = onRequest(
+  { region: REGION, timeoutSeconds: 30, cors: true, invoker: "public" },
+  async (req, res) => {
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+    if (req.method !== "GET") {
+      res.status(405).json({ ok: false, error: "Method not allowed" });
+      return;
+    }
+    try {
+      const snap = await db.collection("workshops").get();
+      const visibleOnly =
+        String(req.query.visibleOnly || "") === "1" ||
+        String(req.query.visibleOnly || "").toLowerCase() === "true";
+      const workshops = [];
+      snap.forEach((doc) => {
+        const raw = doc.data() || {};
+        if (visibleOnly) {
+          if (raw.visible === false) return;
+          if (raw.archived === true) return;
+        }
+        workshops.push({
+          id: doc.id,
+          ..._serializeFirestoreValueForJson(raw),
+        });
+      });
+      workshops.sort((a, b) => {
+        const ao = Number(a.order);
+        const bo = Number(b.order);
+        const aOk = Number.isFinite(ao);
+        const bOk = Number.isFinite(bo);
+        if (aOk && bOk) return ao - bo;
+        if (aOk) return -1;
+        if (bOk) return 1;
+        return String(a.title || a.id || "").localeCompare(String(b.title || b.id || ""));
+      });
+      res.set("Cache-Control", "public, max-age=60");
+      res.status(200).json({
+        ok: true,
+        generatedAt: new Date().toISOString(),
+        count: workshops.length,
+        workshops,
+      });
+    } catch (err) {
+      console.error("publicWorkshopEvents:", err);
+      res.status(500).json({ ok: false, error: "Failed to load workshops" });
     }
   }
 );

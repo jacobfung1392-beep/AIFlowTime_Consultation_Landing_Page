@@ -10,9 +10,12 @@
 // 7. Set "Who has access" to "Anyone"
 // 8. Click "Deploy"
 // 9. Copy the Web App URL
-// 10. Replace the Google Script URL in linktree.html (around line 1803) with your actual URL
+// 10. Replace the Google Script URL in linktree.html (and workshop pages) with your actual URL
 //
 // The script will automatically create a new sheet called "AIFlowTime Lead Magnet" in your Google Drive
+//
+// Upgrading an existing sheet: insert an "Email" column after "Name" on row 1 if your sheet still
+// has the old 5-column header row, so new rows align with Timestamp, Name, Email, WhatsApp, Source, Date.
 
 // Handle GET requests (when someone accesses the URL directly in browser)
 function doGet(e) {
@@ -74,18 +77,19 @@ function doPost(e) {
       sheet = ss.insertSheet(sheetName);
       // Add headers
       sheet.appendRow([
-        'Timestamp', 
-        'Name', 
-        'WhatsApp', 
-        'Source Page', 
+        'Timestamp',
+        'Name',
+        'Email',
+        'WhatsApp',
+        'Source Page',
         'Submission Date (HKT)'
       ]);
       // Make headers bold
-      sheet.getRange(1, 1, 1, 5).setFontWeight('bold');
+      sheet.getRange(1, 1, 1, 6).setFontWeight('bold');
       // Freeze header row
       sheet.setFrozenRows(1);
       // Auto-resize columns
-      sheet.autoResizeColumns(1, 5);
+      sheet.autoResizeColumns(1, 6);
       Logger.log('✅ Created new sheet: ' + sheetName);
     } else {
       Logger.log('✅ Using existing sheet: ' + sheetName);
@@ -102,28 +106,29 @@ function doPost(e) {
     
     // Extract data fields (handle both JSON and form-encoded)
     const name = data.name || data.Name || '';
+    const email = data.email || data.Email || '';
     const whatsapp = data.whatsapp || data.WhatsApp || data.whatsappNumber || '';
     const source = data.source || data.Source || 'linktree';
     
-    Logger.log('Extracted data - Name: ' + name + ', WhatsApp: ' + whatsapp + ', Source: ' + source);
+    Logger.log('Extracted data - Name: ' + name + ', Email: ' + email + ', WhatsApp: ' + whatsapp + ', Source: ' + source);
     
-    // Validate required fields
-    if (!name || !whatsapp) {
-      throw new Error('Missing required fields: name or whatsapp');
+    // Client enforces per-lead required fields; server requires at least one contact trace
+    if (!name && !email && !whatsapp) {
+      throw new Error('Missing submission data (name/email/whatsapp)');
     }
     
     // Append the form data with error handling
     try {
       sheet.appendRow([
-        hkTime,  // Timestamp in HKT
+        hkTime,
         name,
+        email,
         whatsapp,
         source,
-        hkTime  // Submission Date (HKT)
+        hkTime
       ]);
       
-      // Auto-resize columns to fit content
-      sheet.autoResizeColumns(1, 5);
+      sheet.autoResizeColumns(1, 6);
       
       Logger.log('Row appended successfully');
     } catch (appendError) {
@@ -133,8 +138,7 @@ function doPost(e) {
     
     // Log success for debugging
     Logger.log('Lead magnet data saved successfully');
-    Logger.log('Name: ' + data.name);
-    Logger.log('WhatsApp: ' + data.whatsapp);
+    Logger.log('Name: ' + name + ', Email: ' + email + ', WhatsApp: ' + whatsapp);
     Logger.log('Spreadsheet URL: ' + ss.getUrl());
     
     // Return success response
@@ -165,6 +169,7 @@ function testDoPost() {
     postData: {
       contents: JSON.stringify({
         name: 'Test User',
+        email: 'test@example.com',
         whatsapp: '+852 1234 5678',
         timestamp: new Date().toISOString(),
         source: 'linktree'

@@ -8,11 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Workshop CMS | AIFLOWTIME</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23D97757'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif'>A</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Lead Magnets: sticky list column sits below .cms-header (~56px) + padding */
+            --lead-def-sticky-top: max(12px, calc(env(safe-area-inset-top, 0px) + 72px));
             --bg-cream: #FAF9F7;
             --bg-off: #E8E4DF;
             --bg-pampas: #F4F3EE;
@@ -32,7 +35,12 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; overflow-x: hidden; }
+        /*
+         * Use overflow-x: clip (not hidden) so overflow-y stays visible. Pairing overflow-x: hidden
+         * with overflow-y: visible forces overflow-y: auto on body, which creates a scrollport and
+         * breaks position: sticky relative to the viewport (e.g. Lead Magnets left column).
+         */
+        html { scroll-behavior: smooth; overflow-x: clip; }
 
         body {
             font-family: 'Noto Sans TC', sans-serif;
@@ -41,7 +49,7 @@
             line-height: 1.7;
             font-size: 16px;
             font-weight: 400;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* Header */
@@ -398,6 +406,26 @@
             align-items: center; justify-content: center; padding: 20px;
         }
         .modal-overlay.show { display: flex; }
+        .lead-asset-doc-name-overlay {
+            display: none; position: fixed; inset: 0; z-index: 2100;
+            background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .lead-asset-doc-name-overlay.open { display: flex; }
+        .lead-asset-doc-name-box {
+            background: var(--white); border-radius: 18px; padding: 22px 24px 20px;
+            width: min(420px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 1px solid var(--bg-off);
+        }
+        .lead-asset-doc-name-box h4 {
+            margin: 0 0 8px; font-size: 17px; color: var(--text);
+        }
+        .lead-asset-doc-name-box .lead-asset-doc-name-hint {
+            font-size: 13px; color: var(--text-light); line-height: 1.55; margin: 0 0 14px;
+        }
+        .lead-asset-doc-name-box .lead-asset-doc-name-actions {
+            display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;
+        }
         .modal-box {
             background: var(--white); border-radius: 20px; padding: 28px;
             max-width: 920px; width: min(920px, 100%); max-height: 86vh; overflow-y: auto;
@@ -449,12 +477,41 @@
             gap: 12px;
         }
         .media-picker-item {
+            position: relative;
             border: 1.5px solid var(--bg-off);
             border-radius: 14px;
             overflow: hidden;
             background: var(--white);
             cursor: pointer;
             transition: all 0.2s ease;
+        }
+        .media-picker-doc-edit {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 4;
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.92);
+            color: var(--accent);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, transform 0.15s;
+        }
+        .media-picker-doc-edit:hover {
+            background: var(--white);
+            transform: scale(1.05);
+        }
+        .media-picker-doc-edit svg {
+            width: 16px;
+            height: 16px;
+            display: block;
         }
         .media-picker-item:hover {
             border-color: var(--accent);
@@ -472,6 +529,26 @@
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+        .media-picker-thumb.doc {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 14px;
+            background: linear-gradient(180deg, rgba(245,135,107,0.14), rgba(59,59,59,0.08));
+        }
+        .media-picker-doc-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(59,59,59,0.82);
+            color: var(--white);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
         .media-picker-meta {
             padding: 10px 12px 12px;
@@ -881,6 +958,620 @@
         }
         .forms-type-pill:hover { border-color: var(--accent); color: var(--accent); }
         .forms-type-pill.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .lead-def-shell {
+            display: grid;
+            grid-template-columns: minmax(240px, 0.28fr) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+        /* Definitions tab: break out of 900px .container (~1.4× → 1260px) for wider Lead Settings */
+        #tabLeadsDefinitions.lead-definitions-wide {
+            width: min(1260px, calc(100vw - 32px));
+            margin-left: 50%;
+            transform: translateX(-50%);
+            box-sizing: border-box;
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+        .lead-def-editor-panel .search-input {
+            max-width: none;
+        }
+        .lead-def-list-panel,
+        .lead-def-editor-panel {
+            background: var(--white);
+            border: 1px solid var(--bg-off);
+            border-radius: 20px;
+            box-shadow: 0 12px 30px var(--shadow);
+        }
+        .lead-def-list-panel {
+            padding: 18px;
+            position: sticky;
+            /* Sit just under the sticky CMS header so the column does not slide under it */
+            top: var(--lead-def-sticky-top);
+            align-self: start;
+            max-height: calc(100vh - var(--lead-def-sticky-top) - 16px);
+            overflow: visible;
+            z-index: 2;
+        }
+        .lead-def-editor-panel {
+            padding: 20px;
+            min-width: 0;
+            background: var(--white);
+        }
+        .lead-def-list {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            max-height: calc(100vh - var(--lead-def-sticky-top) - 52px);
+            overflow: auto;
+            padding-right: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .lead-def-card {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            flex-shrink: 0;
+            border: 1px solid rgba(217,119,87,0.16);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(252,246,242,0.96), rgba(255,255,255,0.92));
+            cursor: pointer;
+            transition: all 0.18s;
+            overflow: hidden;
+        }
+        .lead-def-card:hover { border-color: rgba(217,119,87,0.35); box-shadow: 0 10px 28px rgba(0,0,0,0.08); transform: translateY(-1px); }
+        .lead-def-card.active { border-color: var(--accent); box-shadow: 0 12px 28px rgba(217,119,87,0.14); }
+        .lead-def-card-media {
+            flex-shrink: 0;
+            height: 112px;
+            background: linear-gradient(180deg, rgba(17,17,17,0.05), rgba(17,17,17,0.01));
+            overflow: hidden;
+            position: relative;
+        }
+        .lead-def-card-media img,
+        .lead-def-card-media video {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+        .lead-def-card-media.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(59,59,59,0.5);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, rgba(252,246,242,0.95), rgba(255,255,255,0.96));
+        }
+        .lead-def-card-body {
+            flex: 0 0 auto;
+            padding: 16px 14px 18px;
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 252, 248, 0.97);
+        }
+        .lead-def-card-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+        .lead-def-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .lead-def-chip {
+            display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
+            font-size: 11px; font-weight: 800; background: rgba(0,0,0,0.06); color: var(--text-light);
+        }
+        .lead-def-chip.active { background: rgba(76,175,80,0.14); color: #2E7D32; }
+        .lead-def-chip.draft { background: rgba(255,152,0,0.16); color: #B45309; }
+        .lead-def-chip.archived { background: rgba(97,97,97,0.16); color: #424242; }
+        .lead-def-card-usage {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .lead-def-card-usage-row {
+            padding: 9px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(17,17,17,0.05);
+        }
+        .lead-def-card-usage-page {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .lead-def-card-usage-meta {
+            margin-top: 4px;
+            font-size: 11px;
+            line-height: 1.65;
+            color: var(--text-light);
+            word-break: break-word;
+            white-space: normal;
+        }
+        .lead-def-card-usage-empty {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px dashed rgba(217,119,87,0.18);
+            background: rgba(255,255,255,0.72);
+            font-size: 11px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+        .lead-def-empty {
+            min-height: 300px; display: flex; align-items: center; justify-content: center;
+            text-align: center; color: var(--text-light); font-size: 14px;
+            border: 1px dashed var(--bg-off); border-radius: 16px; background: rgba(0,0,0,0.02); padding: 24px;
+        }
+        .lead-def-editor-header {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+            margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--bg-off);
+            flex-wrap: nowrap;
+            position: sticky;
+            top: var(--lead-def-sticky-top);
+            z-index: 12;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            padding-top: 6px;
+            margin-top: -6px;
+        }
+        .lead-def-editor-header-actions {
+            display: flex; gap: 10px; flex-wrap: nowrap; flex-shrink: 0; align-items: center;
+        }
+        .lead-def-editor-header-actions .btn {
+            white-space: nowrap;
+        }
+        .lead-def-editor-heading { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+        .lead-def-editor-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+        .lead-def-editor-header h2 { font-size: 24px; margin: 0; }
+        .lead-def-save-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; transition: opacity 0.25s; }
+        .lead-def-save-status.saved { color: var(--accent); }
+        .lead-def-save-status.unsaved { color: #C62828; }
+        .lead-def-save-status .save-icon { width: 16px; height: 16px; flex-shrink: 0; }
+        .lead-def-editor-shell { display: flex; flex-direction: column; gap: 16px; }
+        .lead-def-hero-card,
+        .lead-def-section-card {
+            background: rgba(255,255,255,0.94);
+            border: 1px solid rgba(217,119,87,0.14);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+            backdrop-filter: blur(4px);
+        }
+        .lead-def-hero-grid {
+            display: grid;
+            grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+        .lead-def-hero-grid .lead-def-field--media .lead-image-zone {
+            min-height: 132px;
+            padding: 14px;
+        }
+        .lead-def-hero-grid .lead-image-zone.has-image {
+            padding: 0;
+        }
+        .lead-def-hero-grid .lead-image-zone .preview-wrap {
+            min-height: 112px;
+        }
+        .lead-def-hero-grid .lead-image-zone .preview-wrap img,
+        .lead-def-hero-grid .lead-image-zone .preview-wrap video {
+            max-height: 160px;
+        }
+        .lead-def-hero-fields {
+            width: 100%;
+            min-width: 0;
+        }
+        .lead-def-hero-fields .lead-def-field input[type="text"],
+        .lead-def-hero-fields .lead-def-field input:not([type]),
+        .lead-def-hero-fields .lead-def-field textarea,
+        .lead-def-hero-fields .lead-def-field select.mf-select {
+            width: 100%;
+            max-width: none;
+            box-sizing: border-box;
+        }
+        .lead-def-hero-fields,
+        .lead-def-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .lead-def-hero-fields {
+            min-height: 100%;
+        }
+        .lead-def-hero-primary,
+        .lead-def-hero-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .lead-def-hero-bottom {
+            margin-top: auto;
+            padding-top: 12px;
+        }
+        .lead-def-section-head {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .lead-def-section-kicker {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+        .lead-def-section-head h3 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--text);
+        }
+        .lead-def-section-head p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+        .lead-def-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 0; }
+        .lead-def-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .lead-def-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 0; min-width: 0; }
+        .lead-def-field label { font-size: 12px; font-weight: 700; color: var(--text-light); }
+        .lead-def-field input,
+        .lead-def-field textarea,
+        .lead-def-field select {
+            width: 100%; border: 1px solid var(--bg-off); border-radius: 12px; background: rgba(255,255,255,0.98);
+            padding: 11px 13px; font: inherit; color: var(--text);
+        }
+        .lead-def-field input:focus,
+        .lead-def-field textarea:focus,
+        .lead-def-field select:focus {
+            outline: none;
+            border-color: rgba(217,119,87,0.6);
+            box-shadow: 0 0 0 3px rgba(217,119,87,0.12);
+        }
+        .lead-def-field select.mf-select {
+            width: 100%;
+            height: auto;
+            min-height: 40px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1.5px solid var(--bg-off);
+            font-size: 13px;
+        }
+        .lead-def-field textarea { resize: vertical; min-height: 76px; }
+        .lead-def-field-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .lead-def-field-head label,
+        .lead-def-field-head .lead-def-field-inline-title { margin: 0; font-size: 12px; font-weight: 700; color: var(--text-light); }
+        .lead-field-helper {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+        .lead-def-checkbox {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            align-items: start;
+            gap: 10px;
+            color: var(--text);
+            padding: 12px 14px;
+            border: 1px solid rgba(217,119,87,0.18);
+            border-radius: 14px;
+            align-self: center;
+            cursor: pointer;
+            background: linear-gradient(180deg, rgba(252,246,242,0.95), rgba(255,255,255,0.95));
+            width: min(100%, 420px);
+            max-width: 420px;
+            box-sizing: border-box;
+            margin-inline: auto;
+        }
+        .lead-def-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            margin-top: 2px;
+        }
+        .lead-def-checkbox-copy {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .lead-def-checkbox-title {
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+        .lead-def-checkbox-sub {
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .lead-def-field--notes textarea { min-height: 132px; }
+        .lead-image-zone {
+            border: 2px dashed rgba(217,119,87,0.18);
+            border-radius: 16px;
+            padding: 18px;
+            min-height: 180px;
+            background: linear-gradient(180deg, rgba(252,246,242,0.96), rgba(255,255,255,0.98));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .lead-image-zone:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(217,119,87,0.12);
+        }
+        .lead-image-zone.has-image {
+            padding: 0;
+            border-style: solid;
+            background: var(--white);
+        }
+        .lead-image-zone .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+            pointer-events: none;
+        }
+        .lead-image-zone .upload-placeholder .upload-icon {
+            width: 54px;
+            height: 54px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background: rgba(217,119,87,0.10);
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 800;
+        }
+        .lead-image-zone .upload-placeholder .upload-hint {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 700;
+        }
+        .lead-image-zone .upload-placeholder .upload-hint-sm {
+            font-size: 12px;
+            color: var(--text-light);
+            line-height: 1.6;
+            max-width: 260px;
+        }
+        .lead-image-zone .preview-wrap {
+            position: relative;
+            width: 100%;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(17,17,17,0.06), rgba(17,17,17,0.02));
+        }
+        .lead-image-zone .preview-wrap img,
+        .lead-image-zone .preview-wrap video {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+        .lead-image-zone .preview-wrap .img-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(17,17,17,0.48);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .lead-image-zone:hover .preview-wrap .img-overlay,
+        .lead-image-zone:focus-within .preview-wrap .img-overlay {
+            opacity: 1;
+        }
+        .lead-image-zone .preview-wrap .img-overlay button {
+            border: none;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .lead-image-zone .preview-wrap .img-overlay .btn-change {
+            background: var(--white);
+            color: var(--text);
+        }
+        .lead-image-zone .preview-wrap .img-overlay .btn-remove {
+            background: var(--red);
+            color: var(--white);
+        }
+        .lead-image-zone .preview-wrap .img-corner-remove {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(17,17,17,0.78);
+            color: var(--white);
+            font-size: 18px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .lead-image-zone .preview-wrap .img-corner-remove:hover {
+            background: var(--red);
+        }
+        .lead-def-delivery-doc-panel {
+            display: none;
+            margin-top: 10px;
+            padding: 14px 16px 16px;
+            border: 1px solid rgba(217,119,87,0.18);
+            border-radius: 14px;
+            background: rgba(252,246,242,0.55);
+        }
+        .lead-def-delivery-doc-panel.is-open {
+            display: block;
+        }
+        .lead-doc-manager-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .lead-doc-empty {
+            padding: 18px 16px;
+            border: 1px dashed rgba(217,119,87,0.22);
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(252,246,242,0.92), rgba(255,255,255,0.96));
+            color: var(--text-light);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+        .lead-doc-item {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: start;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(217,119,87,0.12);
+            background: var(--bg-pampas);
+        }
+        .lead-doc-item .doc-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: var(--accent);
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+        .lead-doc-item .doc-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .lead-doc-item .lead-doc-name-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        .lead-doc-item .lead-doc-name-input {
+            width: 100%;
+            border: 1px solid rgba(17,17,17,0.08);
+            border-radius: 10px;
+            padding: 9px 11px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            background: var(--white);
+        }
+        .lead-doc-item .doc-meta,
+        .lead-doc-item .doc-url {
+            font-size: 12px;
+            color: var(--text-light);
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .lead-doc-remove {
+            border: none;
+            border-radius: 10px;
+            background: rgba(198,40,40,0.10);
+            color: var(--red);
+            font-weight: 800;
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+        .lead-doc-remove:hover {
+            background: var(--red);
+            color: var(--white);
+        }
+        .lead-def-mini-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+        .lead-def-mini-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border-radius: 14px;
+            background: var(--bg-pampas);
+            border: 1px solid rgba(17,17,17,0.04);
+        }
+        .lead-def-mini-item input,
+        .lead-def-mini-item select {
+            width: 100%; border: 1px solid var(--bg-off); border-radius: 10px; padding: 10px 12px; font: inherit;
+        }
+        .lead-def-mini-item select.mf-select {
+            border: 1.5px solid var(--bg-off);
+            font-size: 12px;
+            font-weight: 600;
+            min-height: 36px;
+        }
+        .lead-def-mini-remove {
+            border: none; border-radius: 10px; background: rgba(198,40,40,0.1); color: var(--red);
+            font-weight: 800; padding: 9px 12px; cursor: pointer;
+        }
+        @media (max-width: 1100px) {
+            .lead-def-shell { grid-template-columns: 1fr; }
+            .lead-def-list-panel {
+                position: static;
+                top: auto;
+                max-height: none;
+            }
+            .lead-def-list { max-height: none; padding-right: 0; }
+            .lead-def-hero-grid { grid-template-columns: 1fr; }
+            .lead-def-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #tabLeadsDefinitions.lead-definitions-wide {
+                width: 100%;
+                margin-left: 0;
+                transform: none;
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+        @media (max-width: 720px) {
+            .lead-def-grid,
+            .lead-def-grid--two,
+            .lead-def-mini-item,
+            .lead-doc-item { grid-template-columns: 1fr; }
+            .lead-def-field-head,
+            .lead-def-editor-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
         .forms-status-multi-wrap { position: relative; display: inline-block; }
         .forms-status-multi-btn {
             height: 32px; padding: 0 28px 0 10px; border-radius: 8px; border: 1.5px solid var(--bg-off);
@@ -954,6 +1645,20 @@
         }
         .forms-inbox-card:hover { box-shadow: 0 4px 20px var(--shadow); }
         .forms-inbox-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+        .forms-inbox-header-main { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+        .forms-inbox-card-cb { flex-shrink: 0; padding-top: 2px; }
+        .forms-inbox-card-cb input { width: 18px; height: 18px; cursor: pointer; }
+        .forms-inbox-bulk-bar {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            margin: 12px 0 16px; padding: 12px 14px; border-radius: 12px;
+            border: 1px solid var(--bg-off); background: var(--bg-pampas);
+        }
+        .forms-inbox-bulk-count { font-size: 13px; font-weight: 600; color: var(--text); }
+        .forms-inbox-bulk-bar .forms-inbox-bulk-danger { border-color: var(--red); color: var(--red); }
+        .forms-inbox-bulk-bar .forms-inbox-bulk-danger:hover:not(:disabled) { background: rgba(211,47,47,0.08); }
+        .forms-inbox-bulk-bar .forms-inbox-bulk-danger:disabled { opacity: 0.45; cursor: not-allowed; }
+        .forms-grid-table th.fgt-select, .forms-grid-table td.fgt-select { width: 40px; text-align: center; vertical-align: middle; }
+        .forms-grid-table td.fgt-select input { cursor: pointer; }
         .forms-inbox-topline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
         .forms-type-badge,
         .forms-source-badge {
@@ -1305,6 +2010,21 @@
         .ws-header-cap-wrap .mini-rect { width: 10px; height: 14px; border-radius: 4px; background: rgba(0,0,0,0.08); }
         .ws-header-cap-wrap .mini-rect.filled { background: var(--accent); }
         .ws-header-cap-wrap .mini-cap-text { font-size: 11px; color: var(--text-light); font-weight: 600; white-space: nowrap; }
+        .ws-header-cap-wrap--segments .ws-cap-segments-row {
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 2px;
+        }
+        .ws-cap-segment {
+            display: inline-flex; align-items: center; gap: 5px; min-width: 0;
+        }
+        .ws-cap-segment .ws-cap-mode-badges {
+            display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; margin-right: 2px;
+        }
+        .ws-cap-segment .ws-cap-mode-badges .applicant-mode-badge { margin-left: 0; }
+        .ws-session-pending-dot {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 15px; height: 15px; padding: 0 4px; border-radius: 50%;
+            background: #C62828; color: #fff; font-size: 9px; font-weight: 800; line-height: 1; flex-shrink: 0;
+        }
         .ws-applicants-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
         .ws-applicants-card.open .ws-applicants-body { max-height: 5000px; overflow: visible; }
         .ws-applicants-card.open .member-toggle { transform: rotate(45deg); }
@@ -2252,6 +2972,7 @@
         <!-- Mega Tabs -->
         <div class="mega-tabs">
             <button class="mega-tab active" onclick="switchMegaTab('workshop')">Workshop</button>
+            <button class="mega-tab" onclick="switchMegaTab('leads')">Leads</button>
             <button class="mega-tab" onclick="switchMegaTab('consultation')">AI Consultation</button>
         </div>
 
@@ -2259,7 +2980,6 @@
         <div class="mega-section active" id="sectionWorkshop">
         <div class="cms-tabs">
             <button class="cms-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">數據總覽</button>
-            <button class="cms-tab" data-tab="quiz-dashboard" onclick="switchTab('quiz-dashboard')">AI 能力測驗</button>
             <button class="cms-tab" data-tab="workshops" onclick="switchTab('workshops')">工作坊管理</button>
             <button class="cms-tab" data-tab="members" onclick="switchTab('members')">會員管理</button>
             <button class="cms-tab" data-tab="attendance" onclick="switchTab('attendance')">出席管理</button>
@@ -2530,7 +3250,6 @@
             <div class="members-subtabs">
                 <button class="members-subtab" data-member-view="byMember" onclick="switchMemberView('byMember')">By Member</button>
                 <button class="members-subtab active" data-member-view="byWorkshop" onclick="switchMemberView('byWorkshop')">By Workshop</button>
-                <button class="members-subtab" data-member-view="forms" onclick="switchMemberView('forms')">Forms</button>
             </div>
             <div class="search-row" id="memberSearchRow">
                 <input type="text" class="search-input" id="memberSearch" placeholder="搜尋全部欄位..." oninput="filterMembers()">
@@ -2623,15 +3342,17 @@
                 <div class="consult-search-wrap">
                     <input type="text" class="consult-search-input" id="formsSearchInput" placeholder="搜尋姓名、電話、Email、IG…" oninput="renderFormsInbox()">
                 </div>
-                <div class="forms-type-pills" id="formsTypePills">
-                    <button class="forms-type-pill active" data-type="all" onclick="setFormsInboxTypeFilter('all', this)">全部</button>
-                    <button class="forms-type-pill" data-type="consultation" onclick="setFormsInboxTypeFilter('consultation', this)">Consultation</button>
-                    <button class="forms-type-pill" data-type="workshop-waitlist" onclick="setFormsInboxTypeFilter('workshop-waitlist', this)">Workshop Waitlist</button>
-                    <button class="forms-type-pill" data-type="lead-magnet" onclick="setFormsInboxTypeFilter('lead-magnet', this)">Lead Magnet</button>
-                    <button class="forms-type-pill" data-type="quiz-lead" onclick="setFormsInboxTypeFilter('quiz-lead', this)">Quiz Lead</button>
-                    <button class="forms-type-pill" data-type="free-material" onclick="setFormsInboxTypeFilter('free-material', this)">Free Material</button>
-                </div>
                 <div class="forms-filter-bar">
+                    <div class="mf-group">
+                        <span class="mf-label">查看哪種 Lead</span>
+                        <select class="mf-select" id="formsTypeSelect" onchange="setFormsInboxTypeFilter(this.value)">
+                            <option value="all">全部</option>
+                            <option value="quiz-lead">Quiz Leads</option>
+                            <option value="workshop-waitlist">Workshop Waitlist</option>
+                            <option value="free-material">Free Material</option>
+                            <option value="lead-magnet">Lead Magnet</option>
+                        </select>
+                    </div>
                     <div class="forms-status-multi-wrap" id="formsStatusMultiWrap">
                         <button type="button" class="forms-status-multi-btn" id="formsStatusMultiBtn" onclick="toggleFormsStatusDropdown()">狀態：全部</button>
                         <div class="forms-status-multi-dropdown" id="formsStatusMultiDropdown">
@@ -2667,10 +3388,17 @@
                     </div>
                     <button class="consult-sort-btn" id="formsSortBtn" onclick="toggleFormsInboxSortOrder()" title="按日期排序">日期：新→舊 ▼</button>
                     <div class="forms-view-toggle-wrap">
-                        <button type="button" class="forms-view-toggle-btn active" data-view="card" onclick="setFormsInboxView('card', this)" title="卡片檢視">☰ 卡片</button>
-                        <button type="button" class="forms-view-toggle-btn" data-view="grid" onclick="setFormsInboxView('grid', this)" title="表格檢視">▦ 表格</button>
+                        <button type="button" class="forms-view-toggle-btn" data-view="card" onclick="setFormsInboxView('card', this)" title="卡片檢視">☰ 卡片</button>
+                        <button type="button" class="forms-view-toggle-btn active" data-view="grid" onclick="setFormsInboxView('grid', this)" title="表格檢視">▦ 表格</button>
                     </div>
                     <button class="mf-reset" onclick="resetFormsInboxFilters()">重設篩選</button>
+                </div>
+                <div class="forms-inbox-bulk-bar" id="formsInboxBulkBar">
+                    <span class="forms-inbox-bulk-count">已選 <strong id="formsInboxBulkCount">0</strong> 筆</span>
+                    <span style="font-size:12px;color:var(--text-light);margin-left:8px;" title="表格／卡片檢視的列勾選皆適用">按住 Shift 再點另一列可範圍選取</span>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="formsInboxSelectAllFiltered(true)">全選目前清單</button>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="formsInboxClearSelection()">清除選取</button>
+                    <button type="button" class="btn btn-sm btn-outline forms-inbox-bulk-danger" id="formsInboxBulkDeleteBtn" onclick="deleteSelectedFormSubmissions()" disabled>刪除選取</button>
                 </div>
                 <div id="formsInboxList"></div>
                 <div id="formsInboxGrid" style="display:none;"></div>
@@ -2837,6 +3565,327 @@
 
         </div><!-- end #sectionWorkshop -->
 
+        <div class="mega-section" id="sectionLeads">
+            <div class="cms-tabs">
+                <button class="cms-tab active" data-lead-tab="inbox" onclick="switchLeadTab('inbox')">Inbox</button>
+                <button class="cms-tab" data-lead-tab="definitions" onclick="switchLeadTab('definitions')">Definitions</button>
+                <button class="cms-tab" data-lead-tab="email-outbound" onclick="switchLeadTab('email-outbound')">寄件 Email</button>
+                <button class="cms-tab" data-lead-tab="quiz-dashboard" onclick="switchLeadTab('quiz-dashboard')">AI 能力測驗數據</button>
+            </div>
+
+            <div class="tab-content active" id="tabLeadsInbox">
+                <div id="tabLeadsInboxMount"></div>
+            </div>
+
+            <div class="tab-content" id="tabLeadsEmailOutbound">
+                <div class="dashboard-header">
+                    <h1>寄件設定（免費資料與 Lead Magnet 跟進信）</h1>
+                </div>
+                <div class="mega-section" style="display:block;padding:0 0 24px;">
+                    <p style="color:var(--text-light);font-size:14px;line-height:1.7;max-width:720px;margin-bottom:20px;">
+                        此處設定寫入 Firestore <code style="font-size:12px;">siteSettings/emailOutbound</code>，前台在使用「Trigger Email」擴充功能寫入 <code style="font-size:12px;">mail</code> 集合時會帶上這裡的 <strong>寄件者</strong> 與 <strong>回覆地址</strong>。
+                        實際能否以此地址發信，仍取決於你在 <strong>Firebase Console → Extensions → Trigger Email</strong> 的 SMTP（例如 Gmail、SendGrid）是否已驗證該寄件身分（含 SPF / DKIM 等）。
+                    </p>
+                    <div class="form-group" style="max-width:560px;margin-bottom:16px;">
+                        <label for="emailOutboundFromInput">寄件者 From（建議格式）</label>
+                        <input type="text" id="emailOutboundFromInput" class="search-input" style="width:100%;max-width:none;" placeholder='例如：AIFlowTime &lt;noreply@aiflowtime.com&gt; 或 noreply@aiflowtime.com'>
+                        <div style="font-size:12px;color:var(--text-light);margin-top:6px;">與 Nodemailer 相同：可為純 email 或 <code>顯示名稱 &lt;email&gt;</code>。</div>
+                    </div>
+                    <div class="form-group" style="max-width:560px;margin-bottom:20px;">
+                        <label for="emailOutboundReplyToInput">回覆地址 Reply-To（選填）</label>
+                        <input type="text" id="emailOutboundReplyToInput" class="search-input" style="width:100%;max-width:none;" placeholder="例如：hello@aiflowtime.com">
+                    </div>
+                    <button type="button" class="btn" onclick="saveEmailOutboundSettings()">儲存寄件設定</button>
+                </div>
+            </div>
+
+            <div class="tab-content lead-definitions-wide" id="tabLeadsDefinitions">
+                <div class="dashboard-header">
+                    <h1>Lead Magnets</h1>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-outline" type="button" onclick="runLeadDefinitionMigration()">匯入現有版面 Leads</button>
+                        <button class="btn" type="button" onclick="openLeadDefinitionEditor()">+ 新增 Lead</button>
+                    </div>
+                </div>
+                <div class="forms-filter-bar" style="margin-bottom:18px;">
+                    <div class="mf-group">
+                        <span class="mf-label">類型</span>
+                        <select class="mf-select" id="leadDefinitionTypeFilter" onchange="renderLeadDefinitionList()">
+                            <option value="all">全部</option>
+                            <option value="quiz-lead">Quiz Leads</option>
+                            <option value="workshop-waitlist">Workshop Waitlist</option>
+                            <option value="free-material">Free Material</option>
+                            <option value="lead-magnet">Lead Magnet</option>
+                        </select>
+                    </div>
+                    <div class="mf-group">
+                        <span class="mf-label">狀態</span>
+                        <select class="mf-select" id="leadDefinitionStatusFilter" onchange="renderLeadDefinitionList()">
+                            <option value="all">全部</option>
+                            <option value="active">Active</option>
+                            <option value="draft">Draft</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="mf-group" style="min-width:280px;flex:1;">
+                        <span class="mf-label">搜尋</span>
+                        <input type="text" class="search-input" id="leadDefinitionSearchInput" placeholder="搜尋名稱、標題、備註..." oninput="renderLeadDefinitionList()">
+                    </div>
+                </div>
+                <div class="lead-def-shell">
+                    <div class="lead-def-list-panel">
+                        <div id="leadDefinitionList" class="lead-def-list"></div>
+                    </div>
+                    <div class="lead-def-editor-panel">
+                        <div id="leadDefinitionEditorEmpty" class="lead-def-empty">選擇一個 Lead，或按右上角新增。</div>
+                        <div id="leadDefinitionEditor" style="display:none;">
+                            <div class="lead-def-editor-header">
+                                <div class="lead-def-editor-heading">
+                                    <div class="lead-def-editor-eyebrow">Lead Settings</div>
+                                    <h2 id="leadDefinitionEditorTitle">新增 Lead</h2>
+                                    <div class="lead-def-save-status saved" id="leadDefinitionSaveStatus">
+                                        <svg class="save-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                                        <span class="save-label">已儲存</span>
+                                    </div>
+                                </div>
+                                <div class="lead-def-editor-header-actions">
+                                    <button class="btn btn-outline" type="button" id="leadDefinitionDeleteBtn" onclick="deleteLeadDefinition()" style="display:none;">刪除</button>
+                                    <button class="btn" type="button" id="leadDefinitionSaveBtn" onclick="saveLeadDefinition()">儲存 Lead</button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="leadDefinitionIdInput">
+                            <div class="lead-def-editor-shell">
+                                <div class="lead-def-hero-card">
+                                    <div class="lead-def-section-head">
+                                        <div class="lead-def-section-kicker">Lead Identity</div>
+                                        <h3>基本設定與封面</h3>
+                                        <p>先整理這個 Lead 的內部身份與封面素材，之後版面編輯器就只需要選取這個定義。</p>
+                                    </div>
+                                    <div class="lead-def-hero-grid">
+                                        <div class="lead-def-field lead-def-field--media">
+                                            <label>圖片</label>
+                                            <div class="lead-image-zone" id="leadDefinitionImagePicker" onclick="openLeadAssetPicker('image')"></div>
+                                            <input type="hidden" id="leadDefinitionImageUrlInput">
+                                            <div class="lead-field-helper">點擊上方圖片區即可打開媒體池；可重用現有圖片，或在彈出視窗即場上傳新圖片。</div>
+                                            <div class="lead-def-field" style="margin-top:16px;">
+                                                <label class="lead-def-checkbox" style="margin-bottom:8px;display:block;">
+                                                    <input type="checkbox" id="leadDefinitionDeliveryIncludeDocumentsInput" checked onchange="onLeadDefinitionIncludeDocumentsToggle()">
+                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">提供文件</span><span class="lead-def-checkbox-sub">勾選且文件為 PDF 等格式時，Trigger Email 會嘗試附檔。</span></span>
+                                                </label>
+                                                <div id="leadDefinitionDocumentsPanel" class="lead-def-delivery-doc-panel is-open">
+                                                    <div class="lead-def-field-head">
+                                                        <span class="lead-def-field-inline-title">提供給用戶的文件與連結</span>
+                                                        <button class="btn btn-outline btn-sm" type="button" onclick="openLeadAssetPicker('document')">打開文件池</button>
+                                                    </div>
+                                                    <div id="leadDefinitionDocumentsList" class="lead-doc-manager-list"></div>
+                                                    <div class="lead-field-helper">文件來源與 page layout editor 共用同一個文件池；可多次加入不同附件。</div>
+                                                </div>
+                                                <label class="lead-def-checkbox" style="margin-bottom:8px;display:block;margin-top:14px;">
+                                                    <input type="checkbox" id="leadDefinitionDeliveryIncludeLinksInput" onchange="onLeadDefinitionIncludeLinksToggle()">
+                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">提供連結</span><span class="lead-def-checkbox-sub">可新增多組標題與網址；兩者可與文件並存。</span></span>
+                                                </label>
+                                                <div id="leadDefinitionIdentityLinksWrap" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--bg-off);border-radius:10px;background:var(--bg-pampas);">
+                                                    <div style="font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:8px;">連結列表（標題 + 網址）</div>
+                                                    <div id="leadDefinitionIdentityLinksList" class="lead-def-identity-links-list"></div>
+                                                    <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addLeadIdentityLinkRow()">＋ 新增連結</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="lead-def-hero-fields lead-def-stack">
+                                            <div class="lead-def-hero-primary">
+                                                <div class="lead-def-field">
+                                                    <label>內部名稱</label>
+                                                    <input type="text" id="leadDefinitionNameInput" placeholder="例如：2026 AI 指南（首頁）">
+                                                </div>
+                                                <div class="lead-def-field">
+                                                    <label>類型</label>
+                                                    <select class="mf-select" id="leadDefinitionTypeInput" onchange="renderLeadDefinitionEditorState()">
+                                                        <option value="quiz-lead">Quiz Leads</option>
+                                                        <option value="workshop-waitlist">Workshop Waitlist</option>
+                                                        <option value="free-material">Free Material</option>
+                                                        <option value="lead-magnet">Lead Magnet</option>
+                                                    </select>
+                                                </div>
+                                                <div class="lead-def-field">
+                                                    <label>狀態</label>
+                                                    <select class="mf-select" id="leadDefinitionStatusInput">
+                                                        <option value="active">Active</option>
+                                                        <option value="draft">Draft</option>
+                                                        <option value="archived">Archived</option>
+                                                    </select>
+                                                </div>
+                                                <div class="lead-def-field">
+                                                    <label>圖片 Alt</label>
+                                                    <input type="text" id="leadDefinitionImageAltInput" placeholder="圖片說明">
+                                                </div>
+                                                <div class="lead-def-field lead-def-field--notes">
+                                                    <label>內部用途備註</label>
+                                                    <textarea id="leadDefinitionPurposeNotesInput" rows="3" placeholder="例如：首頁 Hero lead、Linktree 免費指南"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="lead-def-hero-bottom">
+                                                <label class="lead-def-checkbox">
+                                                    <input type="checkbox" id="leadDefinitionPublicInput" checked>
+                                                    <span class="lead-def-checkbox-copy">
+                                                        <span class="lead-def-checkbox-title">允許前台讀取</span>
+                                                        <span class="lead-def-checkbox-sub">啟用後，網站前台可以使用這個 Lead 定義。</span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="lead-def-section-card">
+                                    <div class="lead-def-section-head">
+                                        <div class="lead-def-section-kicker">Front-end &amp; Form</div>
+                                        <h3>前台內容、表單與 CTA</h3>
+                                        <p>前台文案與提交跳轉；Lead Magnet 可設定連結列表彈窗要收集的欄位與同意勾選。</p>
+                                    </div>
+                                    <div class="lead-def-stack">
+                                        <div class="lead-def-grid lead-def-grid--two">
+                                            <div class="lead-def-field">
+                                                <label>標題</label>
+                                                <textarea id="leadDefinitionTitleInput" rows="2" placeholder="前台顯示標題"></textarea>
+                                            </div>
+                                            <div class="lead-def-field">
+                                                <label>描述</label>
+                                                <textarea id="leadDefinitionDescriptionInput" rows="3" placeholder="前台顯示說明"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="lead-def-grid lead-def-grid--two">
+                                            <div class="lead-def-field">
+                                                <label>提交按鈕文字</label>
+                                                <input type="text" id="leadDefinitionSubmitTextInput" placeholder="提交">
+                                            </div>
+                                            <div class="lead-def-field">
+                                                <label>提交後前往 URL</label>
+                                                <input type="text" id="leadDefinitionRedirectUrlInput" placeholder="/ai-guide-2026">
+                                            </div>
+                                        </div>
+                                        <div class="lead-def-grid lead-def-grid--two">
+                                            <div class="lead-def-field">
+                                                <label>CTA 文字（Free Material 用）</label>
+                                                <input type="text" id="leadDefinitionCtaTextInput" placeholder="領取免費資料">
+                                            </div>
+                                            <div class="lead-def-field">
+                                                <label>區塊標籤（Free Material 用）</label>
+                                                <input type="text" id="leadDefinitionSectionLabelInput" placeholder="FREE RESOURCE">
+                                            </div>
+                                        </div>
+
+                                        <div class="lead-def-field" id="leadDefinitionContactFieldsWrap" style="display:none;margin-top:8px;padding-top:16px;border-top:1px solid var(--bg-off);">
+                                            <label style="display:block;margin-bottom:10px;font-weight:700;">連結列表彈窗要收集</label>
+                                            <div class="lead-def-stack" style="gap:12px;">
+                                                <label class="lead-def-checkbox" style="margin:0;">
+                                                    <input type="checkbox" id="leadDefinitionCollectNameInput" checked>
+                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">姓名</span></span>
+                                                </label>
+                                                <div class="lead-def-field" style="margin:0 0 0 28px;">
+                                                    <label style="font-size:12px;color:var(--text-light);">姓名欄 placeholder</label>
+                                                    <input type="text" id="leadDefinitionNameFieldLabelInput" placeholder="姓名">
+                                                </div>
+                                                <label class="lead-def-checkbox" style="margin:0;">
+                                                    <input type="checkbox" id="leadDefinitionCollectEmailInput" onchange="renderLeadDefinitionEditorState()">
+                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">Email</span></span>
+                                                </label>
+                                                <div class="lead-def-field" style="margin:0 0 0 28px;">
+                                                    <label style="font-size:12px;color:var(--text-light);">Email 欄 placeholder</label>
+                                                    <input type="text" id="leadDefinitionEmailFieldLabelInput" placeholder="Email">
+                                                </div>
+                                                <label class="lead-def-checkbox" style="margin:0;">
+                                                    <input type="checkbox" id="leadDefinitionCollectPhoneInput" checked onchange="renderLeadDefinitionEditorState()">
+                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">WhatsApp／電話（8 位數字）</span></span>
+                                                </label>
+                                                <div class="lead-def-field" style="margin:0 0 0 28px;">
+                                                    <label style="font-size:12px;color:var(--text-light);">電話欄 placeholder</label>
+                                                    <input type="text" id="leadDefinitionPhoneFieldLabelInput" placeholder="WhatsApp（8位數字）">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="lead-def-field" id="leadDefinitionConsentWrap" style="display:none;margin-top:8px;padding-top:16px;border-top:1px solid var(--bg-off);">
+                                            <label class="lead-def-checkbox" style="margin-bottom:12px;">
+                                                <input type="checkbox" id="leadDefinitionConsentCheckboxEnabledInput" checked>
+                                                <span class="lead-def-checkbox-copy">
+                                                    <span class="lead-def-checkbox-title">在彈窗顯示同意勾選框</span>
+                                                    <span class="lead-def-checkbox-sub">需勾選後才能提交。</span>
+                                                </span>
+                                            </label>
+                                            <label>同意勾選框旁顯示的文字</label>
+                                            <textarea id="leadDefinitionConsentTextInput" rows="3" placeholder="我同意..."></textarea>
+                                        </div>
+
+                                        <div class="lead-def-field" id="leadDefinitionGenericNameEmailWrap" style="display:none;margin-top:8px;padding-top:16px;border-top:1px solid var(--bg-off);">
+                                            <label style="display:block;margin-bottom:10px;font-weight:700;">表單欄位標籤（此 Lead 類型）</label>
+                                            <div class="lead-def-grid lead-def-grid--two">
+                                                <div class="lead-def-field">
+                                                    <label>姓名欄位標籤</label>
+                                                    <input type="text" id="leadDefinitionGenericNameFieldLabelInput" placeholder="姓名">
+                                                </div>
+                                                <div class="lead-def-field">
+                                                    <label>Email 欄位標籤</label>
+                                                    <input type="text" id="leadDefinitionGenericEmailFieldLabelInput" placeholder="Email">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="lead-def-field" id="leadDefinitionDeliverySubsection" style="display:none;margin-top:8px;padding-top:16px;border-top:1px solid var(--bg-off);">
+                                            <label style="display:block;margin-bottom:12px;font-weight:700;">交付方式</label>
+                                            <p class="lead-field-helper" style="margin-bottom:12px;">文件與連結請在上方「Lead Identity」勾選並設定。此處撰寫實際寄出／問候草稿；按下方的「插入」按鈕可把連結按鈕（Email）或純文字連結（WhatsApp）插入游標位置。</p>
+                                            <div class="lead-def-field" id="leadDefinitionDeliveryMaterialTitleWrap" style="margin-bottom:12px;">
+                                                <label>資料名稱</label>
+                                                <input type="text" id="leadDefinitionMaterialTitleInput" placeholder="AIFlowTime 免費教材">
+                                            </div>
+                                            <div class="lead-def-field" id="leadDefinitionDeliveryEmailWrap" style="display:none;margin-bottom:12px;padding:12px;background:var(--bg-off);border-radius:8px;">
+                                                <label style="display:block;margin-bottom:8px;font-weight:600;">Email 寄送</label>
+                                                <div class="lead-def-field" style="margin-bottom:10px;">
+                                                    <label>Email 主旨</label>
+                                                    <input type="text" id="leadDefinitionEmailSubjectInput" placeholder="你的免費資料已送達">
+                                                </div>
+                                                <div class="lead-def-field" style="margin-bottom:10px;">
+                                                    <label>Email 內文</label>
+                                                    <div id="leadDefinitionEmailLinkInsertBar" class="lead-def-link-insert-bar" style="display:none;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0;padding:10px;background:var(--white);border-radius:8px;border:1px dashed var(--bg-off);"></div>
+                                                    <textarea id="leadDefinitionEmailMessageInput" rows="6" placeholder="可用 {name}、{materialTitle}、{downloadUrl}、{documentName} 代入。留空則使用系統預設版型。"></textarea>
+                                                    <div class="lead-field-helper">寄給使用者的 HTML 信件內容；亦可只輸入純文字（會保留換行）。Lead Magnet 於使用者提交並收集到 Email 後寄出。</div>
+                                                </div>
+                                            </div>
+                                            <div class="lead-def-field" id="leadDefinitionDeliveryWhatsAppWrap" style="display:none;padding:12px;background:var(--bg-off);border-radius:8px;">
+                                                <label style="display:block;margin-bottom:8px;font-weight:600;">WhatsApp 問候（預留）</label>
+                                                <div id="leadDefinitionWhatsappLinkInsertBar" class="lead-def-link-insert-bar" style="display:none;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px;padding:10px;background:var(--white);border-radius:8px;border:1px dashed var(--bg-off);"></div>
+                                                <textarea id="leadDefinitionWhatsappGreetingInput" rows="4" placeholder="您好 {name}，這是您索取的資料連結：{downloadUrl}"></textarea>
+                                                <div class="lead-field-helper">字庫會儲存並在提交時寫入待發送佇列。下方按鈕可插入「標題 + 網址」純文字方塊。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="lead-def-field" id="leadDefinitionFormFieldsField" style="display:none !important;">
+                                    <div id="leadDefinitionFormFieldsList" class="lead-def-mini-list"></div>
+                                </div>
+
+                                <div class="lead-def-section-card">
+                                    <div class="lead-def-section-head">
+                                        <div class="lead-def-section-kicker">Messages</div>
+                                        <h3>成功訊息</h3>
+                                        <p>提交後的成功狀態文案等（同意勾選文字已移至上方「前台內容、表單與 CTA」）。</p>
+                                    </div>
+                                    <div class="lead-def-stack">
+                                        <div class="lead-def-field">
+                                            <label>成功訊息</label>
+                                            <textarea id="leadDefinitionSuccessMessageInput" rows="3" placeholder="已收到，你的資料正在寄送..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tabLeadsQuizMount"></div>
+        </div>
+
         <!-- SECTION: AI Consultation -->
         <div class="mega-section" id="sectionConsultation">
             <div class="consult-tabs">
@@ -2922,6 +3971,42 @@
             </div>
             <div class="media-picker-status" id="wsMediaPickerStatus">載入媒體庫中...</div>
             <div class="media-picker-grid" id="wsMediaPickerGrid"></div>
+        </div>
+    </div>
+
+    <div class="lead-asset-doc-name-overlay" id="leadAssetDocNameOverlay" onclick="if(event.target===this)closeLeadAssetDocNameOverlay()">
+        <div class="lead-asset-doc-name-box" onclick="event.stopPropagation()">
+            <h4 id="leadAssetDocNameHeading">編輯文件顯示名稱</h4>
+            <p class="lead-asset-doc-name-hint" id="leadAssetDocNameHint">此名稱用於卡片顯示、加入 Lead 後的預設名稱，以及前台與寄信；不會更改雲端檔案名稱。</p>
+            <label for="leadAssetDocNameInput" class="mf-label" style="display:block;margin-bottom:6px;">顯示名稱</label>
+            <input type="text" id="leadAssetDocNameInput" class="search-input" style="width:100%;" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();submitLeadAssetDocNameOverlay();}">
+            <div class="lead-asset-doc-name-actions">
+                <button type="button" class="btn btn-outline" onclick="closeLeadAssetDocNameOverlay()">取消</button>
+                <button type="button" class="btn" onclick="submitLeadAssetDocNameOverlay()">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="leadAssetPickerModal" onclick="if(event.target===this) closeLeadAssetPicker()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeLeadAssetPicker()">&times;</button>
+            <h3 id="leadAssetPickerTitle">選擇圖片</h3>
+            <p class="media-picker-intro" id="leadAssetPickerIntro">從與 page layout editor 相同的媒體池選擇圖片，或直接上傳新圖片。</p>
+            <div class="media-picker-toolbar">
+                <button type="button" class="btn" id="leadAssetPickerUploadBtn" onclick="leadAssetPickerChooseUpload()">上傳新圖片</button>
+                <button type="button" class="btn btn-outline" onclick="loadLeadAssetLibrary(true)">重新整理媒體池</button>
+                <select id="leadAssetPickerSort" class="media-picker-select" onchange="renderLeadAssetLibrary()">
+                    <option value="newest">最新上傳</option>
+                    <option value="oldest">最早上傳</option>
+                    <option value="name-asc">名稱 A → Z</option>
+                    <option value="name-desc">名稱 Z → A</option>
+                </select>
+                <input type="text" id="leadAssetPickerSearch" class="media-picker-search" placeholder="搜尋檔名..." oninput="renderLeadAssetLibrary()">
+                <input type="file" id="leadAssetPickerUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" style="display:none" onchange="leadAssetPickerUploadSelected(this)">
+                <input type="file" id="leadAssetPickerDocUploadInput" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip" multiple style="display:none" onchange="leadAssetPickerDocUploadSelected(this)">
+            </div>
+            <div class="media-picker-status" id="leadAssetPickerStatus">載入媒體池中...</div>
+            <div class="media-picker-grid" id="leadAssetPickerGrid"></div>
         </div>
     </div>
 
@@ -3116,11 +4201,29 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js?v=2"></script>
+<script src="/js/shared-utils.js?v=10"></script>
 
 <script>
 // Fallback definitions in case shared-utils.js fails to load on Safari/iOS
 if (typeof escHtml === 'undefined') window.escHtml = function(str) { if (!str) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; };
+/** Turn layout-editor rich HTML into plain text for CMS inputs (title, description, etc.). */
+function _cmsRichTextToPlainInput(value) {
+    if (value == null) return '';
+    var s = String(value);
+    if (!s.trim()) return '';
+    if (s.indexOf('<') === -1) return s.trim();
+    s = s.replace(/<\s*br\s*\/?>/gi, '\n');
+    s = s.replace(/<\/\s*p\s*>/gi, '\n');
+    s = s.replace(/<\/\s*div\s*>/gi, '\n');
+    try {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = s;
+        var text = tmp.textContent || tmp.innerText || '';
+        return text.replace(/\r\n/g, '\n').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    } catch (e) {
+        return s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+}
 if (typeof _normDateKey === 'undefined') window._normDateKey = function(dateStr) { if (!dateStr) return ''; var m = dateStr.match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/); if (!m) return dateStr; return m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2); };
 if (typeof sortSessionsList === 'undefined') window.sortSessionsList = function(sessions) { if (!sessions || !sessions.length) return []; return sessions.slice().sort(function(a, b) { var da = _normDateKey(a.date); var db2 = _normDateKey(b.date); if (da !== db2) return da < db2 ? -1 : 1; var ta = (a.time || '').replace(/[^0-9:]/g, ''); var tb = (b.time || '').replace(/[^0-9:]/g, ''); return ta < tb ? -1 : ta > tb ? 1 : 0; }); };
 if (typeof fixStorageUrl === 'undefined') window.fixStorageUrl = function(url) { if (!url) return ''; if (url.indexOf('blob:') === 0 || url.indexOf('data:') === 0) return url; var match = url.match(/\/o\/([^?]+)/); if (match) { return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(decodeURIComponent(match[1])); } if (url.indexOf('http') === 0) return url; return 'https://asia-east2-aiflowtime-hk.cloudfunctions.net/storageProxy?path=' + encodeURIComponent(url); };
@@ -3183,7 +4286,16 @@ function handleGoogleLogin() {
     });
 }
 
-function handleLogout() { if (confirm('確定要登出嗎？')) auth.signOut(); }
+function handleLogout() {
+    function proceed() {
+        if (confirm('確定要登出嗎？')) auth.signOut();
+    }
+    if (_hasUnsavedLeadDefinitionChanges()) {
+        _withLeadDefinitionLeaveGuard(proceed);
+        return;
+    }
+    proceed();
+}
 
 function showLogin() {
     document.getElementById('loginScreen').style.display = 'flex';
@@ -3195,6 +4307,7 @@ function showDashboard(user) {
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('userEmail').textContent = user.email;
     document.getElementById('userAvatar').src = user.photoURL || '';
+    initLeadsSectionMounts();
     // Load global discount codes first so workshop dropdowns can be populated
     db.collection('discountCodes').orderBy('createdAt', 'desc').get().then(function(snap) {
         _globalDiscountCodes = [];
@@ -3204,7 +4317,13 @@ function showDashboard(user) {
     });
     loadDashboardData();
     loadMembersData();
-    if (typeof _applyWorkshopTabFromHash === 'function') _applyWorkshopTabFromHash();
+    var hash = String(window.location.hash || '').replace(/^#/, '').toLowerCase();
+    if (hash === 'quiz-dashboard') {
+        switchMegaTab('leads');
+        switchLeadTab('quiz-dashboard');
+    } else if (typeof _applyWorkshopTabFromHash === 'function') {
+        _applyWorkshopTabFromHash();
+    }
     // Pre-load WhatsApp templates so they're ready when the user clicks a WA button
     db.collection('workshopSettings').doc('config').get().then(function(doc) {
         _wsSettings = doc.exists ? doc.data() : {};
@@ -5052,7 +6171,7 @@ function hasAnyUnsavedWorkshop() {
     return false;
 }
 window.addEventListener('beforeunload', function(e) {
-    if (hasAnyUnsavedWorkshop()) {
+    if (hasAnyUnsavedWorkshop() || _hasUnsavedLeadDefinitionChanges()) {
         e.preventDefault();
         e.returnValue = '';
     }
@@ -6757,10 +7876,9 @@ function deleteWorkshop(workshopId) {
 // ============================================================
 // TABS (data-tab + URL hash for shareable links)
 // ============================================================
-var WORKSHOP_TAB_IDS = ['dashboard', 'quiz-dashboard', 'workshops', 'members', 'attendance', 'discounts', 'settings'];
+var WORKSHOP_TAB_IDS = ['dashboard', 'workshops', 'members', 'attendance', 'discounts', 'settings'];
 var WORKSHOP_TAB_CONTENT_IDS = {
     dashboard: 'tabDashboard',
-    'quiz-dashboard': 'tabQuizDashboard',
     workshops: 'tabWorkshops',
     members: 'tabMembers',
     attendance: 'tabAttendance',
@@ -6769,10 +7887,6 @@ var WORKSHOP_TAB_CONTENT_IDS = {
 };
 var WORKSHOP_TAB_LOADERS = {
     dashboard: loadDashboardData,
-    'quiz-dashboard': function() {
-        loadDashboardData();
-        renderQuizDashboard();
-    },
     workshops: function() {},
     members: loadMembersData,
     attendance: loadAttendanceLog,
@@ -6842,17 +7956,11 @@ function switchMemberView(view) {
     var searchRow = document.getElementById('memberSearchRow');
     var byMember = document.getElementById('memberViewByMember');
     var byWorkshop = document.getElementById('memberViewByWorkshop');
-    var formsView = document.getElementById('memberViewForms');
     var filterBar = document.getElementById('memberFilterBar');
     if (byMember) byMember.style.display = view === 'byMember' ? 'block' : 'none';
     if (byWorkshop) byWorkshop.style.display = view === 'byWorkshop' ? 'block' : 'none';
-    if (formsView) formsView.style.display = view === 'forms' ? 'block' : 'none';
-    if (searchRow) searchRow.style.display = view === 'forms' ? 'none' : 'flex';
+    if (searchRow) searchRow.style.display = 'flex';
     if (filterBar) filterBar.style.display = view === 'byMember' && _membersData.length > 0 ? 'flex' : 'none';
-    if (view === 'forms') {
-        loadFormsInboxData();
-        if (_formsInboxItems.length) renderFormsInbox();
-    }
 }
 
 // ============================================================
@@ -7401,6 +8509,152 @@ function _memberWsDateLine(ws) {
     return single ? escHtml(single) : '';
 }
 
+function _sessionModeBadgesHtml(mode) {
+    var m = mode || 'offline';
+    if (m === 'both') {
+        return '<span class="ws-cap-mode-badges">' +
+            '<span class="applicant-mode-badge mode-offline">實體</span>' +
+            '<span class="applicant-mode-badge mode-online">線上</span>' +
+            '</span>';
+    }
+    if (m === 'online') {
+        return '<span class="ws-cap-mode-badges"><span class="applicant-mode-badge mode-online">線上</span></span>';
+    }
+    return '<span class="ws-cap-mode-badges"><span class="applicant-mode-badge mode-offline">實體</span></span>';
+}
+
+function buildMemberWsHeaderCapSegmentsHtml(ws, wsId, regs) {
+    function pendingForHeaderBadge(r) {
+        if (r.status === 'confirmed' || r.status === 'cancelled' || r.status === 'deleted') return false;
+        return !r.status || r.status === 'pending';
+    }
+    function sumEnrolledAndPending(list) {
+        var en = 0, pe = 0;
+        list.forEach(function(r) {
+            if (isEnrolledReg(r)) en++;
+            if (pendingForHeaderBadge(r)) pe++;
+        });
+        return { enrolled: en, pending: pe };
+    }
+
+    var w = ws || {};
+    var segments = [];
+
+    if (w.courseType === 'continuous' && w.rounds && w.rounds.length) {
+        var byRound = {};
+        regs.forEach(function(r) {
+            if (r.selectedRound) {
+                if (!byRound[r.selectedRound]) byRound[r.selectedRound] = [];
+                byRound[r.selectedRound].push(r);
+            }
+        });
+        w.rounds.forEach(function(round) {
+            var roundRegs = byRound[round.id] || [];
+            var cap = round.capacity || 0;
+            var sp = sumEnrolledAndPending(roundRegs);
+            var rsSorted = sortSessions(round.sessions || []);
+            var rs0 = rsSorted.length ? rsSorted[0] : null;
+            var rmode = (rs0 && rs0.mode) ? rs0.mode : (w.mode || 'offline');
+            segments.push({
+                cap: cap,
+                enrolled: sp.enrolled,
+                pending: sp.pending,
+                label: round.label || round.id || '',
+                modeHtml: _sessionModeBadgesHtml(rmode)
+            });
+        });
+    } else if (w.sessions && w.sessions.length > 1) {
+        var sorted = sortSessions(w.sessions || []);
+        var stableIdSet = {};
+        sorted.forEach(function(s, i) { stableIdSet[s.id || sessionStableId(s, i)] = true; });
+        var bySession = {};
+        regs.forEach(function(r) {
+            var sr = r.selectedRound || '';
+            if (!sr) return;
+            if (stableIdSet[sr]) {
+                if (!bySession[sr]) bySession[sr] = [];
+                bySession[sr].push(r);
+                return;
+            }
+            var matched = null;
+            var label = r.selectedRoundLabel || '';
+            if (label) {
+                for (var j = 0; j < sorted.length; j++) {
+                    var sDate = sorted[j].date || '';
+                    if (sDate && label.indexOf(sDate) === 0) { matched = sorted[j]; break; }
+                }
+            }
+            if (!matched && r.workshopDate) {
+                for (var j = 0; j < sorted.length; j++) {
+                    if (sorted[j].date && sorted[j].date.indexOf(r.workshopDate) !== -1) { matched = sorted[j]; break; }
+                }
+            }
+            if (matched) {
+                var mid = matched.id || sessionStableId(matched);
+                if (!bySession[mid]) bySession[mid] = [];
+                bySession[mid].push(r);
+            } else {
+                if (!bySession[sr]) bySession[sr] = [];
+                bySession[sr].push(r);
+            }
+        });
+        sorted.forEach(function(s, i) {
+            var sid = s.id || sessionStableId(s, i);
+            var sessionRegs = bySession[sid] || [];
+            var sessionCap = s.capacity !== undefined ? s.capacity : (w.capacity || 0);
+            var sp = sumEnrolledAndPending(sessionRegs);
+            var dateLabel = (s.date || '日期 ' + (i + 1)) + (s.time ? ' ' + s.time : '');
+            var smode = s.mode || w.mode || 'offline';
+            segments.push({
+                cap: sessionCap,
+                enrolled: sp.enrolled,
+                pending: sp.pending,
+                label: dateLabel,
+                modeHtml: _sessionModeBadgesHtml(smode)
+            });
+        });
+    } else {
+        var cap0 = w.capacity || 0;
+        if (w.sessions && w.sessions.length === 1) {
+            var s0 = w.sessions[0];
+            if (s0.capacity !== undefined) cap0 = s0.capacity;
+        }
+        var sp0 = sumEnrolledAndPending(regs);
+        var modeSingle = w.mode || 'offline';
+        if (w.sessions && w.sessions.length === 1) {
+            modeSingle = w.sessions[0].mode || w.mode || 'offline';
+        }
+        segments.push({
+            cap: cap0,
+            enrolled: computeEnrolledFromRegs(wsId),
+            pending: sp0.pending,
+            label: '',
+            modeHtml: _sessionModeBadgesHtml(modeSingle)
+        });
+    }
+
+    if (segments.length === 0) {
+        var modeFallback = w.mode || 'offline';
+        if (w.sessions && w.sessions.length === 1) modeFallback = w.sessions[0].mode || w.mode || 'offline';
+        return '<div class="ws-header-cap-wrap ws-header-cap-wrap--segments"><div class="ws-cap-segments-row">' +
+            '<div class="ws-cap-segment">' + _sessionModeBadgesHtml(modeFallback) + buildMiniCapacityContent(w.capacity || 0, computeEnrolledFromRegs(wsId)) + '</div></div></div>';
+    }
+
+    var multi = segments.length > 1;
+    var out = '<div class="ws-header-cap-wrap ws-header-cap-wrap--segments' + (multi ? ' is-multi' : '') + '"><div class="ws-cap-segments-row">';
+    segments.forEach(function(seg) {
+        out += '<div class="ws-cap-segment"' + (seg.label ? ' title="' + escHtml(seg.label) + '"' : '') + '>';
+        out += seg.modeHtml || '';
+        out += buildMiniCapacityContent(seg.cap, seg.enrolled);
+        if (seg.pending > 0) {
+            out += '<span class="ws-session-pending-dot" title="此日期／期數待確認 ' + seg.pending + ' 筆">' + seg.pending + '</span>';
+        }
+        out += '</div>';
+    });
+    out += '</div></div>';
+    return out;
+}
+
 function renderByWorkshopView() {
     var container = document.getElementById('memberViewByWorkshop');
 
@@ -7445,11 +8699,6 @@ function renderByWorkshopView() {
             else if (r.status === 'deleted') deletedCount++;
         });
 
-        // Enrolled = confirmed + pending WITH screenshot (待付款 without screenshot does NOT count)
-        var wsCap = ws.capacity || 0;
-        var wsEnrolled = computeEnrolledFromRegs(wsId);
-        var capBarHtml = buildMiniCapacityContent(wsCap, wsEnrolled);
-
         // Build search data for each field
         var searchNames = [], searchEmails = [], searchPhones = [];
         regs.forEach(function(r) {
@@ -7467,7 +8716,7 @@ function renderByWorkshopView() {
         html += '<h4 style="margin:0;">' + escHtml(wsTitle) + '</h4>';
         var _mDateLine = _memberWsDateLine(ws);
         if (_mDateLine) html += '<div style="font-size:12px;color:var(--text-light);font-weight:500;margin-top:3px;">' + _mDateLine + '</div>';
-        html += '<div class="ws-header-cap-wrap">' + capBarHtml + '</div>';
+        html += buildMemberWsHeaderCapSegmentsHtml(ws, wsId, regs);
         html += '</div>';
         html += '<div class="ws-badge-group">';
         html += '<span class="ws-approved-badge">✓ ' + approvedCount + ' 位已確認</span>';
@@ -7818,7 +9067,9 @@ var _formsInboxItems = [];
 var _formsInboxTypeFilter = 'all';
 var _formsInboxStatusFilters = ['new', 'contacted', 'completed'];
 var _formsInboxSortOrder = 'desc';
-var _formsInboxViewMode = 'card';
+var _formsInboxViewMode = 'grid';
+var _formsInboxSelectedIds = {};
+var _formsInboxSelectAnchorDocId = null;
 
 var FORMS_INBOX_TYPE_META = {
     consultation: {
@@ -7887,6 +9138,10 @@ var FORMS_INBOX_STATUS_META = {
     completed: { label: '已完成', className: 'forms-status-completed' },
     archived: { label: '已封存', className: 'forms-status-archived' }
 };
+
+function _formsInboxHiddenFromLeadsInbox(item) {
+    return !!(item && item.formType === 'consultation');
+}
 
 function _formsInboxSafeText(val) {
     return String(val == null ? '' : val).trim();
@@ -7981,6 +9236,9 @@ function _formsInboxBuildSearchText(item) {
         item.sourceLabel,
         item.sourcePage,
         item.sourcePath,
+        item.leadDefinitionId,
+        item.leadDefinitionType,
+        item.leadDefinitionName,
         item.contactName,
         item.phone,
         item.whatsapp,
@@ -8023,7 +9281,7 @@ function _formsInboxBuildSummary(item) {
         return parts.join(' | ');
     }
     if (item.formType === 'lead-magnet') {
-        return _formsInboxSafeText(item.sourceLabel || item.sourcePage || '免費內容索取');
+        return _formsInboxSafeText(item.leadDefinitionName || item.sourceLabel || item.sourcePage || '免費內容索取');
     }
     if (item.formType === 'quiz-lead') {
         var quizParts = [];
@@ -8032,7 +9290,7 @@ function _formsInboxBuildSummary(item) {
         return quizParts.join(' | ');
     }
     if (item.formType === 'free-material') {
-        return _formsInboxSafeText(answers.materialTitle || answers.documentName || '');
+        return _formsInboxSafeText(item.leadDefinitionName || answers.materialTitle || answers.documentName || '');
     }
     return _formsInboxFlattenValues(answers, []).slice(0, 2).join(' | ');
 }
@@ -8086,8 +9344,9 @@ function _formsInboxGetItem(docId) {
 }
 
 function _formsInboxUpdateKpis() {
-    var totals = { total: _formsInboxItems.length, new: 0, contacted: 0, completed: 0 };
-    _formsInboxItems.forEach(function(item) {
+    var visible = _formsInboxItems.filter(function(item) { return !_formsInboxHiddenFromLeadsInbox(item); });
+    var totals = { total: visible.length, new: 0, contacted: 0, completed: 0 };
+    visible.forEach(function(item) {
         var status = _formsInboxGetStatusValue(item);
         if (status === 'new') totals.new++;
         if (status === 'contacted') totals.contacted++;
@@ -8110,6 +9369,7 @@ function _formsInboxRefreshSourceOptions() {
     var options = ['all'];
     var seen = {};
     _formsInboxItems.forEach(function(item) {
+        if (_formsInboxHiddenFromLeadsInbox(item)) return;
         var label = _formsInboxGetSourceLabel(item);
         if (!label || seen[label]) return;
         seen[label] = true;
@@ -8131,7 +9391,15 @@ function loadFormsInboxData() {
     if (_formsInboxLoaded) return;
     _formsInboxLoaded = true;
     var listEl = document.getElementById('formsInboxList');
-    if (listEl) listEl.innerHTML = '<div class="empty-state">載入中...</div>';
+    var gridEl = document.getElementById('formsInboxGrid');
+    var loading = '<div class="empty-state">載入中...</div>';
+    if (_formsInboxViewMode === 'grid') {
+        if (listEl) { listEl.innerHTML = ''; listEl.style.display = 'none'; }
+        if (gridEl) { gridEl.innerHTML = loading; gridEl.style.display = 'block'; }
+    } else {
+        if (gridEl) { gridEl.innerHTML = ''; gridEl.style.display = 'none'; }
+        if (listEl) { listEl.innerHTML = loading; listEl.style.display = 'block'; }
+    }
     _formsInboxUnsub = db.collection('formSubmissions').orderBy('submittedAt', 'desc').onSnapshot(function(snap) {
         _formsInboxItems = [];
         snap.forEach(function(doc) {
@@ -8144,18 +9412,26 @@ function loadFormsInboxData() {
         renderFormsInbox();
     }, function(err) {
         console.error('[forms inbox] listener error:', err);
+        var msg = '<div class="empty-state" style="color:var(--red);">表單資料載入失敗：' + escHtml(err.message || '未知錯誤') + '</div>';
         var list = document.getElementById('formsInboxList');
-        if (list) {
-            list.innerHTML = '<div class="empty-state" style="color:var(--red);">表單資料載入失敗：' + escHtml(err.message || '未知錯誤') + '</div>';
+        var grid = document.getElementById('formsInboxGrid');
+        if (_formsInboxViewMode === 'grid' && grid) {
+            if (list) { list.innerHTML = ''; list.style.display = 'none'; }
+            grid.innerHTML = msg;
+            grid.style.display = 'block';
+        } else if (list) {
+            if (grid) { grid.innerHTML = ''; grid.style.display = 'none'; }
+            list.innerHTML = msg;
+            list.style.display = 'block';
         }
     });
 }
 
 function setFormsInboxTypeFilter(type, btn) {
+    if (type === 'consultation') type = 'all';
     _formsInboxTypeFilter = type || 'all';
-    document.querySelectorAll('#formsTypePills .forms-type-pill').forEach(function(pill) {
-        pill.classList.toggle('active', pill.getAttribute('data-type') === _formsInboxTypeFilter);
-    });
+    var select = document.getElementById('formsTypeSelect');
+    if (select) select.value = _formsInboxTypeFilter;
     if (btn) btn.blur();
     renderFormsInbox();
 }
@@ -8219,7 +9495,7 @@ function toggleFormsInboxSortOrder() {
 }
 
 function setFormsInboxView(mode, btn) {
-    _formsInboxViewMode = mode || 'card';
+    _formsInboxViewMode = mode || 'grid';
     document.querySelectorAll('.forms-view-toggle-btn').forEach(function(b) {
         b.classList.toggle('active', b.getAttribute('data-view') === _formsInboxViewMode);
     });
@@ -8236,23 +9512,176 @@ function resetFormsInboxFilters() {
     if (dateFrom) dateFrom.value = '';
     if (dateTo) dateTo.value = '';
     if (search) search.value = '';
+    var typeSel = document.getElementById('formsTypeSelect');
+    if (typeSel) typeSel.value = 'all';
     _formsInboxTypeFilter = 'all';
     _formsInboxStatusFilters = ['new', 'contacted', 'completed'];
     _formsInboxSortOrder = 'desc';
-    _formsInboxViewMode = 'card';
+    _formsInboxViewMode = 'grid';
     var sortBtn = document.getElementById('formsSortBtn');
     if (sortBtn) sortBtn.textContent = '日期：新→舊 ▼';
-    document.querySelectorAll('#formsTypePills .forms-type-pill').forEach(function(pill) {
-        pill.classList.toggle('active', pill.getAttribute('data-type') === 'all');
-    });
     document.querySelectorAll('#formsStatusMultiDropdown input[type="checkbox"]').forEach(function(cb) {
         cb.checked = cb.value !== 'archived';
     });
     _updateFormsStatusBtnLabel();
     document.querySelectorAll('.forms-view-toggle-btn').forEach(function(b) {
-        b.classList.toggle('active', b.getAttribute('data-view') === 'card');
+        b.classList.toggle('active', b.getAttribute('data-view') === 'grid');
     });
+    _formsInboxSelectedIds = {};
+    _formsInboxSelectAnchorDocId = null;
     renderFormsInbox();
+}
+
+function _formsInboxPruneStaleSelection() {
+    var valid = {};
+    _formsInboxItems.forEach(function(item) {
+        if (item && item._id) valid[item._id] = true;
+    });
+    Object.keys(_formsInboxSelectedIds).forEach(function(id) {
+        if (!valid[id]) delete _formsInboxSelectedIds[id];
+    });
+    if (_formsInboxSelectAnchorDocId && !valid[_formsInboxSelectAnchorDocId]) {
+        _formsInboxSelectAnchorDocId = null;
+    }
+}
+
+function _formsInboxUpdateBulkBar() {
+    var n = Object.keys(_formsInboxSelectedIds).length;
+    var cnt = document.getElementById('formsInboxBulkCount');
+    if (cnt) cnt.textContent = String(n);
+    var delBtn = document.getElementById('formsInboxBulkDeleteBtn');
+    if (delBtn) delBtn.disabled = n === 0;
+}
+
+function formsInboxSyncSelectAllCheckbox() {
+    var cb = document.getElementById('formsInboxSelectAllCb');
+    if (!cb || _formsInboxViewMode !== 'grid') return;
+    var filtered = _formsInboxFilterItems();
+    if (!filtered.length) {
+        cb.checked = false;
+        cb.indeterminate = false;
+        return;
+    }
+    var sel = 0;
+    filtered.forEach(function(item) {
+        if (_formsInboxSelectedIds[item._id]) sel++;
+    });
+    cb.checked = sel === filtered.length && sel > 0;
+    cb.indeterminate = sel > 0 && sel < filtered.length;
+}
+
+function formsInboxOnHeaderSelectAll(headerCb) {
+    formsInboxSelectAllFiltered(!!headerCb.checked);
+}
+
+function formsInboxSelectAllFiltered(checked) {
+    _formsInboxSelectAnchorDocId = null;
+    var filtered = _formsInboxFilterItems();
+    if (checked) {
+        filtered.forEach(function(item) { _formsInboxSelectedIds[item._id] = true; });
+    } else {
+        filtered.forEach(function(item) { delete _formsInboxSelectedIds[item._id]; });
+    }
+    renderFormsInbox();
+}
+
+function formsInboxClearSelection() {
+    _formsInboxSelectedIds = {};
+    _formsInboxSelectAnchorDocId = null;
+    renderFormsInbox();
+}
+
+function formsInboxRowCheck(docId, checked) {
+    if (checked) _formsInboxSelectedIds[docId] = true;
+    else delete _formsInboxSelectedIds[docId];
+    _formsInboxUpdateBulkBar();
+    formsInboxSyncSelectAllCheckbox();
+}
+
+function formsInboxCheckboxPointerClick(ev, docId) {
+    if (!ev) return false;
+    ev.preventDefault();
+    ev.stopPropagation();
+    var filtered = _formsInboxFilterItems();
+    var curIdx = -1;
+    for (var j = 0; j < filtered.length; j++) {
+        if (filtered[j]._id === docId) { curIdx = j; break; }
+    }
+    if (curIdx < 0) return false;
+    var currentlyChecked = !!_formsInboxSelectedIds[docId];
+    var newChecked = !currentlyChecked;
+
+    if (ev.shiftKey && _formsInboxSelectAnchorDocId != null) {
+            var anchorIdx = -1;
+        for (var k = 0; k < filtered.length; k++) {
+            if (filtered[k]._id === _formsInboxSelectAnchorDocId) { anchorIdx = k; break; }
+        }
+        if (anchorIdx >= 0) {
+            var lo = Math.min(anchorIdx, curIdx);
+            var hi = Math.max(anchorIdx, curIdx);
+            for (var i = lo; i <= hi; i++) {
+                if (newChecked) _formsInboxSelectedIds[filtered[i]._id] = true;
+                else delete _formsInboxSelectedIds[filtered[i]._id];
+            }
+            _formsInboxSelectAnchorDocId = docId;
+            renderFormsInbox();
+            return false;
+        }
+    }
+
+    _formsInboxSelectAnchorDocId = docId;
+    formsInboxRowCheck(docId, newChecked);
+    renderFormsInbox();
+    return false;
+}
+
+function deleteSelectedFormSubmissions() {
+    var ids = Object.keys(_formsInboxSelectedIds);
+    if (!ids.length) return;
+    if (typeof db === 'undefined' || !db) {
+        showToast('資料庫未就緒', 'error');
+        return;
+    }
+    showCmsConfirm({
+        icon: '🗑️',
+        title: '刪除選取的提交？',
+        msg: '將從 Inbox（Firestore formSubmissions）永久刪除 ' + ids.length + ' 筆記錄。不會修改 Google Sheet。',
+        okText: '刪除',
+        cancelText: '取消',
+        onOk: function() { _formsInboxRunBulkDelete(ids.slice()); }
+    });
+}
+
+function _formsInboxRunBulkDelete(ids) {
+    if (!ids || !ids.length) return;
+    showLoadingOverlay('刪除中...');
+    var CHUNK = 400;
+    var i = 0;
+    var total = ids.length;
+    function commitNext() {
+        var slice = ids.slice(i, i + CHUNK);
+        if (!slice.length) {
+            hideLoadingOverlay();
+            _formsInboxSelectedIds = {};
+            _formsInboxSelectAnchorDocId = null;
+            _formsInboxUpdateBulkBar();
+            showToast('已刪除 ' + total + ' 筆');
+            return;
+        }
+        var batch = db.batch();
+        slice.forEach(function(id) {
+            batch.delete(db.collection('formSubmissions').doc(id));
+        });
+        batch.commit().then(function() {
+            i += CHUNK;
+            commitNext();
+        }).catch(function(err) {
+            hideLoadingOverlay();
+            console.error('[forms inbox] bulk delete', err);
+            showToast('刪除失敗：' + (err.message || '未知錯誤'), 'error');
+        });
+    }
+    commitNext();
 }
 
 function _formsInboxBuildCardHtml(item) {
@@ -8285,12 +9714,17 @@ function _formsInboxBuildCardHtml(item) {
     return '' +
         '<div class="forms-inbox-card" id="formInbox_' + domId + '" onclick="toggleFormSubmissionExpand(this, event)">' +
             '<div class="forms-inbox-header">' +
-                '<div>' +
-                    '<div class="forms-inbox-topline">' +
-                        '<span class="forms-type-badge ' + escHtml(meta.badgeClass) + '">' + escHtml(meta.label) + '</span>' +
-                        '<span class="forms-source-badge">' + escHtml(sourceLabel) + '</span>' +
+                '<div class="forms-inbox-header-main">' +
+                    '<label class="forms-inbox-card-cb" onclick="event.stopPropagation()">' +
+                        '<input type="checkbox" ' + (_formsInboxSelectedIds[item._id] ? 'checked' : '') + ' title="Shift+點擊可與上一筆間範圍選取" onclick="return formsInboxCheckboxPointerClick(event, \'' + item._id + '\')">' +
+                    '</label>' +
+                    '<div>' +
+                        '<div class="forms-inbox-topline">' +
+                            '<span class="forms-type-badge ' + escHtml(meta.badgeClass) + '">' + escHtml(meta.label) + '</span>' +
+                            '<span class="forms-source-badge">' + escHtml(sourceLabel) + '</span>' +
+                        '</div>' +
+                        '<h3 class="forms-inbox-name">' + escHtml(item.contactName || '未提供姓名') + '</h3>' +
                     '</div>' +
-                    '<h3 class="forms-inbox-name">' + escHtml(item.contactName || '未提供姓名') + '</h3>' +
                 '</div>' +
                 '<div style="position:relative;">' +
                     '<span class="forms-status-badge ' + escHtml(statusMeta.className) + '" onclick="event.stopPropagation();toggleFormStatusMenu(\'' + item._id + '\')">' + escHtml(statusMeta.label) + ' ▾</span>' +
@@ -8317,6 +9751,8 @@ function _formsInboxBuildCardHtml(item) {
                 '</div>' +
                 '<div class="forms-provenance">' +
                     'formType: <code>' + escHtml(item.formType || 'other') + '</code><br>' +
+                    'leadDefinitionId: <code>' + escHtml(item.leadDefinitionId || 'n/a') + '</code><br>' +
+                    'leadDefinitionName: <code>' + escHtml(item.leadDefinitionName || 'n/a') + '</code><br>' +
                     'sourceCollection: <code>' + escHtml(item.sourceCollection || 'n/a') + '</code><br>' +
                     'sourceDocId: <code>' + escHtml(item.sourceDocId || 'n/a') + '</code><br>' +
                     'sheetTab: <code>' + escHtml(item.sheetTab || 'n/a') + '</code><br>' +
@@ -8338,6 +9774,7 @@ function _formsInboxFilterItems() {
         ? null
         : _formsInboxStatusFilters;
     var filtered = _formsInboxItems.filter(function(item) {
+        if (_formsInboxHiddenFromLeadsInbox(item)) return false;
         var statusValue = _formsInboxGetStatusValue(item);
         if (statusSet && statusSet.indexOf(statusValue) === -1) return false;
         if (_formsInboxTypeFilter !== 'all' && item.formType !== _formsInboxTypeFilter) return false;
@@ -8380,6 +9817,7 @@ function _formsInboxBuildGridHtml(filtered) {
         { key: '_actions', label: '' }
     ];
     var html = '<div class="forms-grid-table-wrap"><table class="forms-grid-table"><thead><tr>';
+    html += '<th class="fgt-select"><input type="checkbox" id="formsInboxSelectAllCb" onclick="event.stopPropagation()" onchange="formsInboxOnHeaderSelectAll(this)" title="全選目前清單（列勾選可按住 Shift 範圍選取）"></th>';
     cols.forEach(function(c) { html += '<th>' + escHtml(c.label) + '</th>'; });
     html += '</tr></thead><tbody>';
     filtered.forEach(function(item) {
@@ -8388,6 +9826,7 @@ function _formsInboxBuildGridHtml(filtered) {
         var statusMeta = _formsInboxGetStatusMeta(statusValue);
         var submittedAt = item.submittedAt || item.createdAt || item.clientSubmittedAt;
         html += '<tr>';
+        html += '<td class="fgt-select" onclick="event.stopPropagation()"><input type="checkbox" ' + (_formsInboxSelectedIds[item._id] ? 'checked' : '') + ' title="Shift+點擊可與上一筆間範圍選取" onclick="return formsInboxCheckboxPointerClick(event, \'' + item._id + '\')"></td>';
         html += '<td><span class="forms-type-badge ' + escHtml(meta.badgeClass) + '" style="font-size:10px;padding:2px 8px;">' + escHtml(meta.label) + '</span></td>';
         html += '<td><span class="forms-status-badge ' + escHtml(statusMeta.className) + '" style="font-size:11px;padding:2px 8px;cursor:pointer;" onclick="toggleFormStatusMenu(\'' + item._id + '\')">' + escHtml(statusMeta.label) + ' ▾</span>';
         var domId = _formsInboxDomId(item._id);
@@ -8425,16 +9864,20 @@ function renderFormsInbox() {
     var gridEl = document.getElementById('formsInboxGrid');
     var emptyEl = document.getElementById('formsInboxEmptyState');
     if (!listEl || !emptyEl) return;
+    _formsInboxPruneStaleSelection();
     _formsInboxUpdateKpis();
     var filtered = _formsInboxFilterItems();
     var isGrid = _formsInboxViewMode === 'grid';
+    var leadsInboxCount = _formsInboxItems.filter(function(i) { return !_formsInboxHiddenFromLeadsInbox(i); }).length;
     if (!filtered.length) {
         listEl.innerHTML = '';
         if (gridEl) gridEl.innerHTML = '';
         listEl.style.display = 'none';
         if (gridEl) gridEl.style.display = 'none';
         emptyEl.style.display = 'block';
-        emptyEl.textContent = _formsInboxItems.length ? '沒有符合目前篩選條件的表單提交' : '尚未有表單提交';
+        emptyEl.textContent = leadsInboxCount ? '沒有符合目前篩選條件的表單提交' : '尚未有表單提交';
+        _formsInboxUpdateBulkBar();
+        formsInboxSyncSelectAllCheckbox();
         return;
     }
     emptyEl.style.display = 'none';
@@ -8444,11 +9887,13 @@ function renderFormsInbox() {
             gridEl.style.display = 'block';
             gridEl.innerHTML = _formsInboxBuildGridHtml(filtered);
         }
+        formsInboxSyncSelectAllCheckbox();
     } else {
         if (gridEl) { gridEl.style.display = 'none'; gridEl.innerHTML = ''; }
         listEl.style.display = 'block';
         listEl.innerHTML = filtered.map(_formsInboxBuildCardHtml).join('');
     }
+    _formsInboxUpdateBulkBar();
 }
 
 function toggleFormSubmissionExpand(card, e) {
@@ -8458,7 +9903,9 @@ function toggleFormSubmissionExpand(card, e) {
         e.target.closest('.forms-status-badge') ||
         e.target.closest('.consult-status-menu') ||
         e.target.closest('textarea') ||
-        e.target.closest('button')
+        e.target.closest('button') ||
+        e.target.closest('.forms-inbox-card-cb') ||
+        e.target.closest('input[type="checkbox"]')
     )) return;
     card.classList.toggle('expanded');
 }
@@ -8566,6 +10013,1961 @@ function copyFormSubmissionContact(docId) {
     document.execCommand('copy');
     textarea.remove();
     onSuccess();
+}
+
+// ============================================================
+// LEADS AREA
+// ============================================================
+var _leadDefinitionsLoaded = false;
+var _leadDefinitionsSubscribed = false;
+var _leadDefinitionsUnsub = null;
+var _leadDefinitions = [];
+var _leadDefinitionsById = {};
+var _leadDefinitionEditorDirty = false;
+var _leadDefinitionEditorSaving = false;
+var _leadDefinitionEditorSnapshot = '';
+var _leadDefinitionEditorDirtyBound = false;
+var _leadDefinitionSuppressDirtyCheck = false;
+
+function initLeadsSectionMounts() {
+    var inboxMount = document.getElementById('tabLeadsInboxMount');
+    var formsView = document.getElementById('memberViewForms');
+    if (inboxMount && formsView && formsView.parentNode !== inboxMount) {
+        inboxMount.appendChild(formsView);
+    }
+    if (formsView) formsView.style.display = 'block';
+
+    var quizMount = document.getElementById('tabLeadsQuizMount');
+    var quizTab = document.getElementById('tabQuizDashboard');
+    if (quizMount && quizTab && quizTab.parentNode !== quizMount) {
+        quizMount.appendChild(quizTab);
+    }
+}
+
+function _setLeadDefinitionsCache(definitions) {
+    _leadDefinitions = Array.isArray(definitions) ? definitions.slice() : [];
+    _leadDefinitionsById = {};
+    _leadDefinitions.forEach(function(def) {
+        if (!def || !def.id) return;
+        _leadDefinitionsById[def.id] = def;
+    });
+    _leadDefinitionsLoaded = true;
+}
+
+function _leadDefinitionEditorVisible() {
+    var editor = document.getElementById('leadDefinitionEditor');
+    return !!(editor && editor.style.display !== 'none');
+}
+
+function _leadDefinitionCurrentId() {
+    return String((document.getElementById('leadDefinitionIdInput') || {}).value || '').trim();
+}
+
+function _stableStringifyLeadEditorValue(value) {
+    if (value == null) return 'null';
+    if (Array.isArray(value)) {
+        return '[' + value.map(function(item) {
+            return _stableStringifyLeadEditorValue(item);
+        }).join(',') + ']';
+    }
+    if (typeof value === 'object') {
+        var keys = Object.keys(value).sort();
+        return '{' + keys.map(function(key) {
+            return JSON.stringify(key) + ':' + _stableStringifyLeadEditorValue(value[key]);
+        }).join(',') + '}';
+    }
+    return JSON.stringify(value);
+}
+
+function _leadDefinitionEditorComparableSnapshot(docId) {
+    try {
+        return _stableStringifyLeadEditorValue(_collectLeadDefinitionEditorPayload(docId || _leadDefinitionCurrentId()));
+    } catch (err) {
+        console.error('[leadDefinitions] comparable snapshot failed', err);
+        return '';
+    }
+}
+
+function _updateLeadDefinitionSaveStatus() {
+    var statusEl = document.getElementById('leadDefinitionSaveStatus');
+    if (!statusEl) return;
+    if (_leadDefinitionEditorDirty) {
+        statusEl.className = 'lead-def-save-status unsaved';
+        statusEl.innerHTML = _cloudUnsavedSvg() + '<span class="save-label">未儲存變更</span>';
+        return;
+    }
+    statusEl.className = 'lead-def-save-status saved';
+    statusEl.innerHTML = _cloudSavedSvg() + '<span class="save-label">' + (_leadDefinitionEditorSaving ? '儲存中...' : '已儲存') + '</span>';
+}
+
+function _setLeadDefinitionDirty(nextDirty) {
+    _leadDefinitionEditorDirty = !!nextDirty;
+    _updateLeadDefinitionSaveStatus();
+}
+
+function _captureLeadDefinitionEditorSnapshot(docId) {
+    _leadDefinitionEditorSnapshot = _leadDefinitionEditorComparableSnapshot(docId || _leadDefinitionCurrentId());
+    _setLeadDefinitionDirty(false);
+}
+
+function _recomputeLeadDefinitionDirty() {
+    if (_leadDefinitionSuppressDirtyCheck || !_leadDefinitionEditorVisible()) return;
+    var currentSnapshot = _leadDefinitionEditorComparableSnapshot(_leadDefinitionCurrentId());
+    _setLeadDefinitionDirty(currentSnapshot !== _leadDefinitionEditorSnapshot);
+}
+
+function _hasUnsavedLeadDefinitionChanges() {
+    if (_leadDefinitionEditorSaving || !_leadDefinitionEditorVisible()) return false;
+    var currentSnapshot = _leadDefinitionEditorComparableSnapshot(_leadDefinitionCurrentId());
+    return currentSnapshot !== _leadDefinitionEditorSnapshot;
+}
+
+function _bindLeadDefinitionEditorDirtyTracking() {
+    if (_leadDefinitionEditorDirtyBound) return;
+    var editor = document.getElementById('leadDefinitionEditor');
+    if (!editor) return;
+    function onDirtyEvent() {
+        _recomputeLeadDefinitionDirty();
+    }
+    editor.addEventListener('input', onDirtyEvent);
+    editor.addEventListener('change', onDirtyEvent);
+    _leadDefinitionEditorDirtyBound = true;
+}
+
+function _withLeadDefinitionLeaveGuard(onOk) {
+    if (!_hasUnsavedLeadDefinitionChanges()) {
+        if (typeof onOk === 'function') onOk();
+        return true;
+    }
+    showCmsConfirm({
+        icon: '⚠️',
+        title: '確定要離開嗎？',
+        msg: '你有未儲存的 Lead 設定變更，離開後將不會保留。',
+        cancelText: '繼續編輯',
+        okText: '離開不儲存',
+        onOk: function() {
+            _setLeadDefinitionDirty(false);
+            if (typeof onOk === 'function') onOk();
+        }
+    });
+    return false;
+}
+
+function loadLeadDefinitionsData() {
+    if (_leadDefinitionsSubscribed || !db || typeof aiflowSubscribeLeadDefinitions !== 'function') return;
+    _leadDefinitionsSubscribed = true;
+    aiflowSubscribeLeadDefinitions(function(definitions) {
+        _setLeadDefinitionsCache(definitions);
+        renderLeadDefinitionList();
+        var selectedId = (document.getElementById('leadDefinitionIdInput') || {}).value || '';
+        var selDef = selectedId ? _leadDefinitionsById[selectedId] : null;
+        if (selectedId && selDef && selDef.type !== 'consultation' && (!_hasUnsavedLeadDefinitionChanges() || _leadDefinitionEditorSaving)) {
+            openLeadDefinitionEditor(selectedId, { skipDirtyConfirm: true });
+        }    
+    }, function(err) {
+        console.error('[leadDefinitions] listener error', err);
+        var list = document.getElementById('leadDefinitionList');
+        if (list) list.innerHTML = '<div class="lead-def-empty" style="min-height:180px;">Lead 定義載入失敗：' + escHtml(err.message || '未知錯誤') + '</div>';
+    }, { db: db }).then(function(unsub) {
+        _leadDefinitionsUnsub = typeof unsub === 'function' ? unsub : null;
+    }).catch(function(err) {
+        _leadDefinitionsSubscribed = false;
+        console.error('[leadDefinitions] subscribe init error', err);
+    });
+}
+
+function switchLeadTab(tabId, opts) {
+    opts = opts || {};
+    var activeLeadTabEl = document.querySelector('#sectionLeads .cms-tab.active');
+    var activeLeadTab = activeLeadTabEl ? (activeLeadTabEl.getAttribute('data-lead-tab') || '') : '';
+    if (!opts.skipDirtyConfirm && activeLeadTab === 'definitions' && tabId !== 'definitions' && _hasUnsavedLeadDefinitionChanges()) {
+        _withLeadDefinitionLeaveGuard(function() {
+            switchLeadTab(tabId, { skipDirtyConfirm: true });
+        });
+        return;
+    }
+    initLeadsSectionMounts();
+    document.querySelectorAll('#sectionLeads .cms-tab').forEach(function(t) {
+        t.classList.toggle('active', t.getAttribute('data-lead-tab') === tabId);
+    });
+    document.querySelectorAll('#sectionLeads > .tab-content').forEach(function(c) {
+        c.classList.remove('active');
+    });
+    var targetId = tabId === 'definitions'
+        ? 'tabLeadsDefinitions'
+        : (tabId === 'quiz-dashboard' ? 'tabLeadsQuizMount'
+        : (tabId === 'email-outbound' ? 'tabLeadsEmailOutbound' : 'tabLeadsInbox'));
+    var target = document.getElementById(targetId);
+    if (target) target.classList.add('active');
+    var quizTab = document.getElementById('tabQuizDashboard');
+    if (quizTab) quizTab.classList.toggle('active', tabId === 'quiz-dashboard');
+    if (tabId === 'inbox') {
+        loadFormsInboxData();
+        renderFormsInbox();
+    } else if (tabId === 'definitions') {
+        loadLeadDefinitionsData();
+        renderLeadDefinitionList();
+        refreshLeadDefinitionUsage(false);
+    } else if (tabId === 'quiz-dashboard') {
+        renderQuizDashboard();
+    } else if (tabId === 'email-outbound') {
+        loadEmailOutboundSettings();
+    }
+}
+
+function loadEmailOutboundSettings() {
+    if (!db) return;
+    db.collection('siteSettings').doc('emailOutbound').get().then(function(doc) {
+        var d = doc.exists ? (doc.data() || {}) : {};
+        var fromEl = document.getElementById('emailOutboundFromInput');
+        var replyEl = document.getElementById('emailOutboundReplyToInput');
+        if (fromEl) fromEl.value = String(d.outboundFrom || '');
+        if (replyEl) replyEl.value = String(d.outboundReplyTo || '');
+    }).catch(function(err) {
+        console.error(err);
+        showToast('無法載入寄件設定', 'error');
+    });
+}
+
+function saveEmailOutboundSettings() {
+    if (!db) {
+        showToast('Firestore 未就緒', 'error');
+        return;
+    }
+    var fromEl = document.getElementById('emailOutboundFromInput');
+    var replyEl = document.getElementById('emailOutboundReplyToInput');
+    var fromVal = String((fromEl && fromEl.value) || '').trim();
+    var replyVal = String((replyEl && replyEl.value) || '').trim();
+    showLoadingOverlay('正在儲存寄件設定...');
+    db.collection('siteSettings').doc('emailOutbound').set({
+        outboundFrom: fromVal,
+        outboundReplyTo: replyVal,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).then(function() {
+        hideLoadingOverlay();
+        if (typeof aiflowInvalidateOutboundEmailSettingsCache === 'function') {
+            aiflowInvalidateOutboundEmailSettingsCache();
+        }
+        showToast('寄件設定已儲存');
+    }).catch(function(err) {
+        hideLoadingOverlay();
+        showToast('儲存失敗：' + (err.message || String(err)), 'error');
+    });
+}
+
+function _getLeadDefinitionById(id) {
+    return _leadDefinitionsById[String(id || '').trim()] || null;
+}
+
+function _leadDefinitionStatusChipClass(status) {
+    var key = String(status || 'active').trim() || 'active';
+    return key === 'draft' ? 'draft' : (key === 'archived' ? 'archived' : 'active');
+}
+
+function _leadCardListThumbInnerMarkup(url) {
+    var normalized = _leadNormalizeMediaUrl(url);
+    if (!normalized) return '';
+    var safeUrl = escHtml(normalized);
+    if (_leadIsVideoMediaUrl(normalized)) {
+        return '<video src="' + safeUrl + '" muted playsinline preload="metadata"></video>';
+    }
+    return '<img src="' + safeUrl + '" alt="" loading="lazy">';
+}
+
+function _leadDefinitionCardMediaMarkup(def) {
+    var normalized = _leadNormalizeMediaUrl(def && def.imageUrl || '');
+    if (!normalized) {
+        return '<div class="lead-def-card-media empty">無圖</div>';
+    }
+    return '<div class="lead-def-card-media">' + _leadCardListThumbInnerMarkup(normalized) + '</div>';
+}
+
+function _leadDefinitionFilterList() {
+    var typeFilter = (document.getElementById('leadDefinitionTypeFilter') || {}).value || 'all';
+    if (typeFilter === 'consultation') typeFilter = 'all';
+    var statusFilter = (document.getElementById('leadDefinitionStatusFilter') || {}).value || 'all';
+    var search = String((document.getElementById('leadDefinitionSearchInput') || {}).value || '').trim().toLowerCase();
+    return (_leadDefinitions || []).filter(function(def) {
+        if (def.type === 'consultation') return false;
+        if (typeFilter !== 'all' && def.type !== typeFilter) return false;
+        if (statusFilter !== 'all' && def.status !== statusFilter) return false;
+        if (!search) return true;
+        var hay = [
+            def.id,
+            def.name,
+            _cmsRichTextToPlainInput(def.title),
+            _cmsRichTextToPlainInput(def.description),
+            _cmsRichTextToPlainInput(def.purposeNotes),
+            def.redirectUrl
+        ].join(' ').toLowerCase();
+        return hay.indexOf(search) >= 0;
+    });
+}
+
+function _groupLeadUsagesByPage(usages) {
+    var groups = [];
+    var seen = {};
+    (Array.isArray(usages) ? usages : []).forEach(function(entry) {
+        var key = String(entry.pageSlug || '') + '::' + String(entry.pageName || '') + '::' + String(entry.layoutId || '');
+        var group = seen[key];
+        if (!group) {
+            group = {
+                pageName: entry.pageName || entry.layoutId || '未命名頁面',
+                pageSlug: entry.pageSlug || '',
+                layoutId: entry.layoutId || '',
+                details: []
+            };
+            seen[key] = group;
+            groups.push(group);
+        }
+        var detail = String(entry.sectionTitle || entry.sectionId || '未命名 section');
+        if (entry.placement === 'link' && entry.itemLabel) {
+            detail += ' · ' + entry.itemLabel;
+        }
+        if (group.details.indexOf(detail) === -1) group.details.push(detail);
+    });
+    return groups;
+}
+
+function _leadDefinitionCardUsageMarkup(defId) {
+    if (_leadDefinitionUsageLoading && !_leadDefinitionUsageLoaded) {
+        return '<div class="lead-def-card-usage-empty">正在檢查使用位置...</div>';
+    }
+    if (!_leadDefinitionUsageLoaded && !_leadDefinitionUsageError) {
+        return '<div class="lead-def-card-usage-empty">正在準備使用位置資料...</div>';
+    }
+    if (!_leadDefinitionUsageLoaded && _leadDefinitionUsageError) {
+        return '<div class="lead-def-card-usage-empty">使用位置載入失敗</div>';
+    }
+    var groups = _groupLeadUsagesByPage(_leadDefinitionUsageIndex[String(defId || '').trim()] || []);
+    if (!groups.length) {
+        return '<div class="lead-def-card-usage-empty">目前未有版面使用這個 Lead Magnet。</div>';
+    }
+    return '<div class="lead-def-card-usage">' + groups.map(function(group) {
+        var pagePath = group.pageSlug ? ('/' + group.pageSlug) : ('layout:' + group.layoutId);
+        return '<div class="lead-def-card-usage-row">' +
+            '<div class="lead-def-card-usage-page">' + escHtml(group.pageName) + '</div>' +
+            '<div class="lead-def-card-usage-meta">' + escHtml(pagePath) + '</div>' +
+            '<div class="lead-def-card-usage-meta">' + escHtml(group.details.join(' ｜ ')) + '</div>' +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+function renderLeadDefinitionList() {
+    var list = document.getElementById('leadDefinitionList');
+    if (!list) return;
+    var typeSel = document.getElementById('leadDefinitionTypeFilter');
+    if (typeSel && typeSel.value === 'consultation') typeSel.value = 'all';
+    loadLeadDefinitionsData();
+    if (!_leadDefinitionsLoaded) {
+        list.innerHTML = '<div class="lead-def-empty" style="min-height:180px;">正在載入 Leads 定義...</div>';
+        return;
+    }
+    var filtered = _leadDefinitionFilterList();
+    if (!filtered.length) {
+        list.innerHTML = '<div class="lead-def-empty" style="min-height:180px;">尚未有符合條件的 Lead 定義。</div>';
+        return;
+    }
+    var selectedId = (document.getElementById('leadDefinitionIdInput') || {}).value || '';
+    list.innerHTML = filtered.map(function(def) {
+        var displayName = typeof aiflowLeadDefinitionDisplayName === 'function' ? aiflowLeadDefinitionDisplayName(def) : (def.name || def.title || def.id);
+        displayName = _cmsRichTextToPlainInput(displayName);
+        var typeLabel = typeof aiflowGetLeadDefinitionTypeMeta === 'function' ? aiflowGetLeadDefinitionTypeMeta(def.type).label : def.type;
+        return '' +
+            '<div class="lead-def-card' + (selectedId === def.id ? ' active' : '') + '" onclick="openLeadDefinitionEditor(\'' + def.id + '\')">' +
+                _leadDefinitionCardMediaMarkup(def) +
+                '<div class="lead-def-card-body">' +
+                    '<div class="lead-def-card-name">' + escHtml(displayName) + '</div>' +
+                    '<div class="lead-def-card-meta">' +
+                        '<span class="lead-def-chip">' + escHtml(typeLabel) + '</span>' +
+                        '<span class="lead-def-chip ' + _leadDefinitionStatusChipClass(def.status) + '">' + escHtml(def.status || 'active') + '</span>' +
+                        '<span class="lead-def-chip">' + (def.publicEnabled === false ? 'Private' : 'Public') + '</span>' +
+                    '</div>' +
+                    _leadDefinitionCardUsageMarkup(def.id) +
+                '</div>' +
+            '</div>';
+    }).join('');
+}
+
+var _leadDefinitionUsageIndex = {};
+var _leadDefinitionUsageLoaded = false;
+var _leadDefinitionUsageLoading = false;
+var _leadDefinitionUsageError = '';
+
+function _leadUsagePlainText(value) {
+    return _cmsRichTextToPlainInput(value || '').trim();
+}
+
+function _leadUsageFirstText(values) {
+    values = Array.isArray(values) ? values : [];
+    for (var i = 0; i < values.length; i++) {
+        var text = _leadUsagePlainText(values[i]);
+        if (text) return text;
+    }
+    return '';
+}
+
+function _leadUsagePageName(layoutId, data) {
+    var name = _leadUsageFirstText([
+        data && data.pageName,
+        data && data.pageTitle,
+        data && data.title
+    ]);
+    if (name) return name;
+    var slug = String(data && data.pageSlug || '').trim();
+    return slug || layoutId || '未命名頁面';
+}
+
+function _leadUsageSectionTitle(section, index) {
+    section = section || {};
+    var content = section.content && typeof section.content === 'object' && !Array.isArray(section.content) ? section.content : {};
+    var title = _leadUsageFirstText([
+        content.sectionTitle,
+        content.title,
+        content.heading,
+        content.name,
+        content.label,
+        content.sectionLabel,
+        content.materialTitle,
+        content.subtitle
+    ]);
+    if (title) return title;
+    if (section.id) return String(section.id);
+    if (section.type) return String(section.type);
+    return 'Section ' + (index + 1);
+}
+
+function _leadUsagePlacementLabel(entry) {
+    if (entry && entry.placement === 'link') return 'Link List 卡片';
+    if (entry && entry.sectionType === 'free-material-download') return 'Free Material 區塊';
+    return 'Section 引用';
+}
+
+function _leadUsagePagePath(entry) {
+    if (entry && entry.pageSlug) return '/' + entry.pageSlug;
+    return 'layout:' + String(entry && entry.layoutId || 'unknown');
+}
+
+function _leadDefinitionUsagePush(index, defId, entry) {
+    var key = String(defId || '').trim();
+    if (!key) return;
+    if (!index[key]) index[key] = [];
+    index[key].push(entry);
+}
+
+function _buildLeadDefinitionUsageIndex(layoutDocs) {
+    var index = {};
+    (layoutDocs || []).forEach(function(docSnap) {
+        var data = docSnap && typeof docSnap.data === 'function' ? (docSnap.data() || {}) : (docSnap || {});
+        var layoutId = docSnap && docSnap.id ? docSnap.id : String(data.id || '').trim();
+        var pageName = _leadUsagePageName(layoutId, data);
+        var pageSlug = String(data.pageSlug || '').trim();
+        var sections = Array.isArray(data.sections) ? data.sections : [];
+        sections.forEach(function(section, sectionIndex) {
+            if (!section) return;
+            var content = section.content && typeof section.content === 'object' && !Array.isArray(section.content) ? section.content : {};
+            var sectionId = String(section.id || ('section-' + (sectionIndex + 1))).trim();
+            var sectionType = String(section.type || '').trim();
+            var sectionTitle = _leadUsageSectionTitle(section, sectionIndex);
+            var baseEntry = {
+                layoutId: layoutId,
+                pageName: pageName,
+                pageSlug: pageSlug,
+                sectionId: sectionId,
+                sectionType: sectionType,
+                sectionTitle: sectionTitle
+            };
+
+            var sectionLeadId = String(content.leadDefinitionId || '').trim();
+            if (sectionLeadId) {
+                _leadDefinitionUsagePush(index, sectionLeadId, Object.assign({}, baseEntry, {
+                    placement: 'section',
+                    itemLabel: '',
+                    itemIndex: -1
+                }));
+            }
+
+            if (Array.isArray(content.links)) {
+                content.links.forEach(function(link, linkIndex) {
+                    var linkLeadId = String(link && link.leadDefinitionId || '').trim();
+                    if (!linkLeadId) return;
+                    var linkLabel = _leadUsageFirstText([
+                        link && link.label,
+                        link && link.title,
+                        link && link.badgeText,
+                        link && link.url
+                    ]) || ('Link ' + (linkIndex + 1));
+                    _leadDefinitionUsagePush(index, linkLeadId, Object.assign({}, baseEntry, {
+                        placement: 'link',
+                        itemLabel: linkLabel,
+                        itemIndex: linkIndex
+                    }));
+                });
+            }
+        });
+    });
+
+    Object.keys(index).forEach(function(defId) {
+        index[defId].sort(function(a, b) {
+            var pageCmp = String(a.pageName || '').localeCompare(String(b.pageName || ''), 'zh-Hant');
+            if (pageCmp !== 0) return pageCmp;
+            var sectionCmp = String(a.sectionId || '').localeCompare(String(b.sectionId || ''), 'zh-Hant');
+            if (sectionCmp !== 0) return sectionCmp;
+            return (a.itemIndex || 0) - (b.itemIndex || 0);
+        });
+    });
+
+    return index;
+}
+
+function renderLeadDefinitionUsage(defId) {
+    var list = document.getElementById('leadDefinitionUsageList');
+    var refreshBtn = document.getElementById('leadDefinitionUsageRefreshBtn');
+    if (!list) return;
+    if (refreshBtn) refreshBtn.disabled = !!_leadDefinitionUsageLoading;
+
+    var currentId = String(defId != null ? defId : _leadDefinitionCurrentId() || '').trim();
+    if (!currentId) {
+        list.innerHTML = '<div class="lead-usage-empty">儲存這個 Lead 定義後，即可查看它目前被哪些頁面與 section 使用。</div>';
+        return;
+    }
+    if (_leadDefinitionUsageLoading && !_leadDefinitionUsageLoaded) {
+        list.innerHTML = '<div class="lead-usage-empty">正在檢查 page 與 section 使用位置...</div>';
+        return;
+    }
+    if (!_leadDefinitionUsageLoaded && _leadDefinitionUsageError) {
+        list.innerHTML = '<div class="lead-usage-empty error">載入使用位置失敗：' + escHtml(_leadDefinitionUsageError) + '</div>';
+        return;
+    }
+
+    var usages = _leadDefinitionUsageIndex[currentId] || [];
+    if (!usages.length) {
+        list.innerHTML = '<div class="lead-usage-empty">目前尚未在任何 page layout 中使用這個 Lead 定義。</div>';
+        return;
+    }
+
+    list.innerHTML = usages.map(function(entry) {
+        return '<div class="lead-usage-item">' +
+            '<div class="lead-usage-item-head">' +
+                '<div class="lead-usage-page">' + escHtml(entry.pageName || entry.layoutId || '未命名頁面') + '</div>' +
+                '<span class="lead-def-chip">' + escHtml(_leadUsagePagePath(entry)) + '</span>' +
+            '</div>' +
+            '<div class="lead-usage-section">' + escHtml(entry.sectionTitle || entry.sectionId || '未命名 section') + '</div>' +
+            '<div class="lead-usage-meta">Section ID：' + escHtml(entry.sectionId || '未指定') + ' ｜ 類型：' + escHtml(entry.sectionType || '未指定') + '</div>' +
+            '<div class="lead-usage-meta">位置：' + escHtml(_leadUsagePlacementLabel(entry)) + (entry.itemLabel ? ' ｜ 卡片：' + escHtml(entry.itemLabel) : '') + '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function refreshLeadDefinitionUsage(forceReload) {
+    var currentId = _leadDefinitionCurrentId();
+    if (_leadDefinitionUsageLoading) {
+        renderLeadDefinitionUsage(currentId);
+        return Promise.resolve();
+    }
+    if (_leadDefinitionUsageLoaded && !forceReload) {
+        renderLeadDefinitionUsage(currentId);
+        renderLeadDefinitionList();
+        return Promise.resolve(_leadDefinitionUsageIndex);
+    }
+    if (!db) {
+        _leadDefinitionUsageError = '資料庫尚未載入';
+        _leadDefinitionUsageLoaded = false;
+        renderLeadDefinitionUsage(currentId);
+        return Promise.resolve();
+    }
+
+    var hadCache = _leadDefinitionUsageLoaded;
+    _leadDefinitionUsageLoading = true;
+    _leadDefinitionUsageError = '';
+    renderLeadDefinitionUsage(currentId);
+
+    return db.collection('pageLayouts').get().then(function(snap) {
+        _leadDefinitionUsageIndex = _buildLeadDefinitionUsageIndex(snap.docs || []);
+        _leadDefinitionUsageLoaded = true;
+        _leadDefinitionUsageError = '';
+    }).catch(function(err) {
+        _leadDefinitionUsageError = err && err.message ? err.message : 'Unknown error';
+        if (!hadCache) _leadDefinitionUsageLoaded = false;
+        showToast('讀取使用位置失敗：' + _leadDefinitionUsageError, 'error');
+    }).then(function() {
+        _leadDefinitionUsageLoading = false;
+        renderLeadDefinitionUsage(currentId);
+        renderLeadDefinitionList();
+    });
+}
+
+var LEAD_DOCUMENT_ASSET_COLLECTION = 'layoutDocumentAssets';
+var _leadAssetPickerMode = 'image';
+var _leadAssetLibraryCache = [];
+var _leadAssetLibraryLoaded = false;
+var _leadAssetLibraryLoading = false;
+
+function _leadAssetPickerStatus(msg, cls) {
+    var status = document.getElementById('leadAssetPickerStatus');
+    if (!status) return;
+    status.className = 'media-picker-status' + (cls ? ' ' + cls : '');
+    status.textContent = msg || '';
+}
+
+function _leadAssetSortKey(asset) {
+    var raw = asset && (asset.updated || asset.timeCreated || '');
+    var ts = Date.parse(raw || '');
+    return isNaN(ts) ? 0 : ts;
+}
+
+function _leadAssetLibraryUpsert(asset) {
+    if (!asset || !asset.path) return;
+    var prev = _leadAssetFindByPath(asset.path);
+    if (prev && prev.cmsDisplayName && !asset.cmsDisplayName) asset = Object.assign({}, asset, { cmsDisplayName: prev.cmsDisplayName });
+    var next = [];
+    for (var i = 0; i < _leadAssetLibraryCache.length; i++) {
+        if (_leadAssetLibraryCache[i] && _leadAssetLibraryCache[i].path !== asset.path) next.push(_leadAssetLibraryCache[i]);
+    }
+    next.unshift(asset);
+    next.sort(function(a, b) { return _leadAssetSortKey(b) - _leadAssetSortKey(a); });
+    _leadAssetLibraryCache = next;
+    _leadAssetLibraryLoaded = true;
+}
+
+function _leadAssetListAllRecursive(ref) {
+    return ref.listAll().then(function(result) {
+        var jobs = [];
+        var items = (result.items || []).slice();
+        (result.prefixes || []).forEach(function(prefix) {
+            jobs.push(_leadAssetListAllRecursive(prefix));
+        });
+        return Promise.all(jobs).then(function(nested) {
+            nested.forEach(function(arr) {
+                if (Array.isArray(arr)) items = items.concat(arr);
+            });
+            return items;
+        });
+    }).catch(function() {
+        return [];
+    });
+}
+
+/**
+ * Merge layoutDocumentAssets (Firestore) into cache so displayName + _id persist across reloads.
+ */
+function _leadAssetMergeFirestoreDocumentAssets() {
+    if (!db || typeof db.collection !== 'function') return Promise.resolve();
+    return db.collection(LEAD_DOCUMENT_ASSET_COLLECTION).get().then(function(snap) {
+        var byPath = {};
+        snap.forEach(function(docSnap) {
+            var d = docSnap.data() || {};
+            var sp = String(d.storagePath || '').trim();
+            if (!sp) return;
+            byPath[sp] = {
+                _id: docSnap.id,
+                displayName: d.displayName,
+                url: d.url || ''
+            };
+        });
+        _leadAssetLibraryCache.forEach(function(asset) {
+            if (!asset || _leadAssetType(asset) !== 'document') return;
+            var p = String(asset.storagePath || asset.path || '').trim();
+            var row = byPath[p];
+            if (!row || !row._id) return;
+            asset._id = row._id;
+            if (row.displayName != null && String(row.displayName).trim() !== '') {
+                asset.cmsDisplayName = String(row.displayName).trim();
+            }
+        });
+    }).catch(function(err) {
+        console.warn('[layoutDocumentAssets] merge failed', err);
+    });
+}
+
+function _leadAssetLoadFolderAssets(folderPath) {
+    if (!storage) return Promise.resolve([]);
+    return _leadAssetListAllRecursive(storage.ref(folderPath)).then(function(items) {
+        return Promise.all((items || []).map(function(itemRef) {
+            return Promise.all([
+                itemRef.getDownloadURL(),
+                itemRef.getMetadata().catch(function() { return null; })
+            ]).then(function(results) {
+                var url = results[0];
+                var meta = results[1] || {};
+                var custom = meta.customMetadata || {};
+                return {
+                    path: itemRef.fullPath || '',
+                    storagePath: itemRef.fullPath || '',
+                    name: custom.displayName || custom.originalName || meta.name || itemRef.name || '',
+                    originalName: custom.originalName || meta.name || itemRef.name || '',
+                    fileName: custom.originalName || meta.name || itemRef.name || '',
+                    url: url,
+                    contentType: meta.contentType || '',
+                    timeCreated: meta.timeCreated || '',
+                    updated: meta.updated || ''
+                };
+            }).catch(function() {
+                return null;
+            });
+        }));
+    });
+}
+
+function _leadAssetType(asset) {
+    if (!asset) return 'document';
+    var type = String(asset.contentType || '').toLowerCase();
+    var name = String(asset.name || asset.path || asset.url || '').toLowerCase();
+    if (type.indexOf('video/') === 0 || /\.(mp4|mov|webm)(?:[?#]|$)/i.test(name)) return 'video';
+    if (type.indexOf('image/') === 0 || /\.(png|jpe?g|webp|gif|svg)(?:[?#]|$)/i.test(name)) return 'image';
+    return 'document';
+}
+
+function _leadAssetDocKind(asset) {
+    var name = String(asset && (asset.fileName || asset.name || asset.path || asset.url) || '').toLowerCase();
+    if (/\.pdf(?:[?#]|$)/i.test(name)) return 'pdf';
+    if (/\.(doc|docx)(?:[?#]|$)/i.test(name)) return 'doc';
+    if (/\.(ppt|pptx)(?:[?#]|$)/i.test(name)) return 'ppt';
+    if (/\.(xls|xlsx)(?:[?#]|$)/i.test(name)) return 'sheet';
+    if (/\.zip(?:[?#]|$)/i.test(name)) return 'zip';
+    return 'other';
+}
+
+function _leadAssetTypeLabel(asset) {
+    var type = _leadAssetType(asset);
+    if (type === 'video') return '影片';
+    if (type === 'image') return '圖片';
+    var docKind = _leadAssetDocKind(asset);
+    if (docKind === 'pdf') return 'PDF';
+    if (docKind === 'doc') return 'Word';
+    if (docKind === 'ppt') return 'PowerPoint';
+    if (docKind === 'sheet') return 'Excel';
+    if (docKind === 'zip') return 'ZIP';
+    return '文件';
+}
+
+function _leadAssetRootLabel(asset) {
+    var path = String(asset && (asset.storagePath || asset.path) || '');
+    var parts = path.split('/').filter(Boolean);
+    return parts[0] || 'external';
+}
+
+function _leadNormalizeMediaUrl(url) {
+    var raw = String(url || '').trim();
+    if (!raw) return '';
+    if (/firebasestorage\.googleapis\.com/i.test(raw) || (/\/o\/[^?]+/.test(raw) && /alt=media/i.test(raw))) {
+        return fixStorageUrl(raw);
+    }
+    if (/^(?:https?:|data:|blob:)/i.test(raw)) return raw;
+    return fixStorageUrl(raw);
+}
+
+function _leadIsVideoMediaUrl(url) {
+    var s = String(url || '');
+    if (/\.(mp4|mov|webm)(?:[?#]|$)/i.test(s)) return true;
+    var pathMatch = s.match(/[?&]path=([^&]+)/);
+    if (pathMatch) {
+        try { return /\.(mp4|mov|webm)$/i.test(decodeURIComponent(pathMatch[1])); } catch (e) { return false; }
+    }
+    var oMatch = s.match(/\/o\/([^?]+)/);
+    if (oMatch) {
+        try { return /\.(mp4|mov|webm)$/i.test(decodeURIComponent(oMatch[1])); } catch (e2) { return false; }
+    }
+    return false;
+}
+
+function _leadMediaPreviewMarkup(url) {
+    var normalized = _leadNormalizeMediaUrl(url);
+    var safeUrl = escHtml(normalized);
+    if (!safeUrl) return '';
+    if (_leadIsVideoMediaUrl(normalized)) {
+        return '<video src="' + safeUrl + '" autoplay loop muted playsinline preload="metadata"></video>';
+    }
+    return '<img src="' + safeUrl + '" alt="preview">';
+}
+
+function _leadAssetPreviewMarkup(asset) {
+    if (!asset) return '';
+    var type = _leadAssetType(asset);
+    if (type === 'image' || type === 'video') {
+        return '<div class="media-picker-thumb">' + _leadMediaPreviewMarkup(asset.url || '') + '</div>';
+    }
+    return '<div class="media-picker-thumb doc">' +
+        '<div class="media-picker-doc-badge">' + escHtml(_leadAssetTypeLabel(asset)) + '</div>' +
+    '</div>';
+}
+
+function _leadImagePlaceholderMarkup() {
+    return '<div class="upload-placeholder">' +
+        '<span class="upload-icon">&#x1F5BC;</span>' +
+        '<span class="upload-hint">點擊打開媒體池選擇圖片</span>' +
+        '<span class="upload-hint-sm">外觀會跟 page layout editor 一樣，直接重用現有素材，或在彈出視窗上傳新圖片。</span>' +
+    '</div>';
+}
+
+function _leadImageOverlayMarkup() {
+    return '<button type="button" class="img-corner-remove" title="移除圖片" onclick="event.stopPropagation(); clearLeadDefinitionImage()">&times;</button>' +
+        '<div class="img-overlay">' +
+            '<button type="button" class="btn-change" onclick="event.stopPropagation(); openLeadAssetPicker(\'image\')">更換圖片</button>' +
+            '<button type="button" class="btn-remove" onclick="event.stopPropagation(); clearLeadDefinitionImage()">移除</button>' +
+        '</div>';
+}
+
+function _renderLeadDefinitionImagePicker(url) {
+    var zone = document.getElementById('leadDefinitionImagePicker');
+    var hidden = document.getElementById('leadDefinitionImageUrlInput');
+    var rawUrl = String(url || '').trim();
+    var normalized = _leadNormalizeMediaUrl(rawUrl);
+    if (hidden) hidden.value = rawUrl;
+    if (!zone) return;
+    zone.classList.toggle('has-image', !!normalized);
+    zone.innerHTML = normalized
+        ? '<div class="preview-wrap">' + _leadMediaPreviewMarkup(normalized) + _leadImageOverlayMarkup() + '</div>'
+        : _leadImagePlaceholderMarkup();
+}
+
+function clearLeadDefinitionImage() {
+    _renderLeadDefinitionImagePicker('');
+    _recomputeLeadDefinitionDirty();
+}
+
+function _leadDocNameFromFile(name) {
+    return String(name || '').replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ').trim() || 'document';
+}
+
+function _leadDocExtLabel(name) {
+    var ext = String(name || '').split('.').pop().toLowerCase();
+    var map = { pdf:'PDF', doc:'DOC', docx:'DOC', ppt:'PPT', pptx:'PPT', xls:'XLS', xlsx:'XLS', zip:'ZIP' };
+    return map[ext] || 'FILE';
+}
+
+function _leadDocItemHtml(idx, doc) {
+    var fileName = String(doc.fileName || doc.originalName || doc.name || '').trim();
+    var url = String(doc.url || '').trim();
+    var displayName = String(doc.name || '').trim() || _leadDocNameFromFile(fileName || url.split('/').pop() || 'document');
+    var nameFieldId = 'leadDocDisplayName_' + idx;
+    return '<div class="lead-doc-item" data-doc-idx="' + idx + '" data-doc-url="' + escHtml(url) + '" data-doc-file="' + escHtml(fileName) + '" data-doc-storage-path="' + escHtml(doc.storagePath || '') + '" data-doc-asset-id="' + escHtml(doc.assetId || doc._id || '') + '">' +
+        '<div class="doc-icon">' + escHtml(_leadDocExtLabel(fileName || displayName)) + '</div>' +
+        '<div class="doc-info">' +
+            '<label class="lead-doc-name-label" for="' + nameFieldId + '">文件名稱（對外顯示）</label>' +
+            '<input type="text" id="' + nameFieldId + '" class="lead-doc-name-input" data-doc-name value="' + escHtml(displayName) + '" placeholder="文件名稱（對外顯示）" title="檔案：' + escHtml(fileName || url.split('/').pop() || '') + '" autocomplete="off">' +
+        '</div>' +
+        '<button type="button" class="lead-doc-remove" onclick="removeLeadDefinitionDocument(' + idx + ')">移除</button>' +
+    '</div>';
+}
+
+function openLeadAssetPicker(mode) {
+    _leadAssetPickerMode = mode === 'document' ? 'document' : 'image';
+    var modal = document.getElementById('leadAssetPickerModal');
+    if (!modal) return;
+    var title = document.getElementById('leadAssetPickerTitle');
+    var intro = document.getElementById('leadAssetPickerIntro');
+    var uploadBtn = document.getElementById('leadAssetPickerUploadBtn');
+    var search = document.getElementById('leadAssetPickerSearch');
+    if (title) title.textContent = _leadAssetPickerMode === 'document' ? '選擇文件' : '選擇圖片';
+    if (intro) intro.textContent = _leadAssetPickerMode === 'document'
+        ? '從與 page layout editor 相同的文件池選擇附件，或直接上傳新文件。'
+        : '從與 page layout editor 相同的媒體池選擇圖片，或直接上傳新圖片。';
+    if (uploadBtn) uploadBtn.textContent = _leadAssetPickerMode === 'document' ? '上傳新文件' : '上傳新圖片';
+    if (search) {
+        search.value = '';
+        search.placeholder = _leadAssetPickerMode === 'document' ? '搜尋文件名稱...' : '搜尋檔名...';
+    }
+    _leadAssetPickerStatus(_leadAssetPickerMode === 'document' ? '載入文件池中...' : '載入媒體池中...');
+    modal.classList.add('show');
+    loadLeadAssetLibrary(false);
+}
+
+function closeLeadAssetPicker() {
+    var modal = document.getElementById('leadAssetPickerModal');
+    if (modal) modal.classList.remove('show');
+}
+
+function leadAssetPickerChooseUpload() {
+    var input = document.getElementById(_leadAssetPickerMode === 'document' ? 'leadAssetPickerDocUploadInput' : 'leadAssetPickerUploadInput');
+    if (!input) return;
+    input.value = '';
+    input.click();
+}
+
+function leadAssetPickerUploadSelected(inp) {
+    var file = inp && inp.files && inp.files[0];
+    if (!file) return;
+    inp.value = '';
+    _uploadLeadImageFile(file);
+}
+
+function leadAssetPickerDocUploadSelected(inp) {
+    var files = inp && inp.files ? Array.prototype.slice.call(inp.files) : [];
+    if (!files.length) return;
+    inp.value = '';
+    _uploadLeadDocumentFiles(files);
+}
+
+function loadLeadAssetLibrary(forceReload) {
+    if (_leadAssetLibraryLoading) return;
+    if (_leadAssetLibraryLoaded && !forceReload) {
+        var refresh = _leadAssetPickerMode === 'document' ? _leadAssetMergeFirestoreDocumentAssets() : Promise.resolve();
+        refresh.then(function() { renderLeadAssetLibrary(); });
+        return;
+    }
+    if (!storage) {
+        _leadAssetPickerStatus('媒體池尚未載入，請重新整理後再試。', 'error');
+        return;
+    }
+    _leadAssetLibraryLoading = true;
+    _leadAssetPickerStatus(_leadAssetPickerMode === 'document' ? '載入文件池中...' : '載入媒體池中...');
+    Promise.all([
+        _leadAssetLoadFolderAssets('layout-images'),
+        _leadAssetLoadFolderAssets('workshop-images'),
+        _leadAssetLoadFolderAssets('carousel-exports'),
+        _leadAssetLoadFolderAssets('layout-documents')
+    ]).then(function(groups) {
+        var merged = [];
+        groups.forEach(function(arr) {
+            (arr || []).forEach(function(asset) {
+                if (asset && asset.url) merged.push(asset);
+            });
+        });
+        var seen = {};
+        _leadAssetLibraryCache = merged.filter(function(asset) {
+            if (!asset || !asset.path || seen[asset.path]) return false;
+            seen[asset.path] = true;
+            return true;
+        }).sort(function(a, b) {
+            return _leadAssetSortKey(b) - _leadAssetSortKey(a);
+        });
+        return _leadAssetPickerMode === 'document' ? _leadAssetMergeFirestoreDocumentAssets() : Promise.resolve();
+    }).then(function() {
+        _leadAssetLibraryLoaded = true;
+        _leadAssetLibraryLoading = false;
+        renderLeadAssetLibrary();
+    }).catch(function(err) {
+        _leadAssetLibraryLoading = false;
+        _leadAssetPickerStatus('載入媒體池失敗：' + (err && err.message ? err.message : 'Unknown error'), 'error');
+        var grid = document.getElementById('leadAssetPickerGrid');
+        if (grid) grid.innerHTML = '';
+    });
+}
+
+function _leadAssetFindByPath(path) {
+    for (var i = 0; i < _leadAssetLibraryCache.length; i++) {
+        if (_leadAssetLibraryCache[i] && _leadAssetLibraryCache[i].path === path) return _leadAssetLibraryCache[i];
+    }
+    return null;
+}
+
+function renderLeadAssetLibrary() {
+    var grid = document.getElementById('leadAssetPickerGrid');
+    if (!grid) return;
+    var search = document.getElementById('leadAssetPickerSearch');
+    var sortSel = document.getElementById('leadAssetPickerSort');
+    var term = String(search && search.value || '').trim().toLowerCase();
+    var sortVal = String(sortSel && sortSel.value || 'newest');
+    var filtered = (_leadAssetLibraryCache || []).filter(function(asset) {
+        var type = _leadAssetType(asset);
+        if (_leadAssetPickerMode === 'document' && type !== 'document') return false;
+        if (_leadAssetPickerMode !== 'document' && type !== 'image') return false;
+        if (!term) return true;
+        return String(asset.name || '').toLowerCase().indexOf(term) !== -1 ||
+            String(asset.cmsDisplayName || '').toLowerCase().indexOf(term) !== -1 ||
+            String(asset.fileName || '').toLowerCase().indexOf(term) !== -1 ||
+            String(asset.path || '').toLowerCase().indexOf(term) !== -1;
+    });
+    filtered.sort(function(a, b) {
+        if (sortVal === 'oldest') return _leadAssetSortKey(a) - _leadAssetSortKey(b);
+        if (sortVal === 'name-asc') return String(a.name || a.path || '').localeCompare(String(b.name || b.path || ''), 'zh-Hant');
+        if (sortVal === 'name-desc') return String(b.name || b.path || '').localeCompare(String(a.name || a.path || ''), 'zh-Hant');
+        return _leadAssetSortKey(b) - _leadAssetSortKey(a);
+    });
+    if (!filtered.length) {
+        grid.innerHTML = '<div class="media-picker-empty">' + (term
+            ? (_leadAssetPickerMode === 'document' ? '找不到符合的文件。' : '找不到符合的圖片。')
+            : (_leadAssetPickerMode === 'document' ? '暫時未找到可重用文件，請先上傳第一份文件。' : '暫時未找到可重用圖片，請先上傳第一張圖片。')) + '</div>';
+        _leadAssetPickerStatus(term
+            ? (_leadAssetPickerMode === 'document' ? '沒有符合搜尋的文件' : '沒有符合搜尋的圖片')
+            : (_leadAssetPickerMode === 'document' ? '目前文件池為空' : '目前媒體池為空'));
+        return;
+    }
+    _leadAssetPickerStatus('共找到 ' + filtered.length + (_leadAssetPickerMode === 'document' ? ' 份可重用文件' : ' 張可重用圖片'));
+    var pencilSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+    grid.innerHTML = filtered.map(function(asset) {
+        var date = asset.updated || asset.timeCreated || '';
+        var dateText = date ? new Date(date).toLocaleDateString('zh-HK') : '未有日期';
+        var type = _leadAssetType(asset);
+        var isDoc = type === 'document';
+        var displayName = isDoc
+            ? String(asset.cmsDisplayName || asset.name || asset.fileName || asset.path || '未命名').trim() || '未命名'
+            : String(asset.name || asset.fileName || asset.path || '未命名').trim() || '未命名';
+        var editBtn = (_leadAssetPickerMode === 'document' && isDoc)
+            ? '<button type="button" class="media-picker-doc-edit" data-media-path="' + escHtml(asset.path) + '" title="編輯顯示名稱" aria-label="編輯顯示名稱" onclick="event.stopPropagation(); leadAssetPickerEditDocName(this.getAttribute(\'data-media-path\'))">' + pencilSvg + '</button>'
+            : '';
+        var sub2 = isDoc ? '' : ('<div class="media-picker-sub">' + escHtml(_leadAssetRootLabel(asset)) + '</div>');
+        return '<div class="media-picker-item" data-media-path="' + escHtml(asset.path) + '" onclick="leadAssetPickerUseMedia(this.getAttribute(\'data-media-path\'))">' +
+            editBtn +
+            _leadAssetPreviewMarkup(asset) +
+            '<div class="media-picker-meta">' +
+                '<div class="media-picker-name">' + escHtml(displayName) + '</div>' +
+                '<div class="media-picker-sub">' + escHtml(_leadAssetTypeLabel(asset) + ' · ' + dateText) + '</div>' +
+                sub2 +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+var _leadAssetDocNameEditPath = null;
+
+function closeLeadAssetDocNameOverlay() {
+    var el = document.getElementById('leadAssetDocNameOverlay');
+    if (el) el.classList.remove('open');
+    _leadAssetDocNameEditPath = null;
+}
+
+function submitLeadAssetDocNameOverlay() {
+    var path = _leadAssetDocNameEditPath;
+    var inp = document.getElementById('leadAssetDocNameInput');
+    if (!path || !inp) {
+        closeLeadAssetDocNameOverlay();
+        return;
+    }
+    var asset = _leadAssetFindByPath(path);
+    if (!asset) {
+        closeLeadAssetDocNameOverlay();
+        return;
+    }
+    var next = String(inp.value || '').trim();
+    var storagePath = String(asset.storagePath || asset.path || '').trim();
+
+    function applyLocal() {
+        if (next) asset.cmsDisplayName = next;
+        else delete asset.cmsDisplayName;
+        closeLeadAssetDocNameOverlay();
+        renderLeadAssetLibrary();
+    }
+
+    if (!db || typeof db.collection !== 'function') {
+        showToast('Firestore 尚未連線，名稱只會暫存在此頁。', 'error');
+        applyLocal();
+        return;
+    }
+
+    var col = db.collection(LEAD_DOCUMENT_ASSET_COLLECTION);
+
+    function doUpdate(docId) {
+        var payload = { updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+        if (next) payload.displayName = next;
+        else payload.displayName = firebase.firestore.FieldValue.delete();
+        return col.doc(docId).update(payload).then(function() {
+            asset._id = docId;
+            applyLocal();
+            showToast(next ? '已將文件名稱同步到 Firebase' : '已清除自訂名稱');
+        });
+    }
+
+    function doCreate() {
+        if (!next) {
+            applyLocal();
+            return Promise.resolve();
+        }
+        return col.add({
+            storagePath: storagePath,
+            url: asset.url || '',
+            displayName: next,
+            originalName: asset.originalName || asset.fileName || '',
+            contentType: asset.contentType || '',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function(ref) {
+            asset._id = ref.id;
+            applyLocal();
+            showToast('已將文件名稱儲存到 Firebase');
+        });
+    }
+
+    if (asset._id) {
+        doUpdate(asset._id).catch(function(err) {
+            console.warn('[layoutDocumentAssets] update', err);
+            showToast('更新失敗：' + (err && err.message ? err.message : ''), 'error');
+        });
+        return;
+    }
+
+    if (!storagePath) {
+        applyLocal();
+        showToast('缺少 storagePath，無法寫入 Firebase', 'error');
+        return;
+    }
+
+    col.where('storagePath', '==', storagePath).limit(1).get()
+        .then(function(qs) {
+            if (!qs.empty) {
+                var id = qs.docs[0].id;
+                asset._id = id;
+                return doUpdate(id);
+            }
+            return doCreate();
+        })
+        .catch(function(err) {
+            console.warn('[layoutDocumentAssets] query', err);
+            showToast('讀取／寫入失敗：' + (err && err.message ? err.message : ''), 'error');
+        });
+}
+
+function leadAssetPickerEditDocName(path) {
+    var asset = _leadAssetFindByPath(path);
+    if (!asset || _leadAssetType(asset) !== 'document') return;
+    var cur = String(asset.cmsDisplayName || '').trim();
+    if (!cur) cur = String(asset.name || asset.fileName || '').trim() || _leadDocNameFromFile(asset.fileName || asset.name || asset.path || '');
+    _leadAssetDocNameEditPath = path;
+    var overlay = document.getElementById('leadAssetDocNameOverlay');
+    var inp = document.getElementById('leadAssetDocNameInput');
+    if (inp) inp.value = cur;
+    if (overlay) overlay.classList.add('open');
+    setTimeout(function() {
+        if (inp) {
+            inp.focus();
+            if (typeof inp.select === 'function') inp.select();
+        }
+    }, 80);
+}
+
+function leadAssetPickerUseMedia(path) {
+    var asset = _leadAssetFindByPath(path);
+    if (!asset) return;
+    if (_leadAssetPickerMode === 'document') {
+        leadDefinitionAttachDocumentAsset(asset);
+    } else {
+        _renderLeadDefinitionImagePicker(asset.url || '');
+        _recomputeLeadDefinitionDirty();
+    }
+    closeLeadAssetPicker();
+}
+
+function leadDefinitionAttachDocumentAsset(asset, opts) {
+    opts = opts || {};
+    if (!asset || !asset.url) return;
+    var docs = _leadDefinitionDocsFromEditor();
+    var fileName = asset.fileName || asset.originalName || asset.name || (asset.path || '').split('/').pop() || '';
+    var friendly = String(asset.cmsDisplayName || '').trim();
+    if (!friendly) friendly = _leadDocNameFromFile(fileName || asset.name || asset.path || '');
+    var next = {
+        name: friendly,
+        url: asset.url,
+        fileName: fileName,
+        storagePath: asset.storagePath || asset.path || '',
+        assetId: asset._id || ''
+    };
+    var exists = docs.some(function(doc) {
+        return (next.assetId && doc.assetId && next.assetId === doc.assetId) ||
+            (next.storagePath && doc.storagePath && next.storagePath === doc.storagePath) ||
+            doc.url === next.url;
+    });
+    if (exists) {
+        if (!opts.silent) showToast('這份文件已經加入');
+        return false;
+    }
+    docs.push(next);
+    _renderLeadDefinitionDocuments(docs);
+    _recomputeLeadDefinitionDirty();
+    if (!opts.silent) showToast('已加入文件');
+    return true;
+}
+
+function _uploadLeadImageFile(file) {
+    if (!file) return;
+    if (!storage) {
+        showToast('儲存服務尚未載入，請重新整理頁面後再試。', 'error');
+        return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+        showToast('檔案大小不能超過 20MB', 'error');
+        return;
+    }
+    closeLeadAssetPicker();
+    showLoadingOverlay('上傳圖片中...');
+    var ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    var path = 'layout-images/lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.' + ext;
+    var ref = storage.ref(path);
+    var task = ref.put(file, {
+        contentType: file.type || undefined,
+        customMetadata: {
+            displayName: file.name || '',
+            originalName: file.name || ''
+        }
+    });
+    task.on('state_changed',
+        function(snapshot) {
+            var pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            var textEl = document.getElementById('cmsLoadingText');
+            if (textEl) textEl.textContent = '上傳圖片中... ' + Math.round(pct) + '%';
+        },
+        function(err) {
+            hideLoadingOverlay();
+            showToast('圖片上傳失敗：' + err.message, 'error');
+        },
+        function() {
+            task.snapshot.ref.getDownloadURL().then(function(url) {
+                var nowIso = new Date().toISOString();
+                _leadAssetLibraryUpsert({
+                    path: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
+                    storagePath: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
+                    name: file.name || '',
+                    fileName: file.name || '',
+                    originalName: file.name || '',
+                    url: url,
+                    contentType: file.type || '',
+                    timeCreated: nowIso,
+                    updated: nowIso
+                });
+                _renderLeadDefinitionImagePicker(url);
+                _recomputeLeadDefinitionDirty();
+                hideLoadingOverlay();
+                showToast('圖片已上傳');
+            }).catch(function(err) {
+                hideLoadingOverlay();
+                showToast('取得圖片連結失敗：' + err.message, 'error');
+            });
+        }
+    );
+}
+
+function _uploadLeadDocumentFiles(files) {
+    if (!files || !files.length) return;
+    if (!storage) {
+        showToast('儲存服務尚未載入，請重新整理頁面後再試。', 'error');
+        return;
+    }
+    closeLeadAssetPicker();
+    showLoadingOverlay('上傳文件中...');
+    var completed = 0;
+    var newAssets = [];
+
+    function finishOne() {
+        completed++;
+        var textEl = document.getElementById('cmsLoadingText');
+        if (textEl) textEl.textContent = '上傳文件中... (' + completed + '/' + files.length + ')';
+        if (completed < files.length) return;
+        hideLoadingOverlay();
+        if (newAssets.length) {
+            newAssets.forEach(function(asset) {
+                leadDefinitionAttachDocumentAsset(asset, { silent: true });
+            });
+            showToast('已加入 ' + newAssets.length + ' 份文件');
+        } else {
+            showToast('未能加入任何文件', 'error');
+        }
+    }
+
+    files.forEach(function(file) {
+        var ext = (file.name.split('.').pop() || 'file').toLowerCase();
+        var baseName = String(file.name || '')
+            .replace(/\.[^.]+$/, '')
+            .replace(/[^a-zA-Z0-9\u4e00-\u9fff._ -]/g, '')
+            .trim();
+        if (!baseName) baseName = 'document';
+        var path = 'layout-documents/lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '_' + baseName + '.' + ext;
+        var ref = storage.ref(path);
+        ref.put(file, {
+            contentType: file.type || undefined,
+            customMetadata: {
+                displayName: file.name || '',
+                originalName: file.name || ''
+            }
+        }).then(function(snap) {
+            return snap.ref.getDownloadURL();
+        }).then(function(url) {
+            var nowIso = new Date().toISOString();
+            var localAsset = {
+                path: path,
+                storagePath: path,
+                name: _leadDocNameFromFile(file.name),
+                displayName: _leadDocNameFromFile(file.name),
+                originalName: file.name || '',
+                fileName: file.name || '',
+                url: url,
+                contentType: file.type || '',
+                timeCreated: nowIso,
+                updated: nowIso
+            };
+            var assetDocJob = db ? db.collection(LEAD_DOCUMENT_ASSET_COLLECTION).add({
+                storagePath: path,
+                url: url,
+                displayName: localAsset.displayName,
+                originalName: localAsset.originalName,
+                contentType: file.type || '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function(refDoc) {
+                localAsset._id = refDoc.id;
+            }).catch(function(err) {
+                console.warn('Lead document asset metadata save failed:', err);
+            }) : Promise.resolve();
+            return assetDocJob.then(function() {
+                newAssets.push(localAsset);
+                _leadAssetLibraryUpsert(localAsset);
+            });
+        }).catch(function(err) {
+            showToast('上傳 ' + (file.name || '文件') + ' 失敗：' + err.message, 'error');
+        }).then(function() {
+            finishOne();
+        });
+    });
+}
+
+function _leadDefinitionDocsFromEditor() {
+    var docs = [];
+    document.querySelectorAll('#leadDefinitionDocumentsList .lead-doc-item').forEach(function(row) {
+        var name = String((row.querySelector('[data-doc-name]') || {}).value || '').trim();
+        var url = String(row.getAttribute('data-doc-url') || '').trim();
+        var fileName = String(row.getAttribute('data-doc-file') || '').trim();
+        var storagePath = String(row.getAttribute('data-doc-storage-path') || '').trim();
+        var assetId = String(row.getAttribute('data-doc-asset-id') || '').trim();
+        if (!url) return;
+        docs.push({
+            name: name || fileName || url.split('/').pop() || 'document',
+            url: url,
+            fileName: fileName || name || '',
+            storagePath: storagePath,
+            assetId: assetId
+        });
+    });
+    return docs;
+}
+
+function _leadDefinitionFormFieldsFromEditor() {
+    var fields = [];
+    document.querySelectorAll('#leadDefinitionFormFieldsList .lead-def-mini-item').forEach(function(row) {
+        var label = String((row.querySelector('[data-form-label]') || {}).value || '').trim();
+        var type = String((row.querySelector('[data-form-type]') || {}).value || 'text').trim() || 'text';
+        if (!label) return;
+        fields.push({ label: label, type: type });
+    });
+    return fields;
+}
+
+function _cmsEscapeAttr(ch) {
+    return String(ch == null ? '' : ch).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function renderLeadDefinitionDocumentsPanelVisibility() {
+    var c = document.getElementById('leadDefinitionDeliveryIncludeDocumentsInput');
+    var p = document.getElementById('leadDefinitionDocumentsPanel');
+    if (!p) return;
+    if (c && c.checked) p.classList.add('is-open');
+    else p.classList.remove('is-open');
+}
+
+function onLeadDefinitionIncludeDocumentsToggle() {
+    renderLeadDefinitionDocumentsPanelVisibility();
+    _recomputeLeadDefinitionDirty();
+}
+
+function renderLeadDefinitionIdentityLinksVisibility() {
+    var c = document.getElementById('leadDefinitionDeliveryIncludeLinksInput');
+    var w = document.getElementById('leadDefinitionIdentityLinksWrap');
+    if (w && c) w.style.display = c.checked ? 'block' : 'none';
+}
+
+function onLeadDefinitionIncludeLinksToggle() {
+    renderLeadDefinitionIdentityLinksVisibility();
+    var c = document.getElementById('leadDefinitionDeliveryIncludeLinksInput');
+    var list = document.getElementById('leadDefinitionIdentityLinksList');
+    if (c && c.checked && list && !list.querySelector('.lead-def-identity-link-row')) {
+        _renderLeadIdentityLinks([{ title: '', url: '' }]);
+    } else {
+        refreshLeadDefinitionDeliveryInsertBars();
+    }
+    _recomputeLeadDefinitionDirty();
+}
+
+function _leadDefinitionIdentityLinksFromEditorRaw() {
+    var wrap = document.getElementById('leadDefinitionIdentityLinksList');
+    if (!wrap) return [];
+    var out = [];
+    wrap.querySelectorAll('.lead-def-identity-link-row').forEach(function(row) {
+        var t = row.querySelector('.lead-id-link-title');
+        var u = row.querySelector('.lead-id-link-url');
+        out.push({ title: String((t && t.value) || ''), url: String((u && u.value) || '') });
+    });
+    return out;
+}
+
+function _leadDefinitionIdentityLinksFromEditor() {
+    return _leadDefinitionIdentityLinksFromEditorRaw().filter(function(r) {
+        return String(r.url || '').trim() !== '';
+    });
+}
+
+function _renderLeadIdentityLinks(links) {
+    var wrap = document.getElementById('leadDefinitionIdentityLinksList');
+    if (!wrap) return;
+    links = Array.isArray(links) ? links.slice() : [];
+    if (!links.length) links = [{ title: '', url: '' }];
+    wrap.innerHTML = links.map(function(row, idx) {
+        return '' +
+            '<div class="lead-def-identity-link-row" data-idx="' + idx + '" style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;flex-wrap:wrap;">' +
+                '<div class="lead-def-field" style="flex:1;min-width:120px;margin:0;"><label style="font-size:11px;">連結標題</label>' +
+                '<input type="text" class="search-input lead-id-link-title" value="' + escHtml(row.title || '') + '" placeholder="按鈕顯示文字"></div>' +
+                '<div class="lead-def-field" style="flex:2;min-width:180px;margin:0;"><label style="font-size:11px;">網址</label>' +
+                '<input type="url" class="search-input lead-id-link-url" value="' + escHtml(row.url || '') + '" placeholder="https://..."></div>' +
+                '<button type="button" class="btn btn-outline btn-sm" onclick="removeLeadIdentityLinkRow(' + idx + ')">移除</button>' +
+            '</div>';
+    }).join('');
+    wrap.querySelectorAll('.lead-id-link-title, .lead-id-link-url').forEach(function(inp) {
+        inp.addEventListener('input', refreshLeadDefinitionDeliveryInsertBars);
+        inp.addEventListener('change', refreshLeadDefinitionDeliveryInsertBars);
+    });
+    refreshLeadDefinitionDeliveryInsertBars();
+    _recomputeLeadDefinitionDirty();
+}
+
+function addLeadIdentityLinkRow() {
+    var cur = _leadDefinitionIdentityLinksFromEditorRaw();
+    cur.push({ title: '', url: '' });
+    _renderLeadIdentityLinks(cur);
+}
+
+function removeLeadIdentityLinkRow(idx) {
+    showCmsConfirm({
+        icon: '🔗',
+        title: '確定移除此連結？',
+        msg: '這列將從「連結列表（標題 + 網址）」中移除。',
+        cancelText: '取消',
+        okText: '移除',
+        onOk: function() {
+            var cur = _leadDefinitionIdentityLinksFromEditorRaw();
+            cur.splice(idx, 1);
+            if (!cur.length) cur = [{ title: '', url: '' }];
+            _renderLeadIdentityLinks(cur);
+        }
+    });
+}
+
+function refreshLeadDefinitionDeliveryInsertBars() {
+    renderLeadDefinitionIdentityLinksVisibility();
+    var inc = document.getElementById('leadDefinitionDeliveryIncludeLinksInput');
+    var linkRows = _leadDefinitionIdentityLinksFromEditor();
+    var show = !!(inc && inc.checked && linkRows.length);
+    function fillBar(barId, isWa) {
+        var bar = document.getElementById(barId);
+        if (!bar) return;
+        if (!show) {
+            bar.style.display = 'none';
+            bar.innerHTML = '';
+            return;
+        }
+        bar.style.display = 'flex';
+        var hint = isWa
+            ? '<span style="font-size:12px;color:var(--text-light);width:100%;margin-bottom:4px;">插入純文字（標題 + 網址）：</span>'
+            : '<span style="font-size:12px;color:var(--text-light);width:100%;margin-bottom:4px;">插入「"標題":網址」格式：</span>';
+        bar.innerHTML = hint + linkRows.map(function(l, i) {
+            var lab = escHtml(l.title || ('連結 ' + (i + 1)));
+            return '<button type="button" class="btn btn-outline btn-sm lead-def-ins-link" data-wa="' + (isWa ? '1' : '0') + '"' +
+                ' data-title="' + _cmsEscapeAttr(l.title || '') + '"' +
+                ' data-url="' + _cmsEscapeAttr(l.url || '') + '">' + lab + '</button>';
+        }).join('');
+        bar.querySelectorAll('.lead-def-ins-link').forEach(function(b) {
+            b.onclick = function() {
+                var t = b.getAttribute('data-title') || '';
+                var u = b.getAttribute('data-url') || '';
+                if (b.getAttribute('data-wa') === '1') insertLeadDefinitionLinkIntoWhatsapp(t, u);
+                else insertLeadDefinitionLinkIntoEmail(t, u);
+            };
+        });
+    }
+    fillBar('leadDefinitionEmailLinkInsertBar', false);
+    fillBar('leadDefinitionWhatsappLinkInsertBar', true);
+}
+
+function insertLeadDefinitionLinkIntoEmail(title, url) {
+    var ta = document.getElementById('leadDefinitionEmailMessageInput');
+    if (!ta) return;
+    title = String(title || '').trim() || '開啟連結';
+    url = String(url || '').trim();
+    if (!url) return;
+    var snippet = JSON.stringify(title) + ':' + url + '\n';
+    var start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+    var end = ta.selectionEnd != null ? ta.selectionEnd : start;
+    var v = ta.value;
+    ta.value = v.slice(0, start) + snippet + v.slice(end);
+    ta.focus();
+    var ns = start + snippet.length;
+    if (ta.setSelectionRange) ta.setSelectionRange(ns, ns);
+    _recomputeLeadDefinitionDirty();
+}
+
+function insertLeadDefinitionLinkIntoWhatsapp(title, url) {
+    var ta = document.getElementById('leadDefinitionWhatsappGreetingInput');
+    if (!ta) return;
+    title = String(title || '').trim();
+    url = String(url || '').trim();
+    if (!url) return;
+    var line = (title ? '【' + title + '】\n' : '') + url + '\n\n';
+    var start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+    var end = ta.selectionEnd != null ? ta.selectionEnd : start;
+    var v = ta.value;
+    ta.value = v.slice(0, start) + line + v.slice(end);
+    ta.focus();
+    var ns = start + line.length;
+    if (ta.setSelectionRange) ta.setSelectionRange(ns, ns);
+    _recomputeLeadDefinitionDirty();
+}
+
+function _renderLeadDefinitionDocuments(docs) {
+    var list = document.getElementById('leadDefinitionDocumentsList');
+    if (!list) return;
+    docs = Array.isArray(docs) ? docs : [];
+    if (!docs.length) {
+        list.innerHTML = '<div class="lead-doc-empty">尚未設定文件。按上方的「打開文件池」即可從共用文件池挑選附件。</div>';
+        _recomputeLeadDefinitionDirty();
+        return;
+    }
+    list.innerHTML = docs.map(function(doc, idx) {
+        return _leadDocItemHtml(idx, doc);
+    }).join('');
+    _recomputeLeadDefinitionDirty();
+}
+
+function _renderLeadDefinitionFormFields(fields) {
+    var list = document.getElementById('leadDefinitionFormFieldsList');
+    if (!list) return;
+    fields = Array.isArray(fields) ? fields : [];
+    if (!fields.length) {
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-light);padding:10px 12px;border:1px dashed var(--bg-off);border-radius:12px;">未設定自訂欄位時，前台會沿用既有 fallback 欄位。</div>';
+        _recomputeLeadDefinitionDirty();
+        return;
+    }
+    list.innerHTML = fields.map(function(field, idx) {
+        var type = String(field.type || 'text').trim() || 'text';
+        return '' +
+            '<div class="lead-def-mini-item">' +
+                '<input type="text" data-form-label value="' + escHtml(field.label || '') + '" placeholder="欄位標籤">' +
+                '<select class="mf-select" data-form-type>' +
+                    '<option value="text"' + (type === 'text' ? ' selected' : '') + '>text</option>' +
+                    '<option value="tel"' + (type === 'tel' ? ' selected' : '') + '>tel</option>' +
+                    '<option value="email"' + (type === 'email' ? ' selected' : '') + '>email</option>' +
+                '</select>' +
+                '<button type="button" class="lead-def-mini-remove" onclick="removeLeadDefinitionFormField(' + idx + ')">✕</button>' +
+            '</div>';
+    }).join('');
+    _recomputeLeadDefinitionDirty();
+}
+
+function renderLeadDefinitionEditorState() {
+    var type = (document.getElementById('leadDefinitionTypeInput') || {}).value || 'lead-magnet';
+    var formFieldWrap = document.getElementById('leadDefinitionFormFieldsField');
+    if (formFieldWrap) formFieldWrap.style.display = 'none';
+    var lmBlock = document.getElementById('leadDefinitionContactFieldsWrap');
+    var consentBlock = document.getElementById('leadDefinitionConsentWrap');
+    var genericNe = document.getElementById('leadDefinitionGenericNameEmailWrap');
+    var delSub = document.getElementById('leadDefinitionDeliverySubsection');
+    var delMat = document.getElementById('leadDefinitionDeliveryMaterialTitleWrap');
+    var delEmail = document.getElementById('leadDefinitionDeliveryEmailWrap');
+    var delWa = document.getElementById('leadDefinitionDeliveryWhatsAppWrap');
+    var collectEm = document.getElementById('leadDefinitionCollectEmailInput');
+    var collectPh = document.getElementById('leadDefinitionCollectPhoneInput');
+    var showDelivery = type === 'free-material' || type === 'lead-magnet';
+    if (delSub) delSub.style.display = showDelivery ? '' : 'none';
+    if (delMat) delMat.style.display = showDelivery ? '' : 'none';
+    if (type === 'lead-magnet') {
+        if (lmBlock) lmBlock.style.display = '';
+        if (consentBlock) consentBlock.style.display = '';
+        if (genericNe) genericNe.style.display = 'none';
+        var emOn = !!(collectEm && collectEm.checked);
+        var phOn = !!(collectPh && collectPh.checked);
+        if (delEmail) delEmail.style.display = emOn ? '' : 'none';
+        if (delWa) delWa.style.display = phOn ? '' : 'none';
+    } else if (type === 'free-material') {
+        if (lmBlock) lmBlock.style.display = 'none';
+        if (consentBlock) consentBlock.style.display = 'none';
+        if (genericNe) genericNe.style.display = '';
+        if (delEmail) delEmail.style.display = '';
+        if (delWa) delWa.style.display = 'none';
+    } else {
+        if (lmBlock) lmBlock.style.display = 'none';
+        if (consentBlock) consentBlock.style.display = 'none';
+        if (genericNe) genericNe.style.display = '';
+        if (delEmail) delEmail.style.display = 'none';
+        if (delWa) delWa.style.display = 'none';
+    }
+}
+
+function openLeadDefinitionEditor(defId, opts) {
+    opts = opts || {};
+    var targetId = String(defId || '').trim();
+    var currentId = _leadDefinitionCurrentId();
+    var sameTarget = (targetId && currentId && targetId === currentId) || (!targetId && !currentId);
+    if (!opts.skipDirtyConfirm && sameTarget && _hasUnsavedLeadDefinitionChanges()) {
+        return;
+    }
+    if (!opts.skipDirtyConfirm && !sameTarget && _hasUnsavedLeadDefinitionChanges()) {
+        _withLeadDefinitionLeaveGuard(function() {
+            openLeadDefinitionEditor(defId, { skipDirtyConfirm: true });
+        });
+        return;
+    }
+    loadLeadDefinitionsData();
+    var empty = document.getElementById('leadDefinitionEditorEmpty');
+    var editor = document.getElementById('leadDefinitionEditor');
+    var deleteBtn = document.getElementById('leadDefinitionDeleteBtn');
+    if (!empty || !editor) return;
+    var def;
+    if (defId) {
+        def = _getLeadDefinitionById(defId);
+        if (!def) return;
+        if (def.type === 'consultation') {
+            showToast('Consultation 請在「AI Consultation」分頁管理；Leads 不顯示此類型。', 'error');
+            document.getElementById('leadDefinitionIdInput').value = '';
+            empty.style.display = 'flex';
+            editor.style.display = 'none';
+            if (deleteBtn) deleteBtn.style.display = 'none';
+            renderLeadDefinitionList();
+            return;
+        }
+        def = JSON.parse(JSON.stringify(def));
+    } else {
+        var defaultType = (document.getElementById('leadDefinitionTypeFilter') || {}).value || 'lead-magnet';
+        if (defaultType === 'all' || defaultType === 'consultation') defaultType = 'lead-magnet';
+        def = typeof aiflowCreateLeadDefinitionDefaults === 'function'
+            ? aiflowCreateLeadDefinitionDefaults(defaultType)
+            : { type: defaultType, status: 'active', publicEnabled: true, documents: [], formFields: [] };
+    }
+    _bindLeadDefinitionEditorDirtyTracking();
+    _leadDefinitionSuppressDirtyCheck = true;
+    empty.style.display = 'none';
+    editor.style.display = 'block';
+    document.getElementById('leadDefinitionEditorTitle').textContent = def.id ? '編輯 Lead' : '新增 Lead';
+    document.getElementById('leadDefinitionIdInput').value = def.id || '';
+    document.getElementById('leadDefinitionNameInput').value = _cmsRichTextToPlainInput(def.name || '');
+    var effType = def.type || 'lead-magnet';
+    if (effType === 'consultation') effType = 'lead-magnet';
+    document.getElementById('leadDefinitionTypeInput').value = effType;
+    document.getElementById('leadDefinitionStatusInput').value = def.status || 'active';
+    document.getElementById('leadDefinitionPublicInput').checked = def.publicEnabled !== false;
+    document.getElementById('leadDefinitionTitleInput').value = _cmsRichTextToPlainInput(def.title || '');
+    document.getElementById('leadDefinitionDescriptionInput').value = _cmsRichTextToPlainInput(def.description || '');
+    _renderLeadDefinitionImagePicker(def.imageUrl || '');
+    document.getElementById('leadDefinitionImageAltInput').value = _cmsRichTextToPlainInput(def.imageAlt || '');
+    document.getElementById('leadDefinitionSubmitTextInput').value = _cmsRichTextToPlainInput(def.submitText || '');
+    document.getElementById('leadDefinitionRedirectUrlInput').value = def.redirectUrl || '';
+    document.getElementById('leadDefinitionCtaTextInput').value = _cmsRichTextToPlainInput(def.ctaText || '');
+    document.getElementById('leadDefinitionSectionLabelInput').value = _cmsRichTextToPlainInput(def.sectionLabel || '');
+    document.getElementById('leadDefinitionMaterialTitleInput').value = _cmsRichTextToPlainInput(def.materialTitle || '');
+    document.getElementById('leadDefinitionEmailSubjectInput').value = _cmsRichTextToPlainInput(def.emailSubject || '');
+    var emMsg = document.getElementById('leadDefinitionEmailMessageInput');
+    if (emMsg) emMsg.value = _cmsRichTextToPlainInput(def.emailMessage || '');
+    var waGr = document.getElementById('leadDefinitionWhatsappGreetingInput');
+    if (waGr) waGr.value = _cmsRichTextToPlainInput(def.whatsappGreetingMessage || '');
+    document.getElementById('leadDefinitionNameFieldLabelInput').value = _cmsRichTextToPlainInput(def.nameFieldLabel || '姓名');
+    document.getElementById('leadDefinitionEmailFieldLabelInput').value = _cmsRichTextToPlainInput(def.emailFieldLabel || 'Email');
+    var genNm = document.getElementById('leadDefinitionGenericNameFieldLabelInput');
+    var genEm = document.getElementById('leadDefinitionGenericEmailFieldLabelInput');
+    if (genNm) genNm.value = _cmsRichTextToPlainInput(def.nameFieldLabel || '姓名');
+    if (genEm) genEm.value = _cmsRichTextToPlainInput(def.emailFieldLabel || 'Email');
+    var cNm = document.getElementById('leadDefinitionCollectNameInput');
+    var cEm = document.getElementById('leadDefinitionCollectEmailInput');
+    var cPh = document.getElementById('leadDefinitionCollectPhoneInput');
+    var cConsentEn = document.getElementById('leadDefinitionConsentCheckboxEnabledInput');
+    var phLbl = document.getElementById('leadDefinitionPhoneFieldLabelInput');
+    if (cNm) cNm.checked = def.collectName !== false;
+    if (cEm) cEm.checked = !!def.collectEmail;
+    if (cPh) cPh.checked = def.collectPhone !== false;
+    if (cConsentEn) cConsentEn.checked = def.consentCheckboxEnabled !== false;
+    if (phLbl) phLbl.value = _cmsRichTextToPlainInput(def.phoneFieldLabel || 'WhatsApp（8位數字）');
+    var incDoc = document.getElementById('leadDefinitionDeliveryIncludeDocumentsInput');
+    var incLnk = document.getElementById('leadDefinitionDeliveryIncludeLinksInput');
+    if (incDoc) incDoc.checked = def.deliveryIncludeDocuments !== false;
+    if (incLnk) incLnk.checked = !!def.deliveryIncludeLinks;
+    renderLeadDefinitionDocumentsPanelVisibility();
+    _renderLeadIdentityLinks(Array.isArray(def.identityLinks) && def.identityLinks.length ? def.identityLinks : [{ title: '', url: '' }]);
+    document.getElementById('leadDefinitionPurposeNotesInput').value = _cmsRichTextToPlainInput(def.purposeNotes || '');
+    document.getElementById('leadDefinitionConsentTextInput').value = _cmsRichTextToPlainInput(def.consentText || '');
+    document.getElementById('leadDefinitionSuccessMessageInput').value = _cmsRichTextToPlainInput(def.successMessage || '');
+    _renderLeadDefinitionDocuments(def.documents || []);
+    _renderLeadDefinitionFormFields([]);
+    if (deleteBtn) deleteBtn.style.display = def.id ? '' : 'none';
+    renderLeadDefinitionEditorState();
+    renderLeadDefinitionList();
+    renderLeadDefinitionUsage(def.id || '');
+    refreshLeadDefinitionUsage(false);
+    _leadDefinitionSuppressDirtyCheck = false;
+    _captureLeadDefinitionEditorSnapshot(def.id || '');
+}
+
+function addLeadDefinitionDocument() {
+    openLeadAssetPicker('document');
+}
+
+function removeLeadDefinitionDocument(idx) {
+    var docs = _leadDefinitionDocsFromEditor();
+    docs.splice(idx, 1);
+    _renderLeadDefinitionDocuments(docs);
+    _recomputeLeadDefinitionDirty();
+}
+
+function addLeadDefinitionFormField() {
+    var fields = _leadDefinitionFormFieldsFromEditor();
+    fields.push({ label: '', type: 'text' });
+    _renderLeadDefinitionFormFields(fields);
+    _recomputeLeadDefinitionDirty();
+}
+
+function removeLeadDefinitionFormField(idx) {
+    var fields = _leadDefinitionFormFieldsFromEditor();
+    fields.splice(idx, 1);
+    _renderLeadDefinitionFormFields(fields);
+    _recomputeLeadDefinitionDirty();
+}
+
+function _collectLeadDefinitionEditorPayload(docId) {
+    var typeRaw = String((document.getElementById('leadDefinitionTypeInput') || {}).value || 'lead-magnet').trim() || 'lead-magnet';
+    if (typeRaw === 'consultation') typeRaw = 'lead-magnet';
+    var nameLblLm = String((document.getElementById('leadDefinitionNameFieldLabelInput') || {}).value || '').trim();
+    var emailLblLm = String((document.getElementById('leadDefinitionEmailFieldLabelInput') || {}).value || '').trim();
+    var nameLblGen = String((document.getElementById('leadDefinitionGenericNameFieldLabelInput') || {}).value || '').trim();
+    var emailLblGen = String((document.getElementById('leadDefinitionGenericEmailFieldLabelInput') || {}).value || '').trim();
+    var raw = {
+        id: docId || '',
+        name: String((document.getElementById('leadDefinitionNameInput') || {}).value || '').trim(),
+        type: typeRaw,
+        status: String((document.getElementById('leadDefinitionStatusInput') || {}).value || 'active').trim() || 'active',
+        publicEnabled: !!((document.getElementById('leadDefinitionPublicInput') || {}).checked),
+        title: String((document.getElementById('leadDefinitionTitleInput') || {}).value || ''),
+        description: String((document.getElementById('leadDefinitionDescriptionInput') || {}).value || ''),
+        imageUrl: String((document.getElementById('leadDefinitionImageUrlInput') || {}).value || '').trim(),
+        imageAlt: String((document.getElementById('leadDefinitionImageAltInput') || {}).value || '').trim(),
+        submitText: String((document.getElementById('leadDefinitionSubmitTextInput') || {}).value || '').trim(),
+        redirectUrl: String((document.getElementById('leadDefinitionRedirectUrlInput') || {}).value || '').trim(),
+        ctaText: String((document.getElementById('leadDefinitionCtaTextInput') || {}).value || '').trim(),
+        sectionLabel: String((document.getElementById('leadDefinitionSectionLabelInput') || {}).value || ''),
+        materialTitle: String((document.getElementById('leadDefinitionMaterialTitleInput') || {}).value || ''),
+        emailSubject: String((document.getElementById('leadDefinitionEmailSubjectInput') || {}).value || ''),
+        emailMessage: String((document.getElementById('leadDefinitionEmailMessageInput') || {}).value || ''),
+        nameFieldLabel: typeRaw === 'lead-magnet' ? nameLblLm : nameLblGen,
+        emailFieldLabel: typeRaw === 'lead-magnet' ? emailLblLm : emailLblGen,
+        deliveryIncludeDocuments: !!((document.getElementById('leadDefinitionDeliveryIncludeDocumentsInput') || {}).checked),
+        deliveryIncludeLinks: !!((document.getElementById('leadDefinitionDeliveryIncludeLinksInput') || {}).checked),
+        identityLinks: _leadDefinitionIdentityLinksFromEditor(),
+        purposeNotes: String((document.getElementById('leadDefinitionPurposeNotesInput') || {}).value || ''),
+        consentText: String((document.getElementById('leadDefinitionConsentTextInput') || {}).value || ''),
+        successMessage: String((document.getElementById('leadDefinitionSuccessMessageInput') || {}).value || ''),
+        whatsappGreetingMessage: String((document.getElementById('leadDefinitionWhatsappGreetingInput') || {}).value || ''),
+        documents: _leadDefinitionDocsFromEditor(),
+        formFields: []
+    };
+    if (typeRaw === 'lead-magnet') {
+        raw.phoneFieldLabel = String((document.getElementById('leadDefinitionPhoneFieldLabelInput') || {}).value || '').trim();
+        raw.collectName = !!((document.getElementById('leadDefinitionCollectNameInput') || {}).checked);
+        raw.collectEmail = !!((document.getElementById('leadDefinitionCollectEmailInput') || {}).checked);
+        raw.collectPhone = !!((document.getElementById('leadDefinitionCollectPhoneInput') || {}).checked);
+        raw.consentCheckboxEnabled = !!((document.getElementById('leadDefinitionConsentCheckboxEnabledInput') || {}).checked);
+    }
+    return typeof aiflowNormalizeLeadDefinition === 'function'
+        ? aiflowNormalizeLeadDefinition(raw, { id: docId || '', type: raw.type })
+        : raw;
+}
+
+function saveLeadDefinition() {
+    if (!db) return;
+    var editor = document.getElementById('leadDefinitionEditor');
+    if (!editor || editor.style.display === 'none') return;
+    if (_leadDefinitionEditorSaving) return;
+    var currentId = String((document.getElementById('leadDefinitionIdInput') || {}).value || '').trim();
+    var saveBtn = document.getElementById('leadDefinitionSaveBtn');
+    var deleteBtn = document.getElementById('leadDefinitionDeleteBtn');
+    var ref = currentId ? db.collection('leadDefinitions').doc(currentId) : db.collection('leadDefinitions').doc();
+    var normalized = _collectLeadDefinitionEditorPayload(ref.id);
+    if (!String(normalized.name || '').trim()) {
+        showToast('請先填寫 Lead 內部名稱', 'error');
+        return;
+    }
+    _leadDefinitionEditorSaving = true;
+    _updateLeadDefinitionSaveStatus();
+    if (saveBtn) saveBtn.disabled = true;
+    if (deleteBtn) deleteBtn.disabled = true;
+    showLoadingOverlay('正在儲存 Lead 設定...');
+    var payload = JSON.parse(JSON.stringify(normalized));
+    delete payload.id;
+    ref.get().then(function(doc) {
+        payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+        if (!doc.exists) payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        return ref.set(payload, { merge: true });
+    }).then(function() {
+        document.getElementById('leadDefinitionIdInput').value = ref.id;
+        _leadDefinitionEditorSaving = false;
+        _captureLeadDefinitionEditorSnapshot(ref.id);
+        if (saveBtn) saveBtn.disabled = false;
+        if (deleteBtn) deleteBtn.disabled = false;
+        hideLoadingOverlay();
+        showToast('Lead 定義已儲存');
+        renderLeadDefinitionList();
+        renderLeadDefinitionUsage(ref.id);
+        refreshLeadDefinitionUsage(false);
+    }).catch(function(err) {
+        _leadDefinitionEditorSaving = false;
+        _updateLeadDefinitionSaveStatus();
+        if (saveBtn) saveBtn.disabled = false;
+        if (deleteBtn) deleteBtn.disabled = false;
+        hideLoadingOverlay();
+        showToast('儲存 Lead 失敗：' + err.message, 'error');
+    });
+}
+
+function deleteLeadDefinition() {
+    var docId = String((document.getElementById('leadDefinitionIdInput') || {}).value || '').trim();
+    if (!docId) return;
+    var def = _getLeadDefinitionById(docId);
+    var label = def && typeof aiflowLeadDefinitionDisplayName === 'function' ? aiflowLeadDefinitionDisplayName(def) : docId;
+    if (!confirm('確定要刪除 Lead「' + label + '」嗎？現有版面如果仍引用它，前台會退回舊版 inline fallback。')) return;
+    db.collection('leadDefinitions').doc(docId).delete().then(function() {
+        showToast('Lead 定義已刪除');
+        document.getElementById('leadDefinitionEditor').style.display = 'none';
+        document.getElementById('leadDefinitionEditorEmpty').style.display = 'flex';
+        document.getElementById('leadDefinitionIdInput').value = '';
+        renderLeadDefinitionUsage('');
+        _leadDefinitionEditorSnapshot = '';
+        _setLeadDefinitionDirty(false);
+    }).catch(function(err) {
+        showToast('刪除失敗：' + err.message, 'error');
+    });
+}
+
+function _leadMigrationSlug(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+}
+
+function _leadMigrationDocId(layoutId, sectionId, itemKey, type) {
+    var joined = ['lead', type, layoutId, sectionId, itemKey].map(_leadMigrationSlug).filter(Boolean).join('-');
+    return joined || ('lead-' + Date.now());
+}
+
+function _leadMigrationTitleText(value) {
+    return String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function runLeadDefinitionMigration() {
+    if (!db) return;
+    if (!confirm('這會把現有 page layouts 內的 Link List Lead Magnet 與 Free Material inline 設定匯入到 `leadDefinitions`，並寫回 `leadDefinitionId`。是否繼續？')) return;
+    try {
+        var snap = await db.collection('pageLayouts').get();
+        var createdCount = 0;
+        var updatedLayouts = 0;
+        for (var d = 0; d < snap.docs.length; d++) {
+            var doc = snap.docs[d];
+            var data = doc.data() || {};
+            var sections = Array.isArray(data.sections) ? JSON.parse(JSON.stringify(data.sections)) : [];
+            if (!sections.length) continue;
+            var changed = false;
+            for (var s = 0; s < sections.length; s++) {
+                var sec = sections[s];
+                if (!sec || !sec.content) continue;
+                if (sec.type === 'link-list' && Array.isArray(sec.content.links)) {
+                    for (var i = 0; i < sec.content.links.length; i++) {
+                        var link = sec.content.links[i];
+                        if (!link || String(link.leadDefinitionId || '').trim()) continue;
+                        var popup = link.leadMagnet || {};
+                        var enabled = popup.enabled === true || String(popup.enabled || '').toLowerCase() === 'true';
+                        if (!enabled) continue;
+                        var defId = _leadMigrationDocId(doc.id, sec.id || ('section-' + s), 'link-' + i, 'lead-magnet');
+                        var defPayload = typeof aiflowNormalizeLeadDefinition === 'function'
+                            ? aiflowNormalizeLeadDefinition({
+                                id: defId,
+                                name: _leadMigrationTitleText(popup.title || link.label || ('Lead Magnet ' + (i + 1))),
+                                type: 'lead-magnet',
+                                status: 'active',
+                                publicEnabled: true,
+                                title: popup.title || link.label || '',
+                                description: popup.description || link.description || '',
+                                imageUrl: popup.imageUrl || link.imageUrl || '',
+                                submitText: popup.submitText || '提交',
+                                redirectUrl: popup.redirectUrl || (String(link.url || '').trim() !== '#' ? String(link.url || '').trim() : ''),
+                                formFields: Array.isArray(popup.formFields) ? popup.formFields : [],
+                                purposeNotes: 'Migrated from page layout "' + doc.id + '" / section "' + (sec.id || ('section-' + s)) + '" / link "' + (link.label || ('Link ' + (i + 1))) + '".'
+                            }, { id: defId, type: 'lead-magnet' })
+                            : {
+                                name: link.label || ('Lead Magnet ' + (i + 1)),
+                                type: 'lead-magnet',
+                                status: 'active',
+                                publicEnabled: true
+                            };
+                        var defRef = db.collection('leadDefinitions').doc(defId);
+                        await defRef.set(Object.assign({}, defPayload, {
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }), { merge: true });
+                        link.leadDefinitionId = defId;
+                        link.leadDefinitionType = 'lead-magnet';
+                        link.leadDefinitionName = typeof aiflowLeadDefinitionDisplayName === 'function' ? aiflowLeadDefinitionDisplayName(defPayload) : (defPayload.name || defId);
+                        createdCount++;
+                        changed = true;
+                    }
+                } else if (sec.type === 'free-material-download') {
+                    if (String(sec.content.leadDefinitionId || '').trim()) continue;
+                    var content = sec.content || {};
+                    var hasInline = !!(
+                        String(content.title || '').trim() ||
+                        String(content.description || '').trim() ||
+                        String(content.imageUrl || '').trim() ||
+                        (Array.isArray(content.documents) && content.documents.length) ||
+                        String(content.pdfUrl || '').trim()
+                    );
+                    if (!hasInline) continue;
+                    var fmId = _leadMigrationDocId(doc.id, sec.id || ('section-' + s), 'free-material', 'free-material');
+                    var fmPayload = typeof aiflowNormalizeLeadDefinition === 'function'
+                        ? aiflowNormalizeLeadDefinition({
+                            id: fmId,
+                            name: _leadMigrationTitleText(content.materialTitle || content.title || ('Free Material ' + doc.id)),
+                            type: 'free-material',
+                            status: 'active',
+                            publicEnabled: true,
+                            title: content.title || '',
+                            description: content.description || '',
+                            imageUrl: content.imageUrl || '',
+                            imageAlt: content.imageAlt || '',
+                            redirectUrl: content.redirectUrl || '',
+                            submitText: content.submitText || '立即寄送',
+                            sectionLabel: content.sectionLabel || '',
+                            ctaText: content.ctaText || '',
+                            materialTitle: content.materialTitle || content.title || '',
+                            emailSubject: content.emailSubject || '',
+                            emailMessage: content.emailMessage || '',
+                            documents: Array.isArray(content.documents) ? content.documents : [],
+                            pdfUrl: content.pdfUrl || '',
+                            fileName: content.fileName || '',
+                            deliveryMode: content.deliveryMode || 'auto',
+                            nameFieldLabel: content.nameFieldLabel || '姓名',
+                            emailFieldLabel: content.emailFieldLabel || 'Email',
+                            consentText: content.consentText || '',
+                            successMessage: content.successMessage || '',
+                            helperNote: content.helperNote || '',
+                            purposeNotes: 'Migrated from page layout "' + doc.id + '" / section "' + (sec.id || ('section-' + s)) + '".'
+                        }, { id: fmId, type: 'free-material' })
+                        : { name: content.title || fmId, type: 'free-material', status: 'active', publicEnabled: true };
+                    await db.collection('leadDefinitions').doc(fmId).set(Object.assign({}, fmPayload, {
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }), { merge: true });
+                    sec.content.leadDefinitionId = fmId;
+                    sec.content.leadDefinitionType = 'free-material';
+                    sec.content.leadDefinitionName = typeof aiflowLeadDefinitionDisplayName === 'function' ? aiflowLeadDefinitionDisplayName(fmPayload) : (fmPayload.name || fmId);
+                    createdCount++;
+                    changed = true;
+                }
+            }
+            if (changed) {
+                await doc.ref.set({
+                    sections: sections,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                updatedLayouts++;
+            }
+        }
+        showToast('匯入完成：建立/更新 ' + createdCount + ' 個 Lead，更新 ' + updatedLayouts + ' 個版面。');
+        loadLeadDefinitionsData();
+        renderLeadDefinitionList();
+    } catch (err) {
+        console.error('[lead migration] failed', err);
+        showToast('匯入失敗：' + err.message, 'error');
+    }
 }
 
 // ============================================================
@@ -13124,14 +16526,30 @@ function loadAttendanceLog() {
 /* ================================================================
    MEGA TAB SWITCHING (Workshop / AI Consultation)
    ================================================================ */
-function switchMegaTab(section) {
+function switchMegaTab(section, opts) {
+    opts = opts || {};
+    var activeMega = document.querySelector('.mega-section.active');
+    var activeMegaId = activeMega ? activeMega.id : '';
+    var activeLeadTabEl = document.querySelector('#sectionLeads .cms-tab.active');
+    var activeLeadTab = activeLeadTabEl ? (activeLeadTabEl.getAttribute('data-lead-tab') || '') : '';
+    if (!opts.skipDirtyConfirm && activeMegaId === 'sectionLeads' && activeLeadTab === 'definitions' && _hasUnsavedLeadDefinitionChanges()) {
+        _withLeadDefinitionLeaveGuard(function() {
+            switchMegaTab(section, { skipDirtyConfirm: true });
+        });
+        return;
+    }
     document.querySelectorAll('.mega-tab').forEach(function(t) { t.classList.remove('active'); });
     document.querySelectorAll('.mega-section').forEach(function(s) { s.classList.remove('active'); });
     if (section === 'workshop') {
         document.querySelector('.mega-tab:nth-child(1)').classList.add('active');
         document.getElementById('sectionWorkshop').classList.add('active');
-    } else if (section === 'consultation') {
+    } else if (section === 'leads') {
         document.querySelector('.mega-tab:nth-child(2)').classList.add('active');
+        document.getElementById('sectionLeads').classList.add('active');
+        initLeadsSectionMounts();
+        switchLeadTab('inbox');
+    } else if (section === 'consultation') {
+        document.querySelector('.mega-tab:nth-child(3)').classList.add('active');
         document.getElementById('sectionConsultation').classList.add('active');
         if (!_consultDataLoaded) loadConsultData();
     }

@@ -220,6 +220,15 @@
         function _modeValue(mode) {
             return _safeText(mode).toLowerCase() || _safeText(ws.mode).toLowerCase() || 'offline';
         }
+        /** When workshop/session is both online + offline, branch UI from how this registration chose to attend. */
+        function _effectiveDisplayMode(sessionMode) {
+            var sm = _modeValue(sessionMode);
+            if (sm !== 'both') return sm;
+            var am = _safeText(reg.attendanceMode).toLowerCase();
+            if (am === 'online') return 'online';
+            if (am === 'offline') return 'offline';
+            return 'both';
+        }
         function _locationForMode(mode, location) {
             var currentMode = _modeValue(mode);
             if (currentMode === 'online') return '';
@@ -227,8 +236,8 @@
         }
         function _meetingLinkForMode(mode, zoomLink) {
             var currentMode = _modeValue(mode);
-            if (currentMode !== 'online') return '';
-            return _safeText(zoomLink);
+            if (currentMode === 'online' || currentMode === 'both') return _safeText(zoomLink);
+            return '';
         }
         function _noticeForMode(mode) {
             var currentMode = _modeValue(mode);
@@ -239,12 +248,15 @@
             return offline || legacy;
         }
         function _addSessionItem(line, location, meetingLink, mode) {
-            if (line) sessionLines.push({
-                line: line,
-                location: _locationForMode(mode, location),
-                meetingLink: _meetingLinkForMode(mode, meetingLink),
-                mode: _modeValue(mode)
-            });
+            if (line) {
+                var dm = _effectiveDisplayMode(mode);
+                sessionLines.push({
+                    line: line,
+                    location: _locationForMode(dm, location),
+                    meetingLink: _meetingLinkForMode(dm, meetingLink),
+                    mode: _modeValue(mode)
+                });
+            }
         }
         // For continuous courses, show only the selected round's sessions
         if (ws.courseType === 'continuous' && ws.rounds && ws.rounds.length && reg.selectedRound) {
@@ -309,10 +321,11 @@
             var fallbackTime = _safeText(ws.time || reg.workshopTime);
             var fb = [fallbackDate, fallbackTime].filter(Boolean).join(' | ');
             if (fb) {
+                var fbDm = _effectiveDisplayMode(ws.mode);
                 sessionLines.push({
                     line: fb,
-                    location: _locationForMode(ws.mode, ws.location),
-                    meetingLink: _meetingLinkForMode(ws.mode, ws.zoomLink),
+                    location: _locationForMode(fbDm, ws.location),
+                    meetingLink: _meetingLinkForMode(fbDm, ws.zoomLink),
                     mode: _modeValue(ws.mode)
                 });
             }
@@ -322,9 +335,9 @@
         var safeLocation = '';
         var safeMeetingLink = '';
         if (sessionLines.length === 1) {
-            var singleMode = sessionLines[0].mode || ws.mode;
-            if (!sessionLines[0].location) safeLocation = _locationForMode(singleMode, ws.location);
-            if (!sessionLines[0].meetingLink) safeMeetingLink = _meetingLinkForMode(singleMode, ws.zoomLink);
+            var singleDm = _effectiveDisplayMode(sessionLines[0].mode || ws.mode);
+            if (!sessionLines[0].location) safeLocation = _locationForMode(singleDm, ws.location);
+            if (!sessionLines[0].meetingLink) safeMeetingLink = _meetingLinkForMode(singleDm, ws.zoomLink);
         }
         if (reg.attendanceToken && _resolvedReceiptMode() !== 'online') {
             var checkinUrl = window.location.origin + '/checkin?token=' + encodeURIComponent(reg.attendanceToken);

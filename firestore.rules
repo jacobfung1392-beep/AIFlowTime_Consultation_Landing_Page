@@ -22,6 +22,9 @@ service cloud.firestore {
           'sourceDocId',
           'sheetTab',
           'importSource',
+          'leadDefinitionId',
+          'leadDefinitionType',
+          'leadDefinitionName',
           'contactName',
           'phone',
           'whatsapp',
@@ -57,6 +60,9 @@ service cloud.firestore {
         && (!request.resource.data.keys().hasAny(['sourceCollection']) || request.resource.data.sourceCollection is string)
         && (!request.resource.data.keys().hasAny(['sourceDocId']) || request.resource.data.sourceDocId is string)
         && (!request.resource.data.keys().hasAny(['sheetTab']) || request.resource.data.sheetTab is string)
+        && (!request.resource.data.keys().hasAny(['leadDefinitionId']) || request.resource.data.leadDefinitionId is string)
+        && (!request.resource.data.keys().hasAny(['leadDefinitionType']) || request.resource.data.leadDefinitionType is string)
+        && (!request.resource.data.keys().hasAny(['leadDefinitionName']) || request.resource.data.leadDefinitionName is string)
         && (!request.resource.data.keys().hasAny(['contactName']) || request.resource.data.contactName is string)
         && (!request.resource.data.keys().hasAny(['phone']) || request.resource.data.phone is string)
         && (!request.resource.data.keys().hasAny(['whatsapp']) || request.resource.data.whatsapp is string)
@@ -144,6 +150,15 @@ service cloud.firestore {
     match /formSubmissions/{docId} {
       allow create: if isValidFormSubmissionCreate();
       allow read, update, delete: if isAdmin();
+    }
+
+    match /leadDefinitions/{docId} {
+      allow read: if isAdmin()
+        || (
+          resource.data.publicEnabled == true
+          && resource.data.status == 'active'
+        );
+      allow create, update, delete: if isAdmin();
     }
 
     // Reservations: backend only (Functions use Admin SDK)
@@ -297,8 +312,25 @@ service cloud.firestore {
         ];
     }
 
+    // Site-wide transactional email headers (Trigger Email extension reads `mail` docs; from/replyTo set client-side from this doc)
+    match /siteSettings/{docId} {
+      allow read: if docId == 'emailOutbound';
+      allow write: if docId == 'emailOutbound' && isAdmin();
+    }
+
     // Free-material download leads: anyone can create; admin read
     match /freeMaterialLeads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in [
+          'jacobfung1392@gmail.com',
+          'jacobfung@aiflowtime.com'
+        ];
+    }
+
+    // Pending WhatsApp outreach (Meta integration TBD): visitors may enqueue; admin only read/update
+    match /whatsappOutreachQueue/{entryId} {
       allow create: if true;
       allow read, update, delete: if request.auth != null
         && request.auth.token.email_verified == true

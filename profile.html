@@ -1193,7 +1193,14 @@ async function generateReceipt(jsonStr) {
     var safeTime = _safeText(r.workshopTime);
     var safePricePaid = _safeText(r.pricePaid) || 'N/A';
     var safePromo = _safeText(r.promoCode);
-    var receiptMode = _safeText(r.workshopMode).toLowerCase() || 'offline';
+    var rawReceiptMode = _safeText(r.workshopMode).toLowerCase() || 'offline';
+    var am = _safeText(r.attendanceMode).toLowerCase();
+    var receiptMode = rawReceiptMode;
+    if (rawReceiptMode === 'both') {
+        if (am === 'online') receiptMode = 'online';
+        else if (am === 'offline') receiptMode = 'offline';
+        else receiptMode = 'both';
+    }
     var safeLocation = receiptMode === 'online' ? '' : _safeText(r.location);
     var safeMeetingLink = (receiptMode === 'online' || receiptMode === 'both') ? _safeText(r.zoomLink) : '';
 

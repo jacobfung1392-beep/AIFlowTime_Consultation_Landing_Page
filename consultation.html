@@ -44,7 +44,7 @@
             font-size: 16px;
             overflow-x: hidden;
         }
-        body.layout-pending .page-content {
+        body.layout-pending [data-section-id] {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -176,7 +176,15 @@
         }
         .hero h1 .accent { color: var(--accent); }
         .hero-img {
-            max-width: 420px; margin: 0 auto 32px; border-radius: var(--radius);
+            display: block;
+            width: 100%;
+            max-width: 420px;
+            max-height: 400px;
+            height: auto;
+            margin: 0 auto 32px;
+            border-radius: var(--radius);
+            object-fit: contain;
+            object-position: center center;
         }
         .hero-desc {
             font-size: 1.15rem; color: var(--text-dim); max-width: 600px;
@@ -188,6 +196,25 @@
             .hero h1 { font-size: 2rem; }
         }
 
+        @media (max-width: 640px) {
+            .hero,
+            .cta-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero > *:not(.hero-img) {
+                width: 100%;
+            }
+            .cta-section > *:not(.cta-img):not(.glass-cta) {
+                width: 100%;
+            }
+            .hero-img,
+            .cta-img {
+                flex-shrink: 0;
+            }
+        }
+
         /* ---- CTA Section ---- */
         .cta-section {
             padding: 80px 20px; text-align: center;
@@ -197,7 +224,15 @@
             font-size: 2rem; font-weight: 700; margin-bottom: 24px;
         }
         .cta-img {
-            max-width: 600px; margin: 0 auto 28px; border-radius: var(--radius);
+            display: block;
+            width: 100%;
+            max-width: 600px;
+            max-height: 250px;
+            height: auto;
+            margin: 0 auto 28px;
+            border-radius: var(--radius);
+            object-fit: contain;
+            object-position: center center;
         }
         .cta-text {
             font-size: 1.1rem; color: var(--text-dim); margin-bottom: 12px;
@@ -361,7 +396,7 @@
     <!-- Header -->
     <header>
         <div class="header-inner">
-            <a href="linktree.html" class="logo">AI<span>FLOW</span>TIME</a>
+            <a href="/linktree" class="logo">AI<span>FLOW</span>TIME</a>
             <nav class="nav-desktop">
                 <a href="/ai-beginner-workshop#workshops">工作坊</a>
                 <a href="/about-jacob">About Jacob</a>
@@ -382,139 +417,38 @@
         </nav>
     </header>
 
-    <!-- Hero -->
-    <div class="hero fade-in">
-        <div class="hero-badge">1-ON-1 AI CONSULTATION</div>
-        <p class="hero-pre">針對 <span class="hl">Slashers</span>、<span class="hl">AI 新手</span>的</p>
-        <h1>一對一<span class="accent">AI</span>諮詢服務</h1>
-        <img src="Jacob_halftone_optimized.png" alt="Jacob" class="hero-img" width="600" height="400" loading="eager" style="max-height: 400px; object-fit: contain;">
-        <p class="hero-desc">一對一深入分析，幫你快速釐清方向、學習建立第一個AI工作流！</p>
+    <!-- Hero (content from Firestore / layout editor) -->
+    <div class="hero fade-in" data-section-id="cn-hero" data-section-type="cn-hero">
+        <div class="hero-badge"></div>
+        <p class="hero-pre"></p>
+        <h1></h1>
+        <img src="" alt="" class="hero-img" width="600" height="400" loading="eager">
+        <p class="hero-desc"></p>
     </div>
 
     <!-- CTA Section -->
-    <div class="cta-section fade-in">
-        <h2>準備好慳返你嘅時間未？</h2>
-        <img src="Computer_Image_optimized.webp" alt="Computer" class="cta-img" width="800" height="250" loading="eager" style="max-height: 250px; object-fit: contain;">
-        <p class="cta-text">識得用AI，每日慳一個鐘，一星期就慳咗七個鐘，一年落嚟你都慳咗300幾個鐘！</p>
-        <p class="cta-sub">跟我分享你遇到的難題！開始建立你嘅 AI 工作流</p>
-        <a href="ig-consultation.html" class="glass-cta">
-            <span class="glass-cta-text">跟我分享你遇到的難題！</span>
+    <div class="cta-section fade-in" data-section-id="cn-cta" data-section-type="cn-cta">
+        <h2></h2>
+        <img src="" alt="" class="cta-img" width="800" height="250" loading="eager">
+        <p class="cta-text"></p>
+        <p class="cta-sub"></p>
+        <a href="#" class="glass-cta">
+            <span class="glass-cta-text"></span>
         </a>
     </div>
 
     <!-- Consultation Process -->
-    <div class="timeline-section">
-        <h2 class="section-title fade-in">諮詢流程</h2>
-        <p class="section-sub fade-in">三步幫你建立專屬 AI 工作流</p>
-
-        <!-- Step 1 -->
-        <div class="timeline-item fade-in">
-            <h3>1. 問題定位（Problem Spotting）</h3>
-            <p>了解你而家做緊乜、目標係乜、時間流失位係邊。Jacob 會深入探討你日常工作流程，找出最耗時、最重複嘅環節。</p>
-            <div class="tl-highlight orange"><strong>重點：</strong>釐清你嘅工作性質、時間分配、痛點位置</div>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="timeline-item fade-in">
-            <h3>2. 痛點拆解（Pain Point）</h3>
-            <p>揾出最耗時、最重複、最易自動化嘅 1-3 件事。Jacob 會用專業框架分析，判斷邊啲工序最適合用 AI 優化。</p>
-            <div class="tl-highlight purple"><strong>目標：</strong>鎖定最高 ROI 嘅自動化機會</div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="timeline-item fade-in">
-            <h3>3. 你會得到（Deliverables）</h3>
-            <div class="del-grid">
-                <div class="del-card">
-                    <h4>最有用 AI 工具建議</h4>
-                    <p>打造「相當於專業助理」嘅輸出能力</p>
-                </div>
-                <div class="del-card">
-                    <h4>自動化概念與方向</h4>
-                    <p>目標每日省 1–2 小時（保守目標）</p>
-                </div>
-                <div class="del-card">
-                    <h4>你專屬嘅 AI workflow 建議</h4>
-                    <p>可落地、可立即執行</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="timeline-item fade-in">
-            <h3>4. 結果（Result）</h3>
-            <div class="result-card">
-                <h4>諮詢成果</h4>
-                <p>你將會了解到AI嘅本質，同埋未來嘅學習方向，獲得使用 AI 工具加速工作流程的知識與能力。</p>
-                <p class="bold-line">成為AI原生使用者，不分年紀！<br>即刻做AI高手Level 1！</p>
-                <div class="result-icons">
-                    <div class="result-icon-item">
-                        <div class="result-icon-circle">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        </div>
-                        <p>即走即用 prompts</p>
-                    </div>
-                    <div class="result-icon-item">
-                        <div class="result-icon-circle">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <p>AI 小技巧</p>
-                    </div>
-                    <div class="result-icon-item">
-                        <div class="result-icon-circle">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        </div>
-                        <p>模板／清單</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="timeline-section" data-section-id="cn-process" data-section-type="cn-process">
+        <h2 class="section-title fade-in"></h2>
+        <p class="section-sub fade-in"></p>
+        <div class="cn-process-mount"></div>
     </div>
 
     <!-- FAQ -->
-    <div class="faq-section">
-        <h2 class="section-title fade-in">常見問題</h2>
-        <p class="section-sub fade-in">解答你對諮詢服務嘅疑問</p>
-
-        <div class="faq-item fade-in">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                <span>我完全新手得唔得？</span>
-                <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-            <div class="faq-answer">
-                <p>絕對得！Jacob 專為零基礎人士設計，由最基本概念開始教起。你只要識得用電腦、打中文就可以。Jacob 會用簡單易明嘅方式，手把手帶你建立第一條工作流。</p>
-            </div>
-        </div>
-
-        <div class="faq-item fade-in">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                <span>需要準備咩？</span>
-                <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-            <div class="faq-answer">
-                <p>你只需要：一部可以上網嘅電腦、你日常工作嘅流程描述（越詳細越好）、以及一顆開放學習嘅心。Jacob 會提供所有需要嘅工具同資源，唔使你額外準備乜。</p>
-            </div>
-        </div>
-
-        <div class="faq-item fade-in">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                <span>會唔會教到我用邊啲工具？</span>
-                <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-            <div class="faq-answer">
-                <p>會！Jacob 會根據你嘅需求同預算，推薦最適合你嘅 AI 工具。可能包括：ChatGPT、Claude、Notion AI、Zapier、Make 等等。Jacob 會教你點樣組合唔同工具，打造最適合你嘅自動化系統。</p>
-            </div>
-        </div>
-
-        <div class="faq-item fade-in">
-            <div class="faq-question" onclick="toggleFAQ(this)">
-                <span>90 分鐘夠唔夠？</span>
-                <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-            </div>
-            <div class="faq-answer">
-                <p>對於入門絕對夠！90 分鐘足夠 Jacob 深入了解你嘅需求、分析痛點、同埋設計一條可以立即執行嘅工作流。而且你會得到完整嘅學習資源，可以跟住步驟慢慢實踐。如果需要更深入嘅指導，Jacob 都有後續支援服務。</p>
-            </div>
-        </div>
+    <div class="faq-section" data-section-id="cn-faq" data-section-type="cn-faq">
+        <h2 class="section-title fade-in"></h2>
+        <p class="section-sub fade-in"></p>
+        <div class="cn-faq-mount"></div>
     </div>
 
     <!-- Footer -->
@@ -532,8 +466,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/shared-utils.js?v=10"></script>
     <script src="/js/page-background-runtime.js"></script>
+    <script src="/js/consultation-layout-runtime.js"></script>
     <script>
         // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
@@ -603,9 +538,12 @@
                 ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
                 : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
 
-            function applyConsultationBackground(sections) {
-                if (typeof syncPageBackgroundFromSections === 'function') {
+            function applyConsultationLayout(sections) {
+                if (typeof applyConsultationPageLayout === 'function') {
+                    applyConsultationPageLayout(sections || [], { wrapperId: 'consultation-page-bg' });
+                } else if (typeof syncPageBackgroundFromSections === 'function') {
                     syncPageBackgroundFromSections(sections || [], { wrapperId: 'consultation-page-bg' });
+                    if (typeof consultationUpdateNoiseLayer === 'function') consultationUpdateNoiseLayer();
                 }
             }
 
@@ -616,13 +554,14 @@
             if (isPreview && typeof initLayoutPreviewBridge === 'function') {
                 initLayoutPreviewBridge({
                     onLayoutPreview: function(sections) {
-                        applyConsultationBackground(sections || []);
+                        applyConsultationLayout(sections || []);
                         finishInitialLayoutRender();
                     }
                 });
             }
 
             if (typeof initFirebase !== 'function' || typeof firebase === 'undefined' || !firebase.firestore) {
+                applyConsultationLayout([]);
                 finishInitialLayoutRender();
                 return;
             }
@@ -632,10 +571,10 @@
                     if (typeof applyFirestorePageMeta === 'function') {
                         applyFirestorePageMeta(data, { fallbackTitle: document.title });
                     }
-                    applyConsultationBackground(data && Array.isArray(data.sections) ? data.sections : []);
+                    applyConsultationLayout(data && Array.isArray(data.sections) ? data.sections : []);
                     finishInitialLayoutRender();
                 }).catch(function() {
-                    applyConsultationBackground([]);
+                    applyConsultationLayout([]);
                     finishInitialLayoutRender();
                 });
             });

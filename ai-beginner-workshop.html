@@ -1869,6 +1869,129 @@
         }
         .sec-link-list .ll-chevron { margin-left: 12px; color: var(--text-light); font-size: 1.2rem; }
 
+        /* Link List — Lead Magnet modal (same structure as linktree whatsapp modal) */
+        .ll-popup-overlay .whatsapp-modal {
+            position: relative;
+            width: min(100%, 500px);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-pampas);
+            border-radius: 16px;
+            border: none;
+            overflow: hidden;
+            box-shadow: none;
+        }
+        .ll-popup-overlay .whatsapp-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 6;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.72);
+            color: var(--text-light);
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ll-popup-overlay .whatsapp-modal-close:hover {
+            background: rgba(255,255,255,0.92);
+            color: var(--text);
+        }
+        .ll-popup-overlay .whatsapp-modal-media {
+            flex: 0 0 clamp(150px, 36vh, 260px);
+            min-height: 150px;
+            max-height: min(40vh, 280px);
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(244,243,238,0.92) 0%, var(--bg-pampas) 100%);
+        }
+        .ll-popup-overlay .whatsapp-modal-media[hidden] { display: none !important; }
+        .ll-popup-overlay .whatsapp-modal-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
+        }
+        .ll-popup-overlay .whatsapp-modal-content {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 22px 24px 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .ll-popup-overlay .whatsapp-modal-header { margin-bottom: 1rem; }
+        .ll-popup-overlay .whatsapp-modal-header h3.ll-ws-modal-title {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.35;
+            color: var(--text);
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+        .ll-popup-overlay .whatsapp-modal-header p.ll-ws-modal-desc {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.65;
+        }
+        .ll-popup-overlay .whatsapp-modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .ll-popup-overlay .whatsapp-modal-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--bg-off);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--text);
+        }
+        .ll-popup-overlay .whatsapp-modal-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(217,119,87,0.15);
+        }
+        .ll-popup-overlay .whatsapp-modal-checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+        .ll-popup-overlay .whatsapp-modal-checkbox { margin-top: 2px; flex-shrink: 0; width: 18px; height: 18px; }
+        .ll-popup-overlay .whatsapp-modal-submit {
+            border: none;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            padding: 14px 18px;
+            cursor: pointer;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        .ll-popup-overlay .whatsapp-modal-submit:disabled {
+            background: #D1D5DB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
         /* =============================================
            NEW SECTION TYPES — Tools Grid
         ============================================= */
@@ -2683,9 +2806,28 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/shared-utils.js?v=10"></script>
     <script src="/js/page-background-runtime.js"></script>
     <script>
+        /**
+         * Hash-only hrefs (#workshops) resolve against <base>, not the visible URL.
+         * resolvePageSlug injects <base href="/"> so #foo becomes /#foo (home) instead of /workshops#foo.
+         */
+        function _fixHashOnlyAnchorsForCurrentPath(root) {
+            var scope = root || document;
+            var path = window.location.pathname || '/';
+            if (path.length > 1) path = path.replace(/\/+$/, '');
+            var prefix = path || '/';
+            scope.querySelectorAll('a[href^="#"]').forEach(function(a) {
+                var h = a.getAttribute('href');
+                if (!h || h.indexOf('#') !== 0) return;
+                a.setAttribute('href', prefix + h);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            _fixHashOnlyAnchorsForCurrentPath();
+        });
+
         var _initWorkshopPageRetries = 0;
         initFirebase(function() { window.setTimeout(initWorkshopPage, 0); }, { waitForAuthPersistence: false });
 
@@ -3354,6 +3496,7 @@
         }
 
         function _finishInitialWorkshopLayoutRender() {
+            _fixHashOnlyAnchorsForCurrentPath();
             revealHeroMedia();
             _layoutPendingController.finish();
         }
@@ -4486,63 +4629,95 @@
                         popupOverlay.className = 'll-popup-overlay';
                         popupOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.56);display:none;align-items:center;justify-content:center;padding:20px;z-index:10000;';
                         popupOverlay.innerHTML =
-                            '<div style="position:relative;width:min(100%,520px);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,0.2);">' +
-                                '<button type="button" class="ll-popup-close" style="position:absolute;top:14px;right:14px;border:none;background:transparent;font-size:28px;line-height:1;cursor:pointer;color:#8A7F74;">&times;</button>' +
-                                '<img class="ll-popup-image" src="" alt="" style="display:none;width:min(100%,220px);border-radius:16px;margin:0 auto 18px;box-shadow:0 12px 30px rgba(0,0,0,0.12);">' +
-                                '<h3 class="ll-popup-title" style="margin:0 0 10px;font-size:1.45rem;color:var(--text);"></h3>' +
-                                '<div class="ll-popup-desc" style="margin-bottom:18px;color:var(--text-light);line-height:1.7;"></div>' +
-                                '<form class="ll-popup-form" style="display:flex;flex-direction:column;gap:12px;">' +
-                                    '<div class="ll-popup-fields" style="display:flex;flex-direction:column;gap:12px;"></div>' +
-                                    '<button type="submit" class="ll-popup-submit" style="border:none;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;padding:14px 18px;cursor:pointer;">提交</button>' +
-                                '</form>' +
+                            '<div class="whatsapp-modal">' +
+                                '<button type="button" class="whatsapp-modal-close" aria-label="關閉">&times;</button>' +
+                                '<div class="whatsapp-modal-media" hidden>' +
+                                    '<img class="whatsapp-modal-image" src="" alt="">' +
+                                '</div>' +
+                                '<div class="whatsapp-modal-content">' +
+                                    '<div class="whatsapp-modal-header">' +
+                                        '<h3 class="ll-ws-modal-title"></h3>' +
+                                        '<p class="ll-ws-modal-desc"></p>' +
+                                    '</div>' +
+                                    '<form class="whatsapp-modal-form">' +
+                                        '<div data-ll-lm-fields></div>' +
+                                        '<label class="whatsapp-modal-checkbox-label" data-ll-lm-consent-row>' +
+                                            '<input type="checkbox" class="whatsapp-modal-checkbox" data-ll-lm-consent>' +
+                                            '<span data-ll-lm-consent-text></span>' +
+                                        '</label>' +
+                                        '<button type="submit" class="whatsapp-modal-submit" disabled>提交</button>' +
+                                    '</form>' +
+                                '</div>' +
                             '</div>';
                         el.appendChild(popupOverlay);
-                        var popupClose = popupOverlay.querySelector('.ll-popup-close');
-                        var popupImage = popupOverlay.querySelector('.ll-popup-image');
-                        var popupTitle = popupOverlay.querySelector('.ll-popup-title');
-                        var popupDesc = popupOverlay.querySelector('.ll-popup-desc');
-                        var popupFields = popupOverlay.querySelector('.ll-popup-fields');
-                        var popupSubmit = popupOverlay.querySelector('.ll-popup-submit');
-                        var popupForm = popupOverlay.querySelector('.ll-popup-form');
+                        var popupClose = popupOverlay.querySelector('.whatsapp-modal-close');
+                        var popupMediaWrap = popupOverlay.querySelector('.whatsapp-modal-media');
+                        var popupImage = popupOverlay.querySelector('.whatsapp-modal-image');
+                        var popupTitle = popupOverlay.querySelector('.ll-ws-modal-title');
+                        var popupDesc = popupOverlay.querySelector('.ll-ws-modal-desc');
+                        var popupFields = popupOverlay.querySelector('[data-ll-lm-fields]');
+                        var popupSubmit = popupOverlay.querySelector('.whatsapp-modal-submit');
+                        var popupForm = popupOverlay.querySelector('.whatsapp-modal-form');
+                        var popupConsentRow = popupOverlay.querySelector('[data-ll-lm-consent-row]');
+                        var popupConsentCb = popupOverlay.querySelector('[data-ll-lm-consent]');
+                        var popupConsentText = popupOverlay.querySelector('[data-ll-lm-consent-text]');
                         var popupRedirectUrl = '';
+                        var _llLmGoogleScriptURL = 'https://script.google.com/macros/s/AKfycbwcEjkz6roPWxKFyap-Jdn-q87F3Y7tOmhbLWH3HHgywuKsWP9z8oAaupjEhJLrPQDiew/exec';
+
+                        function _llLmUpdateSubmit() {
+                            var cfg = popupOverlay._llLmConfig || {};
+                            if (!popupSubmit || !popupFields) return;
+                            var ok = typeof aiflowLeadMagnetFormValid === 'function'
+                                ? aiflowLeadMagnetFormValid(popupFields, popupConsentCb, cfg)
+                                : false;
+                            popupSubmit.disabled = !ok;
+                        }
 
                         function closeLinkListPopup() {
                             popupOverlay.style.display = 'none';
                             document.body.style.overflow = '';
                             popupRedirectUrl = '';
+                            popupOverlay._llLmConfig = null;
                         }
 
                         function openLinkListPopup(config) {
+                            config = config || {};
+                            popupOverlay._llLmConfig = config;
                             var titleHtml = config.titleHtml || '';
                             var descHtml = config.descriptionHtml || '';
                             var imageUrl = config.imageUrl || '';
-                            var fields = Array.isArray(config.formFields) && config.formFields.length
-                                ? config.formFields
-                                : [{ label: '姓名', type: 'text' }, { label: 'WhatsApp / Email', type: 'text' }];
                             popupTitle.innerHTML = titleHtml;
                             popupDesc.innerHTML = descHtml;
                             popupDesc.style.display = descHtml ? '' : 'none';
                             if (imageUrl) {
                                 popupImage.src = typeof fixStorageUrl === 'function' ? fixStorageUrl(imageUrl) : imageUrl;
                                 popupImage.alt = config.titleText || 'Lead Magnet';
-                                popupImage.style.display = 'block';
+                                if (popupMediaWrap) popupMediaWrap.hidden = false;
                             } else {
-                                popupImage.src = '';
+                                popupImage.removeAttribute('src');
                                 popupImage.alt = '';
-                                popupImage.style.display = 'none';
+                                if (popupMediaWrap) popupMediaWrap.hidden = true;
                             }
-                            popupFields.innerHTML = '';
-                            fields.forEach(function(fieldDef) {
-                                var input = document.createElement('input');
-                                input.type = fieldDef.type || 'text';
-                                input.placeholder = fieldDef.label || '';
-                                input.style.cssText = 'width:100%;padding:12px 14px;border:1px solid rgba(0,0,0,0.12);border-radius:12px;font-size:15px;font-family:inherit;';
-                                popupFields.appendChild(input);
-                            });
+                            if (popupFields && typeof aiflowLeadMagnetRenderFields === 'function') {
+                                aiflowLeadMagnetRenderFields(popupFields, config, _llLmUpdateSubmit);
+                            }
+                            var defCt = '我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。';
+                            if (config.consentCheckboxEnabled === false) {
+                                if (popupConsentRow) popupConsentRow.style.display = 'none';
+                                if (popupConsentCb) popupConsentCb.checked = true;
+                            } else {
+                                if (popupConsentRow) popupConsentRow.style.display = '';
+                                if (popupConsentText) popupConsentText.textContent = String(config.consentText || '').trim() || defCt;
+                                if (popupConsentCb) popupConsentCb.checked = false;
+                            }
+                            if (popupConsentCb) {
+                                popupConsentCb.onchange = _llLmUpdateSubmit;
+                            }
                             popupSubmit.textContent = config.submitText || '提交';
                             popupRedirectUrl = config.redirectUrl || '';
                             popupOverlay.style.display = 'flex';
                             document.body.style.overflow = 'hidden';
+                            _llLmUpdateSubmit();
                         }
 
                         if (popupClose) popupClose.addEventListener('click', closeLinkListPopup);
@@ -4552,9 +4727,188 @@
                         if (popupForm) {
                             popupForm.addEventListener('submit', function(evt) {
                                 evt.preventDefault();
-                                var nextUrl = popupRedirectUrl;
+                                var cfg = popupOverlay._llLmConfig || {};
+                                if (!popupFields || typeof aiflowLeadMagnetFormValid !== 'function' || typeof aiflowLeadMagnetReadValues !== 'function') return;
+                                if (!aiflowLeadMagnetFormValid(popupFields, popupConsentCb, cfg)) {
+                                    alert('請填妥所有欄位' + (cfg.consentCheckboxEnabled !== false ? '並勾選同意項目' : '') + '。');
+                                    return;
+                                }
+                                var vals = aiflowLeadMagnetReadValues(popupFields, popupConsentCb, cfg);
+                                var name = vals.name || '';
+                                var whatsapp = vals.whatsapp || '';
+                                var email = vals.email || '';
+                                var timestamp = new Date().toISOString();
+                                var sourceLabel = cfg.sourceLabel || cfg.leadDefinitionName || cfg.titleText || 'Lead Magnet';
+                                var sourceKeySuffix = String(sourceLabel).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'lead-magnet';
+                                var formData = {
+                                    name: name,
+                                    email: email,
+                                    whatsapp: whatsapp,
+                                    timestamp: timestamp,
+                                    source: 'workshop-link-list-' + sourceKeySuffix,
+                                    page: sourceLabel
+                                };
+                                var sheetPromise = fetch(_llLmGoogleScriptURL, {
+                                    method: 'POST',
+                                    mode: 'no-cors',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(formData)
+                                }).then(function() {}).catch(function() {});
+                                var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+                                    ? saveFormSubmissionMirror({
+                                        formType: 'lead-magnet',
+                                        sourceKey: cfg.leadDefinitionId ? ('lead-definition:' + cfg.leadDefinitionId) : formData.source,
+                                        sourceLabel: sourceLabel,
+                                        sourcePage: formData.page,
+                                        sourcePath: window.location.pathname,
+                                        sourceUrl: window.location.href,
+                                        sheetTab: 'AIFlowTime Leads',
+                                        leadDefinitionId: cfg.leadDefinitionId || '',
+                                        leadDefinitionType: cfg.leadDefinitionType || 'lead-magnet',
+                                        leadDefinitionName: cfg.leadDefinitionName || '',
+                                        contactName: name,
+                                        whatsapp: whatsapp,
+                                        email: email,
+                                        answers: Object.assign({}, vals.answers, {
+                                            leadDefinitionName: cfg.leadDefinitionName || '',
+                                            consentAccepted: vals.consentAccepted,
+                                            pageContext: 'ai-beginner-workshop'
+                                        }),
+                                        timestamp: timestamp
+                                    }).catch(function() {})
+                                    : Promise.resolve();
+                                var nextUrl = String(popupRedirectUrl || '').trim();
                                 closeLinkListPopup();
-                                if (nextUrl) window.location.href = nextUrl;
+                                Promise.allSettled([sheetPromise, mirrorPromise]).then(async function() {
+                                    var db;
+                                    try { db = firebase.firestore(); } catch (err) { db = null; }
+                                    var docLm = typeof aiflowLeadMagnetFirstDocument === 'function' ? aiflowLeadMagnetFirstDocument(cfg) : null;
+                                    var hasDocPath = cfg.deliveryIncludeDocuments !== false && docLm && docLm.url;
+                                    var hasLinkPath = false;
+                                    if (cfg.deliveryIncludeLinks && Array.isArray(cfg.identityLinks)) {
+                                        cfg.identityLinks.forEach(function(l) {
+                                            if (l && String(l.url || '').trim()) hasLinkPath = true;
+                                        });
+                                    }
+                                    var emailPromise = Promise.resolve();
+                                    if (cfg.collectEmail && email && (hasDocPath || hasLinkPath) && typeof aiflowSendMaterialEmailFromBrowser === 'function') {
+                                        emailPromise = aiflowSendMaterialEmailFromBrowser({
+                                            name: name,
+                                            email: email,
+                                            cfg: cfg,
+                                            doc: docLm,
+                                            db: db,
+                                            consentAccepted: true,
+                                            meta: {
+                                                submissionSource: 'workshop-link-list',
+                                                pagePath: window.location.pathname,
+                                                pageTitle: document.title
+                                            }
+                                        }).catch(function(err) { console.warn('[lead-magnet] follow-up email', err); });
+                                    }
+                                    if (cfg.collectPhone !== false && whatsapp && String(cfg.whatsappGreetingMessage || '').trim()) {
+                                        var waBody = typeof _aiflowApplyEmailTemplateTokens === 'function'
+                                            ? _aiflowApplyEmailTemplateTokens(cfg.whatsappGreetingMessage, {
+                                                name: name,
+                                                materialTitle: cfg.materialTitle || '',
+                                                downloadUrl: (docLm && docLm.url) || '',
+                                                documentName: (docLm && (docLm.name || docLm.fileName)) || ''
+                                            })
+                                            : String(cfg.whatsappGreetingMessage || '');
+                                        if (typeof aiflowQueueWhatsappOutreach === 'function') {
+                                            aiflowQueueWhatsappOutreach({
+                                                phone: whatsapp,
+                                                body: String(waBody || '').trim(),
+                                                leadDefinitionId: cfg.leadDefinitionId || '',
+                                                source: 'workshop-link-list',
+                                                documentUrl: (docLm && docLm.url) || '',
+                                                contactName: name,
+                                                db: db
+                                            });
+                                        }
+                                    }
+                                    await emailPromise;
+                                    if (nextUrl) window.location.href = nextUrl;
+                                });
+                            });
+                        }
+
+                        function linkListPopupEnabled(link) {
+                            var popup = link && link.leadMagnet || {};
+                            var enabled = popup.enabled === true || String(popup.enabled || '').toLowerCase() === 'true';
+                            var leadDefinitionId = String((link && link.leadDefinitionId) || '').trim();
+                            var enabledDefined = !!(popup && popup.hasOwnProperty('enabled'));
+                            return !!(enabled || (leadDefinitionId && !enabledDefined));
+                        }
+
+                        function buildLinkListPopupConfig(link) {
+                            var popup = link && link.leadMagnet || {};
+                            var redirectUrl = String(popup.redirectUrl || '').trim();
+                            if (!redirectUrl) {
+                                var cardUrl = String(link && link.url || '').trim();
+                                redirectUrl = cardUrl && cardUrl !== '#' ? cardUrl : '';
+                            }
+                            function _linkRichNonEmpty(val) {
+                                return val != null && String(val).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length > 0;
+                            }
+                            var rawPopupLabel = link && link.popupLabel;
+                            var rawLabel = link && link.label;
+                            var titleSource = '';
+                            if (_linkRichNonEmpty(rawPopupLabel)) titleSource = rawPopupLabel;
+                            else if (_linkRichNonEmpty(popup.title)) titleSource = popup.title;
+                            else if (_linkRichNonEmpty(rawLabel)) titleSource = rawLabel;
+                            else titleSource = popup.title || rawLabel || '';
+                            var fields = Array.isArray(popup.formFields) ? popup.formFields.slice() : [];
+                            if (!fields.length && typeof aiflowLeadMagnetDefaultFormFields === 'function') {
+                                fields = aiflowLeadMagnetDefaultFormFields();
+                            }
+                            if (!fields.length) {
+                                fields = [{ label: '姓名', type: 'text', key: 'name' }, { label: 'WhatsApp（8位數字）', type: 'tel', key: 'phone' }];
+                            }
+                            var defConsent = '我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。';
+                            var plainTitle = String(titleSource || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                            return {
+                                titleHtml: typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(String(titleSource || '')) : _escHtml(String(titleSource || '')).replace(/\n/g, '<br>'),
+                                titleText: plainTitle,
+                                descriptionHtml: typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(popup.description || link.description || '') : _escHtml(popup.description || link.description || '').replace(/\n/g, '<br>'),
+                                imageUrl: String(popup.imageUrl || '').trim(),
+                                submitText: String(popup.submitText || '').trim() || '提交',
+                                redirectUrl: redirectUrl,
+                                formFields: fields,
+                                consentText: String(popup.consentText || '').trim() || defConsent,
+                                consentCheckboxEnabled: popup.consentCheckboxEnabled !== false,
+                                sourceLabel: String(link && link.leadDefinitionName || '').trim() || plainTitle || 'Lead Magnet',
+                                leadDefinitionId: String(link && link.leadDefinitionId || '').trim(),
+                                leadDefinitionType: String(link && link.leadDefinitionType || 'lead-magnet').trim() || 'lead-magnet',
+                                leadDefinitionName: String(link && link.leadDefinitionName || '').replace(/<[^>]+>/g, ' ').trim(),
+                                materialTitle: String(popup.materialTitle || '').trim(),
+                                emailSubject: String(popup.emailSubject || '').trim(),
+                                emailMessage: String(popup.emailMessage || '').trim(),
+                                deliveryMode: String(popup.deliveryMode || 'auto').trim(),
+                                deliveryIncludeDocuments: popup.deliveryIncludeDocuments !== false,
+                                deliveryIncludeLinks: !!popup.deliveryIncludeLinks,
+                                identityLinks: Array.isArray(popup.identityLinks) ? popup.identityLinks.slice() : [],
+                                whatsappGreetingMessage: String(popup.whatsappGreetingMessage || '').trim(),
+                                collectEmail: !!popup.collectEmail,
+                                collectPhone: popup.collectPhone !== false,
+                                documents: Array.isArray(popup.documents) ? popup.documents.slice() : [],
+                                pdfUrl: String(popup.pdfUrl || '').trim(),
+                                fileName: String(popup.fileName || '').trim()
+                            };
+                        }
+
+                        function resolveLinkListPopupConfig(link) {
+                            var inlineConfig = buildLinkListPopupConfig(link);
+                            var leadDefinitionId = String(link && link.leadDefinitionId || '').trim();
+                            if (!leadDefinitionId || typeof aiflowFetchLeadDefinitionById !== 'function' || typeof aiflowApplyLeadDefinitionToLinkLeadMagnet !== 'function') {
+                                return Promise.resolve(inlineConfig);
+                            }
+                            return aiflowFetchLeadDefinitionById(leadDefinitionId).then(function(definition) {
+                                if (!definition) return inlineConfig;
+                                return buildLinkListPopupConfig(aiflowApplyLeadDefinitionToLinkLeadMagnet(link, definition));
+                            }).catch(function(err) {
+                                console.warn('[workshop-main] lead definition load failed:', err);
+                                return inlineConfig;
                             });
                         }
 
@@ -4562,8 +4916,7 @@
                             var safeLabel = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(lnk.label || '') : _escHtml(lnk.label || '').replace(/\n/g, '<br>');
                             var safeDesc = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(lnk.description || '') : _escHtml(lnk.description || '').replace(/\n/g, '<br>');
                             var safeBadge = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(lnk.badgeText || '') : _escHtml(lnk.badgeText || '').replace(/\n/g, '<br>');
-                            var popup = lnk.leadMagnet || {};
-                            var popupEnabled = popup.enabled === true || String(popup.enabled || '').toLowerCase() === 'true';
+                            var popupEnabled = linkListPopupEnabled(lnk);
                             var a = document.createElement('a');
                             a.className = 'll-card';
                             a.href = lnk.url || '#';
@@ -4580,19 +4933,8 @@
                                 a.removeAttribute('rel');
                                 a.addEventListener('click', function(evt) {
                                     evt.preventDefault();
-                                    var redirectUrl = String(popup.redirectUrl || '').trim();
-                                    if (!redirectUrl) {
-                                        var cardUrl = String(lnk.url || '').trim();
-                                        redirectUrl = cardUrl && cardUrl !== '#' ? cardUrl : '';
-                                    }
-                                    openLinkListPopup({
-                                        titleHtml: typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(popup.title || lnk.label || '') : _escHtml(popup.title || lnk.label || '').replace(/\n/g, '<br>'),
-                                        titleText: String(popup.title || lnk.label || '').replace(/<[^>]+>/g, ' ').trim(),
-                                        descriptionHtml: typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(popup.description || lnk.description || '') : _escHtml(popup.description || lnk.description || '').replace(/\n/g, '<br>'),
-                                        imageUrl: String(popup.imageUrl || '').trim(),
-                                        submitText: String(popup.submitText || '').trim() || '提交',
-                                        redirectUrl: redirectUrl,
-                                        formFields: Array.isArray(popup.formFields) ? popup.formFields : []
+                                    resolveLinkListPopupConfig(lnk).then(function(config) {
+                                        if (config) openLinkListPopup(config);
                                     });
                                 });
                             }

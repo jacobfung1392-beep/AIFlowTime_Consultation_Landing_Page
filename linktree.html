@@ -30,6 +30,7 @@
             --text-secondary: #6B7280;
             --bg-light: #F8F9FA;
             --border-light: #E5E7EB;
+            --bg-pampas: #F4F3EE;
         }
         
         body {
@@ -1257,27 +1258,62 @@
         }
         
         .whatsapp-modal {
-            background: white;
+            background: var(--bg-pampas);
             border-radius: 1rem;
-            padding: 2rem;
+            border: none;
+            padding: 0;
             max-width: 500px;
             width: 90%;
             max-height: 90vh;
-            overflow: visible;
+            overflow: hidden;
             position: relative;
+            display: flex;
+            flex-direction: column;
             transform: scale(0.9);
             transition: transform 0.3s ease;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: none;
+        }
+        
+        .whatsapp-modal-media {
+            flex: 0 0 clamp(150px, 36vh, 260px);
+            min-height: 150px;
+            max-height: min(40vh, 280px);
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(244, 243, 238, 0.92) 0%, var(--bg-pampas) 100%);
+        }
+        
+        /* Modal stays milky (workshop-style) even though the page is always dark-mode */
+        body.dark-mode .whatsapp-modal-media {
+            background: linear-gradient(180deg, rgba(244, 243, 238, 0.92) 0%, var(--bg-pampas) 100%);
+        }
+        
+        .whatsapp-modal-media[hidden] {
+            display: none !important;
+        }
+        
+        .whatsapp-modal-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            pointer-events: none;
         }
         
         .whatsapp-modal-content {
-            max-height: calc(90vh - 4rem);
+            flex: 1 1 auto;
+            min-height: 0;
             overflow-y: auto;
             overflow-x: visible;
+            padding: 1.5rem 2rem 2rem;
         }
         
         body.dark-mode .whatsapp-modal {
-            background: #1F2937;
+            background: var(--bg-pampas);
+            border: none;
+            box-shadow: none;
         }
         
         .whatsapp-modal-overlay.active .whatsapp-modal {
@@ -1288,15 +1324,19 @@
             margin-bottom: 1.5rem;
         }
         
+        /* Align with .link-title / .link-title-text so 標籤 styling matches the link row */
         .whatsapp-modal-header h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.35;
             color: var(--text-primary);
             margin-bottom: 0.5rem;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
         
         body.dark-mode .whatsapp-modal-header h3 {
-            color: #ffffff;
+            color: var(--text-primary);
         }
         
         .whatsapp-modal-header p {
@@ -1305,39 +1345,42 @@
         }
         
         body.dark-mode .whatsapp-modal-header p {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
         }
         
         .whatsapp-modal-close {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.72);
             border: none;
             font-size: 1.5rem;
             color: var(--text-secondary);
             cursor: pointer;
-            width: 2rem;
-            height: 2rem;
+            width: 2.35rem;
+            height: 2.35rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 0.5rem;
+            border-radius: 999px;
+            box-shadow: none;
             transition: all 0.2s ease;
         }
         
         .whatsapp-modal-close:hover {
-            background: #F3F4F6;
+            background: #ffffff;
             color: var(--text-primary);
         }
         
         body.dark-mode .whatsapp-modal-close {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.72);
         }
         
         body.dark-mode .whatsapp-modal-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
+            background: #ffffff;
+            color: var(--text-primary);
         }
         
         .whatsapp-modal-form {
@@ -1358,9 +1401,9 @@
         }
         
         body.dark-mode .whatsapp-modal-input {
-            background: #374151;
-            border-color: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
+            background: #ffffff;
+            border-color: var(--border-light);
+            color: #1F2937;
         }
         
         .whatsapp-modal-input:focus {
@@ -1380,7 +1423,7 @@
         }
         
         body.dark-mode .whatsapp-modal-checkbox-label {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
         }
         
         .whatsapp-modal-checkbox {
@@ -1396,7 +1439,7 @@
         }
         
         body.dark-mode .whatsapp-modal-checkbox-label:hover {
-            color: #ffffff;
+            color: var(--text-primary);
         }
         
         .whatsapp-modal-submit {
@@ -1428,30 +1471,17 @@
         }
         
         body.dark-mode .whatsapp-modal-submit:disabled {
-            background: #4B5563;
+            background: #D1D5DB;
             color: #9CA3AF;
-        }
-        
-        .whatsapp-modal-image {
-            position: absolute;
-            top: -50px;
-            right: 1rem;
-            width: 120px;
-            height: auto;
-            z-index: 10;
-            pointer-events: none;
         }
         
         @media (max-width: 640px) {
             .whatsapp-modal {
-                padding: 1.5rem;
                 width: 95%;
             }
             
-            .whatsapp-modal-image {
-                width: 80px;
-                top: -40px;
-                right: 0.5rem;
+            .whatsapp-modal-content {
+                padding: 1.25rem 1.5rem 1.5rem;
             }
         }
 
@@ -1614,42 +1644,24 @@
     <!-- WhatsApp Modal -->
     <div id="whatsappModal" class="whatsapp-modal-overlay" onclick="closeWhatsAppModalOnOverlay(event)">
         <div class="whatsapp-modal" onclick="event.stopPropagation()">
-            <img id="whatsappModalImage" src="" alt="" class="whatsapp-modal-image" width="100" height="100" loading="eager" decoding="async" style="display:none;">
-            <button class="whatsapp-modal-close" onclick="closeWhatsAppModal()" aria-label="Close">&times;</button>
+            <button type="button" class="whatsapp-modal-close" onclick="closeWhatsAppModal()" aria-label="Close">&times;</button>
+            <div class="whatsapp-modal-media" id="whatsappModalMediaWrap" hidden>
+                <img id="whatsappModalImage" src="" alt="" class="whatsapp-modal-image" loading="eager" decoding="async">
+            </div>
             <div class="whatsapp-modal-content">
                 <div class="whatsapp-modal-header">
                     <h3 id="whatsappModalTitle">領取免費2026年AI指南</h3>
                     <p id="whatsappModalDescription">想知道幾款超級實用的入門級別必學AI嗎？請輸入你的個人資料，我們將會把指南發送給你！</p>
                 </div>
                 <form class="whatsapp-modal-form" onsubmit="handleWhatsAppSubmit(event)">
-                    <input 
-                        type="text" 
-                        class="whatsapp-modal-input" 
-                        placeholder="你的名字" 
-                        required
-                        id="whatsappNameInput"
-                        minlength="2"
-                        title="請輸入你的名字"
-                    />
-                    <input 
-                        type="tel" 
-                        class="whatsapp-modal-input" 
-                        placeholder="12345678 (8位數字)" 
-                        required
-                        id="whatsappNumberInput"
-                        pattern="[0-9]{8}"
-                        title="請輸入8位數字WhatsApp號碼"
-                        minlength="8"
-                        maxlength="8"
-                    />
-                    <label class="whatsapp-modal-checkbox-label">
+                    <div id="whatsappModalFields"></div>
+                    <label class="whatsapp-modal-checkbox-label" id="whatsappConsentRow">
                         <input 
                             type="checkbox" 
                             id="whatsappConsentCheckbox" 
                             class="whatsapp-modal-checkbox"
-                            required
                         />
-                        <span>我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。</span>
+                        <span id="whatsappConsentText">我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。</span>
                     </label>
                     <button type="submit" class="whatsapp-modal-submit" id="whatsappModalSubmit" disabled>
                         領取免費指南
@@ -1768,23 +1780,97 @@
             return _escHtml(raw).replace(/\n/g, '<br>');
         }
 
-        function _getLinkLeadMagnetConfig(lnk) {
+        function _linkUsesLeadMagnet(lnk) {
             var popup = lnk && lnk.leadMagnet;
             var enabled = popup && (popup.enabled === true || String(popup.enabled || '').toLowerCase() === 'true');
+            var leadDefinitionId = String((lnk && lnk.leadDefinitionId) || '').trim();
+            var enabledDefined = !!(popup && popup.hasOwnProperty('enabled'));
+            return !!(enabled || (leadDefinitionId && !enabledDefined));
+        }
+
+        function _getLinkLeadMagnetConfig(lnk) {
+            var nextLink = lnk || {};
+            if (String(nextLink.leadDefinitionId || '').trim()
+                && typeof aiflowApplyLeadDefinitionToLinkLeadMagnet === 'function'
+                && nextLink.__leadDefinitionResolved) {
+                nextLink = aiflowApplyLeadDefinitionToLinkLeadMagnet(nextLink, nextLink.__leadDefinitionResolved);
+            }
+            var popup = nextLink && nextLink.leadMagnet;
+            var enabled = _linkUsesLeadMagnet(nextLink);
             if (!enabled) return null;
-            var linkUrl = String((lnk && lnk.url) || '').trim();
+            var linkUrl = String((nextLink && nextLink.url) || '').trim();
             var redirectUrl = String((popup && popup.redirectUrl) || '').trim();
             if (!redirectUrl && linkUrl && linkUrl !== '#') redirectUrl = linkUrl;
+            function _ltLinkRichNonEmpty(val) {
+                return val != null && String(val).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().length > 0;
+            }
+            var rawPopupLabel = nextLink && nextLink.popupLabel;
+            var rawLabel = nextLink && nextLink.label;
+            var titleSource = '';
+            if (_ltLinkRichNonEmpty(rawPopupLabel)) titleSource = rawPopupLabel;
+            else if (_ltLinkRichNonEmpty(popup && popup.title)) titleSource = popup.title;
+            else if (_ltLinkRichNonEmpty(rawLabel)) titleSource = rawLabel;
+            else titleSource = (popup && popup.title) || rawLabel || '領取免費資源';
+            var fields = Array.isArray(popup && popup.formFields) ? popup.formFields.slice() : [];
+            if (!fields.length && typeof aiflowLeadMagnetDefaultFormFields === 'function') {
+                fields = aiflowLeadMagnetDefaultFormFields();
+            }
+            if (!fields.length) {
+                fields = [{ label: '姓名', type: 'text', key: 'name' }, { label: 'WhatsApp（8位數字）', type: 'tel', key: 'phone' }];
+            }
+            var defConsent = '我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。';
             return {
-                titleHtml: _richTextHtml((popup && popup.title) || lnk.label || '領取免費資源'),
-                descriptionHtml: _richTextHtml((popup && popup.description) || lnk.description || ''),
+                titleHtml: _richTextHtml(titleSource || ''),
+                descriptionHtml: _richTextHtml((popup && popup.description) || nextLink.description || ''),
                 imageUrl: String((popup && popup.imageUrl) || '').trim(),
                 submitText: String((popup && popup.submitText) || '提交').trim() || '提交',
                 redirectUrl: redirectUrl,
-                sourceLabel: _plainModalText((popup && popup.title) || lnk.label || 'Lead Magnet'),
-                triggerLabel: _plainModalText((lnk && lnk.label) || ''),
-                triggerUrl: linkUrl
+                formFields: fields,
+                consentText: String((popup && popup.consentText) || '').trim() || defConsent,
+                consentCheckboxEnabled: !(popup && popup.consentCheckboxEnabled === false),
+                sourceLabel: _plainModalText((nextLink && nextLink.leadDefinitionName) || (popup && popup.title) || nextLink.label || 'Lead Magnet'),
+                triggerLabel: _plainModalText((nextLink && nextLink.label) || ''),
+                triggerUrl: linkUrl,
+                leadDefinitionId: String((nextLink && nextLink.leadDefinitionId) || '').trim(),
+                leadDefinitionType: String((nextLink && nextLink.leadDefinitionType) || 'lead-magnet').trim() || 'lead-magnet',
+                leadDefinitionName: _plainModalText((nextLink && nextLink.leadDefinitionName) || ''),
+                materialTitle: String((popup && popup.materialTitle) || '').trim(),
+                emailSubject: String((popup && popup.emailSubject) || '').trim(),
+                emailMessage: String((popup && popup.emailMessage) || '').trim(),
+                deliveryMode: String((popup && popup.deliveryMode) || 'auto').trim(),
+                deliveryIncludeDocuments: !(popup && popup.deliveryIncludeDocuments === false),
+                deliveryIncludeLinks: !!(popup && popup.deliveryIncludeLinks),
+                identityLinks: Array.isArray(popup && popup.identityLinks) ? popup.identityLinks.slice() : [],
+                whatsappGreetingMessage: String((popup && popup.whatsappGreetingMessage) || '').trim(),
+                collectEmail: !!(popup && popup.collectEmail),
+                collectPhone: !(popup && popup.collectPhone === false),
+                documents: Array.isArray(popup && popup.documents) ? popup.documents.slice() : [],
+                pdfUrl: String((popup && popup.pdfUrl) || '').trim(),
+                fileName: String((popup && popup.fileName) || '').trim()
             };
+        }
+
+        function _resolveLinkLeadMagnetConfig(lnk) {
+            var inlineConfig = _getLinkLeadMagnetConfig(lnk);
+            var leadDefinitionId = String((lnk && lnk.leadDefinitionId) || '').trim();
+            if (!leadDefinitionId || typeof aiflowFetchLeadDefinitionById !== 'function' || typeof aiflowApplyLeadDefinitionToLinkLeadMagnet !== 'function') {
+                return Promise.resolve(inlineConfig);
+            }
+            return aiflowFetchLeadDefinitionById(leadDefinitionId).then(function(definition) {
+                if (!definition) return inlineConfig;
+                return _getLinkLeadMagnetConfig(aiflowApplyLeadDefinitionToLinkLeadMagnet(lnk, definition));
+            }).catch(function(err) {
+                console.warn('[linktree] lead definition load failed:', err);
+                return inlineConfig;
+            });
+        }
+
+        function _openResolvedLinkLeadMagnet(lnk, event) {
+            if (event) event.preventDefault();
+            return _resolveLinkLeadMagnetConfig(lnk).then(function(config) {
+                if (config && typeof openWhatsAppModal === 'function') openWhatsAppModal(config);
+                return config;
+            });
         }
 
         function _applyWhatsAppModalConfig(config) {
@@ -1798,19 +1884,36 @@
                 descEl.innerHTML = descHtml;
                 descEl.style.display = descHtml ? '' : 'none';
             }
+            var mediaWrap = document.getElementById('whatsappModalMediaWrap');
             if (imageEl) {
                 var imgUrl = String((config && config.imageUrl) || '').trim();
                 if (imgUrl) {
                     imageEl.src = typeof fixStorageUrl === 'function' ? fixStorageUrl(imgUrl) : imgUrl;
                     imageEl.alt = config && config.sourceLabel ? config.sourceLabel : 'Lead Magnet';
-                    imageEl.style.display = '';
+                    if (mediaWrap) mediaWrap.hidden = false;
                 } else {
-                    imageEl.src = '';
+                    imageEl.removeAttribute('src');
                     imageEl.alt = '';
-                    imageEl.style.display = 'none';
+                    if (mediaWrap) mediaWrap.hidden = true;
                 }
             }
             if (submitButton) submitButton.textContent = (config && config.submitText) || '提交';
+            var fieldsEl = document.getElementById('whatsappModalFields');
+            var consentRow = document.getElementById('whatsappConsentRow');
+            var consentCb = document.getElementById('whatsappConsentCheckbox');
+            var consentSpan = document.getElementById('whatsappConsentText');
+            if (fieldsEl && typeof aiflowLeadMagnetRenderFields === 'function') {
+                aiflowLeadMagnetRenderFields(fieldsEl, config || {}, function() { updateWhatsAppSubmitButton(); });
+            }
+            var consentTxt = (config && config.consentText) ? String(config.consentText) : '我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。';
+            if (config && config.consentCheckboxEnabled === false) {
+                if (consentRow) consentRow.style.display = 'none';
+                if (consentCb) consentCb.checked = true;
+            } else {
+                if (consentRow) consentRow.style.display = '';
+                if (consentSpan) consentSpan.textContent = consentTxt;
+                if (consentCb) consentCb.checked = false;
+            }
         }
 
         function openWhatsAppModal(config) {
@@ -1824,19 +1927,17 @@
                     redirectUrl: 'ai-guide-2026.html',
                     sourceLabel: '免費 AI 指南',
                     triggerLabel: '免費 AI 指南',
-                    triggerUrl: ''
+                    triggerUrl: '',
+                    formFields: typeof aiflowLeadMagnetDefaultFormFields === 'function' ? aiflowLeadMagnetDefaultFormFields() : [],
+                    consentCheckboxEnabled: true,
+                    consentText: '我同意 AIFlowTime 透過 WhatsApp 向我發送免費指南及相關教學／服務資訊；我可隨時回覆「STOP」取消接收。'
                 };
                 _applyWhatsAppModalConfig(activeWhatsAppModalConfig);
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                const nameInput = document.getElementById('whatsappNameInput');
-                const numberInput = document.getElementById('whatsappNumberInput');
-                const checkbox = document.getElementById('whatsappConsentCheckbox');
                 const submitButton = document.getElementById('whatsappModalSubmit');
-                if (nameInput) nameInput.value = '';
-                if (numberInput) numberInput.value = '';
-                if (checkbox) checkbox.checked = false;
                 if (submitButton) submitButton.disabled = true;
+                updateWhatsAppSubmitButton();
             }
         }
         
@@ -1855,130 +1956,138 @@
         }
         
         function updateWhatsAppSubmitButton() {
-            const nameInput = document.getElementById('whatsappNameInput');
-            const numberInput = document.getElementById('whatsappNumberInput');
-            const checkbox = document.getElementById('whatsappConsentCheckbox');
-            const submitButton = document.getElementById('whatsappModalSubmit');
-            
-            if (nameInput && numberInput && checkbox && submitButton) {
-                const whatsappNumber = numberInput.value.trim().replace(/\s+/g, '');
-                const isValid = nameInput.value.trim().length >= 2 && 
-                               /^[0-9]{8}$/.test(whatsappNumber) && 
-                               checkbox.checked;
-                submitButton.disabled = !isValid;
-            }
+            var fieldsEl = document.getElementById('whatsappModalFields');
+            var checkbox = document.getElementById('whatsappConsentCheckbox');
+            var submitButton = document.getElementById('whatsappModalSubmit');
+            if (!fieldsEl || !submitButton) return;
+            var cfg = activeWhatsAppModalConfig || {};
+            var ok = typeof aiflowLeadMagnetFormValid === 'function'
+                ? aiflowLeadMagnetFormValid(fieldsEl, checkbox, cfg)
+                : false;
+            submitButton.disabled = !ok;
         }
         
         async function handleWhatsAppSubmit(event) {
             event.preventDefault();
-            console.log('handleWhatsAppSubmit called');
-            
-            const nameInput = document.getElementById('whatsappNameInput');
-            const numberInput = document.getElementById('whatsappNumberInput');
-            const consentCheckbox = document.getElementById('whatsappConsentCheckbox');
-            const modalConfig = activeWhatsAppModalConfig || {};
-            
-            if (!nameInput || !numberInput || !consentCheckbox) {
-                console.error('Form inputs not found!');
+            var fieldsEl = document.getElementById('whatsappModalFields');
+            var consentCheckbox = document.getElementById('whatsappConsentCheckbox');
+            var modalConfig = activeWhatsAppModalConfig || {};
+            if (!fieldsEl || typeof aiflowLeadMagnetReadValues !== 'function' || typeof aiflowLeadMagnetFormValid !== 'function') {
+                console.error('Lead magnet form helpers unavailable');
                 return;
             }
-            
-            const name = nameInput.value.trim();
-            let whatsapp = numberInput.value.trim().replace(/\s+/g, '');
-            const consent = consentCheckbox.checked;
-            
-            console.log('Form values:', { name, whatsapp, consent });
-            
-            if (!/^[0-9]{8}$/.test(whatsapp)) {
-                alert('請輸入8位數字WhatsApp號碼');
-                numberInput.focus();
+            if (!aiflowLeadMagnetFormValid(fieldsEl, consentCheckbox, modalConfig)) {
+                alert('請填妥所有欄位' + (modalConfig.consentCheckboxEnabled !== false ? '並勾選同意項目' : '') + '。');
                 return;
             }
-            
-            if (name && whatsapp && consent) {
-                const timestamp = new Date().toISOString();
-                const sourceLabel = modalConfig.sourceLabel || modalConfig.triggerLabel || 'Lead Magnet';
-                const sourceKeySuffix = (modalConfig.triggerLabel || sourceLabel || 'lead-magnet')
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-|-$/g, '') || 'lead-magnet';
-                const formData = {
-                    name: name,
+            var vals = aiflowLeadMagnetReadValues(fieldsEl, consentCheckbox, modalConfig);
+            var name = vals.name || '';
+            var whatsapp = vals.whatsapp || '';
+            var email = vals.email || '';
+            var timestamp = new Date().toISOString();
+            var sourceLabel = modalConfig.sourceLabel || modalConfig.triggerLabel || 'Lead Magnet';
+            var sourceKeySuffix = (modalConfig.triggerLabel || sourceLabel || 'lead-magnet')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '') || 'lead-magnet';
+            var formData = {
+                name: name,
+                email: email,
+                whatsapp: whatsapp,
+                timestamp: timestamp,
+                source: 'linktree-link-list-' + sourceKeySuffix,
+                page: sourceLabel
+            };
+            var googleScriptURL = 'https://script.google.com/macros/s/AKfycbwcEjkz6roPWxKFyap-Jdn-q87F3Y7tOmhbLWH3HHgywuKsWP9z8oAaupjEhJLrPQDiew/exec';
+            var sheetPromise = fetch(googleScriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            }).then(function() {}).catch(function(err) { console.error('Sheet submit', err); });
+            var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+                ? saveFormSubmissionMirror({
+                    formType: 'lead-magnet',
+                    sourceKey: modalConfig.leadDefinitionId ? ('lead-definition:' + modalConfig.leadDefinitionId) : formData.source,
+                    sourceLabel: sourceLabel,
+                    sourcePage: formData.page,
+                    sourcePath: window.location.pathname,
+                    sourceUrl: window.location.href,
+                    sheetTab: 'AIFlowTime Leads',
+                    leadDefinitionId: modalConfig.leadDefinitionId || '',
+                    leadDefinitionType: modalConfig.leadDefinitionType || 'lead-magnet',
+                    leadDefinitionName: modalConfig.leadDefinitionName || '',
+                    contactName: name,
                     whatsapp: whatsapp,
-                    timestamp: timestamp,
-                    source: 'linktree-link-list-' + sourceKeySuffix,
-                    page: sourceLabel
-                };
-                
-                console.log('Submitting lead magnet form:', formData);
-                
-                const googleScriptURL = 'https://script.google.com/macros/s/AKfycbwcEjkz6roPWxKFyap-Jdn-q87F3Y7tOmhbLWH3HHgywuKsWP9z8oAaupjEhJLrPQDiew/exec';
-                
-                console.log('Sending POST request to:', googleScriptURL);
-                
-                const sheetPromise = fetch(googleScriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                }).then(() => {
-                    console.log('✅ Form submission sent successfully');
-                }).catch(err => {
-                    console.error('❌ Error submitting form:', err);
+                    email: email,
+                    answers: Object.assign({}, vals.answers, {
+                        leadDefinitionName: modalConfig.leadDefinitionName || '',
+                        consentAccepted: vals.consentAccepted,
+                        triggerLabel: modalConfig.triggerLabel || ''
+                    }),
+                    timestamp: timestamp
+                }).catch(function(err) { console.error('Mirror lead magnet', err); })
+                : Promise.resolve();
+            closeWhatsAppModal();
+            await Promise.allSettled([sheetPromise, mirrorPromise]);
+            var db;
+            try { db = firebase.firestore(); } catch (err) { db = null; }
+            var docLm = typeof aiflowLeadMagnetFirstDocument === 'function' ? aiflowLeadMagnetFirstDocument(modalConfig) : null;
+            var hasDocPath = modalConfig.deliveryIncludeDocuments !== false && docLm && docLm.url;
+            var hasLinkPath = false;
+            if (modalConfig.deliveryIncludeLinks && Array.isArray(modalConfig.identityLinks)) {
+                modalConfig.identityLinks.forEach(function(l) {
+                    if (l && String(l.url || '').trim()) hasLinkPath = true;
                 });
-                const mirrorPromise = typeof saveFormSubmissionMirror === 'function'
-                    ? saveFormSubmissionMirror({
-                        formType: 'lead-magnet',
-                        sourceKey: formData.source,
-                        sourceLabel: sourceLabel,
-                        sourcePage: formData.page,
-                        sourcePath: window.location.pathname,
-                        sourceUrl: window.location.href,
-                        sheetTab: 'AIFlowTime Leads',
-                        contactName: name,
-                        whatsapp: whatsapp,
-                        answers: {
-                            consentAccepted: consent,
-                            triggerLabel: modalConfig.triggerLabel || ''
-                        },
-                        timestamp: timestamp
-                    }).catch(err => {
-                        console.error('❌ Error mirroring lead magnet form:', err);
+            }
+            var emailPromise = Promise.resolve();
+            if (modalConfig.collectEmail && email && (hasDocPath || hasLinkPath) && typeof aiflowSendMaterialEmailFromBrowser === 'function') {
+                emailPromise = aiflowSendMaterialEmailFromBrowser({
+                    name: name,
+                    email: email,
+                    cfg: modalConfig,
+                    doc: docLm,
+                    db: db,
+                    consentAccepted: true,
+                    meta: {
+                        submissionSource: 'linktree-lead-magnet',
+                        pagePath: window.location.pathname,
+                        pageTitle: document.title
+                    }
+                }).catch(function(err) { console.warn('[lead-magnet] follow-up email', err); });
+            }
+            if (modalConfig.collectPhone !== false && whatsapp && String(modalConfig.whatsappGreetingMessage || '').trim()) {
+                var waBody = typeof _aiflowApplyEmailTemplateTokens === 'function'
+                    ? _aiflowApplyEmailTemplateTokens(modalConfig.whatsappGreetingMessage, {
+                        name: name,
+                        materialTitle: modalConfig.materialTitle || '',
+                        downloadUrl: (docLm && docLm.url) || '',
+                        documentName: (docLm && (docLm.name || docLm.fileName)) || ''
                     })
-                    : Promise.resolve();
-                
-                closeWhatsAppModal();
-                await Promise.allSettled([sheetPromise, mirrorPromise]);
-                
-                var nextUrl = String(modalConfig.redirectUrl || '').trim();
-                if (nextUrl) {
-                setTimeout(() => {
-                        console.log('Redirecting after lead magnet submit...');
-                        window.location.href = nextUrl;
-                }, 500);
+                    : String(modalConfig.whatsappGreetingMessage || '');
+                if (typeof aiflowQueueWhatsappOutreach === 'function') {
+                    aiflowQueueWhatsappOutreach({
+                        phone: whatsapp,
+                        body: String(waBody || '').trim(),
+                        leadDefinitionId: modalConfig.leadDefinitionId || '',
+                        source: 'linktree-lead-magnet',
+                        documentUrl: (docLm && docLm.url) || '',
+                        contactName: name,
+                        db: db
+                    });
                 }
-            } else {
-                console.warn('Form validation failed:', { name: !!name, whatsapp: !!whatsapp, consent: consent });
+            }
+            await emailPromise;
+            var nextUrl = String(modalConfig.redirectUrl || '').trim();
+            if (nextUrl) {
+                window.location.href = nextUrl;
             }
         }
         
         // Set up event listeners for WhatsApp modal
         document.addEventListener('DOMContentLoaded', function() {
-            const nameInput = document.getElementById('whatsappNameInput');
-            const numberInput = document.getElementById('whatsappNumberInput');
-            const checkbox = document.getElementById('whatsappConsentCheckbox');
-            
-            if (nameInput) {
-                nameInput.addEventListener('input', updateWhatsAppSubmitButton);
-            }
-            if (numberInput) {
-                numberInput.addEventListener('input', updateWhatsAppSubmitButton);
-            }
-            if (checkbox) {
-                checkbox.addEventListener('change', updateWhatsAppSubmitButton);
-            }
+            var checkbox = document.getElementById('whatsappConsentCheckbox');
+            if (checkbox) checkbox.addEventListener('change', updateWhatsAppSubmitButton);
             
             // Close modal on ESC key
             document.addEventListener('keydown', function(e) {
@@ -2006,7 +2115,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/shared-utils.js?v=10"></script>
     <script src="/js/page-background-runtime.js"></script>
 
     <!-- Layout Engine (Preview + Public) -->
@@ -2898,7 +3007,7 @@
                             });
                         } else {
                         c.links.forEach(function(lnk) {
-                            var popupConfig = _getLinkLeadMagnetConfig(lnk);
+                            var hasLeadMagnet = _linkUsesLeadMagnet(lnk);
                             var rowInner = '<div class="link-text">';
                             rowInner += '<div class="link-title">';
                             if (lnk.badgeText) {
@@ -2939,10 +3048,9 @@
                                 if (lnk.url && lnk.url.indexOf('http') === 0) { linkRow.target = '_blank'; linkRow.rel = 'noopener noreferrer'; }
                                 linkRow.innerHTML = rowInner;
                                 card.appendChild(linkRow);
-                                if (popupConfig) {
+                                if (hasLeadMagnet) {
                                     function _openLeadMagnet(e) {
-                                        e.preventDefault();
-                                        if (typeof openWhatsAppModal === 'function') openWhatsAppModal(popupConfig);
+                                        _openResolvedLinkLeadMagnet(lnk, e);
                                     }
                                     linkRow.addEventListener('click', _openLeadMagnet);
                                     mediaHit.addEventListener('click', _openLeadMagnet);
@@ -2965,10 +3073,9 @@
                             }
                             inner += '<div class="link-content">' + rowInner + '</div>';
                             a.innerHTML = inner;
-                            if (popupConfig) {
+                            if (hasLeadMagnet) {
                                 a.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    if (typeof openWhatsAppModal === 'function') openWhatsAppModal(popupConfig);
+                                    _openResolvedLinkLeadMagnet(lnk, e);
                                 });
                             } else if ((lnk.url || '') === '#') {
                                 a.addEventListener('click', function(e) { e.preventDefault(); });

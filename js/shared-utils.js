@@ -111,6 +111,160 @@ function sanitizeHeroTitleHtml(html) {
 }
 
 /**
+ * Lead-magnet / free-material email bodies: preserve links and block tags
+ * (sanitizeHeroTitleHtml strips <a>/<p>/<div>, which made custom templates blank).
+ */
+function sanitizeFreeMaterialEmailHtml(html) {
+    if (html == null || html === '') return '';
+    var raw = String(html).trim();
+    if (!raw) return '';
+
+    if (/&lt;|&gt;|&#60;|&#62;|&#x3[cCeE];/.test(raw)) {
+        var decoder = document.createElement('textarea');
+        decoder.innerHTML = raw;
+        raw = decoder.value;
+    }
+
+    if (!/[<>]/.test(raw)) return escHtml(raw).replace(/\n/g, '<br>');
+
+    function emailSafeHref(href) {
+        href = String(href || '').trim();
+        if (!href) return '';
+        if (/^https?:\/\//i.test(href)) return href;
+        if (/^mailto:/i.test(href)) return href;
+        return '';
+    }
+
+    function cleanChildren(parent) {
+        var frag = document.createDocumentFragment();
+        var cn = Array.prototype.slice.call(parent.childNodes);
+        cn.forEach(function(child) {
+            if (child.nodeType === 3) {
+                frag.appendChild(document.createTextNode(child.textContent));
+                return;
+            }
+            if (child.nodeType !== 1) return;
+            var tag = child.tagName.toLowerCase();
+            if (tag === 'script' || tag === 'style' || tag === 'iframe') return;
+            if (tag === 'br') {
+                frag.appendChild(document.createElement('br'));
+                return;
+            }
+            if (tag === 'hr') {
+                frag.appendChild(document.createElement('hr'));
+                return;
+            }
+            if (tag === 'a') {
+                var safeHref = emailSafeHref(child.getAttribute('href'));
+                if (!safeHref) {
+                    frag.appendChild(cleanChildren(child));
+                    return;
+                }
+                var a = document.createElement('a');
+                a.setAttribute('href', safeHref);
+                a.setAttribute('rel', 'noopener noreferrer');
+                a.setAttribute('target', '_blank');
+                a.appendChild(cleanChildren(child));
+                frag.appendChild(a);
+                return;
+            }
+            if (['p', 'div', 'h1', 'h2', 'h3', 'h4', 'blockquote'].indexOf(tag) !== -1) {
+                var block = document.createElement(tag);
+                block.appendChild(cleanChildren(child));
+                frag.appendChild(block);
+                return;
+            }
+            if (['b', 'strong', 'i', 'em', 'u', 's', 'strike'].indexOf(tag) !== -1) {
+                var inline = document.createElement(tag);
+                inline.appendChild(cleanChildren(child));
+                frag.appendChild(inline);
+                return;
+            }
+            if (tag === 'font') {
+                var sp2 = document.createElement('span');
+                var faceColor = (child.getAttribute('color') || '').trim();
+                if (faceColor) {
+                    var fcNorm = faceColor.replace(/\s*!important\s*$/i, '').trim();
+                    if (_heroTitleSafeColor(fcNorm)) sp2.setAttribute('style', 'color:' + fcNorm);
+                }
+                sp2.appendChild(cleanChildren(child));
+                frag.appendChild(sp2);
+                return;
+            }
+            if (tag === 'span') {
+                var st = child.getAttribute('style') || '';
+                var allowed = [];
+                var m;
+                if ((m = st.match(/color\s*:\s*([^;]+)/i))) {
+                    var col = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
+                    if (_heroTitleSafeColor(col)) allowed.push('color:' + col);
+                }
+                if ((m = st.match(/font-size\s*:\s*([^;]+)/i))) {
+                    var fs = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
+                    if (/^[\d.]+\s*(px|em|rem|%)$/i.test(fs)) allowed.push('font-size:' + fs);
+                }
+                if (allowed.length) {
+                    var sp = document.createElement('span');
+                    sp.setAttribute('style', allowed.join(';'));
+                    sp.appendChild(cleanChildren(child));
+                    frag.appendChild(sp);
+                } else {
+                    frag.appendChild(cleanChildren(child));
+                }
+                return;
+            }
+            frag.appendChild(cleanChildren(child));
+        });
+        return frag;
+    }
+
+    var container = document.createElement('div');
+    container.innerHTML = raw;
+    var out = document.createElement('div');
+    out.appendChild(cleanChildren(container));
+    return out.innerHTML;
+}
+
+function _freeMaterialEmailHasVisibleContent(html) {
+    if (!html || !String(html).trim()) return false;
+    var d = document.createElement('div');
+    d.innerHTML = html;
+    return String(d.textContent || '').replace(/\s+/g, '').length > 0;
+}
+
+function _aiflowEscEmailAttr(s) {
+    return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;');
+}
+
+/**
+ * CMS email 內文「"標題":url」格式（與 insert 按鈕一致）→ 可點連結；其餘文字 escape。
+ */
+function _aiflowEmailQuotedLabelLinksToHtml(text) {
+    text = String(text || '');
+    var re = /("(?:[^"\\]|\\.)*")\s*:\s*(https?:\/\/[^\s<\]]+)/gi;
+    var out = '';
+    var last = 0;
+    var m;
+    while ((m = re.exec(text)) !== null) {
+        out += escHtml(text.slice(last, m.index)).replace(/\n/g, '<br>');
+        var label;
+        try {
+            label = JSON.parse(m[1]);
+        } catch (err) {
+            label = m[1].slice(1, -1).replace(/\\(.)/g, '$1');
+        }
+        out += '<a href="' + _aiflowEscEmailAttr(m[2]) + '" rel="noopener noreferrer" target="_blank">' +
+            escHtml(label) + '</a>';
+        last = re.lastIndex;
+    }
+    out += escHtml(text.slice(last)).replace(/\n/g, '<br>');
+    return out;
+}
+
+/**
  * Shared rich-text renderer for page-layout CMS fields.
  * Reuses the hero sanitizer so text adjustment bars and rich array fields
  * render consistently in preview and on the live page.
@@ -236,6 +390,9 @@ function buildFormSubmissionDoc(input) {
         sourceDocId: _aiflowTrimString(input.sourceDocId || ''),
         sheetTab: _aiflowTrimString(input.sheetTab || ''),
         importSource: _aiflowTrimString(input.importSource || 'live-form'),
+        leadDefinitionId: _aiflowTrimString(input.leadDefinitionId || ''),
+        leadDefinitionType: _aiflowTrimString(input.leadDefinitionType || (input.leadDefinitionId ? (input.formType || '') : '')),
+        leadDefinitionName: _aiflowTrimString(input.leadDefinitionName || ''),
         contactName: _aiflowTrimString(input.contactName || input.name || ''),
         phone: _aiflowTrimString(input.phone || ''),
         whatsapp: _aiflowTrimString(input.whatsapp || ''),
@@ -253,6 +410,9 @@ function buildFormSubmissionDoc(input) {
         doc.sourceLabel,
         doc.sourcePage,
         doc.sourcePath,
+        doc.leadDefinitionId,
+        doc.leadDefinitionType,
+        doc.leadDefinitionName,
         doc.contactName,
         doc.phone,
         doc.whatsapp,
@@ -307,6 +467,588 @@ function saveFormSubmissionMirror(input, opts) {
         }
         reject(new Error('Firebase unavailable'));
     });
+}
+
+function _aiflowDeepClone(val) {
+    if (val == null) return val;
+    return JSON.parse(JSON.stringify(val));
+}
+
+var AIFLOW_LEAD_DEFINITION_TYPES = [
+    'quiz-lead',
+    'consultation',
+    'workshop-waitlist',
+    'free-material',
+    'lead-magnet'
+];
+
+var AIFLOW_LEAD_DEFINITION_TYPE_META = {
+    'quiz-lead': { label: 'Quiz Leads' },
+    consultation: { label: 'Consultation' },
+    'workshop-waitlist': { label: 'Workshop Waitlist' },
+    'free-material': { label: 'Free Material' },
+    'lead-magnet': { label: 'Lead Magnet' }
+};
+
+var _aiflowLeadDefinitionDocCache = {};
+
+function aiflowGetLeadDefinitionTypeMeta(type) {
+    var key = _aiflowTrimString(type || '');
+    return AIFLOW_LEAD_DEFINITION_TYPE_META[key] || { label: key || 'Lead' };
+}
+
+function aiflowGetLeadDefinitionTypeOptions(includeAll) {
+    var opts = [];
+    if (includeAll) opts.push({ value: 'all', label: '全部類型' });
+    AIFLOW_LEAD_DEFINITION_TYPES.forEach(function(type) {
+        opts.push({ value: type, label: aiflowGetLeadDefinitionTypeMeta(type).label });
+    });
+    return opts;
+}
+
+function _aiflowNormalizeLeadDocuments(list) {
+    var docs = [];
+    if (!Array.isArray(list)) return docs;
+    list.forEach(function(item) {
+        if (!item) return;
+        var url = _aiflowTrimString(item.url || item.href || '');
+        if (!url) return;
+        docs.push({
+            name: _aiflowTrimString(item.name || item.fileName || url.split('/').pop() || 'document'),
+            url: url,
+            fileName: _aiflowTrimString(item.fileName || item.name || '')
+        });
+    });
+    return docs;
+}
+
+/** Lead Identity outbound links (title + url) for email/WA button snippets in CMS & runtime */
+function _aiflowNormalizeIdentityLinks(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [];
+    list.forEach(function(row) {
+        if (!row) return;
+        var url = _aiflowTrimString(row.url || row.href || '');
+        if (!url) return;
+        out.push({
+            title: _aiflowTrimString(row.title || row.label || ''),
+            url: url
+        });
+    });
+    return out;
+}
+
+function _aiflowNormalizeLeadFormFields(list) {
+    if (!Array.isArray(list)) return [];
+    return list.map(function(item) {
+        var row = {
+            label: _aiflowTrimString(item && item.label || ''),
+            type: _aiflowTrimString(item && item.type || 'text') || 'text'
+        };
+        var key = _aiflowTrimString(item && item.key || '');
+        if (key) row.key = key;
+        return row;
+    }).filter(function(item) {
+        return item.label;
+    });
+}
+
+/** Infer collectName / collectEmail / collectPhone from legacy mini-list formFields */
+function _aiflowInferLeadMagnetCollectFlags(formFields) {
+    var out = { collectName: false, collectEmail: false, collectPhone: false };
+    (formFields || []).forEach(function(f) {
+        if (!f) return;
+        var t = _aiflowTrimString(f.type || 'text') || 'text';
+        var lab = String(f.label || '');
+        var labLow = lab.toLowerCase();
+        if (t === 'email') out.collectEmail = true;
+        else if (t === 'tel') out.collectPhone = true;
+        else if (t === 'text') {
+            if (/whatsapp|whats|電話|phone|8\s*位|8位/i.test(lab) || /whatsapp|email/i.test(labLow)) {
+                out.collectPhone = true;
+            } else {
+                out.collectName = true;
+            }
+        }
+    });
+    if (!out.collectName && !out.collectEmail && !out.collectPhone) {
+        out.collectName = true;
+        out.collectPhone = true;
+    }
+    return out;
+}
+
+/** Build lead-magnet formFields from CMS flags + labels (order: name, email, phone) */
+function aiflowBuildLeadMagnetFormFieldsFromCollect(def) {
+    def = def || {};
+    var fields = [];
+    if (def.collectName) {
+        fields.push({ label: _aiflowTrimString(def.nameFieldLabel || '姓名') || '姓名', type: 'text', key: 'name' });
+    }
+    if (def.collectEmail) {
+        fields.push({ label: _aiflowTrimString(def.emailFieldLabel || 'Email') || 'Email', type: 'email', key: 'email' });
+    }
+    if (def.collectPhone) {
+        fields.push({
+            label: _aiflowTrimString(def.phoneFieldLabel || 'WhatsApp（8位數字）') || 'WhatsApp（8位數字）',
+            type: 'tel',
+            key: 'phone'
+        });
+    }
+    if (!fields.length) {
+        fields.push({ label: _aiflowTrimString(def.nameFieldLabel || '姓名') || '姓名', type: 'text', key: 'name' });
+        fields.push({
+            label: _aiflowTrimString(def.phoneFieldLabel || 'WhatsApp（8位數字）') || 'WhatsApp（8位數字）',
+            type: 'tel',
+            key: 'phone'
+        });
+    }
+    return fields;
+}
+
+function aiflowLeadDefinitionDisplayName(definition) {
+    var def = definition || {};
+    var name = _aiflowTrimString(def.name || '');
+    if (name) return name;
+    var title = _aiflowTrimString(String(def.title || '').replace(/<[^>]+>/g, ' '));
+    if (title) return title;
+    return aiflowGetLeadDefinitionTypeMeta(def.type).label;
+}
+
+function aiflowCreateLeadDefinitionDefaults(type) {
+    var normalizedType = _aiflowTrimString(type || 'lead-magnet');
+    if (AIFLOW_LEAD_DEFINITION_TYPES.indexOf(normalizedType) === -1) normalizedType = 'lead-magnet';
+    var base = {
+        name: '',
+        type: normalizedType,
+        status: 'active',
+        publicEnabled: true,
+        title: '',
+        description: '',
+        imageUrl: '',
+        imageAlt: '',
+        redirectUrl: '',
+        submitText: normalizedType === 'free-material' ? '立即寄送' : '提交',
+        sectionLabel: '',
+        ctaText: normalizedType === 'free-material' ? '領取免費資料' : '',
+        materialTitle: '',
+        emailSubject: '',
+        emailMessage: '',
+        whatsappGreetingMessage: '',
+        documents: [],
+        pdfUrl: '',
+        fileName: '',
+        deliveryMode: 'auto',
+        deliveryIncludeDocuments: true,
+        deliveryIncludeLinks: false,
+        identityLinks: [],
+        nameFieldLabel: '姓名',
+        emailFieldLabel: 'Email',
+        consentText: '',
+        successMessage: '',
+        helperNote: '',
+        purposeNotes: '',
+        formFields: []
+    };
+    if (normalizedType === 'lead-magnet') {
+        base.phoneFieldLabel = 'WhatsApp（8位數字）';
+        base.collectName = true;
+        base.collectEmail = false;
+        base.collectPhone = true;
+        base.consentCheckboxEnabled = true;
+        base.submitText = '提交';
+        base.formFields = aiflowBuildLeadMagnetFormFieldsFromCollect(base);
+    } else if (normalizedType === 'workshop-waitlist') {
+        base.submitText = '加入等候名單';
+    } else if (normalizedType === 'consultation') {
+        base.submitText = '提交申請';
+    } else if (normalizedType === 'quiz-lead') {
+        base.submitText = '查看結果';
+    }
+    return base;
+}
+
+function aiflowNormalizeLeadDefinition(raw, opts) {
+    raw = raw || {};
+    opts = opts || {};
+    var type = _aiflowTrimString(raw.type || opts.type || 'lead-magnet');
+    if (AIFLOW_LEAD_DEFINITION_TYPES.indexOf(type) === -1) type = 'lead-magnet';
+    var next = aiflowCreateLeadDefinitionDefaults(type);
+    Object.keys(raw).forEach(function(key) {
+        if (raw[key] === undefined) return;
+        next[key] = _aiflowDeepClone(raw[key]);
+    });
+    next.id = _aiflowTrimString(opts.id || raw.id || '');
+    next.type = type;
+    next.name = _aiflowTrimString(next.name || '');
+    next.status = ['active', 'draft', 'archived'].indexOf(_aiflowTrimString(next.status || 'active')) >= 0
+        ? _aiflowTrimString(next.status || 'active')
+        : 'active';
+    next.publicEnabled = next.publicEnabled !== false;
+    next.title = String(next.title || '');
+    next.description = String(next.description || '');
+    next.imageUrl = _aiflowTrimString(next.imageUrl || '');
+    next.imageAlt = _aiflowTrimString(next.imageAlt || '');
+    next.redirectUrl = _aiflowTrimString(next.redirectUrl || '');
+    next.submitText = _aiflowTrimString(next.submitText || aiflowCreateLeadDefinitionDefaults(type).submitText);
+    next.sectionLabel = String(next.sectionLabel || '');
+    next.ctaText = _aiflowTrimString(next.ctaText || '');
+    next.materialTitle = String(next.materialTitle || '');
+    next.emailSubject = String(next.emailSubject || '');
+    next.emailMessage = String(next.emailMessage || '');
+    next.whatsappGreetingMessage = String(next.whatsappGreetingMessage || '');
+    next.nameFieldLabel = _aiflowTrimString(next.nameFieldLabel || '姓名');
+    next.emailFieldLabel = _aiflowTrimString(next.emailFieldLabel || 'Email');
+    next.phoneFieldLabel = _aiflowTrimString(next.phoneFieldLabel || '');
+    next.consentText = String(next.consentText || '');
+    next.successMessage = String(next.successMessage || '');
+    next.helperNote = String(next.helperNote || '');
+    next.purposeNotes = String(next.purposeNotes || '');
+    if (type === 'lead-magnet') {
+        if (!raw.hasOwnProperty('collectName') && !raw.hasOwnProperty('collectEmail') && !raw.hasOwnProperty('collectPhone')) {
+            var preNormFields = _aiflowNormalizeLeadFormFields(Array.isArray(raw.formFields) ? raw.formFields : []);
+            var infFlags = _aiflowInferLeadMagnetCollectFlags(preNormFields);
+            next.collectName = infFlags.collectName;
+            next.collectEmail = infFlags.collectEmail;
+            next.collectPhone = infFlags.collectPhone;
+        } else {
+            next.collectName = !!next.collectName;
+            next.collectEmail = !!next.collectEmail;
+            next.collectPhone = !!next.collectPhone;
+        }
+        if (!raw.hasOwnProperty('consentCheckboxEnabled')) {
+            next.consentCheckboxEnabled = true;
+        } else {
+            next.consentCheckboxEnabled = !!next.consentCheckboxEnabled;
+        }
+        if (!next.phoneFieldLabel) next.phoneFieldLabel = 'WhatsApp（8位數字）';
+        next.formFields = _aiflowNormalizeLeadFormFields(aiflowBuildLeadMagnetFormFieldsFromCollect(next));
+    } else {
+        next.formFields = _aiflowNormalizeLeadFormFields(next.formFields);
+    }
+    next.documents = _aiflowNormalizeLeadDocuments(next.documents);
+    next.pdfUrl = _aiflowTrimString(next.pdfUrl || '');
+    next.fileName = _aiflowTrimString(next.fileName || '');
+    if (!next.documents.length && next.pdfUrl) {
+        next.documents = [{
+            name: next.fileName || next.pdfUrl.split('/').pop() || 'document',
+            url: next.pdfUrl,
+            fileName: next.fileName || ''
+        }];
+    }
+    if (!next.pdfUrl && next.documents.length) next.pdfUrl = next.documents[0].url || '';
+    if (!next.fileName && next.documents.length) next.fileName = next.documents[0].fileName || next.documents[0].name || '';
+    next.identityLinks = _aiflowNormalizeIdentityLinks(next.identityLinks || []);
+    var legacyMode = _aiflowTrimString(raw.deliveryMode || next.deliveryMode || 'auto').toLowerCase();
+    if (!raw.hasOwnProperty('deliveryIncludeDocuments')) {
+        if (legacyMode === 'link') next.deliveryIncludeDocuments = false;
+        else {
+            next.deliveryIncludeDocuments = !!(next.documents.length || _aiflowTrimString(next.pdfUrl || ''))
+                || legacyMode === 'attachment'
+                || legacyMode === 'auto';
+        }
+    } else {
+        next.deliveryIncludeDocuments = !!next.deliveryIncludeDocuments;
+    }
+    if (!raw.hasOwnProperty('deliveryIncludeLinks')) {
+        next.deliveryIncludeLinks = next.identityLinks.length > 0 || legacyMode === 'link';
+    } else {
+        next.deliveryIncludeLinks = !!next.deliveryIncludeLinks;
+    }
+    var primaryFileUrl = _aiflowTrimString(next.pdfUrl || '') || (next.documents[0] && next.documents[0].url) || '';
+    if (next.deliveryIncludeDocuments && primaryFileUrl && _aiflowUrlLooksLikeDownloadableFile(primaryFileUrl)) {
+        next.deliveryMode = 'attachment';
+    } else if (next.deliveryIncludeLinks && (!next.deliveryIncludeDocuments || !primaryFileUrl)) {
+        next.deliveryMode = 'link';
+    } else {
+        next.deliveryMode = ['auto', 'attachment', 'link'].indexOf(legacyMode) >= 0 ? legacyMode : 'auto';
+    }
+    if (next.deliveryIncludeDocuments && next.deliveryIncludeLinks) next.deliveryMode = 'auto';
+    var hasAttachableDoc = next.documents.length > 0 || !!_aiflowTrimString(next.pdfUrl || '');
+    var hasIdLinks = next.identityLinks.length > 0;
+    if (type === 'lead-magnet') {
+        if ((hasAttachableDoc || hasIdLinks) && !raw.hasOwnProperty('collectEmail')) {
+            next.collectEmail = true;
+            next.formFields = _aiflowNormalizeLeadFormFields(aiflowBuildLeadMagnetFormFieldsFromCollect(next));
+        }
+    }
+    if (type === 'free-material' && hasIdLinks && !raw.hasOwnProperty('collectEmail')) {
+        next.collectEmail = true;
+    }
+    return next;
+}
+
+function _aiflowResolveLeadDb(opts) {
+    opts = opts || {};
+    if (opts.db) return Promise.resolve(opts.db);
+    return new Promise(function(resolve, reject) {
+        try {
+            if (typeof initFirebase === 'function') {
+                initFirebase(function(app) {
+                    try {
+                        resolve(app.firestore());
+                    } catch (err) {
+                        reject(err);
+                    }
+                }, { waitForAuthPersistence: false });
+                return;
+            }
+            if (typeof firebase !== 'undefined' && firebase.firestore) {
+                resolve(firebase.firestore());
+                return;
+            }
+        } catch (err) {
+            reject(err);
+            return;
+        }
+        reject(new Error('Firebase unavailable'));
+    });
+}
+
+function aiflowFetchLeadDefinitionById(id, opts) {
+    var docId = _aiflowTrimString(id || '');
+    if (!docId) return Promise.resolve(null);
+    if (_aiflowLeadDefinitionDocCache[docId]) return Promise.resolve(_aiflowLeadDefinitionDocCache[docId]);
+    return _aiflowResolveLeadDb(opts).then(function(db) {
+        return db.collection('leadDefinitions').doc(docId).get().then(function(doc) {
+            if (!doc.exists) return null;
+            var normalized = aiflowNormalizeLeadDefinition(doc.data() || {}, { id: doc.id });
+            _aiflowLeadDefinitionDocCache[docId] = normalized;
+            return normalized;
+        });
+    });
+}
+
+function aiflowFetchLeadDefinitionsByIds(ids, opts) {
+    var unique = [];
+    (ids || []).forEach(function(id) {
+        var docId = _aiflowTrimString(id || '');
+        if (docId && unique.indexOf(docId) === -1) unique.push(docId);
+    });
+    if (!unique.length) return Promise.resolve({});
+    return Promise.all(unique.map(function(id) {
+        return aiflowFetchLeadDefinitionById(id, opts).then(function(def) {
+            return { id: id, definition: def };
+        }).catch(function() {
+            return { id: id, definition: null };
+        });
+    })).then(function(rows) {
+        var out = {};
+        rows.forEach(function(row) {
+            if (row.definition) out[row.id] = row.definition;
+        });
+        return out;
+    });
+}
+
+function aiflowSubscribeLeadDefinitions(onChange, onError, opts) {
+    opts = opts || {};
+    return _aiflowResolveLeadDb(opts).then(function(db) {
+        return db.collection('leadDefinitions').onSnapshot(function(snap) {
+            var list = [];
+            snap.forEach(function(doc) {
+                var normalized = aiflowNormalizeLeadDefinition(doc.data() || {}, { id: doc.id });
+                _aiflowLeadDefinitionDocCache[doc.id] = normalized;
+                list.push(normalized);
+            });
+            list.sort(function(a, b) {
+                return aiflowLeadDefinitionDisplayName(a).localeCompare(aiflowLeadDefinitionDisplayName(b), 'zh-Hant');
+            });
+            if (typeof onChange === 'function') onChange(list);
+        }, function(err) {
+            if (typeof onError === 'function') onError(err);
+        });
+    });
+}
+
+function aiflowLeadDefinitionSelectOptions(definitions, type, includeBlankLabel) {
+    var filtered = (definitions || []).filter(function(item) {
+        return !type || type === 'all' || item.type === type;
+    });
+    var options = [];
+    if (includeBlankLabel) options.push({ value: '', label: includeBlankLabel });
+    filtered.forEach(function(item) {
+        options.push({
+            value: item.id,
+            label: aiflowLeadDefinitionDisplayName(item) + ' [' + aiflowGetLeadDefinitionTypeMeta(item.type).label + ']'
+        });
+    });
+    return options;
+}
+
+function aiflowApplyLeadDefinitionToLinkLeadMagnet(link, definition) {
+    if (!definition) return _aiflowDeepClone(link || {});
+    var normalized = aiflowNormalizeLeadDefinition(definition, { id: definition.id });
+    var next = _aiflowDeepClone(link || {});
+    var popup = _aiflowIsPlainObject(next.leadMagnet) ? _aiflowDeepClone(next.leadMagnet) : {};
+    if (!popup.hasOwnProperty('enabled')) popup.enabled = true;
+    popup.title = normalized.title || '';
+    popup.description = normalized.description || '';
+    popup.imageUrl = normalized.imageUrl || '';
+    popup.submitText = normalized.submitText || '提交';
+    popup.redirectUrl = normalized.redirectUrl || '';
+    popup.formFields = _aiflowDeepClone(normalized.formFields || []);
+    popup.consentText = String(normalized.consentText || '');
+    popup.consentCheckboxEnabled = normalized.consentCheckboxEnabled !== false;
+    popup.materialTitle = normalized.materialTitle || '';
+    popup.emailSubject = normalized.emailSubject || '';
+    popup.emailMessage = String(normalized.emailMessage || '');
+    popup.deliveryMode = normalized.deliveryMode || 'auto';
+    popup.documents = _aiflowDeepClone(normalized.documents || []);
+    popup.pdfUrl = normalized.pdfUrl || '';
+    popup.fileName = normalized.fileName || '';
+    popup.whatsappGreetingMessage = String(normalized.whatsappGreetingMessage || '');
+    popup.identityLinks = _aiflowDeepClone(normalized.identityLinks || []);
+    popup.deliveryIncludeDocuments = normalized.deliveryIncludeDocuments !== false;
+    popup.deliveryIncludeLinks = !!normalized.deliveryIncludeLinks;
+    popup.collectEmail = !!normalized.collectEmail;
+    popup.collectPhone = normalized.collectPhone !== false;
+    if (!popup.redirectUrl) {
+        var linkUrl = _aiflowTrimString(next.url || '');
+        if (linkUrl && linkUrl !== '#') popup.redirectUrl = linkUrl;
+    }
+    next.leadMagnet = popup;
+    next.leadDefinitionId = normalized.id || _aiflowTrimString(next.leadDefinitionId || '');
+    next.leadDefinitionType = normalized.type || 'lead-magnet';
+    next.leadDefinitionName = aiflowLeadDefinitionDisplayName(normalized);
+    return next;
+}
+
+function aiflowApplyLeadDefinitionToFreeMaterialContent(content, definition) {
+    if (!definition) return _aiflowDeepClone(content || {});
+    var normalized = aiflowNormalizeLeadDefinition(definition, { id: definition.id });
+    var next = _aiflowDeepClone(content || {});
+    next.sectionLabel = normalized.sectionLabel || '';
+    next.title = normalized.title || '';
+    next.description = normalized.description || '';
+    next.imageUrl = normalized.imageUrl || '';
+    next.imageAlt = normalized.imageAlt || '';
+    next.ctaText = normalized.ctaText || '';
+    next.submitText = normalized.submitText || '';
+    next.materialTitle = normalized.materialTitle || '';
+    next.emailSubject = normalized.emailSubject || '';
+    next.emailMessage = String(normalized.emailMessage || '');
+    next.whatsappGreetingMessage = String(normalized.whatsappGreetingMessage || '');
+    next.documents = _aiflowDeepClone(normalized.documents || []);
+    next.pdfUrl = normalized.pdfUrl || '';
+    next.fileName = normalized.fileName || '';
+    next.deliveryMode = normalized.deliveryMode || 'auto';
+    next.identityLinks = _aiflowDeepClone(normalized.identityLinks || []);
+    next.deliveryIncludeDocuments = normalized.deliveryIncludeDocuments !== false;
+    next.deliveryIncludeLinks = !!normalized.deliveryIncludeLinks;
+    next.nameFieldLabel = normalized.nameFieldLabel || '姓名';
+    next.emailFieldLabel = normalized.emailFieldLabel || 'Email';
+    next.consentText = normalized.consentText || '';
+    next.successMessage = normalized.successMessage || '';
+    next.helperNote = normalized.helperNote || '';
+    next.redirectUrl = normalized.redirectUrl || '';
+    next.leadDefinitionId = normalized.id || _aiflowTrimString(next.leadDefinitionId || '');
+    next.leadDefinitionType = normalized.type || 'free-material';
+    next.leadDefinitionName = aiflowLeadDefinitionDisplayName(normalized);
+    return next;
+}
+
+function aiflowLeadMagnetFirstDocument(config) {
+    config = config || {};
+    var docs = Array.isArray(config.documents) ? config.documents.filter(function(d) { return d && d.url; }) : [];
+    if (docs.length) return docs[0];
+    var u = _aiflowTrimString(config.pdfUrl || '');
+    if (u) {
+        var fn = _aiflowTrimString(config.fileName || '');
+        return { url: u, name: fn || u.split('/').pop().split('?')[0] || 'document', fileName: fn };
+    }
+    return null;
+}
+
+function aiflowLeadMagnetDefaultFormFields() {
+    return [
+        { label: '姓名', type: 'text', key: 'name' },
+        { label: 'WhatsApp（8位數字）', type: 'tel', key: 'phone' }
+    ];
+}
+
+function aiflowLeadMagnetFieldsArrayFromConfig(config) {
+    var fields = config && Array.isArray(config.formFields) ? config.formFields : [];
+    if (!fields.length) fields = aiflowLeadMagnetDefaultFormFields();
+    return fields.map(function(fd, idx) {
+        var type = _aiflowTrimString(fd.type || 'text') || 'text';
+        var key = _aiflowTrimString(fd.key || '');
+        if (!key) {
+            if (type === 'email') key = 'email';
+            else if (type === 'tel') key = 'phone';
+            else key = idx === 0 ? 'name' : 'field_' + idx;
+        }
+        return {
+            label: _aiflowTrimString(fd.label || ''),
+            type: type,
+            key: key
+        };
+    }).filter(function(f) { return f.label; });
+}
+
+function aiflowLeadMagnetRenderFields(containerEl, config, onChange) {
+    if (!containerEl || typeof document === 'undefined') return;
+    containerEl.innerHTML = '';
+    containerEl.__aiflowLmOnChange = typeof onChange === 'function' ? onChange : null;
+    aiflowLeadMagnetFieldsArrayFromConfig(config).forEach(function(fd) {
+        var inp = document.createElement('input');
+        inp.type = fd.type === 'email' ? 'email' : fd.type === 'tel' ? 'tel' : 'text';
+        if (fd.type === 'tel') inp.setAttribute('inputmode', 'numeric');
+        inp.placeholder = fd.label;
+        inp.className = 'whatsapp-modal-input aiflow-lm-field-input';
+        inp.setAttribute('data-aiflow-lm-key', fd.key);
+        inp.setAttribute('data-aiflow-lm-type', fd.type);
+        inp.required = true;
+        inp.addEventListener('input', function() {
+            if (containerEl.__aiflowLmOnChange) containerEl.__aiflowLmOnChange();
+        });
+        containerEl.appendChild(inp);
+    });
+}
+
+function aiflowLeadMagnetFieldValueValid(type, rawVal) {
+    var v = String(rawVal || '').trim();
+    if (type === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (type === 'tel') return /^[0-9]{8}$/.test(v.replace(/\s+/g, ''));
+    return v.length >= 2;
+}
+
+function aiflowLeadMagnetFormValid(fieldsContainer, consentCheckboxEl, config) {
+    if (!fieldsContainer) return false;
+    var ok = true;
+    fieldsContainer.querySelectorAll('.aiflow-lm-field-input').forEach(function(inp) {
+        var t = inp.getAttribute('data-aiflow-lm-type') || 'text';
+        if (!aiflowLeadMagnetFieldValueValid(t, inp.value)) ok = false;
+    });
+    if (config && config.consentCheckboxEnabled !== false) {
+        if (!consentCheckboxEl || !consentCheckboxEl.checked) ok = false;
+    }
+    return ok;
+}
+
+function aiflowLeadMagnetReadValues(fieldsContainer, consentCheckboxEl, config) {
+    var out = {
+        name: '',
+        email: '',
+        whatsapp: '',
+        consentAccepted: true,
+        answers: {}
+    };
+    if (!fieldsContainer) return out;
+    fieldsContainer.querySelectorAll('.aiflow-lm-field-input').forEach(function(inp) {
+        var key = inp.getAttribute('data-aiflow-lm-key') || '';
+        var t = inp.getAttribute('data-aiflow-lm-type') || 'text';
+        var v = (inp.value || '').trim();
+        var stored = t === 'tel' ? v.replace(/\s+/g, '') : v;
+        out.answers[key] = stored;
+        if (key === 'name') out.name = v;
+        else if (key === 'email') out.email = v;
+        else if (key === 'phone') out.whatsapp = stored;
+    });
+    if (config && config.consentCheckboxEnabled !== false) {
+        out.consentAccepted = !!(consentCheckboxEl && consentCheckboxEl.checked);
+    }
+    return out;
 }
 
 /**
@@ -658,6 +1400,36 @@ function initScrollReveal(selector, opts) {
 
 var _aiflowFreeMaterialConfigs = {};
 var _aiflowFreeMaterialState = { activeKey: '', busy: false, selectedDoc: null };
+var _aiflowOutboundEmailCache = { at: 0, ttlMs: 45000, data: null };
+
+/** Public read: siteSettings/emailOutbound — used before writing `mail` for Trigger Email. */
+function aiflowInvalidateOutboundEmailSettingsCache() {
+    _aiflowOutboundEmailCache.at = 0;
+    _aiflowOutboundEmailCache.data = null;
+}
+
+function aiflowFetchOutboundEmailSettings(db) {
+    if (!db) return Promise.resolve({ outboundFrom: '', outboundReplyTo: '' });
+    var now = Date.now();
+    if (_aiflowOutboundEmailCache.data && (now - _aiflowOutboundEmailCache.at) < _aiflowOutboundEmailCache.ttlMs) {
+        return Promise.resolve(_aiflowOutboundEmailCache.data);
+    }
+    return db.collection('siteSettings').doc('emailOutbound').get().then(function(doc) {
+        var out = { outboundFrom: '', outboundReplyTo: '' };
+        if (doc.exists) {
+            var d = doc.data() || {};
+            out.outboundFrom = _aiflowTrimString(d.outboundFrom || '');
+            out.outboundReplyTo = _aiflowTrimString(d.outboundReplyTo || '');
+        }
+        _aiflowOutboundEmailCache = { at: Date.now(), ttlMs: _aiflowOutboundEmailCache.ttlMs || 45000, data: out };
+        return out;
+    }).catch(function() {
+        return { outboundFrom: '', outboundReplyTo: '' };
+    });
+}
+if (typeof window !== 'undefined') {
+    window.aiflowInvalidateOutboundEmailSettingsCache = aiflowInvalidateOutboundEmailSettingsCache;
+}
 
 function _aiflowFreeMaterialRichText(html) {
     return typeof sanitizeHeroTitleHtml === 'function'
@@ -708,36 +1480,53 @@ function _aiflowEnsureFreeMaterialStyles() {
         '.af-free-material-helper{margin:14px 0 0;font-size:13px;line-height:1.7;color:var(--af-muted);}' +
         '.af-free-material-btn{margin-top:24px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border:none;border-radius:999px;background:var(--af-accent);color:var(--af-accent-text);font:inherit;font-weight:700;cursor:pointer;box-shadow:0 16px 30px rgba(0,0,0,0.12);}' +
         '.af-free-material-btn:hover{transform:translateY(-1px);}' +
-        '.af-free-material-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:var(--af-modal-backdrop);}' +
-        '.af-free-material-modal.show{display:flex;}' +
-        '.af-free-material-dialog{width:min(560px,100%);background:#fff;border-radius:24px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,0.20);position:relative;}' +
-        '.af-free-material-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border:none;border-radius:50%;background:rgba(0,0,0,0.06);color:#333;font-size:20px;cursor:pointer;}' +
-        '.af-free-material-dialog h3{margin:0;font-size:28px;line-height:1.1;color:#231f20;}' +
-        '.af-free-material-dialog p{margin:12px 0 0;color:rgba(35,31,32,0.72);line-height:1.7;}' +
-        '.af-free-material-form{margin-top:20px;display:grid;gap:14px;}' +
-        '.af-free-material-form label{display:block;margin-bottom:6px;font-size:13px;font-weight:700;color:#231f20;}' +
-        '.af-free-material-form input{width:100%;padding:13px 14px;border:1px solid rgba(35,31,32,0.12);border-radius:14px;font:inherit;font-size:15px;}' +
-        '.af-free-material-consent{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.6;color:rgba(35,31,32,0.78);}' +
-        '.af-free-material-consent input{width:16px;height:16px;margin-top:3px;flex:0 0 16px;}' +
-        '.af-free-material-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;}' +
-        '.af-free-material-submit{border:none;border-radius:999px;background:#D97757;color:#fff;padding:13px 22px;font:inherit;font-weight:700;cursor:pointer;}' +
-        '.af-free-material-submit[disabled]{opacity:.65;cursor:wait;}' +
-        '.af-free-material-status{font-size:13px;line-height:1.6;color:rgba(35,31,32,0.72);min-height:20px;}' +
-        '.af-free-material-status.error{color:#b3261e;}' +
-        '.af-free-material-status.success{color:#177245;}' +
+        '#aiflowDocPickerModal.af-free-material-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:var(--af-modal-backdrop);}' +
+        '#aiflowDocPickerModal.af-free-material-modal.show{display:flex;}' +
+        '#aiflowDocPickerModal .af-free-material-dialog{width:min(560px,100%);background:#fff;border-radius:24px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,0.20);position:relative;}' +
+        '#aiflowDocPickerModal .af-free-material-close{position:absolute;top:14px;right:14px;width:34px;height:34px;border:none;border-radius:50%;background:rgba(0,0,0,0.06);color:#333;font-size:20px;cursor:pointer;}' +
+        '#aiflowDocPickerModal .af-free-material-dialog h3{margin:0;font-size:28px;line-height:1.1;color:#231f20;}' +
+        '#aiflowDocPickerModal .af-free-material-dialog p{margin:12px 0 0;color:rgba(35,31,32,0.72);line-height:1.7;}' +
+        '#aiflowFreeMaterialModal.whatsapp-modal-overlay{--brand-orange:#D97706;--text-primary:#1F2937;--text-secondary:#6B7280;--border-light:#E5E7EB;--bg-pampas:#F4F3EE;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:10000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s ease;overflow:visible;padding:20px;box-sizing:border-box;}' +
+        '#aiflowFreeMaterialModal.whatsapp-modal-overlay.active{display:flex;opacity:1;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal{background:var(--bg-pampas);border-radius:1rem;padding:0;max-width:500px;width:100%;max-height:90vh;overflow:hidden;position:relative;display:flex;flex-direction:column;transform:scale(0.9);transition:transform 0.3s ease;box-shadow:none;font-family:inherit;}' +
+        '#aiflowFreeMaterialModal.whatsapp-modal-overlay.active .whatsapp-modal{transform:scale(1);}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-media{flex:0 0 clamp(150px,36vh,260px);min-height:150px;max-height:min(40vh,280px);position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(244,243,238,0.92) 0%,var(--bg-pampas) 100%);}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-media[hidden]{display:none !important;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-content{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:visible;padding:1.5rem 2rem 2rem;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-header{margin-bottom:1.5rem;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-header h3{font-size:1rem;font-weight:600;line-height:1.35;color:var(--text-primary);margin:0 0 0.5rem 0;white-space:normal;overflow-wrap:anywhere;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-header p{color:var(--text-secondary);font-size:0.875rem;margin:0;line-height:1.5;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-close{position:absolute;top:0.75rem;right:0.75rem;z-index:5;background:rgba(255,255,255,0.72);border:none;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;width:2.35rem;height:2.35rem;display:flex;align-items:center;justify-content:center;border-radius:999px;transition:all 0.2s ease;line-height:1;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-close:hover{background:#ffffff;color:var(--text-primary);}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-form{display:flex;flex-direction:column;gap:1rem;margin:0;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-form label.field-lbl{display:block;margin-bottom:0.35rem;font-size:0.8125rem;font-weight:600;color:var(--text-primary);}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-input{width:100%;padding:0.75rem 1rem;border:1px solid var(--border-light);border-radius:0.5rem;font-size:1rem;transition:all 0.2s ease;background:#fff;color:#1F2937;box-sizing:border-box;font:inherit;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-input:focus{outline:none;border-color:var(--brand-orange);box-shadow:0 0 0 3px rgba(217,119,6,0.1);}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-checkbox-label{display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;font-size:0.875rem;color:var(--text-secondary);line-height:1.5;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-checkbox{margin-top:0.125rem;width:1.25rem;height:1.25rem;cursor:pointer;flex-shrink:0;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-submit{background:var(--brand-orange);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:0.5rem;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.2s ease;font:inherit;}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-submit:hover:not(:disabled){background:#B45309;transform:translateY(-1px);}' +
+        '#aiflowFreeMaterialModal .whatsapp-modal-submit:disabled{background:#D1D5DB;color:#9CA3AF;cursor:not-allowed;opacity:0.6;}' +
+        '#aiflowFreeMaterialModal .af-free-material-status{font-size:0.875rem;line-height:1.5;min-height:1.25rem;color:var(--text-secondary);}' +
+        '#aiflowFreeMaterialModal .af-free-material-status.error{color:#b3261e;}' +
+        '#aiflowFreeMaterialModal .af-free-material-status.success{color:#177245;}' +
+        '@media (max-width:640px){#aiflowFreeMaterialModal .whatsapp-modal{width:95%;}#aiflowFreeMaterialModal .whatsapp-modal-content{padding:1.25rem 1.5rem 1.5rem;}}' +
         '.af-doc-picker-list{display:flex;flex-direction:column;gap:10px;margin:20px 0 0;}' +
         '.af-doc-picker-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:rgba(35,31,32,0.03);border:1px solid rgba(35,31,32,0.08);border-radius:16px;cursor:pointer;transition:all .15s;}' +
         '.af-doc-picker-card:hover{background:rgba(217,119,87,0.08);border-color:rgba(217,119,87,0.3);transform:translateY(-1px);}' +
         '.af-doc-picker-badge{flex:0 0 44px;height:44px;display:flex;align-items:center;justify-content:center;background:#D97757;color:#fff;border-radius:12px;font-size:13px;font-weight:800;letter-spacing:.04em;}' +
         '.af-doc-picker-name{flex:1;min-width:0;font-size:15px;font-weight:600;color:#231f20;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
         '.af-doc-picker-arrow{flex:0 0 20px;color:rgba(35,31,32,0.3);font-size:18px;}' +
-        '@media (max-width: 860px){.af-free-material-shell{grid-template-columns:1fr;gap:18px;}.af-free-material-visual{min-height:220px;}.af-free-material-dialog{padding:22px 18px;}}';
+        '@media (max-width: 860px){.af-free-material-shell{grid-template-columns:1fr;gap:18px;}.af-free-material-visual{min-height:220px;}#aiflowDocPickerModal .af-free-material-dialog{padding:22px 18px;}}';
     document.head.appendChild(style);
 }
 
 function registerFreeMaterialConfig(pageKey, sectionId, content) {
     var key = String(pageKey || 'page') + '::' + String(sectionId || ('section-' + Date.now()));
-    _aiflowFreeMaterialConfigs[key] = JSON.parse(JSON.stringify(content || {}));
+    var clone = _aiflowDeepClone(content || {});
+    delete clone.__leadDefinitionResolved;
+    _aiflowFreeMaterialConfigs[key] = clone;
     return key;
 }
 
@@ -745,6 +1534,20 @@ function renderFreeMaterialSection(el, pageKey, sectionId, content, theme) {
     if (!el) return;
     _aiflowEnsureFreeMaterialStyles();
     var cfg = content || {};
+    var leadDefinitionId = _aiflowTrimString(cfg.leadDefinitionId || '');
+    if (leadDefinitionId && !cfg.__leadDefinitionResolved && typeof aiflowFetchLeadDefinitionById === 'function') {
+        var baseCfg = _aiflowDeepClone(cfg);
+        baseCfg.__leadDefinitionResolved = true;
+        aiflowFetchLeadDefinitionById(leadDefinitionId).then(function(definition) {
+            if (!definition) return;
+            var mergedCfg = aiflowApplyLeadDefinitionToFreeMaterialContent(baseCfg, definition);
+            mergedCfg.__leadDefinitionResolved = true;
+            renderFreeMaterialSection(el, pageKey, sectionId, mergedCfg, theme);
+        }).catch(function(err) {
+            console.warn('[free-material] lead definition load failed:', err);
+        });
+        cfg = baseCfg;
+    }
     var th = _aiflowFreeMaterialTheme(theme);
     var key = registerFreeMaterialConfig(pageKey, sectionId, cfg);
     var title = _aiflowFreeMaterialRichText(cfg.title || '');
@@ -861,30 +1664,45 @@ function _aiflowEnsureFreeMaterialModal() {
     if (modal) return modal;
     modal = document.createElement('div');
     modal.id = 'aiflowFreeMaterialModal';
-    modal.className = 'af-free-material-modal';
+    modal.className = 'whatsapp-modal-overlay';
     modal.innerHTML =
-        '<div class="af-free-material-dialog">' +
-            '<button type="button" class="af-free-material-close" aria-label="Close">&times;</button>' +
-            '<h3 id="aiflowFreeMaterialModalTitle"></h3>' +
-            '<p id="aiflowFreeMaterialModalDesc"></p>' +
-            '<form class="af-free-material-form" id="aiflowFreeMaterialForm">' +
-                '<div><label id="aiflowFmNameLabel" for="aiflowFmName">姓名</label><input id="aiflowFmName" name="name" type="text" autocomplete="name" required></div>' +
-                '<div><label id="aiflowFmEmailLabel" for="aiflowFmEmail">Email</label><input id="aiflowFmEmail" name="email" type="email" autocomplete="email" required></div>' +
-                '<label class="af-free-material-consent" id="aiflowFmConsentWrap"><input id="aiflowFmConsent" name="consent" type="checkbox"><span id="aiflowFmConsentText"></span></label>' +
-                '<div class="af-free-material-actions">' +
-                    '<div class="af-free-material-status" id="aiflowFmStatus"></div>' +
-                    '<button class="af-free-material-submit" id="aiflowFmSubmit" type="submit">送出</button>' +
+        '<div class="whatsapp-modal" onclick="event.stopPropagation()">' +
+            '<button type="button" class="whatsapp-modal-close" aria-label="Close">&times;</button>' +
+            '<div class="whatsapp-modal-media" id="aiflowFmModalMediaWrap" hidden>' +
+                '<img id="aiflowFmModalImage" src="" alt="" class="whatsapp-modal-image" loading="eager" decoding="async">' +
+            '</div>' +
+            '<div class="whatsapp-modal-content">' +
+                '<div class="whatsapp-modal-header">' +
+                    '<h3 id="aiflowFreeMaterialModalTitle"></h3>' +
+                    '<p id="aiflowFreeMaterialModalDesc"></p>' +
                 '</div>' +
-            '</form>' +
+                '<form class="whatsapp-modal-form" id="aiflowFreeMaterialForm">' +
+                    '<div>' +
+                        '<label class="field-lbl" id="aiflowFmNameLabel" for="aiflowFmName">姓名</label>' +
+                        '<input id="aiflowFmName" class="whatsapp-modal-input" name="name" type="text" autocomplete="name" required>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label class="field-lbl" id="aiflowFmEmailLabel" for="aiflowFmEmail">Email</label>' +
+                        '<input id="aiflowFmEmail" class="whatsapp-modal-input" name="email" type="email" autocomplete="email" required>' +
+                    '</div>' +
+                    '<label class="whatsapp-modal-checkbox-label" id="aiflowFmConsentWrap">' +
+                        '<input type="checkbox" id="aiflowFmConsent" name="consent" class="whatsapp-modal-checkbox">' +
+                        '<span id="aiflowFmConsentText"></span>' +
+                    '</label>' +
+                    '<div class="af-free-material-status" id="aiflowFmStatus"></div>' +
+                    '<button class="whatsapp-modal-submit" id="aiflowFmSubmit" type="submit">送出</button>' +
+                '</form>' +
+            '</div>' +
         '</div>';
     document.body.appendChild(modal);
     modal.addEventListener('click', function(e) {
         if (e.target === modal) closeFreeMaterialModal();
     });
-    modal.querySelector('.af-free-material-close').onclick = closeFreeMaterialModal;
+    var closer = modal.querySelector('.whatsapp-modal-close');
+    if (closer) closer.onclick = closeFreeMaterialModal;
     modal.querySelector('#aiflowFreeMaterialForm').addEventListener('submit', _submitFreeMaterialRequest);
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('show')) closeFreeMaterialModal();
+        if (e.key === 'Escape' && modal.classList.contains('active')) closeFreeMaterialModal();
     });
     return modal;
 }
@@ -896,12 +1714,27 @@ function openFreeMaterialModalByKey(key, theme, meta) {
     _aiflowFreeMaterialState.activeKey = key;
     _aiflowFreeMaterialState.meta = meta || {};
     _aiflowFreeMaterialState.theme = _aiflowFreeMaterialTheme(theme);
-    var th = _aiflowFreeMaterialState.theme;
     var doc = _aiflowFreeMaterialState.selectedDoc;
     var docName = (doc && doc.name) ? ' — ' + doc.name : '';
-    modal.style.setProperty('--af-modal-backdrop', th.backdrop);
+    var mediaWrap = modal.querySelector('#aiflowFmModalMediaWrap');
+    var imgEl = modal.querySelector('#aiflowFmModalImage');
+    var heroImg = _aiflowTrimString(cfg.imageUrl || '');
+    if (heroImg && imgEl && mediaWrap) {
+        imgEl.src = typeof fixStorageUrl === 'function' ? fixStorageUrl(heroImg) : heroImg;
+        imgEl.alt = _aiflowTrimString(cfg.imageAlt || cfg.materialTitle || 'Free material') || 'Free material';
+        mediaWrap.hidden = false;
+    } else if (mediaWrap && imgEl) {
+        imgEl.removeAttribute('src');
+        imgEl.alt = '';
+        mediaWrap.hidden = true;
+    }
     modal.querySelector('#aiflowFreeMaterialModalTitle').innerHTML = _aiflowFreeMaterialRichText((cfg.materialTitle || cfg.title || '免費資料下載') + docName);
-    modal.querySelector('#aiflowFreeMaterialModalDesc').innerHTML = _aiflowFreeMaterialRichText(cfg.description || '');
+    var descEl = modal.querySelector('#aiflowFreeMaterialModalDesc');
+    var descHtml = _aiflowFreeMaterialRichText(cfg.description || '');
+    if (descEl) {
+        descEl.innerHTML = descHtml;
+        descEl.style.display = (_aiflowTrimString(String(cfg.description || '').replace(/<[^>]+>/g, ' '))) ? '' : 'none';
+    }
     modal.querySelector('#aiflowFmNameLabel').textContent = cfg.nameFieldLabel || '姓名';
     modal.querySelector('#aiflowFmEmailLabel').textContent = cfg.emailFieldLabel || 'Email';
     modal.querySelector('#aiflowFmConsentText').innerHTML = _aiflowFreeMaterialRichText(cfg.consentText || '');
@@ -911,7 +1744,7 @@ function openFreeMaterialModalByKey(key, theme, meta) {
     modal.querySelector('#aiflowFmStatus').textContent = '';
     modal.querySelector('#aiflowFmStatus').className = 'af-free-material-status';
     modal.querySelector('#aiflowFreeMaterialForm').reset();
-    modal.classList.add('show');
+    modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     setTimeout(function() {
         var inp = modal.querySelector('#aiflowFmName');
@@ -922,27 +1755,202 @@ function openFreeMaterialModalByKey(key, theme, meta) {
 function closeFreeMaterialModal() {
     var modal = document.getElementById('aiflowFreeMaterialModal');
     if (!modal) return;
-    modal.classList.remove('show');
+    modal.classList.remove('active');
     document.body.style.overflow = '';
     _aiflowFreeMaterialState.busy = false;
 }
 
+function _aiflowApplyEmailTemplateTokens(template, map) {
+    var out = String(template || '');
+    if (!map) return out;
+    Object.keys(map).forEach(function(k) {
+        var val = map[k] == null ? '' : String(map[k]);
+        var re = new RegExp('\\{' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\}', 'g');
+        out = out.replace(re, val);
+    });
+    return out;
+}
+
+function _aiflowUrlLooksLikeDownloadableFile(url) {
+    var u = String(url || '').split('?')[0].toLowerCase();
+    return /\.(pdf|zip|docx?|xlsx?|pptx?|epub)$/.test(u);
+}
+
+/** CMS：deliveryIncludeDocuments + 可下載副檔名 → Trigger Email 附件 */
+function _aiflowMailShouldAttachFile(cfg, attachDocUrl) {
+    if (!cfg || cfg.deliveryIncludeDocuments === false) return false;
+    if (!attachDocUrl) return false;
+    return _aiflowUrlLooksLikeDownloadableFile(attachDocUrl);
+}
+
 function _buildFreeMaterialEmailHtml(name, doc, cfg) {
     var title = cfg.materialTitle || '免費資料';
-    var docName = (doc && doc.name) || cfg.fileName || 'notes.pdf';
+    var docName = (doc && (doc.name || doc.fileName)) || cfg.fileName || 'notes.pdf';
     var docUrl = (doc && doc.url) || cfg.pdfUrl || '';
+    var idLinks = _aiflowNormalizeIdentityLinks(cfg.identityLinks || []);
+    if (!docUrl && idLinks[0]) docUrl = idLinks[0].url;
+    var primaryAttach = (doc && doc.url) || _aiflowTrimString(cfg.pdfUrl || '');
+    var linkOnly = !(cfg.deliveryIncludeDocuments !== false && primaryAttach && _aiflowUrlLooksLikeDownloadableFile(primaryAttach));
+    function _fmEsc(s) {
+        return typeof escHtml === 'function'
+            ? escHtml(String(s || ''))
+            : String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+    var safeName = _fmEsc(name);
+    var safeTitle = _fmEsc(title);
+    var safeDocName = _fmEsc(docName);
+    var tmpl = _aiflowTrimString(cfg.emailMessage || '');
+    if (tmpl) {
+        var filled = _aiflowApplyEmailTemplateTokens(tmpl, {
+            name: safeName,
+            materialTitle: safeTitle,
+            downloadUrl: docUrl,
+            documentName: safeDocName
+        });
+        var customHtml;
+        if (/<[a-z][\s\S]*>/i.test(filled)) {
+            customHtml = sanitizeFreeMaterialEmailHtml(filled);
+        } else {
+            customHtml = '<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">' +
+                _aiflowEmailQuotedLabelLinksToHtml(filled) + '</div>';
+        }
+        if (_freeMaterialEmailHasVisibleContent(customHtml)) return customHtml;
+        tmpl = '';
+    }
+    if (linkOnly) {
+        var linkRows = idLinks.length ? idLinks : [{ title: '', url: docUrl }];
+        var btns = linkRows.map(function(l) {
+            var u = _aiflowTrimString(l.url || '');
+            if (!u) return '';
+            var lab = _fmEsc(_aiflowTrimString(l.title || '') || '開啟連結');
+            return '<p style="margin:12px 0;"><a href="' + _fmEsc(u) + '" ' +
+                'style="display:inline-block;padding:12px 28px;background:#FF6B2C;color:#fff;' +
+                'text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;">' +
+                lab + '</a></p>';
+        }).join('');
+        return '<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">' +
+            '<h2 style="color:#222;">Hi ' + safeName + '!</h2>' +
+            '<p style="font-size:16px;line-height:1.6;color:#444;">感謝你的申請！你請求的「<strong>' +
+            safeTitle + '</strong>」請透過下方連結開啟或下載。</p>' +
+            btns +
+            '<hr style="border:none;border-top:1px solid #eee;margin:32px 0 16px;">' +
+            '<p style="font-size:12px;color:#999;">此郵件由 AIFLOWTIME 自動發送。</p>' +
+            '</div>';
+    }
     return '<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">' +
-        '<h2 style="color:#222;">Hi ' + (name || '').replace(/</g, '&lt;') + '!</h2>' +
+        '<h2 style="color:#222;">Hi ' + safeName + '!</h2>' +
         '<p style="font-size:16px;line-height:1.6;color:#444;">感謝你的申請！你請求的「<strong>' +
-        (title).replace(/</g, '&lt;') + '</strong>」已附在這封 email 中。</p>' +
+        safeTitle + '</strong>」已附在這封 email 中。</p>' +
         '<p style="font-size:16px;line-height:1.6;color:#444;">如果附件未能顯示，你也可以直接點擊下方連結下載：</p>' +
-        '<p style="margin:20px 0;"><a href="' + docUrl + '" ' +
+        '<p style="margin:20px 0;"><a href="' + _fmEsc(docUrl) + '" ' +
         'style="display:inline-block;padding:12px 28px;background:#FF6B2C;color:#fff;' +
         'text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;">' +
-        '下載 ' + docName.replace(/</g, '&lt;') + '</a></p>' +
+        '下載 ' + safeDocName + '</a></p>' +
         '<hr style="border:none;border-top:1px solid #eee;margin:32px 0 16px;">' +
         '<p style="font-size:12px;color:#999;">此郵件由 AIFLOWTIME 自動發送。</p>' +
         '</div>';
+}
+
+/**
+ * Write freeMaterialLeads + mail (Firebase email extension). Optional mirror handled by caller.
+ */
+function aiflowSendMaterialEmailFromBrowser(opts) {
+    opts = opts || {};
+    var name = String(opts.name || '').trim();
+    var email = String(opts.email || '').trim();
+    var cfg = opts.cfg || {};
+    var doc = opts.doc || null;
+    if (!doc) doc = (_aiflowNormalizeDocs(cfg) || [])[0] || null;
+    var attachUrl = (doc && doc.url) || _aiflowTrimString(cfg.pdfUrl || '');
+    var idLinks = _aiflowNormalizeIdentityLinks(cfg.identityLinks || []);
+    var docUrl = attachUrl || (idLinks[0] && idLinks[0].url) || '';
+    var docName = (doc && (doc.name || doc.fileName)) || cfg.fileName || '';
+    var db = opts.db;
+    if (!db) {
+        try { db = firebase.firestore(); } catch (_) {}
+    }
+    if (!db || !email || !docUrl) {
+        return Promise.reject(new Error('aiflowSendMaterialEmailFromBrowser: need Firestore, email, and document URL'));
+    }
+    var docForHtml = doc;
+    if (!docForHtml && idLinks[0]) {
+        docForHtml = { url: idLinks[0].url, name: idLinks[0].title || 'link', fileName: '' };
+    }
+    var leadRef = db.collection('freeMaterialLeads').doc();
+    var subject = _aiflowTrimString(cfg.emailSubject || '') || ('AIFLOWTIME — ' + (cfg.materialTitle || '你的免費資料'));
+    var htmlBody = _buildFreeMaterialEmailHtml(name, docForHtml, cfg);
+    var useAttachment = _aiflowMailShouldAttachFile(cfg, attachUrl);
+    var attachFileName = docName || 'document';
+    if (!/\.\w{2,5}$/.test(attachFileName)) attachFileName += '.pdf';
+    var meta = opts.meta || {};
+    var leadData = {
+        name: name,
+        email: email,
+        materialTitle: cfg.materialTitle || '',
+        documentName: docName,
+        documentUrl: docUrl,
+        leadDefinitionId: _aiflowTrimString(cfg.leadDefinitionId || ''),
+        leadDefinitionType: _aiflowTrimString(cfg.leadDefinitionType || 'free-material'),
+        leadDefinitionName: _aiflowTrimString(cfg.leadDefinitionName || ''),
+        submissionSource: String(meta.submissionSource || ''),
+        pageKey: meta.pageKey || '',
+        pagePath: meta.pagePath || (typeof window !== 'undefined' ? window.location.pathname : ''),
+        pageTitle: meta.pageTitle || (typeof document !== 'undefined' ? document.title : ''),
+        sectionId: meta.sectionId || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        deliveryIncludeDocuments: cfg.deliveryIncludeDocuments !== false,
+        deliveryIncludeLinks: !!cfg.deliveryIncludeLinks,
+        identityLinks: idLinks.slice()
+    };
+    leadData.mailDocId = leadRef.id;
+    if (opts.consentAccepted !== undefined) leadData.consentAccepted = !!opts.consentAccepted;
+    var leadId = leadRef.id;
+    return aiflowFetchOutboundEmailSettings(db).then(function(ob) {
+        var mailData = {
+            to: [email],
+            message: {
+                subject: subject,
+                html: htmlBody
+            }
+        };
+        if (useAttachment) {
+            mailData.message.attachments = [{ filename: attachFileName, path: attachUrl }];
+        }
+        if (ob && ob.outboundFrom) mailData.from = ob.outboundFrom;
+        if (ob && ob.outboundReplyTo) mailData.replyTo = ob.outboundReplyTo;
+        return Promise.all([
+            leadRef.set(leadData),
+            db.collection('mail').doc(leadRef.id).set(mailData)
+        ]);
+    }).then(function() {
+        return { leadId: leadId };
+    });
+}
+
+/** Queue a WhatsApp message for future automation (Meta verification pending). */
+function aiflowQueueWhatsappOutreach(opts) {
+    opts = opts || {};
+    var phone = String(opts.phone || '').trim();
+    var body = String(opts.body || '').trim();
+    if (!phone || !body) return Promise.resolve(false);
+    var db = opts.db;
+    if (!db) {
+        try { db = firebase.firestore(); } catch (_) {}
+    }
+    if (!db) return Promise.resolve(false);
+    return db.collection('whatsappOutreachQueue').add({
+        toPhone: phone,
+        body: body,
+        leadDefinitionId: _aiflowTrimString(opts.leadDefinitionId || ''),
+        source: String(opts.source || 'lead-magnet'),
+        documentUrl: String(opts.documentUrl || ''),
+        contactName: String(opts.contactName || ''),
+        status: 'pending',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function() { return true; }).catch(function(err) {
+        console.warn('[whatsappOutreachQueue]', err);
+        return false;
+    });
 }
 
 function _submitFreeMaterialRequest(e) {
@@ -1002,71 +2010,58 @@ function _submitFreeMaterialRequest(e) {
     status.className = 'af-free-material-status';
 
     var meta = _aiflowFreeMaterialState.meta || {};
-    var leadData = {
+    aiflowSendMaterialEmailFromBrowser({
         name: name,
         email: email,
-        materialTitle: cfg.materialTitle || '',
-        documentName: docName,
-        documentUrl: docUrl,
-        pageKey: meta.pageKey || '',
-        pagePath: meta.pagePath || window.location.pathname,
-        pageTitle: meta.pageTitle || document.title,
-        sectionId: meta.sectionId || '',
+        cfg: cfg,
+        doc: doc,
+        db: db,
         consentAccepted: consentAccepted,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    var subject = cfg.emailSubject || ('AIFLOWTIME — ' + (cfg.materialTitle || '你的免費資料'));
-    var htmlBody = _buildFreeMaterialEmailHtml(name, doc, cfg);
-
-    var attachments = [];
-    if (docUrl) {
-        var attachFileName = docName || 'document';
-        if (!/\.\w{2,5}$/.test(attachFileName)) attachFileName += '.pdf';
-        attachments.push({ filename: attachFileName, path: docUrl });
-    }
-    var mailData = {
-        to: [email],
-        message: { subject: subject, html: htmlBody }
-    };
-    if (attachments.length) mailData.message.attachments = attachments;
-
-    var leadRef = db.collection('freeMaterialLeads').doc();
-    leadData.mailDocId = leadRef.id;
-    var formMirrorPromise = Promise.resolve();
-    if (typeof saveFormSubmissionMirror === 'function') {
-        formMirrorPromise = saveFormSubmissionMirror({
-            formType: 'free-material',
-            sourceKey: 'free-material-modal',
-            sourceLabel: '免費資料下載',
-            sourcePage: meta.pageTitle || document.title || '',
-            sourcePath: meta.pagePath || window.location.pathname,
-            sourceUrl: window.location.href,
-            sourceCollection: 'freeMaterialLeads',
-            sourceDocId: leadRef.id,
-            contactName: name,
-            email: email,
-            answers: {
-                materialTitle: cfg.materialTitle || '',
-                documentName: docName,
-                pageKey: meta.pageKey || '',
-                sectionId: meta.sectionId || '',
-                consentAccepted: consentAccepted
-            }
-        }, { db: db });
-    }
-
-    Promise.all([
-        leadRef.set(leadData),
-        db.collection('mail').doc(leadRef.id).set(mailData),
-        formMirrorPromise
-    ]).then(function() {
+        meta: {
+            submissionSource: 'free-material-modal',
+            pageKey: meta.pageKey || '',
+            pagePath: meta.pagePath || window.location.pathname,
+            pageTitle: meta.pageTitle || document.title,
+            sectionId: meta.sectionId || ''
+        }
+    }).then(function(res) {
+        var leadId = res && res.leadId;
+        if (typeof saveFormSubmissionMirror === 'function' && leadId) {
+            return saveFormSubmissionMirror({
+                formType: 'free-material',
+                sourceKey: cfg.leadDefinitionId ? ('lead-definition:' + cfg.leadDefinitionId) : 'free-material-modal',
+                sourceLabel: cfg.leadDefinitionName || cfg.materialTitle || '免費資料下載',
+                sourcePage: meta.pageTitle || document.title || '',
+                sourcePath: meta.pagePath || window.location.pathname,
+                sourceUrl: window.location.href,
+                sourceCollection: 'freeMaterialLeads',
+                sourceDocId: leadId,
+                leadDefinitionId: cfg.leadDefinitionId || '',
+                leadDefinitionType: cfg.leadDefinitionType || 'free-material',
+                leadDefinitionName: cfg.leadDefinitionName || '',
+                contactName: name,
+                email: email,
+                answers: {
+                    leadDefinitionName: cfg.leadDefinitionName || '',
+                    materialTitle: cfg.materialTitle || '',
+                    documentName: docName,
+                    pageKey: meta.pageKey || '',
+                    sectionId: meta.sectionId || '',
+                    consentAccepted: consentAccepted
+                }
+            }, { db: db });
+        }
+    }).then(function() {
         status.textContent = cfg.successMessage || '已寄送，請查看你的 email。';
         status.className = 'af-free-material-status success';
         submitBtn.disabled = false;
         _aiflowFreeMaterialState.busy = false;
         _aiflowFreeMaterialState.selectedDoc = null;
-        setTimeout(closeFreeMaterialModal, 1600);
+        var nextUrl = _aiflowTrimString(cfg.redirectUrl || '');
+        setTimeout(function() {
+            closeFreeMaterialModal();
+            if (nextUrl) window.location.href = nextUrl;
+        }, 1600);
     }).catch(function(err) {
         status.textContent = '寄送失敗，請稍後再試。';
         status.className = 'af-free-material-status error';

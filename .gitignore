@@ -45,6 +45,7 @@ elevator-action-gb/*.db
 elevator-action-gb/*.db-shm
 elevator-action-gb/*.db-wal
 extensions/
+scripts/backups/
 
 # Build outputs (if any)
 dist/

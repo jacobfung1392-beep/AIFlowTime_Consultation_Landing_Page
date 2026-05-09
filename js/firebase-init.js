@@ -45,7 +45,9 @@ function initFirebase(callback, opts) {
                 var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                 var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-                var settings = { merge: true };
+                // Do not use merge:true here — SDK defaults already enable auto-detect long polling,
+                // and merging would set both long-polling options and throw.
+                var settings = {};
                 if (isSafari || isIOS) {
                     settings.experimentalForceLongPolling = true;
                 } else {

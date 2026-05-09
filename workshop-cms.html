@@ -826,6 +826,40 @@
             background: linear-gradient(to right, rgba(217,119,87,0.3), transparent);
         }
         .ws-form-section-title .section-icon { font-size: 15px; }
+        .ws-form-section-title.with-action::after { display: none; }
+        .ws-section-title-label { display: inline-flex; align-items: center; gap: 10px; }
+        .ws-section-title-line { flex: 1; height: 2.5px; border-radius: 2px; background: linear-gradient(to right, rgba(217,119,87,0.3), transparent); }
+        .finished-classes-btn { height: 32px; padding: 0 12px; font-size: 12px; white-space: nowrap; margin-left: 12px; }
+        .finished-classes-summary { font-size: 13px; color: var(--text-light); line-height: 1.7; margin: -4px 0 14px; }
+        .finished-classes-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+        .finished-classes-count { font-size: 13px; font-weight: 700; color: var(--text-light); margin-right: auto; }
+        .finished-classes-list { display: flex; flex-direction: column; gap: 10px; }
+        .finished-class-card {
+            border: 1.5px solid var(--bg-off); border-radius: 14px; background: var(--white);
+            overflow: hidden;
+        }
+        .finished-class-header { padding: 14px 16px; display: flex; gap: 14px; align-items: center; justify-content: space-between; cursor: pointer; }
+        .finished-class-header:hover { background: rgba(0,0,0,0.02); }
+        .finished-class-main { min-width: 0; flex: 1; }
+        .finished-class-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+        .finished-class-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .finished-class-badge {
+            display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px;
+            font-size: 11px; font-weight: 700; background: var(--bg-pampas); color: var(--text-light);
+        }
+        .finished-class-badge.visible { background: var(--green-bg); color: var(--green); }
+        .finished-class-badge.hidden { background: var(--red-bg); color: var(--red); }
+        .finished-class-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .finished-class-toggle { font-size: 14px; color: var(--accent); font-weight: 800; transition: transform 0.2s; flex-shrink: 0; }
+        .finished-class-card.open .finished-class-toggle { transform: rotate(90deg); }
+        .finished-class-body { max-height: 0; overflow: hidden; transition: max-height 0.28s ease; border-top: 1px solid transparent; }
+        .finished-class-card.open .finished-class-body { max-height: 1600px; border-top-color: rgba(0,0,0,0.06); }
+        .finished-class-members { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.015); }
+        .finished-member-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--bg-off); border-radius: 10px; background: var(--white); }
+        .finished-member-info { flex: 1; min-width: 0; }
+        .finished-member-name { font-size: 13px; font-weight: 800; color: var(--text); }
+        .finished-member-meta { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 2px; font-size: 11px; color: var(--text-light); font-weight: 600; }
+        .finished-member-empty { padding: 10px 12px; color: var(--text-light); font-size: 12px; font-weight: 600; }
 
         /* Form actions */
         .form-actions { display: flex; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1.5px solid rgba(0,0,0,0.06); flex-wrap: wrap; }
@@ -964,7 +998,7 @@
             gap: 24px;
             align-items: start;
         }
-        /* Definitions tab: break out of 900px .container (~1.4× → 1260px) for wider Lead Settings */
+        /* Lead Magnets tab: break out of 900px .container (~1.4× → 1260px) for wider Lead Settings */
         #tabLeadsDefinitions.lead-definitions-wide {
             width: min(1260px, calc(100vw - 32px));
             margin-left: 50%;
@@ -1150,8 +1184,8 @@
         }
         .lead-def-hero-grid {
             display: grid;
-            grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
-            gap: 24px;
+            grid-template-columns: minmax(210px, 280px) minmax(0, 1fr);
+            gap: 26px 30px;
             align-items: start;
         }
         .lead-def-hero-grid .lead-def-field--media .lead-image-zone {
@@ -1188,6 +1222,85 @@
         }
         .lead-def-hero-fields {
             min-height: 100%;
+        }
+        .lead-def-identity-main {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-width: 0;
+        }
+        .lead-def-identity-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .lead-def-identity-grid--meta {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: stretch;
+        }
+        .lead-def-field--name input {
+            min-height: 48px;
+            font-size: 16px;
+            font-weight: 650;
+        }
+        .lead-def-identity-main .lead-def-checkbox {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            min-height: 100%;
+        }
+        .lead-def-delivery-card {
+            grid-column: 1 / -1;
+            margin-top: 4px;
+            padding: 18px;
+            border: 1px solid rgba(217,119,87,0.14);
+            border-radius: 16px;
+            background: linear-gradient(180deg, rgba(252,246,242,0.66), rgba(255,255,255,0.92));
+        }
+        .lead-def-delivery-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .lead-def-delivery-title {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 3px;
+        }
+        .lead-def-delivery-sub {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-light);
+        }
+        .lead-def-delivery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        .lead-def-delivery-option {
+            min-width: 0;
+        }
+        .lead-def-delivery-option .lead-def-checkbox {
+            width: 100%;
+            max-width: none;
+            margin: 0 0 10px;
+        }
+        .lead-def-delivery-panel {
+            padding: 14px;
+            border: 1px solid rgba(17,17,17,0.06);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.76);
+        }
+        .lead-def-identity-links-wrap {
+            margin-top: 0;
+            padding: 14px;
+            border: 1px solid rgba(17,17,17,0.06);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.76);
         }
         .lead-def-hero-primary,
         .lead-def-hero-bottom {
@@ -1552,7 +1665,11 @@
             }
             .lead-def-list { max-height: none; padding-right: 0; }
             .lead-def-hero-grid { grid-template-columns: 1fr; }
-            .lead-def-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .lead-def-grid,
+            .lead-def-identity-grid,
+            .lead-def-identity-grid--meta,
+            .lead-def-delivery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .lead-def-identity-grid--meta .lead-def-checkbox { grid-column: 1 / -1; }
             #tabLeadsDefinitions.lead-definitions-wide {
                 width: 100%;
                 margin-left: 0;
@@ -1564,8 +1681,12 @@
         @media (max-width: 720px) {
             .lead-def-grid,
             .lead-def-grid--two,
+            .lead-def-identity-grid,
+            .lead-def-identity-grid--meta,
+            .lead-def-delivery-grid,
             .lead-def-mini-item,
             .lead-doc-item { grid-template-columns: 1fr; }
+            .lead-def-delivery-head { flex-direction: column; }
             .lead-def-field-head,
             .lead-def-editor-header {
                 flex-direction: column;
@@ -1670,7 +1791,6 @@
         .forms-type-badge.type-workshop-waitlist { background: rgba(255,152,0,0.14); color: #E65100; }
         .forms-type-badge.type-lead-magnet { background: rgba(76,175,80,0.12); color: #2E7D32; }
         .forms-type-badge.type-quiz-lead { background: rgba(156,39,176,0.12); color: #7B1FA2; }
-        .forms-type-badge.type-free-material { background: rgba(0,150,136,0.12); color: #00796B; }
         .forms-source-badge { background: rgba(0,0,0,0.06); color: var(--text-light); }
         .forms-inbox-name { font-size: 18px; font-weight: 800; color: var(--text); margin: 0; }
         .forms-inbox-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--text-light); margin-bottom: 12px; }
@@ -2028,6 +2148,7 @@
         .ws-applicants-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
         .ws-applicants-card.open .ws-applicants-body { max-height: 5000px; overflow: visible; }
         .ws-applicants-card.open .member-toggle { transform: rotate(45deg); }
+        .ws-applicants-card.open .ws-applicants-header .ws-header-cap-wrap { display: none; }
         .ws-applicants-card.open .bulk-toolbar-normal { display: flex; }
         .ws-applicants-card.open .ws-filter-bar-row { display: flex; }
         .ws-applicants-card.open .bulk-toolbar-deleted { display: none; }
@@ -2050,6 +2171,8 @@
         .ws-subgroup-add-btn:hover, .ws-subgroup-notes-btn:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
         .ws-subgroup-notes-btn { border-color: rgba(76,175,80,0.3); color: var(--green); background: rgba(76,175,80,0.06); }
         .ws-subgroup-notes-btn:hover { background: var(--green); border-color: var(--green); color: var(--white); }
+        .ws-subgroup-finished-btn { border-color: rgba(230,81,0,0.30); color: #E65100; background: rgba(230,81,0,0.06); }
+        .ws-subgroup-finished-btn:hover { background: #E65100; border-color: #E65100; color: var(--white); }
 
         /* Send Notes modal */
         .send-notes-modal-overlay { display: none; position: fixed; inset: 0; z-index: 1001; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; padding: 20px; }
@@ -3211,11 +3334,14 @@
             <div class="ws-calendar-wrap" id="wsCalendarWrap">
                 <div class="ws-cal-header">
                     <div class="ws-cal-title">📅 工作坊日曆</div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="runSyncWorkshopsToGoogleCalendar()" title="將 Firestore 工作坊場次同步到 Google（僅限專用行事曆內由我們建立的活動）">↗ 同步到 Google</button>
                     <div class="ws-cal-nav">
                         <button class="ws-cal-nav-btn" onclick="calNav(-1)">‹</button>
                         <span class="ws-cal-month" id="calMonthLabel"></span>
                         <button class="ws-cal-nav-btn" onclick="calNav(1)">›</button>
                         <button class="ws-cal-today-btn" onclick="calToday()">今天</button>
+                    </div>
                     </div>
                 </div>
                 <div class="ws-cal-grid" id="calGrid"></div>
@@ -3348,9 +3474,8 @@
                         <select class="mf-select" id="formsTypeSelect" onchange="setFormsInboxTypeFilter(this.value)">
                             <option value="all">全部</option>
                             <option value="quiz-lead">Quiz Leads</option>
-                            <option value="workshop-waitlist">Workshop Waitlist</option>
-                            <option value="free-material">Free Material</option>
-                            <option value="lead-magnet">Lead Magnet</option>
+                            <option value="workshop-waitlist">Waiting List</option>
+                            <option value="lead-magnet">Lead Magnets</option>
                         </select>
                     </div>
                     <div class="forms-status-multi-wrap" id="formsStatusMultiWrap">
@@ -3376,9 +3501,10 @@
                     </div>
                     <div class="mf-group">
                         <span class="mf-label">來源頁面</span>
-                        <select class="mf-select" id="formsSourceFilter" onchange="renderFormsInbox()">
+                        <select class="mf-select" id="formsSourceFilter" onchange="renderFormsInbox();syncFormsSourceVisitButton()">
                             <option value="all">全部</option>
                         </select>
+                        <button type="button" class="btn btn-sm btn-outline" id="formsSourceVisitBtn" onclick="visitSelectedFormsSource()" disabled>前往頁面</button>
                     </div>
                     <div class="mf-group">
                         <span class="mf-label">日期</span>
@@ -3560,6 +3686,21 @@
                         <span style="font-size:13px;color:var(--text-light);white-space:nowrap;">小時自動關閉報名</span>
                     </div>
                 </div>
+
+                <hr style="border:none;border-top:1px solid var(--bg-off);margin:28px 0 20px;">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;">Google 日曆同步</h3>
+                <div style="padding:12px 16px;background:var(--bg-pampas);border-radius:10px;font-size:12px;color:var(--text-light);margin-bottom:16px;line-height:1.8;">
+                    使用 <strong>OAuth</strong> 連接你的 Google 帳戶（例如 jacobfung@aiflowtime.com）。首次連線會自動建立專用行事曆「AIFlowTime Workshops」——
+                    <strong>不會刪除或覆寫你其他行事曆</strong> 的活動；同步僅會新增／更新／刪除由我們寫入且已追蹤的活動。
+                    推送以 <strong>Firestore 工作坊資料為準</strong>。
+                </div>
+                <div id="gcalSettingsStatus" style="font-size:13px;margin-bottom:12px;color:var(--text);">尚未載入狀態…</div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                    <button type="button" class="btn btn-sm" onclick="startGoogleCalendarOAuth()">連接 Google 日曆</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="runSyncWorkshopsToGoogleCalendar()">推送：以資料庫覆蓋日曆</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="disconnectGoogleCalendarCms()">中斷連接</button>
+                </div>
+                <p id="gcalSettingsHint" style="font-size:12px;color:var(--text-light);margin-top:8px;line-height:1.6;"></p>
             </div>
         </div>
 
@@ -3568,7 +3709,7 @@
         <div class="mega-section" id="sectionLeads">
             <div class="cms-tabs">
                 <button class="cms-tab active" data-lead-tab="inbox" onclick="switchLeadTab('inbox')">Inbox</button>
-                <button class="cms-tab" data-lead-tab="definitions" onclick="switchLeadTab('definitions')">Definitions</button>
+                <button class="cms-tab" data-lead-tab="definitions" onclick="switchLeadTab('definitions')">Lead Magnets</button>
                 <button class="cms-tab" data-lead-tab="email-outbound" onclick="switchLeadTab('email-outbound')">寄件 Email</button>
                 <button class="cms-tab" data-lead-tab="quiz-dashboard" onclick="switchLeadTab('quiz-dashboard')">AI 能力測驗數據</button>
             </div>
@@ -3613,9 +3754,8 @@
                         <select class="mf-select" id="leadDefinitionTypeFilter" onchange="renderLeadDefinitionList()">
                             <option value="all">全部</option>
                             <option value="quiz-lead">Quiz Leads</option>
-                            <option value="workshop-waitlist">Workshop Waitlist</option>
-                            <option value="free-material">Free Material</option>
-                            <option value="lead-magnet">Lead Magnet</option>
+                            <option value="workshop-waitlist">Waiting List</option>
+                            <option value="lead-magnet">Lead Magnets</option>
                         </select>
                     </div>
                     <div class="mf-group">
@@ -3667,43 +3807,19 @@
                                             <div class="lead-image-zone" id="leadDefinitionImagePicker" onclick="openLeadAssetPicker('image')"></div>
                                             <input type="hidden" id="leadDefinitionImageUrlInput">
                                             <div class="lead-field-helper">點擊上方圖片區即可打開媒體池；可重用現有圖片，或在彈出視窗即場上傳新圖片。</div>
-                                            <div class="lead-def-field" style="margin-top:16px;">
-                                                <label class="lead-def-checkbox" style="margin-bottom:8px;display:block;">
-                                                    <input type="checkbox" id="leadDefinitionDeliveryIncludeDocumentsInput" checked onchange="onLeadDefinitionIncludeDocumentsToggle()">
-                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">提供文件</span><span class="lead-def-checkbox-sub">勾選且文件為 PDF 等格式時，Trigger Email 會嘗試附檔。</span></span>
-                                                </label>
-                                                <div id="leadDefinitionDocumentsPanel" class="lead-def-delivery-doc-panel is-open">
-                                                    <div class="lead-def-field-head">
-                                                        <span class="lead-def-field-inline-title">提供給用戶的文件與連結</span>
-                                                        <button class="btn btn-outline btn-sm" type="button" onclick="openLeadAssetPicker('document')">打開文件池</button>
-                                                    </div>
-                                                    <div id="leadDefinitionDocumentsList" class="lead-doc-manager-list"></div>
-                                                    <div class="lead-field-helper">文件來源與 page layout editor 共用同一個文件池；可多次加入不同附件。</div>
-                                                </div>
-                                                <label class="lead-def-checkbox" style="margin-bottom:8px;display:block;margin-top:14px;">
-                                                    <input type="checkbox" id="leadDefinitionDeliveryIncludeLinksInput" onchange="onLeadDefinitionIncludeLinksToggle()">
-                                                    <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">提供連結</span><span class="lead-def-checkbox-sub">可新增多組標題與網址；兩者可與文件並存。</span></span>
-                                                </label>
-                                                <div id="leadDefinitionIdentityLinksWrap" style="display:none;margin-top:10px;padding:12px;border:1px solid var(--bg-off);border-radius:10px;background:var(--bg-pampas);">
-                                                    <div style="font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:8px;">連結列表（標題 + 網址）</div>
-                                                    <div id="leadDefinitionIdentityLinksList" class="lead-def-identity-links-list"></div>
-                                                    <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addLeadIdentityLinkRow()">＋ 新增連結</button>
-                                                </div>
-                                            </div>
                                         </div>
-                                        <div class="lead-def-hero-fields lead-def-stack">
-                                            <div class="lead-def-hero-primary">
-                                                <div class="lead-def-field">
-                                                    <label>內部名稱</label>
-                                                    <input type="text" id="leadDefinitionNameInput" placeholder="例如：2026 AI 指南（首頁）">
-                                                </div>
+                                        <div class="lead-def-identity-main">
+                                            <div class="lead-def-field lead-def-field--name">
+                                                <label>內部名稱</label>
+                                                <input type="text" id="leadDefinitionNameInput" placeholder="例如：2026 AI 指南（首頁）">
+                                            </div>
+                                            <div class="lead-def-identity-grid lead-def-identity-grid--meta">
                                                 <div class="lead-def-field">
                                                     <label>類型</label>
                                                     <select class="mf-select" id="leadDefinitionTypeInput" onchange="renderLeadDefinitionEditorState()">
                                                         <option value="quiz-lead">Quiz Leads</option>
-                                                        <option value="workshop-waitlist">Workshop Waitlist</option>
-                                                        <option value="free-material">Free Material</option>
-                                                        <option value="lead-magnet">Lead Magnet</option>
+                                                        <option value="workshop-waitlist">Waiting List</option>
+                                                        <option value="lead-magnet">Lead Magnets</option>
                                                     </select>
                                                 </div>
                                                 <div class="lead-def-field">
@@ -3714,6 +3830,15 @@
                                                         <option value="archived">Archived</option>
                                                     </select>
                                                 </div>
+                                                <label class="lead-def-checkbox">
+                                                    <input type="checkbox" id="leadDefinitionPublicInput" checked>
+                                                    <span class="lead-def-checkbox-copy">
+                                                        <span class="lead-def-checkbox-title">允許前台讀取</span>
+                                                        <span class="lead-def-checkbox-sub">啟用後，網站前台可以使用這個 Lead 定義。</span>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div class="lead-def-identity-grid">
                                                 <div class="lead-def-field">
                                                     <label>圖片 Alt</label>
                                                     <input type="text" id="leadDefinitionImageAltInput" placeholder="圖片說明">
@@ -3723,14 +3848,40 @@
                                                     <textarea id="leadDefinitionPurposeNotesInput" rows="3" placeholder="例如：首頁 Hero lead、Linktree 免費指南"></textarea>
                                                 </div>
                                             </div>
-                                            <div class="lead-def-hero-bottom">
-                                                <label class="lead-def-checkbox">
-                                                    <input type="checkbox" id="leadDefinitionPublicInput" checked>
-                                                    <span class="lead-def-checkbox-copy">
-                                                        <span class="lead-def-checkbox-title">允許前台讀取</span>
-                                                        <span class="lead-def-checkbox-sub">啟用後，網站前台可以使用這個 Lead 定義。</span>
-                                                    </span>
-                                                </label>
+                                        </div>
+                                        <div class="lead-def-delivery-card">
+                                            <div class="lead-def-delivery-head">
+                                                <div>
+                                                    <div class="lead-def-delivery-title">交付內容</div>
+                                                    <div class="lead-def-delivery-sub">設定提交後要提供給用戶的文件或連結；兩者可以同時使用。</div>
+                                                </div>
+                                                <button class="btn btn-outline btn-sm" type="button" onclick="openLeadAssetPicker('document')">打開文件池</button>
+                                            </div>
+                                            <div class="lead-def-delivery-grid">
+                                                <div class="lead-def-delivery-option">
+                                                    <label class="lead-def-checkbox">
+                                                        <input type="checkbox" id="leadDefinitionDeliveryIncludeDocumentsInput" checked onchange="onLeadDefinitionIncludeDocumentsToggle()">
+                                                        <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">提供文件</span><span class="lead-def-checkbox-sub">勾選且文件為 PDF 等格式時，Trigger Email 會嘗試附檔。</span></span>
+                                                    </label>
+                                                    <div id="leadDefinitionDocumentsPanel" class="lead-def-delivery-doc-panel lead-def-delivery-panel is-open">
+                                                        <div class="lead-def-field-head">
+                                                            <span class="lead-def-field-inline-title">文件列表</span>
+                                                        </div>
+                                                        <div id="leadDefinitionDocumentsList" class="lead-doc-manager-list"></div>
+                                                        <div class="lead-field-helper">文件來源與 page layout editor 共用同一個文件池；可多次加入不同附件。</div>
+                                                    </div>
+                                                </div>
+                                                <div class="lead-def-delivery-option">
+                                                    <label class="lead-def-checkbox">
+                                                        <input type="checkbox" id="leadDefinitionDeliveryIncludeLinksInput" onchange="onLeadDefinitionIncludeLinksToggle()">
+                                                        <span class="lead-def-checkbox-copy"><span class="lead-def-checkbox-title">提供連結</span><span class="lead-def-checkbox-sub">可新增多組標題與網址；兩者可與文件並存。</span></span>
+                                                    </label>
+                                                    <div id="leadDefinitionIdentityLinksWrap" class="lead-def-identity-links-wrap" style="display:none;">
+                                                        <div class="lead-def-field-inline-title" style="margin-bottom:8px;">連結列表（標題 + 網址）</div>
+                                                        <div id="leadDefinitionIdentityLinksList" class="lead-def-identity-links-list"></div>
+                                                        <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="addLeadIdentityLinkRow()">＋ 新增連結</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -3765,11 +3916,11 @@
                                         </div>
                                         <div class="lead-def-grid lead-def-grid--two">
                                             <div class="lead-def-field">
-                                                <label>CTA 文字（Free Material 用）</label>
+                                                <label>CTA 文字（Lead Magnet 下載區塊用）</label>
                                                 <input type="text" id="leadDefinitionCtaTextInput" placeholder="領取免費資料">
                                             </div>
                                             <div class="lead-def-field">
-                                                <label>區塊標籤（Free Material 用）</label>
+                                                <label>區塊標籤（Lead Magnet 下載區塊用）</label>
                                                 <input type="text" id="leadDefinitionSectionLabelInput" placeholder="FREE RESOURCE">
                                             </div>
                                         </div>
@@ -3956,9 +4107,9 @@
         <div class="modal-box">
             <button class="modal-close" onclick="closeWorkshopImagePicker()">&times;</button>
             <h3>選擇媒體</h3>
-            <p class="media-picker-intro">重用 page layout editor 的媒體池，或直接上傳新圖片到工作坊封面。</p>
+            <p class="media-picker-intro">重用 page layout editor 的媒體池，或一次上傳多張新圖片到工作坊封面媒體池。</p>
             <div class="media-picker-toolbar">
-                <button type="button" class="btn" onclick="workshopImagePickerChooseUpload()">上傳新圖片</button>
+                <button type="button" class="btn" onclick="workshopImagePickerChooseUpload()">上傳新圖片（可多選）</button>
                 <button type="button" class="btn btn-outline" onclick="loadWorkshopImageLibrary(true)">重新整理媒體庫</button>
                 <select id="wsMediaPickerSort" class="media-picker-select" onchange="renderWorkshopImageLibrary()">
                     <option value="newest">最新上傳</option>
@@ -3967,10 +4118,25 @@
                     <option value="name-desc">名稱 Z → A</option>
                 </select>
                 <input type="text" id="wsMediaPickerSearch" class="media-picker-search" placeholder="搜尋檔名..." oninput="renderWorkshopImageLibrary()">
-                <input type="file" id="wsMediaPickerUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" style="display:none" onchange="workshopImagePickerUploadSelected(this)">
+                <input type="file" id="wsMediaPickerUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" multiple style="display:none" onchange="workshopImagePickerUploadSelected(this)">
             </div>
             <div class="media-picker-status" id="wsMediaPickerStatus">載入媒體庫中...</div>
             <div class="media-picker-grid" id="wsMediaPickerGrid"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="finishedClassesModal" onclick="if(event.target===this) closeFinishedClassesModal()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeFinishedClassesModal()">&times;</button>
+            <h3 id="finishedClassesTitle">已完結課堂</h3>
+            <p class="finished-classes-summary">
+                這裡只列出此工作坊卡片內日期已過的課堂。這些課堂會從編輯卡片和公開網站隱藏，只保留於歷史記錄。
+            </p>
+            <div class="finished-classes-toolbar">
+                <span class="finished-classes-count" id="finishedClassesCount">讀取中…</span>
+                <button type="button" class="btn btn-outline btn-sm" onclick="exportFinishedClassesExcel()">匯出 Excel</button>
+            </div>
+            <div class="finished-classes-list" id="finishedClassesList"></div>
         </div>
     </div>
 
@@ -3991,9 +4157,9 @@
         <div class="modal-box">
             <button class="modal-close" onclick="closeLeadAssetPicker()">&times;</button>
             <h3 id="leadAssetPickerTitle">選擇圖片</h3>
-            <p class="media-picker-intro" id="leadAssetPickerIntro">從與 page layout editor 相同的媒體池選擇圖片，或直接上傳新圖片。</p>
+            <p class="media-picker-intro" id="leadAssetPickerIntro">從與 page layout editor 相同的媒體池選擇圖片，或一次上傳多張新圖片。</p>
             <div class="media-picker-toolbar">
-                <button type="button" class="btn" id="leadAssetPickerUploadBtn" onclick="leadAssetPickerChooseUpload()">上傳新圖片</button>
+                <button type="button" class="btn" id="leadAssetPickerUploadBtn" onclick="leadAssetPickerChooseUpload()">上傳新圖片（可多選）</button>
                 <button type="button" class="btn btn-outline" onclick="loadLeadAssetLibrary(true)">重新整理媒體池</button>
                 <select id="leadAssetPickerSort" class="media-picker-select" onchange="renderLeadAssetLibrary()">
                     <option value="newest">最新上傳</option>
@@ -4002,7 +4168,7 @@
                     <option value="name-desc">名稱 Z → A</option>
                 </select>
                 <input type="text" id="leadAssetPickerSearch" class="media-picker-search" placeholder="搜尋檔名..." oninput="renderLeadAssetLibrary()">
-                <input type="file" id="leadAssetPickerUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" style="display:none" onchange="leadAssetPickerUploadSelected(this)">
+                <input type="file" id="leadAssetPickerUploadInput" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml" multiple style="display:none" onchange="leadAssetPickerUploadSelected(this)">
                 <input type="file" id="leadAssetPickerDocUploadInput" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip" multiple style="display:none" onchange="leadAssetPickerDocUploadSelected(this)">
             </div>
             <div class="media-picker-status" id="leadAssetPickerStatus">載入媒體池中...</div>
@@ -4201,7 +4367,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js?v=10"></script>
+<script src="/js/shared-utils.js?v=31"></script>
 
 <script>
 // Fallback definitions in case shared-utils.js fails to load on Safari/iOS
@@ -4258,6 +4424,177 @@ function syncWorkshopEnrollmentCounters(workshopId) {
     }).then(function(res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
+    });
+}
+
+/** Google Calendar CMS API via same-origin /api/cmsGoogleCalendar (Hosting rewrite → avoids cloudfunctions.net CORS). */
+function callCmsGoogleCalendarApi(action, extraData) {
+    if (!auth || !auth.currentUser) return Promise.reject(new Error('請先登入'));
+    var payload = Object.assign({ action: String(action || '').trim() }, extraData || {});
+    return auth.currentUser.getIdToken(true).then(function(token) {
+        return fetch('/api/cmsGoogleCalendar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ data: payload })
+        });
+    }).then(function(res) {
+        return res.text().then(function(text) {
+            if (res.status === 404) {
+                throw new Error('日曆 API 尚未部署。請設定 GOOGLE_CALENDAR_CLIENT_SECRET 與 GOOGLE_CALENDAR_CLIENT_ID 後執行 npx firebase deploy --only functions');
+            }
+            var body = {};
+            try {
+                body = text ? JSON.parse(text) : {};
+            } catch (parseErr) {
+                if (!res.ok) throw new Error('伺服器回應異常（HTTP ' + res.status + '）');
+                throw parseErr;
+            }
+            if (!res.ok) {
+                var msg = (body.error && body.error.message) || res.statusText || ('HTTP ' + res.status);
+                throw new Error(msg);
+            }
+            if (body.error) {
+                throw new Error(body.error.message || 'Request error');
+            }
+            return body.result;
+        });
+    });
+}
+
+function loadGoogleCalendarSettingsUi() {
+    var st = document.getElementById('gcalSettingsStatus');
+    var hint = document.getElementById('gcalSettingsHint');
+    if (!db || !st) return;
+    st.textContent = '讀取中…';
+
+    function renderStatus(meta, apiStatus) {
+        var lines = [];
+        if (apiStatus) {
+            if (apiStatus.configured) {
+                lines.push('Google OAuth：已由後端設定完成。');
+            } else {
+                lines.push('<span style="color:#b45309;">Google OAuth 後端尚未設定完成，請聯絡系統管理員。</span>');
+            }
+        }
+        if (meta.connected) {
+            var lastPush = '';
+            if (meta.lastPushAt && typeof meta.lastPushAt.toDate === 'function') {
+                lastPush = meta.lastPushAt.toDate().toLocaleString();
+            }
+            lines.push('已連接：<strong>' + escHtml(String(meta.connectedEmail || '')) + '</strong>');
+            lines.push('專用行事曆 ID：<code style="font-size:11px;word-break:break-all;">' + escHtml(String(meta.targetCalendarId || '')) + '</code>');
+            if (lastPush) lines.push('上次推送：' + escHtml(lastPush));
+        } else {
+            lines.push('尚未連接 Google 日曆。');
+        }
+        st.innerHTML = lines.join('<br>');
+    }
+
+    db.collection('siteSettings').doc('googleCalendar').get().then(function(doc) {
+        var d = doc.exists ? (doc.data() || {}) : {};
+        renderStatus(d, null);
+        if (hint) {
+            hint.textContent = '按「連接 Google 日曆」後，請選擇要同步的 Google 帳戶並授權。';
+        }
+        return callCmsGoogleCalendarApi('status').then(function(apiStatus) {
+            renderStatus(d, apiStatus || null);
+        }).catch(function(apiErr) {
+            if (hint) hint.innerHTML += '<br><span style="color:#b45309;">日曆 API 狀態暫時無法讀取：' + escHtml(apiErr.message || String(apiErr)) + '</span>';
+        });
+    }).catch(function(e) {
+        st.textContent = '無法讀取狀態：' + (e.message || String(e));
+    });
+}
+
+function startGoogleCalendarOAuth() {
+    showLoadingOverlay('取得 Google 授權網址…');
+    callCmsGoogleCalendarApi('oauthUrl').then(function(res) {
+        hideLoadingOverlay();
+        if (res && res.url) window.location.href = res.url;
+        else showToast('未取得授權網址', 'error');
+    }).catch(function(e) {
+        hideLoadingOverlay();
+        showToast('失敗：' + e.message, 'error');
+    });
+}
+
+function runSyncWorkshopsToGoogleCalendar() {
+    if (!confirm('以 Firestore 工作坊資料更新 Google「AIFlowTime Workshops」行事曆？\n僅會變更由本 CMS 建立／追蹤的活動，不會清空你 Google 帳戶內其他行事曆。')) return;
+    showLoadingOverlay('同步到 Google 日曆…');
+    callCmsGoogleCalendarApi('sync').then(function(res) {
+        hideLoadingOverlay();
+        showToast('完成：新增 ' + (res.created || 0) + '、更新 ' + (res.updated || 0) + '、移除過時 ' + (res.deleted || 0));
+        loadGoogleCalendarSettingsUi();
+        loadAllWorkshops();
+    }).catch(function(e) {
+        hideLoadingOverlay();
+        showToast('同步失敗：' + e.message, 'error');
+    });
+}
+
+var _gcalAutoSyncTimer = null;
+var _gcalAutoSyncInFlight = false;
+var _gcalAutoSyncQueued = false;
+function scheduleAutoGoogleCalendarSync(reason) {
+    if (_gcalAutoSyncTimer) clearTimeout(_gcalAutoSyncTimer);
+    _gcalAutoSyncQueued = true;
+    _gcalAutoSyncTimer = setTimeout(function() {
+        _gcalAutoSyncTimer = null;
+        runAutoGoogleCalendarSync(reason || 'workshop-save');
+    }, 900);
+}
+
+function runAutoGoogleCalendarSync(reason) {
+    if (!_gcalAutoSyncQueued && _gcalAutoSyncInFlight) return Promise.resolve(null);
+    if (_gcalAutoSyncInFlight) return Promise.resolve(null);
+    _gcalAutoSyncQueued = false;
+    _gcalAutoSyncInFlight = true;
+    return callCmsGoogleCalendarApi('sync', { reason: reason || 'auto' }).then(function(res) {
+        _gcalAutoSyncInFlight = false;
+        showToast('Google 日曆已自動同步：新增 ' + (res.created || 0) + '、更新 ' + (res.updated || 0) + '、移除 ' + (res.deleted || 0));
+        loadGoogleCalendarSettingsUi();
+        if (_gcalAutoSyncQueued) runAutoGoogleCalendarSync('queued');
+        return res;
+    }).catch(function(e) {
+        _gcalAutoSyncInFlight = false;
+        var msg = e && e.message ? e.message : String(e || '');
+        if (/Google Calendar is not connected|尚未部署|not configured|CLIENT_ID|secret|No target calendar/i.test(msg)) {
+            console.info('Google Calendar auto-sync skipped:', msg);
+        } else {
+            showToast('Google 日曆自動同步失敗：' + msg, 'error');
+        }
+        if (_gcalAutoSyncQueued) runAutoGoogleCalendarSync('queued');
+        return null;
+    });
+}
+
+function runPullGoogleCalendarToCms() {
+    if (!confirm('將 Google「AIFlowTime Workshops」行事曆內、由 CMS 同步建立的活動時間寫回 Firestore？\n會覆蓋對應場次的日期／時間。')) return;
+    showLoadingOverlay('從 Google 拉回…');
+    callCmsGoogleCalendarApi('pull').then(function(res) {
+        hideLoadingOverlay();
+        showToast('已更新 ' + (res.workshopsPatched || 0) + ' 份工作坊資料');
+        loadAllWorkshops();
+        renderCalendar();
+    }).catch(function(e) {
+        hideLoadingOverlay();
+        showToast('拉回失敗：' + e.message, 'error');
+    });
+}
+
+function disconnectGoogleCalendarCms() {
+    if (!confirm('中斷 Google 日曆連接？（只移除授權權杖；不會刪除 Google 上的行事曆。）')) return;
+    showLoadingOverlay('中斷中…');
+    callCmsGoogleCalendarApi('disconnect').then(function() {
+        hideLoadingOverlay();
+        showToast('已中斷');
+        loadGoogleCalendarSettingsUi();
+    }).catch(function(e) {
+        hideLoadingOverlay();
+        showToast('失敗：' + e.message, 'error');
     });
 }
 
@@ -4324,6 +4661,20 @@ function showDashboard(user) {
     } else if (typeof _applyWorkshopTabFromHash === 'function') {
         _applyWorkshopTabFromHash();
     }
+    try {
+        var gcalQ = new URLSearchParams(window.location.search || '');
+        if (gcalQ.get('gcal') === 'ok') {
+            switchTab('settings');
+            if (typeof loadGoogleCalendarSettingsUi === 'function') loadGoogleCalendarSettingsUi();
+            showToast('Google 日曆已連接（專用 AIFlowTime Workshops 行事曆）');
+            if (window.history.replaceState) window.history.replaceState(null, '', window.location.pathname + '#settings');
+        } else if (gcalQ.get('gcal') === 'err') {
+            switchTab('settings');
+            if (typeof loadGoogleCalendarSettingsUi === 'function') loadGoogleCalendarSettingsUi();
+            showToast('Google 連接失敗：' + (gcalQ.get('reason') || ''), 'error');
+            if (window.history.replaceState) window.history.replaceState(null, '', window.location.pathname + '#settings');
+        }
+    } catch (gcalErr) {}
     // Pre-load WhatsApp templates so they're ready when the user clicks a WA button
     db.collection('workshopSettings').doc('config').get().then(function(doc) {
         _wsSettings = doc.exists ? doc.data() : {};
@@ -5712,6 +6063,7 @@ function loadAllWorkshops() {
                 if (Array.isArray(d.rounds)) {
                     d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
                 }
+                d = _splitFinishedClassesFromWorkshop(doc.id, d, true).workshop;
                 if (Array.isArray(d.sessions)) {
                     d.sessions.forEach(function(s, i) { if (!s.id) s.id = sessionStableId(s, i); });
                 }
@@ -5731,6 +6083,7 @@ function loadAllWorkshops() {
             if (Array.isArray(d.rounds)) {
                 d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
             }
+            d = _splitFinishedClassesFromWorkshop(doc.id, d, true).workshop;
             var isArchived = d.archived === true;
             var item = buildWorkshopItem(doc.id, d);
             if (isArchived) {
@@ -5949,7 +6302,7 @@ function _renderWsBody(item) {
                     '<small style="color:#7A7A7A;font-size:11px;margin-top:2px;display:block;">如有填寫，工作坊卡片會以劃線方式顯示此金額</small>' +
                 '</div>' +
             '</div>' +
-            '<div class="ws-form-section"><div class="ws-form-section-title"><span class="section-icon">📅</span> 時間與地點</div></div>' +
+            '<div class="ws-form-section"><div class="ws-form-section-title with-action"><span class="ws-section-title-label"><span class="section-icon">📅</span> 時間與地點</span><span class="ws-section-title-line"></span><button type="button" class="btn btn-outline btn-sm finished-classes-btn" onclick="openFinishedClassesModal(event, \'' + id + '\')">已完結課堂</button></div></div>' +
             '<input type="hidden" name="date" value="' + escHtml(d.date || '') + '">' +
             '<input type="hidden" name="time" value="' + escHtml(d.time || '') + '">' +
             '<input type="hidden" name="courseType" value="' + escHtml(d.courseType || 'single') + '">' +
@@ -6809,15 +7162,104 @@ function _sessionCapRow(s, globalCap) {
     '</div>';
 }
 
+function _extractLabelNumber(label, unit) {
+    var re = unit === '堂' ? /第\s*(\d+)\s*堂/ : /第\s*(\d+)\s*期/;
+    var m = re.exec(String(label || ''));
+    return m ? (parseInt(m[1], 10) || 0) : 0;
+}
+
+function _finishedSessionHistoryForForm(form) {
+    var item = form ? form.closest('.ws-item') : null;
+    var wsId = item ? item.dataset.id : '';
+    var ws = (item && item._wsData) || (wsId && _allWorkshopsCache[wsId]) || {};
+    return Array.isArray(ws.finishedSessions) ? ws.finishedSessions : [];
+}
+
+function _nextLabelNumberFromInputs(inputs, unit) {
+    var max = 0;
+    (inputs || []).forEach(function(input) {
+        max = Math.max(max, _extractLabelNumber(input.value, unit));
+    });
+    return max + 1;
+}
+
+function _nextSingleSessionNumber(form) {
+    var max = 0;
+    (form ? form.querySelectorAll('.single-sessions-wrap .session-label-input') : []).forEach(function(input) {
+        max = Math.max(max, _extractLabelNumber(input.value, '期'));
+    });
+    _finishedSessionHistoryForForm(form).forEach(function(row) {
+        if (row.source === 'round') return;
+        max = Math.max(max, _extractLabelNumber(row.label, '期'));
+    });
+    if (!max) {
+        var activeCount = form ? form.querySelectorAll('.single-sessions-wrap .session-row').length : 0;
+        var historyCount = _finishedSessionHistoryForForm(form).filter(function(row) { return row.source !== 'round'; }).length;
+        return activeCount + historyCount + 1;
+    }
+    return max + 1;
+}
+
+function _nextRoundNumber(form) {
+    var max = 0;
+    (form ? form.querySelectorAll('.round-label-input') : []).forEach(function(input) {
+        max = Math.max(max, _extractLabelNumber(input.value, '期'));
+    });
+    _finishedSessionHistoryForForm(form).forEach(function(row) {
+        max = Math.max(max, _extractLabelNumber(row.roundLabel, '期'));
+    });
+    if (!max) {
+        var activeCount = form ? form.querySelectorAll('.round-card').length : 0;
+        var roundIds = {};
+        _finishedSessionHistoryForForm(form).forEach(function(row) {
+            if (row.roundId || row.roundLabel) roundIds[row.roundId || row.roundLabel] = true;
+        });
+        return activeCount + Object.keys(roundIds).length + 1;
+    }
+    return max + 1;
+}
+
+function _nextRoundSessionNumber(form, roundCard) {
+    var max = 0;
+    var roundId = roundCard ? (roundCard.dataset.roundId || '') : '';
+    (roundCard ? roundCard.querySelectorAll('.round-sessions .session-label-input') : []).forEach(function(input) {
+        max = Math.max(max, _extractLabelNumber(input.value, '堂'));
+    });
+    _finishedSessionHistoryForForm(form).forEach(function(row) {
+        if (row.source !== 'round') return;
+        if (roundId && row.roundId && row.roundId !== roundId) return;
+        max = Math.max(max, _extractLabelNumber(row.label, '堂'));
+    });
+    if (!max) {
+        var activeCount = roundCard ? roundCard.querySelectorAll('.round-sessions .session-row').length : 0;
+        var historyCount = _finishedSessionHistoryForForm(form).filter(function(row) {
+            return row.source === 'round' && (!roundId || !row.roundId || row.roundId === roundId);
+        }).length;
+        return activeCount + historyCount + 1;
+    }
+    return max + 1;
+}
+
+function _singleSessionHistoryBase(wsId) {
+    var ws = (wsId && _allWorkshopsCache[wsId]) || {};
+    var max = 0;
+    (ws.finishedSessions || []).forEach(function(row) {
+        if (row.source === 'round') return;
+        max = Math.max(max, _extractLabelNumber(row.label, '期'));
+    });
+    return max;
+}
+
 function buildSessionsHtml(sessions, wsId, globalCap, fallbackZoomLink) {
     if (!sessions || !sessions.length) return '';
     var sorted = sortSessions(sessions);
     var isMulti = sorted.length > 1;
+    var historyBase = _singleSessionHistoryBase(wsId);
     var html = '';
     for (var i = 0; i < sorted.length; i++) {
         var s = sorted[i];
         var vis = s.visible !== false;
-        var sessionLabel = s.label || ('第' + (i + 1) + '期');
+        var sessionLabel = s.label || ('第' + (historyBase + i + 1) + '期');
         var sessionZoom = s.zoomLink || (((s.mode === 'online' || s.mode === 'both') && fallbackZoomLink) ? fallbackZoomLink : '');
         html += '<div class="session-row' + (vis ? '' : ' session-hidden') + '">' +
             '<div class="session-top">' +
@@ -6838,9 +7280,8 @@ function buildSessionsHtml(sessions, wsId, globalCap, fallbackZoomLink) {
 
 function addSessionRow(btn) {
     var list = btn.previousElementSibling;
-    var existingCount = list.querySelectorAll('.session-row').length;
-    var autoLabel = '第' + (existingCount + 1) + '期';
     var form = btn.closest('.ws-form');
+    var autoLabel = '第' + _nextSingleSessionNumber(form) + '期';
     var globalCap = form ? (parseInt((form.querySelector('[name="capacity"]') || {}).value) || 0) : 0;
     var row = document.createElement('div');
     row.className = 'session-row';
@@ -7046,7 +7487,8 @@ function buildSingleRoundHtml(r, fallbackZoomLink) {
 
 function addRound(btn) {
     var editor = btn.previousElementSibling;
-    var r = { id: _nextRoundId(), label: '', capacity: 10, enrolled: 0, sessions: [{ label: '第1堂', date: '', time: '' }] };
+    var form = btn.closest('.ws-form');
+    var r = { id: _nextRoundId(), label: '第' + _nextRoundNumber(form) + '期', capacity: 10, enrolled: 0, sessions: [{ label: '第1堂', date: '', time: '' }] };
     var temp = document.createElement('div');
     temp.innerHTML = buildSingleRoundHtml(r, '');
     var card = temp.firstChild;
@@ -7063,8 +7505,9 @@ function removeRound(btn) {
 
 function addRoundSession(btn) {
     var list = btn.previousElementSibling;
-    var existingCount = list.querySelectorAll('.session-row').length;
-    var autoLabel = '第' + (existingCount + 1) + '堂';
+    var roundCard = btn.closest('.round-card');
+    var form = btn.closest('.ws-form');
+    var autoLabel = '第' + _nextRoundSessionNumber(form, roundCard) + '堂';
     var row = document.createElement('div');
     row.className = 'session-row';
     row.innerHTML = '<div class="session-top">' +
@@ -7305,10 +7748,10 @@ function workshopImagePickerChooseUpload() {
 }
 
 function workshopImagePickerUploadSelected(inp) {
-    var file = inp && inp.files && inp.files[0];
-    if (!file || !_wsImagePickerActiveWorkshopId || !_wsImagePickerActiveArea) return;
+    var files = inp && inp.files ? Array.prototype.slice.call(inp.files) : [];
+    if (!files.length || !_wsImagePickerActiveWorkshopId || !_wsImagePickerActiveArea) return;
     closeWorkshopImagePicker();
-    _uploadWorkshopImageFile(file, _wsImagePickerActiveWorkshopId, _wsImagePickerActiveArea);
+    _uploadWorkshopImageFiles(files, _wsImagePickerActiveWorkshopId, _wsImagePickerActiveArea);
     inp.value = '';
 }
 
@@ -7403,18 +7846,15 @@ function _uploadWorkshopImageFile(file, workshopId, area) {
         showToast('儲存服務尚未載入，請重新整理頁面後再試。', 'error');
         return;
     }
-    if (file.size > 20 * 1024 * 1024) {
-        showToast('檔案大小不能超過 20MB', 'error');
-        return;
-    }
-    var progressWrap = area && area.parentElement ? area.parentElement.querySelector('.upload-progress') : null;
-    var progressBar = progressWrap ? progressWrap.querySelector('.upload-progress-bar') : null;
-    if (progressWrap) progressWrap.style.display = 'block';
-    if (progressBar) progressBar.style.width = '0%';
-    showLoadingOverlay('上傳圖片中...');
+    _uploadWorkshopImageFiles([file], workshopId, area);
+}
 
+function _uploadWorkshopImageAsset(file, workshopId, progressCb) {
+    if (file.size > 20 * 1024 * 1024) {
+        return Promise.reject(new Error((file.name || '圖片') + ' 檔案大小不能超過 20MB'));
+    }
     var ext = (file.name.split('.').pop() || 'png').toLowerCase();
-    var path = 'workshop-images/' + workshopId + '_' + Date.now() + '.' + ext;
+    var path = 'workshop-images/' + workshopId + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.' + ext;
     var ref = storage.ref(path);
     var task = ref.put(file, {
         contentType: file.type || undefined,
@@ -7423,38 +7863,88 @@ function _uploadWorkshopImageFile(file, workshopId, area) {
             originalName: file.name || ''
         }
     });
+    return new Promise(function(resolve, reject) {
+        task.on('state_changed',
+            function(snapshot) {
+                if (typeof progressCb === 'function') progressCb(snapshot);
+            },
+            reject,
+            function() {
+                task.snapshot.ref.getDownloadURL().then(function(url) {
+                    var nowIso = new Date().toISOString();
+                    resolve({
+                        path: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
+                        name: file.name || '',
+                        url: url,
+                        contentType: file.type || '',
+                        timeCreated: nowIso,
+                        updated: nowIso
+                    });
+                }).catch(reject);
+            }
+        );
+    });
+}
 
-    task.on('state_changed',
-        function(snapshot) {
-            var pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            if (progressBar) progressBar.style.width = pct + '%';
-            var textEl = document.getElementById('cmsLoadingText');
-            if (textEl) textEl.textContent = '上傳圖片中... ' + Math.round(pct) + '%';
-        },
-        function(err) {
-            hideLoadingOverlay();
-            if (progressWrap) progressWrap.style.display = 'none';
-            showToast('圖片上傳失敗：' + err.message, 'error');
-        },
-        function() {
-            task.snapshot.ref.getDownloadURL().then(function(url) {
-                if (progressWrap) progressWrap.style.display = 'none';
-                _wsImageLibraryUpsert({
-                    path: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
-                    name: file.name || '',
-                    url: url,
-                    contentType: file.type || '',
-                    timeCreated: new Date().toISOString(),
-                    updated: new Date().toISOString()
-                });
-                _persistWorkshopImageUrl(workshopId, url, area, '圖片已上傳');
-            }).catch(function(err) {
-                hideLoadingOverlay();
-                if (progressWrap) progressWrap.style.display = 'none';
-                showToast('取得圖片連結失敗：' + err.message, 'error');
-            });
+function _uploadWorkshopImageFiles(files, workshopId, area) {
+    files = (files || []).filter(Boolean);
+    if (!files.length) return;
+    if (!storage) {
+        showToast('儲存服務尚未載入，請重新整理頁面後再試。', 'error');
+        return;
+    }
+    var progressWrap = area && area.parentElement ? area.parentElement.querySelector('.upload-progress') : null;
+    var progressBar = progressWrap ? progressWrap.querySelector('.upload-progress-bar') : null;
+    if (progressWrap) progressWrap.style.display = 'block';
+    if (progressBar) progressBar.style.width = '0%';
+    showLoadingOverlay(files.length > 1 ? '上傳圖片中... (0/' + files.length + ')' : '上傳圖片中...');
+    var completed = 0;
+    var uploaded = [];
+
+    function finishOne() {
+        completed++;
+        if (progressBar) progressBar.style.width = Math.round((completed / files.length) * 100) + '%';
+        var textEl = document.getElementById('cmsLoadingText');
+        if (textEl) textEl.textContent = files.length > 1 ? '上傳圖片中... (' + completed + '/' + files.length + ')' : '上傳圖片中... 100%';
+    }
+
+    Promise.all(files.map(function(file) {
+        return _uploadWorkshopImageAsset(file, workshopId, function(snapshot) {
+            if (files.length === 1) {
+                var pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                if (progressBar) progressBar.style.width = pct + '%';
+                var textEl = document.getElementById('cmsLoadingText');
+                if (textEl) textEl.textContent = '上傳圖片中... ' + Math.round(pct) + '%';
+            }
+        }).then(function(asset) {
+            uploaded.push(asset);
+            _wsImageLibraryUpsert(asset);
+            finishOne();
+            return asset;
+        }).catch(function(err) {
+            console.warn('Workshop image upload failed:', file && file.name, err);
+            finishOne();
+            return null;
+        });
+    })).then(function() {
+        uploaded = uploaded.filter(Boolean);
+        if (progressWrap) progressWrap.style.display = 'none';
+        hideLoadingOverlay();
+        if (!uploaded.length) {
+            showToast('圖片上傳失敗，請重試。', 'error');
+            return;
         }
-    );
+        _persistWorkshopImageUrl(
+            workshopId,
+            uploaded[0].url || '',
+            area,
+            uploaded.length > 1 ? '已上傳 ' + uploaded.length + ' 張圖片，並套用第一張為封面' : '圖片已上傳'
+        );
+    }).catch(function(err) {
+        hideLoadingOverlay();
+        if (progressWrap) progressWrap.style.display = 'none';
+        showToast('圖片上傳失敗：' + err.message, 'error');
+    });
 }
 
 function handleImageUpload(input, workshopId) {
@@ -7709,6 +8199,7 @@ function saveWorkshop(event, workshopId) {
             _allWorkshopsCache[workshopId] = localWorkshopData;
         }
         renderCalendar();
+        scheduleAutoGoogleCalendarSync('workshop-save');
     }).catch(function(err) {
         hideLoadingOverlay();
         showToast('儲存失敗：' + err.message, 'error');
@@ -7754,6 +8245,7 @@ function createNewWorkshop() {
 
     newDoc.set(data).then(function() {
         showToast('已新增工作坊');
+        scheduleAutoGoogleCalendarSync('workshop-create');
         var list = document.getElementById('wsListCurrent');
         list.querySelectorAll('.ws-item.open').forEach(function(x) {
             var xForm = x.querySelector('.ws-form');
@@ -7812,11 +8304,14 @@ function duplicateWorkshop(wsId) {
         }
         copy.createdAt = firebase.firestore.FieldValue.serverTimestamp();
         copy.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+        delete copy.googleCalendarEventIds;
+        delete copy.googleCalendarSyncedAt;
         return db.collection('workshops').add(copy);
     }).then(function(newRef) {
         if (!newRef) return;
         hideLoadingOverlay();
         showToast('已複製工作坊');
+        scheduleAutoGoogleCalendarSync('workshop-duplicate');
         switchWsView('current');
         loadAllWorkshops();
     }).catch(function(err) {
@@ -7836,6 +8331,7 @@ function archiveWorkshop(workshopId) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
         showToast('工作坊已封存');
+        scheduleAutoGoogleCalendarSync('workshop-archive');
         loadAllWorkshops();
         switchWsView('archived');
     }).catch(function(err) {
@@ -7850,6 +8346,7 @@ function unarchiveWorkshop(workshopId) {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function() {
         showToast('已取消封存');
+        scheduleAutoGoogleCalendarSync('workshop-unarchive');
         loadAllWorkshops();
         switchWsView('current');
     }).catch(function(err) {
@@ -7866,11 +8363,431 @@ function deleteWorkshop(workshopId) {
 
     db.collection('workshops').doc(workshopId).delete().then(function() {
         showToast('工作坊已刪除');
+        scheduleAutoGoogleCalendarSync('workshop-delete');
         var item = document.querySelector('.ws-item[data-id="' + workshopId + '"]');
         if (item) item.remove();
     }).catch(function(err) {
         showToast('刪除失敗：' + err.message, 'error');
     });
+}
+
+// ============================================================
+// FINISHED CLASSES
+// ============================================================
+var _finishedClassesCache = [];
+var _finishedClassesWorkshopId = '';
+var _finishedClassesWorkshopTitle = '';
+
+function _todayHkDateKey() {
+    var hkt = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    return hkt.getUTCFullYear() + '-' + String(hkt.getUTCMonth() + 1).padStart(2, '0') + '-' + String(hkt.getUTCDate()).padStart(2, '0');
+}
+
+function _finishedClassTitle(ws, id) {
+    ws = ws || {};
+    return (ws.workshopNumber ? ws.workshopNumber + ' - ' : '') + (ws.title || id || '工作坊');
+}
+
+function _finishedClassRowKey(row) {
+    row = row || {};
+    return [row.source || 'session', row.roundId || '', row.id || '', row.dateKey || _normDateKey(row.date || ''), row.time || '', row.label || ''].join('|');
+}
+
+function _finishedClassFromSession(s, ws, ctx) {
+    s = s || {};
+    ws = ws || {};
+    ctx = ctx || {};
+    var dateKey = _normDateKey(s.date || '');
+    if (!dateKey) return null;
+    var row = {};
+    Object.keys(s).forEach(function(k) { row[k] = s[k]; });
+    row.id = row.id || sessionStableId(s, ctx.index || 0);
+    row.dateKey = dateKey;
+    row.date = s.date || dateKey;
+    row.time = s.time || '';
+    row.label = s.label || '';
+    row.roundId = ctx.roundId || '';
+    row.roundLabel = ctx.roundLabel || '';
+    row.source = ctx.source || 'session';
+    row.mode = s.mode || ws.mode || 'offline';
+    row.location = s.location || ws.location || '';
+    row.zoomLink = s.zoomLink || ws.zoomLink || '';
+    row.capacity = s.capacity != null ? s.capacity : '';
+    row.enrolled = s.enrolled != null ? s.enrolled : '';
+    row.movedToHistoryAt = row.movedToHistoryAt || new Date().toISOString();
+    return row;
+}
+
+function _finishedClassModeLabel(mode) {
+    var m = String(mode || 'offline').toLowerCase();
+    if (m === 'online') return '💻 線上';
+    if (m === 'both') return '🏢 實體＋💻 線上';
+    return '🏢 實體';
+}
+
+function _finishedClassRegMatches(row, reg) {
+    if (!row || !reg) return false;
+    if ((reg.workshopId || '') !== (_finishedClassesWorkshopId || '')) return false;
+    var status = String(reg.status || 'pending').toLowerCase();
+    if (status === 'deleted' || status === 'cancelled') return false;
+    var rowId = String(row.id || '');
+    var rowRoundId = String(row.roundId || '');
+    var selectedRound = String(reg.selectedRound || '');
+    if (row.source === 'round' && rowRoundId && selectedRound === rowRoundId) return true;
+    if (rowId && selectedRound === rowId) return true;
+    var rowDate = String(row.dateKey || row.date || '');
+    var rowTime = String(row.time || '');
+    var label = String(reg.selectedRoundLabel || '');
+    if (rowDate && label && label.indexOf(rowDate) === 0) return true;
+    var regDate = String(reg.workshopDate || '');
+    if (rowDate && regDate && (regDate === rowDate || regDate.indexOf(rowDate) !== -1 || rowDate.indexOf(regDate) !== -1)) return true;
+    if (Array.isArray(reg.allSessionDates)) {
+        for (var i = 0; i < reg.allSessionDates.length; i++) {
+            var d = reg.allSessionDates[i] || {};
+            var dDate = String(d.date || '');
+            var dTime = String(d.time || '');
+            if (rowDate && dDate && (dDate === rowDate || dDate.indexOf(rowDate) !== -1 || rowDate.indexOf(dDate) !== -1)) {
+                if (!rowTime || !dTime || dTime === rowTime) return true;
+            }
+        }
+    }
+    return false;
+}
+
+function _finishedClassMembers(row) {
+    return (_allRegistrations || []).filter(function(reg) {
+        return _finishedClassRegMatches(row, reg);
+    }).sort(function(a, b) {
+        return String(a.name || '').localeCompare(String(b.name || ''), 'zh-Hant');
+    });
+}
+
+function _finishedClassMembersHtml(row) {
+    var members = _finishedClassMembers(row);
+    if (!members.length) return '<div class="finished-member-empty">這堂暫時找不到對應會員 / 報名記錄。</div>';
+    var html = '';
+    members.forEach(function(r) {
+        var statusClass = String(r.status || 'pending').toLowerCase();
+        if (['pending', 'confirmed', 'cancelled', 'deleted', 'completed'].indexOf(statusClass) === -1) statusClass = 'pending';
+        var statusText = getStatusText(r.status || 'pending');
+        var modeBadge = '';
+        if (r.attendanceMode === 'online') modeBadge = '<span class="applicant-mode-badge mode-online">線上</span>';
+        else if (r.attendanceMode === 'offline') modeBadge = '<span class="applicant-mode-badge mode-offline">實體</span>';
+        html += '<div class="finished-member-row">' +
+            '<div class="finished-member-info">' +
+                '<div class="finished-member-name">' + escHtml(r.name || '訪客') + modeBadge + '</div>' +
+                '<div class="finished-member-meta">' +
+                    (r.userEmail ? '<span>✉ ' + escHtml(r.userEmail) + '</span>' : '') +
+                    (r.phone ? '<span>📱 ' + escHtml(r.phone) + '</span>' : '') +
+                    (r.selectedRoundLabel ? '<span>📅 ' + escHtml(r.selectedRoundLabel) + '</span>' : '') +
+                '</div>' +
+            '</div>' +
+            '<span class="reg-status ' + statusClass + '" onclick="event.stopPropagation();toggleStatusDropdown(this, \'' + escHtml(r._id) + '\', \'' + escHtml(r.workshopId || '') + '\')">' + statusText + '</span>' +
+        '</div>';
+    });
+    return html;
+}
+
+function _normalizeFinishedClassRows(rows) {
+    rows = Array.isArray(rows) ? rows : [];
+    var seen = {};
+    var out = [];
+    rows.forEach(function(row) {
+        if (!row) return;
+        var copy = {};
+        Object.keys(row).forEach(function(k) { copy[k] = row[k]; });
+        copy.dateKey = copy.dateKey || _normDateKey(copy.date || '');
+        if (!copy.dateKey) return;
+        if (!copy.mode) {
+            copy.mode = (copy.offlineCapacity !== undefined && copy.onlineCapacity !== undefined)
+                ? 'both'
+                : (copy.zoomLink ? 'online' : 'offline');
+        }
+        var key = _finishedClassRowKey(copy);
+        if (seen[key]) return;
+        seen[key] = true;
+        out.push(copy);
+    });
+    out.sort(function(a, b) {
+        if (a.dateKey !== b.dateKey) return a.dateKey < b.dateKey ? -1 : 1;
+        return String(a.time || '').localeCompare(String(b.time || ''));
+    });
+    return out;
+}
+
+function _splitFinishedClassesFromWorkshop(workshopId, ws, persist) {
+    ws = ws || {};
+    _normalizeArrayField(ws, 'sessions');
+    _normalizeArrayField(ws, 'rounds');
+    _normalizeArrayField(ws, 'finishedSessions');
+    if (Array.isArray(ws.rounds)) ws.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
+
+    var todayKey = _todayHkDateKey();
+    var finished = _normalizeFinishedClassRows(ws.finishedSessions || []);
+    var seen = {};
+    finished.forEach(function(row) { seen[_finishedClassRowKey(row)] = true; });
+    var changed = false;
+    var activeCount = 0;
+
+    function pushFinished(row) {
+        if (!row) return;
+        var key = _finishedClassRowKey(row);
+        if (!seen[key]) {
+            finished.push(row);
+            seen[key] = true;
+        }
+        changed = true;
+    }
+
+    if (Array.isArray(ws.rounds) && ws.rounds.length) {
+        ws.rounds = ws.rounds.map(function(round) {
+            var nextRound = {};
+            Object.keys(round || {}).forEach(function(k) { nextRound[k] = round[k]; });
+            var activeSessions = [];
+            (round.sessions || []).forEach(function(s, idx) {
+                var dateKey = _normDateKey(s && s.date || '');
+                if (dateKey && dateKey < todayKey) {
+                    pushFinished(_finishedClassFromSession(s, ws, {
+                        source: 'round',
+                        roundId: round.id || '',
+                        roundLabel: round.label || round.name || '',
+                        index: idx
+                    }));
+                } else {
+                    activeSessions.push(s);
+                    if (dateKey) activeCount++;
+                }
+            });
+            if (activeSessions.length !== (round.sessions || []).length) changed = true;
+            nextRound.sessions = activeSessions;
+            return nextRound;
+        });
+    } else if (Array.isArray(ws.sessions) && ws.sessions.length) {
+        var active = [];
+        ws.sessions.forEach(function(s, idx) {
+            var dateKey = _normDateKey(s && s.date || '');
+            if (dateKey && dateKey < todayKey) {
+                pushFinished(_finishedClassFromSession(s, ws, { source: 'session', index: idx }));
+            } else {
+                active.push(s);
+                if (dateKey) activeCount++;
+            }
+        });
+        if (active.length !== ws.sessions.length) changed = true;
+        ws.sessions = active;
+    } else if (ws.date) {
+        var legacyDateKey = _normDateKey(ws.date || '');
+        if (legacyDateKey && legacyDateKey < todayKey) {
+            pushFinished(_finishedClassFromSession({
+                date: ws.date,
+                time: ws.time,
+                mode: ws.mode,
+                location: ws.location,
+                capacity: ws.capacity,
+                enrolled: ws.enrolled
+            }, ws, { source: 'legacy', index: 0 }));
+            ws.date = '';
+            ws.time = '';
+            changed = true;
+        } else if (legacyDateKey) {
+            activeCount++;
+        }
+    }
+
+    finished = _normalizeFinishedClassRows(finished);
+    ws.finishedSessions = finished;
+
+    var activeSessions = [];
+    if (Array.isArray(ws.rounds) && ws.rounds.length) {
+        ws.rounds.forEach(function(round) { (round.sessions || []).forEach(function(s) { activeSessions.push(s); }); });
+    } else if (Array.isArray(ws.sessions)) {
+        activeSessions = ws.sessions.slice();
+    }
+    activeSessions = sortSessions(activeSessions);
+    if (activeSessions.length) {
+        if (ws.date !== (activeSessions[0].date || '') || ws.time !== (activeSessions[0].time || '')) changed = true;
+        ws.date = activeSessions[0].date || '';
+        ws.time = activeSessions[0].time || '';
+    } else if (finished.length && (ws.date || ws.time)) {
+        ws.date = '';
+        ws.time = '';
+        changed = true;
+    }
+
+    if (finished.length && activeCount === 0 && ws.visible === true) {
+        ws.visible = false;
+        changed = true;
+    }
+
+    if (persist && changed && db) {
+        var update = {
+            sessions: ws.sessions || [],
+            rounds: ws.rounds || [],
+            finishedSessions: finished,
+            date: ws.date || '',
+            time: ws.time || '',
+            visible: ws.visible === true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        db.collection('workshops').doc(workshopId).set(update, { merge: true }).then(function() {
+            scheduleAutoGoogleCalendarSync('finished-class-auto-move');
+        }).catch(function(err) {
+            console.warn('Failed to move finished classes for ' + workshopId + ':', err);
+        });
+    }
+    return { workshop: ws, finished: finished, changed: changed };
+}
+
+function openFinishedClassesModal(evt, workshopId) {
+    if (evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
+    }
+    var modal = document.getElementById('finishedClassesModal');
+    var list = document.getElementById('finishedClassesList');
+    var count = document.getElementById('finishedClassesCount');
+    if (!modal || !list || !count) return;
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    if (!workshopId) return;
+    _finishedClassesWorkshopId = workshopId;
+    list.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:28px 0;">整理已完結課堂中...</p>';
+    count.textContent = '讀取中…';
+
+    db.collection('workshops').doc(workshopId).get().then(function(doc) {
+        if (!doc.exists) throw new Error('找不到工作坊');
+        var ws = doc.data() || {};
+        var result = _splitFinishedClassesFromWorkshop(workshopId, ws, true);
+        _allWorkshopsCache[workshopId] = result.workshop;
+        _finishedClassesWorkshopTitle = _finishedClassTitle(result.workshop, workshopId);
+        _finishedClassesCache = result.finished || [];
+        var titleEl = document.getElementById('finishedClassesTitle');
+        if (titleEl) titleEl.textContent = '已完結課堂｜' + _finishedClassesWorkshopTitle;
+        if (result.changed) {
+            setTimeout(function() { loadAllWorkshops(); }, 350);
+        }
+        renderFinishedClassesList();
+    }).catch(function(err) {
+        list.innerHTML = '<p style="text-align:center;color:var(--red);padding:28px 0;">載入失敗：' + escHtml(err.message || String(err)) + '</p>';
+        count.textContent = '載入失敗';
+    });
+}
+
+function closeFinishedClassesModal() {
+    var modal = document.getElementById('finishedClassesModal');
+    if (modal) modal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function renderFinishedClassesList() {
+    var list = document.getElementById('finishedClassesList');
+    var count = document.getElementById('finishedClassesCount');
+    if (!list || !count) return;
+    var rows = _finishedClassesCache || [];
+    count.textContent = rows.length ? rows.length + ' 堂已完結課堂' : '沒有已完結課堂';
+    if (!rows.length) {
+        list.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:28px 0;">這個工作坊暫時沒有日期已過的課堂。</p>';
+        return;
+    }
+    var html = '';
+    rows.forEach(function(row, idx) {
+        var members = _finishedClassMembers(row);
+        html += '<div class="finished-class-card" data-finished-index="' + idx + '">' +
+            '<div class="finished-class-header" onclick="toggleFinishedClassCard(this)">' +
+                '<div class="finished-class-main">' +
+                    '<div class="finished-class-title">' + escHtml((row.roundLabel ? row.roundLabel + '｜' : '') + (row.label || '課堂') + ' ' + (row.dateKey || row.date || '')) + '</div>' +
+                    '<div class="finished-class-meta">' +
+                        '<span class="finished-class-badge">📅 ' + escHtml(row.dateKey || row.date || '') + '</span>' +
+                        (row.time ? '<span class="finished-class-badge">🕒 ' + escHtml(row.time) + '</span>' : '') +
+                        '<span class="finished-class-badge">' + escHtml(_finishedClassModeLabel(row.mode)) + '</span>' +
+                        (row.location ? '<span class="finished-class-badge">📍 ' + escHtml(row.location) + '</span>' : '') +
+                        (row.zoomLink ? '<span class="finished-class-badge">🔗 Zoom</span>' : '') +
+                        '<span class="finished-class-badge">' + members.length + ' 位報名</span>' +
+                        '<span class="finished-class-badge hidden">不會顯示於網站</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="finished-class-actions">' +
+                    '<button type="button" class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteFinishedClassSession(' + idx + ')">刪除記錄</button>' +
+                    '<span class="finished-class-toggle">▸</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="finished-class-body"><div class="finished-class-members">' + _finishedClassMembersHtml(row) + '</div></div>' +
+        '</div>';
+    });
+    list.innerHTML = html;
+}
+
+function toggleFinishedClassCard(headerEl) {
+    var card = headerEl ? headerEl.closest('.finished-class-card') : null;
+    if (card) card.classList.toggle('open');
+}
+
+function deleteFinishedClassSession(index) {
+    var row = (_finishedClassesCache || [])[index];
+    if (!row || !_finishedClassesWorkshopId) return;
+    showCmsConfirm({
+        icon: '🗑️',
+        title: '刪除已完結課堂記錄？',
+        msg: '將永久刪除「' + (row.dateKey || row.date || '') + (row.time ? ' ' + row.time : '') + '」這筆歷史課堂記錄。此操作無法復原。',
+        okText: '刪除',
+        onOk: function() {
+            _finishedClassesCache.splice(index, 1);
+            db.collection('workshops').doc(_finishedClassesWorkshopId).set({
+                finishedSessions: _finishedClassesCache,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(function() {
+                showToast('已刪除歷史課堂記錄');
+                if (_allWorkshopsCache[_finishedClassesWorkshopId]) _allWorkshopsCache[_finishedClassesWorkshopId].finishedSessions = _finishedClassesCache;
+                renderFinishedClassesList();
+            }).catch(function(err) {
+                showToast('刪除失敗：' + err.message, 'error');
+            });
+        }
+    });
+}
+
+function exportFinishedClassesExcel() {
+    if (typeof XLSX === 'undefined') {
+        alert('Excel 匯出功能載入中，請稍後再試。');
+        return;
+    }
+    var rows = _finishedClassesCache || [];
+    if (!rows.length) {
+        showToast('沒有可匯出的歷史課堂', 'error');
+        return;
+    }
+    var exportRows = rows.map(function(row) {
+        return {
+            '工作坊': _finishedClassesWorkshopTitle || _finishedClassesWorkshopId,
+            '期數': row.roundLabel || '',
+            '課堂': row.label || '',
+            '日期': row.dateKey || row.date || '',
+            '時間': row.time || '',
+            '模式': row.mode || '',
+            '地點': row.location || '',
+            'Zoom': row.zoomLink || '',
+            '名額': row.capacity,
+            '已報名': row.enrolled,
+            '來源': row.source || ''
+        };
+    });
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.json_to_sheet(exportRows);
+    if (ws['!ref']) {
+        var range = XLSX.utils.decode_range(ws['!ref']);
+        var cols = [];
+        for (var c = range.s.c; c <= range.e.c; c++) {
+            var maxW = 10;
+            for (var r = range.s.r; r <= range.e.r; r++) {
+                var cell = ws[XLSX.utils.encode_cell({ r: r, c: c })];
+                if (cell && cell.v != null) maxW = Math.min(Math.max(maxW, String(cell.v).length), 42);
+            }
+            cols.push({ wch: maxW + 2 });
+        }
+        ws['!cols'] = cols;
+    }
+    XLSX.utils.book_append_sheet(wb, ws, '已完結課堂');
+    XLSX.writeFile(wb, 'AIFLOWTIME_已完結課堂_' + new Date().toISOString().slice(0, 10) + '.xlsx');
 }
 
 // ============================================================
@@ -7891,7 +8808,10 @@ var WORKSHOP_TAB_LOADERS = {
     members: loadMembersData,
     attendance: loadAttendanceLog,
     discounts: loadGlobalDiscountCodes,
-    settings: loadWsSettings
+    settings: function() {
+        loadWsSettings();
+        if (typeof loadGoogleCalendarSettingsUi === 'function') loadGoogleCalendarSettingsUi();
+    }
 };
 
 function switchTab(tabId) {
@@ -8056,6 +8976,7 @@ function _startWsListener() {
             if (Array.isArray(d.rounds)) {
                 d.rounds.forEach(function(r) { _normalizeArrayField(r, 'sessions'); });
             }
+            d = _splitFinishedClassesFromWorkshop(doc.id, d, false).workshop;
             if (Array.isArray(d.sessions)) {
                 d.sessions.forEach(function(s, i) { if (!s.id) s.id = sessionStableId(s, i); });
             }
@@ -8523,6 +9444,38 @@ function _sessionModeBadgesHtml(mode) {
     return '<span class="ws-cap-mode-badges"><span class="applicant-mode-badge mode-offline">實體</span></span>';
 }
 
+function _memberRegMatchesActiveSession(r, session, sid) {
+    if (!r || !session) return false;
+    var selectedRound = String(r.selectedRound || '');
+    var sessionId = String(sid || session.id || '');
+    if (selectedRound && sessionId && selectedRound === sessionId) return true;
+    var sDate = String(session.date || '');
+    if (!sDate) return false;
+    var label = String(r.selectedRoundLabel || '');
+    if (label && label.indexOf(sDate) === 0) return true;
+    var regDate = String(r.workshopDate || '');
+    if (regDate && (regDate === sDate || sDate.indexOf(regDate) !== -1 || regDate.indexOf(sDate) !== -1)) return true;
+    if (Array.isArray(r.allSessionDates)) {
+        for (var i = 0; i < r.allSessionDates.length; i++) {
+            var d = r.allSessionDates[i] && String(r.allSessionDates[i].date || '');
+            if (d && (d === sDate || sDate.indexOf(d) !== -1 || d.indexOf(sDate) !== -1)) return true;
+        }
+    }
+    return false;
+}
+
+function _memberRegsForActiveSession(regs, session, sid) {
+    return (regs || []).filter(function(r) {
+        return _memberRegMatchesActiveSession(r, session, sid);
+    });
+}
+
+function _memberCountEnrolled(list) {
+    var count = 0;
+    (list || []).forEach(function(r) { if (isEnrolledReg(r)) count++; });
+    return count;
+}
+
 function buildMemberWsHeaderCapSegmentsHtml(ws, wsId, regs) {
     function pendingForHeaderBadge(r) {
         if (r.status === 'confirmed' || r.status === 'cancelled' || r.status === 'deleted') return false;
@@ -8619,14 +9572,15 @@ function buildMemberWsHeaderCapSegmentsHtml(ws, wsId, regs) {
             var s0 = w.sessions[0];
             if (s0.capacity !== undefined) cap0 = s0.capacity;
         }
-        var sp0 = sumEnrolledAndPending(regs);
+        var activeSingleRegs = (w.sessions && w.sessions.length === 1) ? _memberRegsForActiveSession(regs, w.sessions[0], w.sessions[0].id || sessionStableId(w.sessions[0], 0)) : regs;
+        var sp0 = sumEnrolledAndPending(activeSingleRegs);
         var modeSingle = w.mode || 'offline';
         if (w.sessions && w.sessions.length === 1) {
             modeSingle = w.sessions[0].mode || w.mode || 'offline';
         }
         segments.push({
             cap: cap0,
-            enrolled: computeEnrolledFromRegs(wsId),
+            enrolled: sp0.enrolled,
             pending: sp0.pending,
             label: '',
             modeHtml: _sessionModeBadgesHtml(modeSingle)
@@ -8636,8 +9590,9 @@ function buildMemberWsHeaderCapSegmentsHtml(ws, wsId, regs) {
     if (segments.length === 0) {
         var modeFallback = w.mode || 'offline';
         if (w.sessions && w.sessions.length === 1) modeFallback = w.sessions[0].mode || w.mode || 'offline';
+        var fallbackRegs = (w.sessions && w.sessions.length === 1) ? _memberRegsForActiveSession(regs, w.sessions[0], w.sessions[0].id || sessionStableId(w.sessions[0], 0)) : regs;
         return '<div class="ws-header-cap-wrap ws-header-cap-wrap--segments"><div class="ws-cap-segments-row">' +
-            '<div class="ws-cap-segment">' + _sessionModeBadgesHtml(modeFallback) + buildMiniCapacityContent(w.capacity || 0, computeEnrolledFromRegs(wsId)) + '</div></div></div>';
+            '<div class="ws-cap-segment">' + _sessionModeBadgesHtml(modeFallback) + buildMiniCapacityContent(w.capacity || 0, _memberCountEnrolled(fallbackRegs)) + '</div></div></div>';
     }
 
     var multi = segments.length > 1;
@@ -8728,6 +9683,7 @@ function renderByWorkshopView() {
         // Normal bulk toolbar
         html += '<div class="bulk-toolbar bulk-toolbar-normal" data-ws-id="' + wsId + '">';
         html += '<button class="bulk-btn btn-select" onclick="event.stopPropagation();toggleBulkSelect(\'' + wsId + '\', this, \'normal\')">☑ 多選</button>';
+        html += '<button class="bulk-btn ws-subgroup-finished-btn" onclick="openFinishedClassesModal(event, \'' + wsId + '\')">已完結課堂</button>';
         html += '<button class="bulk-btn btn-approve" style="display:none" onclick="event.stopPropagation();bulkChangeStatus(\'' + wsId + '\', \'confirmed\')">✓ 確認已選</button>';
         html += '<button class="bulk-btn btn-cancel-sel" style="display:none" onclick="event.stopPropagation();bulkChangeStatus(\'' + wsId + '\', \'cancelled\')">✕ 取消已選</button>';
         html += '<button class="bulk-btn btn-delete-sel" style="display:none" onclick="event.stopPropagation();bulkChangeStatus(\'' + wsId + '\', \'deleted\')">🗑 刪除已選</button>';
@@ -8881,9 +9837,12 @@ function renderByWorkshopView() {
                 if ((s0.mode || ws.mode) === 'online') modeStr = ' · 線上';
                 else if ((s0.mode || ws.mode) === 'both') modeStr = ' · 實體＋線上';
                 var singleCap = s0.capacity !== undefined ? s0.capacity : (ws.capacity || 0);
-                var singleEnr = regs.filter(function(r) { return r.status !== 'deleted' && r.status !== 'cancelled'; }).length;
+                var singleSid = s0.id || sessionStableId(s0, 0);
+                var singleRegs = _memberRegsForActiveSession(regs, s0, singleSid);
+                var singleEnr = _memberCountEnrolled(singleRegs);
                 var singleBody = '';
-                regs.forEach(function(r) { singleBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                singleRegs.forEach(function(r) { singleBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                if (!singleRegs.length) singleBody = '<p style="font-size:12px;color:var(--text-light);padding:4px 0 0;">此日期尚無報名。</p>';
                 html += _buildWsApplicantGroupHtml({
                     wsId: wsId,
                     groupId: 'session:single',
@@ -8897,6 +9856,21 @@ function renderByWorkshopView() {
                         targetLabel: singleLabel
                     }
                 });
+                var unmatchedSingleRegs = regs.filter(function(r) {
+                    return !_memberRegMatchesActiveSession(r, s0, singleSid);
+                });
+                if (unmatchedSingleRegs.length > 0) {
+                    var unmatchedBody = '';
+                    unmatchedSingleRegs.forEach(function(r) { unmatchedBody += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
+                    html += _buildWsApplicantGroupHtml({
+                        wsId: wsId,
+                        groupId: 'session:history-unmatched',
+                        title: '已完結 / 未對應目前課堂',
+                        bodyHtml: unmatchedBody,
+                        summaryText: unmatchedSingleRegs.length + ' 位',
+                        muted: true
+                    });
+                }
             } else {
                 regs.forEach(function(r) { html += _buildApplicantCardHtml(r, wsId, wsTitle, ws); });
             }
@@ -9093,7 +10067,7 @@ var FORMS_INBOX_TYPE_META = {
         ]
     },
     'workshop-waitlist': {
-        label: 'Workshop Waitlist',
+        label: 'Waiting List',
         badgeClass: 'type-workshop-waitlist',
         fields: [
             ['workshopEvent', '等候工作坊'],
@@ -9102,14 +10076,18 @@ var FORMS_INBOX_TYPE_META = {
         ]
     },
     'lead-magnet': {
-        label: 'Lead Magnet',
+        label: 'Lead Magnets',
         badgeClass: 'type-lead-magnet',
         fields: [
+            ['materialTitle', '資料名稱'],
+            ['documentName', '文件名稱'],
+            ['pageKey', '頁面 Key'],
+            ['sectionId', 'Section ID'],
             ['consentAccepted', '已同意接收']
         ]
     },
     'quiz-lead': {
-        label: 'Quiz Lead',
+        label: 'Quiz Leads',
         badgeClass: 'type-quiz-lead',
         fields: [
             ['contactType', '聯絡方式'],
@@ -9117,17 +10095,6 @@ var FORMS_INBOX_TYPE_META = {
             ['recommendedWorkshop', '推薦工作坊'],
             ['scores', '分數'],
             ['answers', '答題序列']
-        ]
-    },
-    'free-material': {
-        label: 'Free Material',
-        badgeClass: 'type-free-material',
-        fields: [
-            ['materialTitle', '資料名稱'],
-            ['documentName', '文件名稱'],
-            ['pageKey', '頁面 Key'],
-            ['sectionId', 'Section ID'],
-            ['consentAccepted', '已同意接收']
         ]
     }
 };
@@ -9141,6 +10108,11 @@ var FORMS_INBOX_STATUS_META = {
 
 function _formsInboxHiddenFromLeadsInbox(item) {
     return !!(item && item.formType === 'consultation');
+}
+
+function _formsInboxEffectiveType(type) {
+    var t = _formsInboxSafeText(type || '');
+    return t === 'free-material' ? 'lead-magnet' : t;
 }
 
 function _formsInboxSafeText(val) {
@@ -9191,7 +10163,8 @@ function _formsInboxHumanizeKey(key) {
 }
 
 function _formsInboxGetTypeMeta(type) {
-    return FORMS_INBOX_TYPE_META[type] || { label: _formsInboxHumanizeKey(type || 'other'), badgeClass: '', fields: [] };
+    var effectiveType = _formsInboxEffectiveType(type);
+    return FORMS_INBOX_TYPE_META[effectiveType] || { label: _formsInboxHumanizeKey(effectiveType || 'other'), badgeClass: '', fields: [] };
 }
 
 function _formsInboxGetStatusMeta(status) {
@@ -9227,6 +10200,53 @@ function _formsInboxFormatTimestamp(val) {
 
 function _formsInboxGetSourceLabel(item) {
     return _formsInboxSafeText((item && (item.sourcePage || item.sourceLabel || item.sourcePath || item.sourceKey)) || '未知來源');
+}
+
+function _formsInboxNormalizeVisitUrl(value) {
+    var raw = _formsInboxSafeText(value || '');
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.charAt(0) === '/') return window.location.origin + raw;
+    if (/^[a-z0-9][a-z0-9._~!$&'()*+,;=:@/-]*(\?[^\s#]*)?(#[^\s]*)?$/i.test(raw)) {
+        return window.location.origin + '/' + raw.replace(/^\/+/, '');
+    }
+    return '';
+}
+
+function _formsInboxSourceUrlForLabel(label) {
+    var selected = _formsInboxSafeText(label || '');
+    if (!selected || selected === 'all') return '';
+    for (var i = 0; i < _formsInboxItems.length; i++) {
+        var item = _formsInboxItems[i] || {};
+        if (_formsInboxHiddenFromLeadsInbox(item)) continue;
+        if (_formsInboxGetSourceLabel(item) !== selected) continue;
+        var url = _formsInboxNormalizeVisitUrl(item.sourceUrl || '');
+        if (url) return url;
+        url = _formsInboxNormalizeVisitUrl(item.sourcePath || '');
+        if (url) return url;
+        url = _formsInboxNormalizeVisitUrl(item.sourcePage || '');
+        if (url) return url;
+    }
+    return _formsInboxNormalizeVisitUrl(selected);
+}
+
+function syncFormsSourceVisitButton() {
+    var select = document.getElementById('formsSourceFilter');
+    var btn = document.getElementById('formsSourceVisitBtn');
+    if (!btn) return;
+    var url = select ? _formsInboxSourceUrlForLabel(select.value || '') : '';
+    btn.disabled = !url;
+    btn.title = url ? ('開啟 ' + url) : '請先選擇一個來源頁面';
+}
+
+function visitSelectedFormsSource() {
+    var select = document.getElementById('formsSourceFilter');
+    var url = select ? _formsInboxSourceUrlForLabel(select.value || '') : '';
+    if (!url) {
+        showToast('請先選擇一個來源頁面', 'error');
+        return;
+    }
+    window.open(url, '_blank', 'noopener');
 }
 
 function _formsInboxBuildSearchText(item) {
@@ -9271,26 +10291,24 @@ function _formsInboxFormatAnswerValue(val) {
 
 function _formsInboxBuildSummary(item) {
     var answers = item.answers || {};
-    if (item.formType === 'consultation') {
+    var effectiveType = _formsInboxEffectiveType(item.formType);
+    if (effectiveType === 'consultation') {
         return _formsInboxSafeText(answers.aiGoal || answers.currentProblem || answers.successOutcome || '');
     }
-    if (item.formType === 'workshop-waitlist') {
+    if (effectiveType === 'workshop-waitlist') {
         var parts = [];
         if (answers.workshopEvent) parts.push(answers.workshopEvent);
         if (answers.painPoint) parts.push(answers.painPoint);
         return parts.join(' | ');
     }
-    if (item.formType === 'lead-magnet') {
+    if (effectiveType === 'lead-magnet') {
         return _formsInboxSafeText(item.leadDefinitionName || item.sourceLabel || item.sourcePage || '免費內容索取');
     }
-    if (item.formType === 'quiz-lead') {
+    if (effectiveType === 'quiz-lead') {
         var quizParts = [];
         if (answers.profileName) quizParts.push('結果：' + answers.profileName);
         if (answers.recommendedWorkshop) quizParts.push('推薦：' + answers.recommendedWorkshop);
         return quizParts.join(' | ');
-    }
-    if (item.formType === 'free-material') {
-        return _formsInboxSafeText(item.leadDefinitionName || answers.materialTitle || answers.documentName || '');
     }
     return _formsInboxFlattenValues(answers, []).slice(0, 2).join(' | ');
 }
@@ -9310,6 +10328,15 @@ function _formsInboxBuildAnswerFields(item) {
     }
     Object.keys(answers).forEach(function(key) {
         if (used[key] || !_formsInboxHasValue(answers[key])) return;
+        if (key === 'customAnswerLabels') return;
+        if (key === 'customAnswers' && _formsInboxIsPlainObject(answers.customAnswers)) {
+            var labels = _formsInboxIsPlainObject(answers.customAnswerLabels) ? answers.customAnswerLabels : {};
+            Object.keys(answers.customAnswers).forEach(function(customKey) {
+                if (!_formsInboxHasValue(answers.customAnswers[customKey])) return;
+                html += '<div class="consult-field"><div class="consult-field-label">' + escHtml(labels[customKey] || _formsInboxHumanizeKey(customKey)) + '</div><div class="consult-field-value">' + _formsInboxFormatAnswerValue(answers.customAnswers[customKey]) + '</div></div>';
+            });
+            return;
+        }
         html += '<div class="consult-field"><div class="consult-field-label">' + escHtml(_formsInboxHumanizeKey(key)) + '</div><div class="consult-field-value">' + _formsInboxFormatAnswerValue(answers[key]) + '</div></div>';
     });
     if (!html) return '<div class="forms-empty-answer">沒有額外答案。</div>';
@@ -9385,6 +10412,7 @@ function _formsInboxRefreshSourceOptions() {
     }).join('');
     if (options.indexOf(current) === -1) current = 'all';
     select.value = current;
+    syncFormsSourceVisitButton();
 }
 
 function loadFormsInboxData() {
@@ -9429,6 +10457,7 @@ function loadFormsInboxData() {
 
 function setFormsInboxTypeFilter(type, btn) {
     if (type === 'consultation') type = 'all';
+    if (type === 'free-material') type = 'lead-magnet';
     _formsInboxTypeFilter = type || 'all';
     var select = document.getElementById('formsTypeSelect');
     if (select) select.value = _formsInboxTypeFilter;
@@ -9529,6 +10558,7 @@ function resetFormsInboxFilters() {
     });
     _formsInboxSelectedIds = {};
     _formsInboxSelectAnchorDocId = null;
+    syncFormsSourceVisitButton();
     renderFormsInbox();
 }
 
@@ -9777,7 +10807,7 @@ function _formsInboxFilterItems() {
         if (_formsInboxHiddenFromLeadsInbox(item)) return false;
         var statusValue = _formsInboxGetStatusValue(item);
         if (statusSet && statusSet.indexOf(statusValue) === -1) return false;
-        if (_formsInboxTypeFilter !== 'all' && item.formType !== _formsInboxTypeFilter) return false;
+        if (_formsInboxTypeFilter !== 'all' && _formsInboxEffectiveType(item.formType) !== _formsInboxTypeFilter) return false;
         if (sourceFilter !== 'all' && _formsInboxGetSourceLabel(item) !== sourceFilter) return false;
         if (searchQuery) {
             var haystack = (item.searchText || _formsInboxBuildSearchText(item) || '');
@@ -9878,6 +10908,7 @@ function renderFormsInbox() {
         emptyEl.textContent = leadsInboxCount ? '沒有符合目前篩選條件的表單提交' : '尚未有表單提交';
         _formsInboxUpdateBulkBar();
         formsInboxSyncSelectAllCheckbox();
+        syncFormsSourceVisitButton();
         return;
     }
     emptyEl.style.display = 'none';
@@ -9894,6 +10925,7 @@ function renderFormsInbox() {
         listEl.innerHTML = filtered.map(_formsInboxBuildCardHtml).join('');
     }
     _formsInboxUpdateBulkBar();
+    syncFormsSourceVisitButton();
 }
 
 function toggleFormSubmissionExpand(card, e) {
@@ -10028,6 +11060,7 @@ var _leadDefinitionEditorSaving = false;
 var _leadDefinitionEditorSnapshot = '';
 var _leadDefinitionEditorDirtyBound = false;
 var _leadDefinitionSuppressDirtyCheck = false;
+var _leadFreeMaterialMigrationStarted = false;
 
 function initLeadsSectionMounts() {
     var inboxMount = document.getElementById('tabLeadsInboxMount');
@@ -10122,6 +11155,62 @@ function _hasUnsavedLeadDefinitionChanges() {
     return currentSnapshot !== _leadDefinitionEditorSnapshot;
 }
 
+function _normalizeFreeMaterialReferencesInObject(obj) {
+    var changed = false;
+    function visit(node) {
+        if (!node || typeof node !== 'object') return;
+        if (node.leadDefinitionType === 'free-material') {
+            node.leadDefinitionType = 'lead-magnet';
+            changed = true;
+        }
+        if (node.formType === 'free-material') {
+            node.formType = 'lead-magnet';
+            changed = true;
+        }
+        Object.keys(node).forEach(function(key) {
+            var val = node[key];
+            if (val && typeof val === 'object') visit(val);
+        });
+    }
+    visit(obj);
+    return changed;
+}
+
+function _ensureFreeMaterialDefinitionsMigrated() {
+    if (_leadFreeMaterialMigrationStarted || !db) return;
+    _leadFreeMaterialMigrationStarted = true;
+    db.collection('leadDefinitions').where('type', '==', 'free-material').get().then(function(snap) {
+        var writes = [];
+        snap.forEach(function(doc) {
+            writes.push(doc.ref.set({
+                type: 'lead-magnet',
+                migratedFromType: 'free-material',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }));
+        });
+        return Promise.all(writes);
+    }).then(function() {
+        return db.collection('pageLayouts').get();
+    }).then(function(snap) {
+        var writes = [];
+        snap.forEach(function(doc) {
+            var data = doc.data() || {};
+            var sections = Array.isArray(data.sections) ? JSON.parse(JSON.stringify(data.sections)) : [];
+            if (!sections.length) return;
+            if (!_normalizeFreeMaterialReferencesInObject(sections)) return;
+            writes.push(doc.ref.set({
+                sections: sections,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }));
+        });
+        return Promise.all(writes);
+    }).then(function() {
+        console.info('[leadDefinitions] free-material migrated to lead-magnet');
+    }).catch(function(err) {
+        console.warn('[leadDefinitions] free-material migration skipped/failed', err);
+    });
+}
+
 function _bindLeadDefinitionEditorDirtyTracking() {
     if (_leadDefinitionEditorDirtyBound) return;
     var editor = document.getElementById('leadDefinitionEditor');
@@ -10156,6 +11245,7 @@ function _withLeadDefinitionLeaveGuard(onOk) {
 function loadLeadDefinitionsData() {
     if (_leadDefinitionsSubscribed || !db || typeof aiflowSubscribeLeadDefinitions !== 'function') return;
     _leadDefinitionsSubscribed = true;
+    _ensureFreeMaterialDefinitionsMigrated();
     aiflowSubscribeLeadDefinitions(function(definitions) {
         _setLeadDefinitionsCache(definitions);
         renderLeadDefinitionList();
@@ -10285,6 +11375,7 @@ function _leadDefinitionCardMediaMarkup(def) {
 function _leadDefinitionFilterList() {
     var typeFilter = (document.getElementById('leadDefinitionTypeFilter') || {}).value || 'all';
     if (typeFilter === 'consultation') typeFilter = 'all';
+    if (typeFilter === 'free-material') typeFilter = 'lead-magnet';
     var statusFilter = (document.getElementById('leadDefinitionStatusFilter') || {}).value || 'all';
     var search = String((document.getElementById('leadDefinitionSearchInput') || {}).value || '').trim().toLowerCase();
     return (_leadDefinitions || []).filter(function(def) {
@@ -10358,6 +11449,7 @@ function renderLeadDefinitionList() {
     if (!list) return;
     var typeSel = document.getElementById('leadDefinitionTypeFilter');
     if (typeSel && typeSel.value === 'consultation') typeSel.value = 'all';
+    if (typeSel && typeSel.value === 'free-material') typeSel.value = 'lead-magnet';
     loadLeadDefinitionsData();
     if (!_leadDefinitionsLoaded) {
         list.innerHTML = '<div class="lead-def-empty" style="min-height:180px;">正在載入 Leads 定義...</div>';
@@ -10439,7 +11531,7 @@ function _leadUsageSectionTitle(section, index) {
 
 function _leadUsagePlacementLabel(entry) {
     if (entry && entry.placement === 'link') return 'Link List 卡片';
-    if (entry && entry.sectionType === 'free-material-download') return 'Free Material 區塊';
+    if (entry && entry.sectionType === 'free-material-download') return 'Lead Magnet 下載區塊';
     return 'Section 引用';
 }
 
@@ -10862,8 +11954,8 @@ function openLeadAssetPicker(mode) {
     if (title) title.textContent = _leadAssetPickerMode === 'document' ? '選擇文件' : '選擇圖片';
     if (intro) intro.textContent = _leadAssetPickerMode === 'document'
         ? '從與 page layout editor 相同的文件池選擇附件，或直接上傳新文件。'
-        : '從與 page layout editor 相同的媒體池選擇圖片，或直接上傳新圖片。';
-    if (uploadBtn) uploadBtn.textContent = _leadAssetPickerMode === 'document' ? '上傳新文件' : '上傳新圖片';
+        : '從與 page layout editor 相同的媒體池選擇圖片，或一次上傳多張新圖片。';
+    if (uploadBtn) uploadBtn.textContent = _leadAssetPickerMode === 'document' ? '上傳新文件' : '上傳新圖片（可多選）';
     if (search) {
         search.value = '';
         search.placeholder = _leadAssetPickerMode === 'document' ? '搜尋文件名稱...' : '搜尋檔名...';
@@ -10886,10 +11978,10 @@ function leadAssetPickerChooseUpload() {
 }
 
 function leadAssetPickerUploadSelected(inp) {
-    var file = inp && inp.files && inp.files[0];
-    if (!file) return;
+    var files = inp && inp.files ? Array.prototype.slice.call(inp.files) : [];
+    if (!files.length) return;
     inp.value = '';
-    _uploadLeadImageFile(file);
+    _uploadLeadImageFiles(files);
 }
 
 function leadAssetPickerDocUploadSelected(inp) {
@@ -11178,8 +12270,13 @@ function _uploadLeadImageFile(file) {
         showToast('檔案大小不能超過 20MB', 'error');
         return;
     }
-    closeLeadAssetPicker();
-    showLoadingOverlay('上傳圖片中...');
+    _uploadLeadImageFiles([file]);
+}
+
+function _uploadLeadImageAsset(file, progressCb) {
+    if (file.size > 20 * 1024 * 1024) {
+        return Promise.reject(new Error((file.name || '圖片') + ' 檔案大小不能超過 20MB'));
+    }
     var ext = (file.name.split('.').pop() || 'png').toLowerCase();
     var path = 'layout-images/lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.' + ext;
     var ref = storage.ref(path);
@@ -11190,40 +12287,81 @@ function _uploadLeadImageFile(file) {
             originalName: file.name || ''
         }
     });
-    task.on('state_changed',
-        function(snapshot) {
-            var pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            var textEl = document.getElementById('cmsLoadingText');
-            if (textEl) textEl.textContent = '上傳圖片中... ' + Math.round(pct) + '%';
-        },
-        function(err) {
-            hideLoadingOverlay();
-            showToast('圖片上傳失敗：' + err.message, 'error');
-        },
-        function() {
-            task.snapshot.ref.getDownloadURL().then(function(url) {
-                var nowIso = new Date().toISOString();
-                _leadAssetLibraryUpsert({
-                    path: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
-                    storagePath: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
-                    name: file.name || '',
-                    fileName: file.name || '',
-                    originalName: file.name || '',
-                    url: url,
-                    contentType: file.type || '',
-                    timeCreated: nowIso,
-                    updated: nowIso
-                });
-                _renderLeadDefinitionImagePicker(url);
-                _recomputeLeadDefinitionDirty();
-                hideLoadingOverlay();
-                showToast('圖片已上傳');
-            }).catch(function(err) {
-                hideLoadingOverlay();
-                showToast('取得圖片連結失敗：' + err.message, 'error');
-            });
+    return new Promise(function(resolve, reject) {
+        task.on('state_changed',
+            function(snapshot) {
+                if (typeof progressCb === 'function') progressCb(snapshot);
+            },
+            reject,
+            function() {
+                task.snapshot.ref.getDownloadURL().then(function(url) {
+                    var nowIso = new Date().toISOString();
+                    resolve({
+                        path: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
+                        storagePath: task.snapshot && task.snapshot.ref ? task.snapshot.ref.fullPath : path,
+                        name: file.name || '',
+                        fileName: file.name || '',
+                        originalName: file.name || '',
+                        url: url,
+                        contentType: file.type || '',
+                        timeCreated: nowIso,
+                        updated: nowIso
+                    });
+                }).catch(reject);
+            }
+        );
+    });
+}
+
+function _uploadLeadImageFiles(files) {
+    files = (files || []).filter(Boolean);
+    if (!files.length) return;
+    if (!storage) {
+        showToast('儲存服務尚未載入，請重新整理頁面後再試。', 'error');
+        return;
+    }
+    closeLeadAssetPicker();
+    showLoadingOverlay(files.length > 1 ? '上傳圖片中... (0/' + files.length + ')' : '上傳圖片中...');
+    var completed = 0;
+    var uploaded = [];
+
+    function finishOne() {
+        completed++;
+        var textEl = document.getElementById('cmsLoadingText');
+        if (textEl) textEl.textContent = files.length > 1 ? '上傳圖片中... (' + completed + '/' + files.length + ')' : '上傳圖片中... 100%';
+    }
+
+    Promise.all(files.map(function(file) {
+        return _uploadLeadImageAsset(file, function(snapshot) {
+            if (files.length === 1) {
+                var pct = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                var textEl = document.getElementById('cmsLoadingText');
+                if (textEl) textEl.textContent = '上傳圖片中... ' + Math.round(pct) + '%';
+            }
+        }).then(function(asset) {
+            uploaded.push(asset);
+            _leadAssetLibraryUpsert(asset);
+            finishOne();
+            return asset;
+        }).catch(function(err) {
+            console.warn('Lead image upload failed:', file && file.name, err);
+            finishOne();
+            return null;
+        });
+    })).then(function() {
+        uploaded = uploaded.filter(Boolean);
+        hideLoadingOverlay();
+        if (!uploaded.length) {
+            showToast('圖片上傳失敗，請重試。', 'error');
+            return;
         }
-    );
+        _renderLeadDefinitionImagePicker(uploaded[0].url || '');
+        _recomputeLeadDefinitionDirty();
+        showToast(uploaded.length > 1 ? '已上傳 ' + uploaded.length + ' 張圖片，並套用第一張' : '圖片已上傳');
+    }).catch(function(err) {
+        hideLoadingOverlay();
+        showToast('圖片上傳失敗：' + err.message, 'error');
+    });
 }
 
 function _uploadLeadDocumentFiles(files) {
@@ -11561,7 +12699,8 @@ function renderLeadDefinitionEditorState() {
     var delWa = document.getElementById('leadDefinitionDeliveryWhatsAppWrap');
     var collectEm = document.getElementById('leadDefinitionCollectEmailInput');
     var collectPh = document.getElementById('leadDefinitionCollectPhoneInput');
-    var showDelivery = type === 'free-material' || type === 'lead-magnet';
+    if (type === 'free-material') type = 'lead-magnet';
+    var showDelivery = type === 'lead-magnet';
     if (delSub) delSub.style.display = showDelivery ? '' : 'none';
     if (delMat) delMat.style.display = showDelivery ? '' : 'none';
     if (type === 'lead-magnet') {
@@ -11572,12 +12711,6 @@ function renderLeadDefinitionEditorState() {
         var phOn = !!(collectPh && collectPh.checked);
         if (delEmail) delEmail.style.display = emOn ? '' : 'none';
         if (delWa) delWa.style.display = phOn ? '' : 'none';
-    } else if (type === 'free-material') {
-        if (lmBlock) lmBlock.style.display = 'none';
-        if (consentBlock) consentBlock.style.display = 'none';
-        if (genericNe) genericNe.style.display = '';
-        if (delEmail) delEmail.style.display = '';
-        if (delWa) delWa.style.display = 'none';
     } else {
         if (lmBlock) lmBlock.style.display = 'none';
         if (consentBlock) consentBlock.style.display = 'none';
@@ -11622,7 +12755,7 @@ function openLeadDefinitionEditor(defId, opts) {
         def = JSON.parse(JSON.stringify(def));
     } else {
         var defaultType = (document.getElementById('leadDefinitionTypeFilter') || {}).value || 'lead-magnet';
-        if (defaultType === 'all' || defaultType === 'consultation') defaultType = 'lead-magnet';
+        if (defaultType === 'all' || defaultType === 'consultation' || defaultType === 'free-material') defaultType = 'lead-magnet';
         def = typeof aiflowCreateLeadDefinitionDefaults === 'function'
             ? aiflowCreateLeadDefinitionDefaults(defaultType)
             : { type: defaultType, status: 'active', publicEnabled: true, documents: [], formFields: [] };
@@ -11636,6 +12769,7 @@ function openLeadDefinitionEditor(defId, opts) {
     document.getElementById('leadDefinitionNameInput').value = _cmsRichTextToPlainInput(def.name || '');
     var effType = def.type || 'lead-magnet';
     if (effType === 'consultation') effType = 'lead-magnet';
+    if (effType === 'free-material') effType = 'lead-magnet';
     document.getElementById('leadDefinitionTypeInput').value = effType;
     document.getElementById('leadDefinitionStatusInput').value = def.status || 'active';
     document.getElementById('leadDefinitionPublicInput').checked = def.publicEnabled !== false;
@@ -11717,6 +12851,7 @@ function removeLeadDefinitionFormField(idx) {
 function _collectLeadDefinitionEditorPayload(docId) {
     var typeRaw = String((document.getElementById('leadDefinitionTypeInput') || {}).value || 'lead-magnet').trim() || 'lead-magnet';
     if (typeRaw === 'consultation') typeRaw = 'lead-magnet';
+    if (typeRaw === 'free-material') typeRaw = 'lead-magnet';
     var nameLblLm = String((document.getElementById('leadDefinitionNameFieldLabelInput') || {}).value || '').trim();
     var emailLblLm = String((document.getElementById('leadDefinitionEmailFieldLabelInput') || {}).value || '').trim();
     var nameLblGen = String((document.getElementById('leadDefinitionGenericNameFieldLabelInput') || {}).value || '').trim();
@@ -11846,7 +12981,7 @@ function _leadMigrationTitleText(value) {
 
 async function runLeadDefinitionMigration() {
     if (!db) return;
-    if (!confirm('這會把現有 page layouts 內的 Link List Lead Magnet 與 Free Material inline 設定匯入到 `leadDefinitions`，並寫回 `leadDefinitionId`。是否繼續？')) return;
+    if (!confirm('這會把現有 page layouts 內的 Link List Lead Magnet 與 Lead Magnet 下載區塊 inline 設定匯入到 `leadDefinitions`，並寫回 `leadDefinitionId`。是否繼續？')) return;
     try {
         var snap = await db.collection('pageLayouts').get();
         var createdCount = 0;
@@ -11911,12 +13046,12 @@ async function runLeadDefinitionMigration() {
                         String(content.pdfUrl || '').trim()
                     );
                     if (!hasInline) continue;
-                    var fmId = _leadMigrationDocId(doc.id, sec.id || ('section-' + s), 'free-material', 'free-material');
+                    var fmId = _leadMigrationDocId(doc.id, sec.id || ('section-' + s), 'lead-magnet', 'lead-magnet');
                     var fmPayload = typeof aiflowNormalizeLeadDefinition === 'function'
                         ? aiflowNormalizeLeadDefinition({
                             id: fmId,
-                            name: _leadMigrationTitleText(content.materialTitle || content.title || ('Free Material ' + doc.id)),
-                            type: 'free-material',
+                            name: _leadMigrationTitleText(content.materialTitle || content.title || ('Lead Magnet ' + doc.id)),
+                            type: 'lead-magnet',
                             status: 'active',
                             publicEnabled: true,
                             title: content.title || '',
@@ -11940,14 +13075,14 @@ async function runLeadDefinitionMigration() {
                             successMessage: content.successMessage || '',
                             helperNote: content.helperNote || '',
                             purposeNotes: 'Migrated from page layout "' + doc.id + '" / section "' + (sec.id || ('section-' + s)) + '".'
-                        }, { id: fmId, type: 'free-material' })
-                        : { name: content.title || fmId, type: 'free-material', status: 'active', publicEnabled: true };
+                        }, { id: fmId, type: 'lead-magnet' })
+                        : { name: content.title || fmId, type: 'lead-magnet', status: 'active', publicEnabled: true };
                     await db.collection('leadDefinitions').doc(fmId).set(Object.assign({}, fmPayload, {
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     }), { merge: true });
                     sec.content.leadDefinitionId = fmId;
-                    sec.content.leadDefinitionType = 'free-material';
+                    sec.content.leadDefinitionType = 'lead-magnet';
                     sec.content.leadDefinitionName = typeof aiflowLeadDefinitionDisplayName === 'function' ? aiflowLeadDefinitionDisplayName(fmPayload) : (fmPayload.name || fmId);
                     createdCount++;
                     changed = true;
@@ -16709,6 +17844,17 @@ function renderConsultApps() {
         if (a.workshopInterest) html += '<div class="consult-field"><div class="consult-field-label">工作坊興趣</div><div class="consult-field-value">' + escHtml(a.workshopInterest) + '</div></div>';
         if (a.additionalInfo) html += '<div class="consult-field"><div class="consult-field-label">補充資料</div><div class="consult-field-value">' + escHtml(a.additionalInfo) + '</div></div>';
         if (a.whatsappConsent) html += '<div class="consult-field"><div class="consult-field-label">WhatsApp 同意</div><div class="consult-field-value">' + escHtml(a.whatsappConsent) + '</div></div>';
+        if (a.customAnswers && Object.keys(a.customAnswers).length) {
+            html += '<div class="consult-field"><div class="consult-field-label">自訂問題</div><div class="consult-field-value">';
+            Object.keys(a.customAnswers).forEach(function(key) {
+                var label = (a.customAnswerLabels && a.customAnswerLabels[key]) || key;
+                var val = a.customAnswers[key];
+                var display = Array.isArray(val) ? val.join(', ') : String(val == null ? '' : val);
+                if (!display) return;
+                html += '<div style="margin-bottom:8px;"><strong>' + escHtml(label) + ':</strong> ' + escHtml(display) + '</div>';
+            });
+            html += '</div></div>';
+        }
         html += '</div>';
 
         html += '</div>';

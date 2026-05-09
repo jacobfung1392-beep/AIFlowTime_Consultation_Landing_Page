@@ -595,14 +595,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=10"></script>
+    <script src="/js/shared-utils.js?v=31"></script>
     <script src="/js/page-background-runtime.js"></script>
 
     <!-- Layout Engine (Preview + Public) -->
     <script>
     (function() {
         var _layoutQuery = new URLSearchParams(window.location.search);
-        var _isPreview = _layoutQuery.has('preview');
+        var _isPreview = _layoutQuery.get('preview') === '1';
         var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'about-jacob';
         var _layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
             ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
@@ -806,7 +806,7 @@
                 if (!sec || sec.type === 'page-background') return;
                 if (!sec.visible) return;
                 var el = document.querySelector('[data-section-id="' + sec.id + '"]');
-                if (!el && (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download')) {
+                if (!el && (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download' || sec.type === 'consultation-form')) {
                     el = document.createElement('section');
                     el.className = 'aj-section fade-in visible';
                     el.setAttribute('data-section-id', sec.id);
@@ -817,6 +817,9 @@
                 el.style.display = '';
                 el.style.order = order++;
                 applyContent(el, sec);
+                if (typeof aiflowApplySectionCropToElement === 'function') {
+                    aiflowApplySectionCropToElement(el, sec.content || {});
+                }
                 _markSectionVisible(el);
             });
         }
@@ -1036,6 +1039,13 @@
                     });
                     break;
 
+                case 'consultation-form':
+                    renderConsultationSection(el, c, {
+                        pageKey: 'about-jacob',
+                        sectionId: el.getAttribute('data-section-id') || 'consultation-form'
+                    });
+                    break;
+
                 case 'image-only':
                     var ajImgAlign = c.align === 'left' ? 'flex-start' : c.align === 'right' ? 'flex-end' : 'center';
                     var ajImgShadow = c.shadow === 'strong'
@@ -1054,7 +1064,7 @@
                     el.innerHTML = '<div class="aj-container" style="display:flex;justify-content:' + ajImgAlign + ';">' +
                         '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 960) + 'px);">' +
                         ajStart +
-                        '<img src="' + ajImgUrl + '" alt="' + ajAlt + '" style="display:block;width:100%;height:auto;max-height:72vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + ajImgShadow + ';">' +
+                        '<img src="' + ajImgUrl + '" alt="' + ajAlt + '" style="display:block;width:100%;height:auto;object-fit:' + (c.objectFit === 'cover' ? 'cover' : 'contain') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + ajImgShadow + ';">' +
                         (ajCap ? '<p style="margin-top:12px;color:var(--text-light);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + ajCap + '</p>' : '') +
                         ajEnd +
                         '</div></div>';

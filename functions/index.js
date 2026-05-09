@@ -2153,6 +2153,11 @@ const MANAGED_PUBLIC_PAGE_ROUTES = {
     previewTemplateUrl: "/consultation",
     templatePath: "/consultation.html",
   },
+  "ig-consultation": {
+    defaultSlug: "ig-consultation",
+    previewTemplateUrl: "/ig-consultation",
+    templatePath: "/ig-consultation.html",
+  },
   "quiz": {
     defaultSlug: "quiz",
     previewTemplateUrl: "/quiz",
@@ -2188,9 +2193,9 @@ const SYSTEM_RESERVED_PAGE_SLUGS = new Set([
   "qr-display",
   "qr-submit",
   "doc",
+  "canvas-page",
   "elevator-action-gb",
   "game-scores-admin",
-  "ig-consultation",
   "index",
   "js",
   "css",
@@ -3006,4 +3011,10 @@ exports.publicWorkshopEvents = onRequest(
     }
   }
 );
+
+// --- Google Calendar ↔ CMS (dedicated calendar; safe delete only our events) ---
+const { registerGoogleCalendarIntegration } = require("./googleCalendarSync");
+const _gcal = registerGoogleCalendarIntegration({ db, REGION });
+exports.cmsGoogleCalendarApi = _gcal.cmsGoogleCalendarApi;
+exports.calendarOAuthCallback = _gcal.calendarOAuthCallback;
 

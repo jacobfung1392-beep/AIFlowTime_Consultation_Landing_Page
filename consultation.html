@@ -466,9 +466,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=10"></script>
+    <script src="/js/shared-utils.js?v=31"></script>
     <script src="/js/page-background-runtime.js"></script>
-    <script src="/js/consultation-layout-runtime.js"></script>
+    <script src="/js/consultation-layout-runtime.js?v=30"></script>
     <script>
         // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
@@ -532,7 +532,7 @@
 
         (function() {
             var query = new URLSearchParams(window.location.search);
-            var isPreview = query.has('preview');
+            var isPreview = query.get('preview') === '1';
             var layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || query.get('layoutDoc') || 'consultation';
             var layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
                 ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })

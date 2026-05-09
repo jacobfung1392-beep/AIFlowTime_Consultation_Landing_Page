@@ -42,6 +42,13 @@ function sanitizeHeroTitleHtml(html) {
 
     if (!/[<>]/.test(raw)) return escHtml(raw).replace(/\n/g, '<br>');
 
+    function safeImageUrl(url) {
+        var clean = String(url || '').trim();
+        if (!clean) return '';
+        if (/^(https?:|\/|data:image\/(png|jpe?g|gif|webp|svg\+xml);base64,)/i.test(clean)) return clean;
+        return '';
+    }
+
     function cleanChildren(parent) {
         var frag = document.createDocumentFragment();
         var cn = Array.prototype.slice.call(parent.childNodes);
@@ -55,6 +62,19 @@ function sanitizeHeroTitleHtml(html) {
             if (tag === 'script' || tag === 'style' || tag === 'iframe') return;
             if (tag === 'br') {
                 frag.appendChild(document.createElement('br'));
+                return;
+            }
+            if (tag === 'img') {
+                var imgSrc = safeImageUrl(child.getAttribute('src') || '');
+                if (!imgSrc) return;
+                var img = document.createElement('img');
+                img.setAttribute('src', imgSrc);
+                var alt = (child.getAttribute('alt') || '').trim();
+                if (alt) img.setAttribute('alt', alt.slice(0, 180));
+                img.setAttribute('loading', 'lazy');
+                img.setAttribute('decoding', 'async');
+                img.setAttribute('style', 'display:block;max-width:100%;height:auto;margin:16px auto;border-radius:14px;');
+                frag.appendChild(img);
                 return;
             }
             if (['b', 'strong', 'i', 'em', 'u', 's', 'strike'].indexOf(tag) !== -1) {
@@ -85,6 +105,18 @@ function sanitizeHeroTitleHtml(html) {
                 if ((m = st.match(/font-size\s*:\s*([^;]+)/i))) {
                     var fs = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
                     if (/^[\d.]+\s*(px|em|rem|%)$/i.test(fs)) allowed.push('font-size:' + fs);
+                }
+                if ((m = st.match(/font-weight\s*:\s*([^;]+)/i))) {
+                    var fw = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
+                    if (/^(normal|bold|[1-9]00)$/i.test(fw)) allowed.push('font-weight:' + fw);
+                }
+                if ((m = st.match(/font-style\s*:\s*([^;]+)/i))) {
+                    var fst = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
+                    if (/^(normal|italic)$/i.test(fst)) allowed.push('font-style:' + fst);
+                }
+                if ((m = st.match(/text-decoration(?:-line)?\s*:\s*([^;]+)/i))) {
+                    var td = m[1].trim().replace(/\s*!important\s*$/i, '').trim();
+                    if (/^(none|underline|line-through|underline line-through|line-through underline)$/i.test(td)) allowed.push('text-decoration:' + td);
                 }
                 // Do not unwrap font-size-only spans whose sole child is another span — that drops
                 // font-size when users apply color after size (common: outer size, inner color).
@@ -284,6 +316,110 @@ function aiflowSetRichText(el, value) {
     return html;
 }
 
+function aiflowApplyTextAlignToElement(el, content, fieldName) {
+    if (!el) return;
+    if (!fieldName || !content || typeof content !== 'object') {
+        el.style.removeProperty('text-align');
+        return;
+    }
+    var a = String(content[fieldName + '_textAlign'] || '').trim().toLowerCase();
+    if (a === 'center' || a === 'right' || a === 'justify' || a === 'left') el.style.textAlign = a;
+    else el.style.removeProperty('text-align');
+}
+
+function aiflowSectionCropNumber(value) {
+    var n = parseFloat(value);
+    if (isNaN(n) || n < 0) return 0;
+    return Math.min(2000, n);
+}
+
+function aiflowEnsureSectionCropInner(sectionEl) {
+    if (!sectionEl) return null;
+    var direct = null;
+    Array.prototype.slice.call(sectionEl.children || []).some(function(child) {
+        if (child && child.classList && child.classList.contains('layout-section-crop-inner')) {
+            direct = child;
+            return true;
+        }
+        return false;
+    });
+    if (direct) return direct;
+    direct = document.createElement('div');
+    direct.className = 'layout-section-crop-inner';
+    Array.prototype.slice.call(sectionEl.childNodes || []).forEach(function(node) {
+        if (node.nodeType === 1 && node.classList && node.classList.contains('layout-section-crop-handle')) return;
+        direct.appendChild(node);
+    });
+    sectionEl.insertBefore(direct, sectionEl.firstChild);
+    return direct;
+}
+
+function aiflowApplySectionCropToElement(sectionEl, content) {
+    if (!sectionEl) return;
+    content = content || {};
+    var cropTop = aiflowSectionCropNumber(content._cropTop);
+    var cropBottom = aiflowSectionCropNumber(content._cropBottom);
+    var hasExplicitHeight = content._cropHeight !== undefined && content._cropHeight !== null && String(content._cropHeight).trim() !== '';
+    var cropHeight = hasExplicitHeight ? aiflowSectionCropNumber(content._cropHeight) : 0;
+    sectionEl.setAttribute('data-layout-crop-top', String(Math.round(cropTop * 100) / 100));
+    sectionEl.setAttribute('data-layout-crop-bottom', String(Math.round(cropBottom * 100) / 100));
+    if (hasExplicitHeight) sectionEl.setAttribute('data-layout-crop-height', String(Math.round(cropHeight * 100) / 100));
+    else sectionEl.removeAttribute('data-layout-crop-height');
+
+    var existingInner = null;
+    Array.prototype.slice.call(sectionEl.children || []).some(function(child) {
+        if (child && child.classList && child.classList.contains('layout-section-crop-inner')) {
+            existingInner = child;
+            return true;
+        }
+        return false;
+    });
+
+    if (!cropTop && !cropBottom && !hasExplicitHeight) {
+        if (existingInner) {
+            while (existingInner.firstChild) sectionEl.insertBefore(existingInner.firstChild, existingInner);
+            existingInner.remove();
+        }
+        sectionEl.style.height = '';
+        sectionEl.style.overflow = '';
+        if (sectionEl.hasAttribute('data-layout-crop-prev-min-height')) {
+            var prevMinHeight = sectionEl.getAttribute('data-layout-crop-prev-min-height') || '';
+            if (prevMinHeight) sectionEl.style.minHeight = prevMinHeight;
+            else sectionEl.style.removeProperty('min-height');
+            sectionEl.removeAttribute('data-layout-crop-prev-min-height');
+        }
+        sectionEl.removeAttribute('data-layout-crop-natural-height');
+        return;
+    }
+
+    var inner = existingInner || aiflowEnsureSectionCropInner(sectionEl);
+    if (!inner) return;
+    sectionEl.style.position = sectionEl.style.position || 'relative';
+    sectionEl.style.overflow = 'hidden';
+    if (!sectionEl.hasAttribute('data-layout-crop-prev-min-height')) {
+        sectionEl.setAttribute('data-layout-crop-prev-min-height', sectionEl.style.minHeight || '');
+    }
+    sectionEl.style.minHeight = '0px';
+    inner.style.transform = cropTop ? ('translate3d(0,-' + cropTop + 'px,0)') : '';
+    inner.style.willChange = 'transform';
+
+    sectionEl.style.height = '';
+    var naturalHeight = Math.max(
+        inner.scrollHeight || 0,
+        inner.offsetHeight || 0,
+        Math.ceil((inner.getBoundingClientRect && inner.getBoundingClientRect().height) || 0),
+        sectionEl.scrollHeight || 0
+    );
+    var visibleHeight = hasExplicitHeight
+        ? Math.max(24, cropHeight)
+        : Math.max(24, naturalHeight - cropTop - cropBottom);
+    var derivedBottom = Math.max(0, naturalHeight - cropTop - visibleHeight);
+    sectionEl.setAttribute('data-layout-crop-bottom', String(Math.round(derivedBottom * 100) / 100));
+    sectionEl.setAttribute('data-layout-crop-height', String(Math.round(visibleHeight * 100) / 100));
+    sectionEl.style.height = visibleHeight + 'px';
+    sectionEl.setAttribute('data-layout-crop-natural-height', String(naturalHeight));
+}
+
 function aiflowRichTextHasVisibleText(value) {
     return String(aiflowRenderRichTextHtml(value) || '')
         .replace(/<[^>]+>/g, ' ')
@@ -478,16 +614,14 @@ var AIFLOW_LEAD_DEFINITION_TYPES = [
     'quiz-lead',
     'consultation',
     'workshop-waitlist',
-    'free-material',
     'lead-magnet'
 ];
 
 var AIFLOW_LEAD_DEFINITION_TYPE_META = {
     'quiz-lead': { label: 'Quiz Leads' },
     consultation: { label: 'Consultation' },
-    'workshop-waitlist': { label: 'Workshop Waitlist' },
-    'free-material': { label: 'Free Material' },
-    'lead-magnet': { label: 'Lead Magnet' }
+    'workshop-waitlist': { label: 'Waiting List' },
+    'lead-magnet': { label: 'Lead Magnets' }
 };
 
 var _aiflowLeadDefinitionDocCache = {};
@@ -617,6 +751,7 @@ function aiflowLeadDefinitionDisplayName(definition) {
 
 function aiflowCreateLeadDefinitionDefaults(type) {
     var normalizedType = _aiflowTrimString(type || 'lead-magnet');
+    if (normalizedType === 'free-material') normalizedType = 'lead-magnet';
     if (AIFLOW_LEAD_DEFINITION_TYPES.indexOf(normalizedType) === -1) normalizedType = 'lead-magnet';
     var base = {
         name: '',
@@ -628,9 +763,9 @@ function aiflowCreateLeadDefinitionDefaults(type) {
         imageUrl: '',
         imageAlt: '',
         redirectUrl: '',
-        submitText: normalizedType === 'free-material' ? '立即寄送' : '提交',
+        submitText: '提交',
         sectionLabel: '',
-        ctaText: normalizedType === 'free-material' ? '領取免費資料' : '',
+        ctaText: '',
         materialTitle: '',
         emailSubject: '',
         emailMessage: '',
@@ -672,6 +807,7 @@ function aiflowNormalizeLeadDefinition(raw, opts) {
     raw = raw || {};
     opts = opts || {};
     var type = _aiflowTrimString(raw.type || opts.type || 'lead-magnet');
+    if (type === 'free-material') type = 'lead-magnet';
     if (AIFLOW_LEAD_DEFINITION_TYPES.indexOf(type) === -1) type = 'lead-magnet';
     var next = aiflowCreateLeadDefinitionDefaults(type);
     Object.keys(raw).forEach(function(key) {
@@ -771,9 +907,6 @@ function aiflowNormalizeLeadDefinition(raw, opts) {
             next.collectEmail = true;
             next.formFields = _aiflowNormalizeLeadFormFields(aiflowBuildLeadMagnetFormFieldsFromCollect(next));
         }
-    }
-    if (type === 'free-material' && hasIdLinks && !raw.hasOwnProperty('collectEmail')) {
-        next.collectEmail = true;
     }
     return next;
 }
@@ -943,7 +1076,7 @@ function aiflowApplyLeadDefinitionToFreeMaterialContent(content, definition) {
     next.helperNote = normalized.helperNote || '';
     next.redirectUrl = normalized.redirectUrl || '';
     next.leadDefinitionId = normalized.id || _aiflowTrimString(next.leadDefinitionId || '');
-    next.leadDefinitionType = normalized.type || 'free-material';
+    next.leadDefinitionType = normalized.type || 'lead-magnet';
     next.leadDefinitionName = aiflowLeadDefinitionDisplayName(normalized);
     return next;
 }
@@ -1865,6 +1998,8 @@ function aiflowSendMaterialEmailFromBrowser(opts) {
     var idLinks = _aiflowNormalizeIdentityLinks(cfg.identityLinks || []);
     var docUrl = attachUrl || (idLinks[0] && idLinks[0].url) || '';
     var docName = (doc && (doc.name || doc.fileName)) || cfg.fileName || '';
+    var leadDefinitionType = _aiflowTrimString(cfg.leadDefinitionType || 'lead-magnet');
+    if (leadDefinitionType === 'free-material') leadDefinitionType = 'lead-magnet';
     var db = opts.db;
     if (!db) {
         try { db = firebase.firestore(); } catch (_) {}
@@ -1890,7 +2025,7 @@ function aiflowSendMaterialEmailFromBrowser(opts) {
         documentName: docName,
         documentUrl: docUrl,
         leadDefinitionId: _aiflowTrimString(cfg.leadDefinitionId || ''),
-        leadDefinitionType: _aiflowTrimString(cfg.leadDefinitionType || 'free-material'),
+        leadDefinitionType: leadDefinitionType,
         leadDefinitionName: _aiflowTrimString(cfg.leadDefinitionName || ''),
         submissionSource: String(meta.submissionSource || ''),
         pageKey: meta.pageKey || '',
@@ -2028,8 +2163,8 @@ function _submitFreeMaterialRequest(e) {
         var leadId = res && res.leadId;
         if (typeof saveFormSubmissionMirror === 'function' && leadId) {
             return saveFormSubmissionMirror({
-                formType: 'free-material',
-                sourceKey: cfg.leadDefinitionId ? ('lead-definition:' + cfg.leadDefinitionId) : 'free-material-modal',
+                formType: 'lead-magnet',
+                sourceKey: cfg.leadDefinitionId ? ('lead-definition:' + cfg.leadDefinitionId) : 'lead-magnet-modal',
                 sourceLabel: cfg.leadDefinitionName || cfg.materialTitle || '免費資料下載',
                 sourcePage: meta.pageTitle || document.title || '',
                 sourcePath: meta.pagePath || window.location.pathname,
@@ -2037,7 +2172,7 @@ function _submitFreeMaterialRequest(e) {
                 sourceCollection: 'freeMaterialLeads',
                 sourceDocId: leadId,
                 leadDefinitionId: cfg.leadDefinitionId || '',
-                leadDefinitionType: cfg.leadDefinitionType || 'free-material',
+                leadDefinitionType: (cfg.leadDefinitionType === 'free-material' ? 'lead-magnet' : (cfg.leadDefinitionType || 'lead-magnet')),
                 leadDefinitionName: cfg.leadDefinitionName || '',
                 contactName: name,
                 email: email,
@@ -2067,6 +2202,872 @@ function _submitFreeMaterialRequest(e) {
         status.className = 'af-free-material-status error';
         submitBtn.disabled = false;
         _aiflowFreeMaterialState.busy = false;
+    });
+}
+
+function _aiflowEnsureConsultationSectionStyles() {
+    if (document.getElementById('aiflowConsultationSectionStyles')) return;
+    var style = document.createElement('style');
+    style.id = 'aiflowConsultationSectionStyles';
+    style.textContent =
+        '.af-consult-section{--afc-bg:#0a0a0f;--afc-card:#111118;--afc-border:rgba(255,255,255,0.07);--afc-accent:#D97757;--afc-text:#f0ede8;--afc-muted:rgba(240,237,232,0.55);--afc-dim:rgba(240,237,232,0.3);--afc-glow:rgba(217,119,87,0.35);background:var(--afc-bg);color:var(--afc-text);padding:calc(5.75rem + env(safe-area-inset-top,0px)) 20px 80px;scroll-margin-top:calc(5rem + env(safe-area-inset-top,0px));position:relative;overflow:hidden;}' +
+        '.af-consult-section:before{content:"";position:absolute;inset:0;background:radial-gradient(circle 700px at 50% 0,rgba(217,119,87,0.18),transparent 70%);pointer-events:none;}' +
+        '.af-consult-wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;}' +
+        '.af-consult-header{text-align:center;margin-bottom:48px;}' +
+        '.af-consult-badge{display:inline-block;background:rgba(217,119,87,0.15);color:var(--afc-accent);font-size:13px;font-weight:700;padding:6px 18px;border-radius:20px;letter-spacing:1px;margin-bottom:20px;font-family:"Courier Prime",monospace;}' +
+        '.af-consult-header h2{font-size:clamp(32px,5vw,46px);font-weight:700;line-height:1.3;margin:0 0 12px;color:var(--afc-text);}' +
+        '.af-consult-header .accent{color:var(--afc-accent);}' +
+        '.af-consult-header p{margin:0;color:var(--afc-muted);font-size:17px;line-height:1.8;}' +
+        '.af-consult-header .highlight{color:var(--afc-accent);font-weight:inherit;margin-top:8px;}' +
+        '.af-consult-card{background:var(--afc-card);border:1px solid var(--afc-border);border-radius:16px;padding:32px 28px;margin-bottom:24px;transition:border-color .2s;}' +
+        '.af-consult-card:hover{border-color:var(--afc-glow);}' +
+        '.af-consult-card h3{font-size:18px;font-weight:700;color:var(--afc-accent);margin:0 0 24px;padding-bottom:12px;border-bottom:1px solid var(--afc-border);font-family:"Courier Prime",monospace;letter-spacing:.5px;}' +
+        '.af-consult-field{margin-bottom:20px;}' +
+        '.af-consult-field:last-child{margin-bottom:0;}' +
+        '.af-consult-label{display:block;font-weight:500;color:var(--afc-text);margin-bottom:8px;font-size:15px;line-height:1.5;}' +
+        '.af-consult-label.required:after{content:" *";color:var(--afc-accent);}' +
+        '.af-consult-input,.af-consult-select,.af-consult-textarea{width:100%;padding:14px 16px;background:rgba(255,255,255,0.04);border:1.5px solid var(--afc-border);border-radius:12px;font-size:16px;font-family:inherit;color:var(--afc-text);transition:all .2s;box-sizing:border-box;}' +
+        '.af-consult-input:focus,.af-consult-select:focus,.af-consult-textarea:focus{outline:none;border-color:var(--afc-accent);box-shadow:0 0 0 3px rgba(217,119,87,0.15);}' +
+        '.af-consult-input::placeholder,.af-consult-textarea::placeholder{color:var(--afc-dim);}' +
+        '.af-consult-select{cursor:pointer;}' +
+        '.af-consult-select option{background:var(--afc-card);color:var(--afc-text);}' +
+        '.af-consult-textarea{min-height:100px;resize:vertical;}' +
+        '.af-consult-help{font-size:13px;color:var(--afc-dim);margin-top:6px;}' +
+        '.af-consult-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px;}' +
+        '.af-consult-check{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--afc-border);cursor:pointer;font-size:15px;color:var(--afc-text);transition:border-color .2s,background .2s;}' +
+        '.af-consult-check input{width:18px;height:18px;accent-color:var(--afc-accent);flex-shrink:0;}' +
+        '.af-consult-radio-choice:has(input:checked){border-color:var(--afc-accent);background:rgba(217,119,87,0.10);box-shadow:0 0 0 1px rgba(217,119,87,0.25);}' +
+        '.af-consult-other{display:none;margin-top:10px;}' +
+        '.af-consult-consent{display:flex;align-items:flex-start;gap:12px;padding:16px 20px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--afc-border);margin-bottom:24px;}' +
+        '.af-consult-consent input{width:20px;height:20px;accent-color:var(--afc-accent);flex-shrink:0;margin-top:3px;}' +
+        '.af-consult-consent span{font-size:14px;color:var(--afc-muted);line-height:1.6;}' +
+        '.af-consult-submit{display:flex;align-items:center;justify-content:center;width:100%;height:56px;padding:0 32px;background:var(--afc-accent);color:#fff;border:none;border-radius:14px;font-size:18px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 0 24px rgba(217,119,87,0.4);}' +
+        '.af-consult-submit:disabled{background:rgba(255,255,255,0.1);color:var(--afc-dim);cursor:not-allowed;box-shadow:none;}' +
+        '.af-consult-success{display:none;text-align:center;padding:60px 32px;background:var(--afc-card);border:1px solid var(--afc-border);border-radius:16px;}' +
+        '.af-consult-success.show{display:block;}' +
+        '.af-consult-success-icon{width:72px;height:72px;margin:0 auto 24px;background:var(--afc-accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;}' +
+        '.af-consult-success h3{font-size:24px;margin:0 0 12px;color:var(--afc-text);}' +
+        '.af-consult-success p{font-size:16px;color:var(--afc-muted);line-height:1.7;margin:0;}' +
+        '.af-consult-status{min-height:22px;margin-top:12px;font-size:14px;color:var(--afc-muted);}' +
+        '.af-consult-status.error{color:#ffb4a8;}' +
+        '@media(max-width:520px){.af-consult-section{padding:calc(5.5rem + env(safe-area-inset-top,0px)) 16px 56px;scroll-margin-top:calc(4.75rem + env(safe-area-inset-top,0px));}.af-consult-card{padding:24px 20px;}.af-consult-check-grid{grid-template-columns:1fr;}}';
+    document.head.appendChild(style);
+}
+
+function _aiflowConsultEsc(s) {
+    return typeof escHtml === 'function'
+        ? escHtml(String(s || ''))
+        : String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+}
+
+function aiflowGetDefaultServiceApplicationContent() {
+    return {
+        badge: 'SERVICE APPLICATION',
+        title: '服務<span class="accent">申請</span>表單',
+        subtitle: '讓我們更了解你的情況',
+        highlight: '提交你的需要，我們會盡快與你聯絡。',
+        successTitle: '提交成功！',
+        successMessage: '我們已收到你的資料，會盡快與你聯絡。',
+        submitText: '提交申請 →',
+        submittingText: '提交中...',
+        errorMessage: '提交時遇到問題，請稍後再試。',
+        otherPlaceholder: '請輸入其他...',
+        cardTitles: {
+            basic: '// 基本資料',
+            survey: '// AI 應用調查',
+            needs: '// 需求與意願',
+            custom: '// 自訂問題'
+        },
+        fieldOrder: [
+            'name',
+            'phone',
+            'email',
+            'igAccount',
+            'aiSkillLevel',
+            'aiGoal',
+            'currentAITools',
+            'successOutcome',
+            'currentProblem',
+            'startTiming',
+            'willingnessToPay',
+            'whyNow',
+            'workshopInterest',
+            'aiTopics',
+            'additionalInfo',
+            'whatsappConsent'
+        ],
+        customFields: [],
+        fields: {
+            name: { visible: true, required: true, label: '姓名', placeholder: '請輸入你的姓名', help: '' },
+            phone: { visible: true, required: true, label: '電話號碼', placeholder: '+852 xxxx xxxx', help: '' },
+            email: { visible: true, required: false, label: 'Email Address', placeholder: 'your.email@example.com', help: '' },
+            igAccount: { visible: true, required: false, label: '你的 IG 帳號？', placeholder: '@your_instagram', help: '請輸入你的 Instagram 帳號（包含 @）' },
+            aiSkillLevel: { visible: true, required: true, label: '你會怎樣形容自己在AI應用方面的能力？', placeholder: '請選擇', optionsText: '從未接觸\n新手\n進階\n專家' },
+            aiGoal: { visible: true, required: true, label: '你希望在接下來 90 天，透過 AI 最想達成哪一個具體成果？', placeholder: '例如：每週省下 5 小時重複工作、每月多產出 8 條內容等' },
+            currentAITools: { visible: true, required: false, label: '目前你在工作或創業中，已經有在用哪些 AI 工具？（可多選）', optionsText: 'ChatGPT\nClaude\nGemini\nNotion AI\nZapier\nMake\nn8n\nKimi', allowOther: true, otherLabel: '其他' },
+            successOutcome: { visible: true, required: false, label: '用一句話形容：如果這次服務很成功，結束後你希望自己「多了哪一種能力」或「少了哪一種困擾」？', placeholder: '請用一句話描述...' },
+            currentProblem: { visible: true, required: true, label: '你目前最想解決的問題是什麼？', placeholder: '請詳細描述你目前遇到的問題...' },
+            startTiming: { visible: true, required: true, label: '如果我們可以解決你的問題，你希望多快開始進行？', placeholder: '請選擇', optionsText: '立即開始\n1週內\n2-4週內\n1-3個月內\n3個月以上' },
+            willingnessToPay: { visible: true, required: true, label: '這個問題，你願意花錢解決嗎？', placeholder: '請選擇', optionsText: '非常願意\n願意\n考慮中\n不太願意\n不願意' },
+            whyNow: { visible: true, required: false, label: '你現在為什麼會想找我們解決問題？是什麼讓你覺得現在就是時機？', placeholder: '請分享你的想法...' },
+            workshopInterest: { visible: true, required: false, label: '你會唔會有興趣參加未來嘅 AI 付費工作坊？', placeholder: '請選擇', optionsText: '有興趣\n可能會\n暫時冇興趣' },
+            aiTopics: { visible: true, required: false, label: '你對邊啲 AI 主題比較有興趣？（可多選）', optionsText: '內容／文案生成\n社交媒體內容流程\n工作流自動化（n8n／Zapier／Make）\n簡報／報告／文件整理\n客服／銷售\n資料整理／分析', allowOther: true, otherLabel: '其他' },
+            additionalInfo: { visible: true, required: false, label: '有沒有什麼想讓我們提前知道的？', placeholder: '任何額外的資訊、問題或需求...' },
+            whatsappConsent: { visible: true, required: true, label: '我同意在提交此表單後，透過 WhatsApp 接收由 AIFlowTime 提供的自動化 AI 回覆與相關服務資訊（包括申請安排與後續聯絡）。' }
+        }
+    };
+}
+
+function aiflowGetServiceApplicationBuiltinFieldMeta() {
+    return {
+        name: { group: 'basic', type: 'short-answer', tag: 'Short answer', inputType: 'text', title: '姓名' },
+        phone: { group: 'basic', type: 'short-answer', tag: 'Short answer', inputType: 'tel', title: '電話' },
+        email: { group: 'basic', type: 'short-answer', tag: 'Short answer', inputType: 'email', title: 'Email' },
+        igAccount: { group: 'basic', type: 'short-answer', tag: 'Short answer', inputType: 'text', title: 'IG 帳號' },
+        aiSkillLevel: { group: 'survey', type: 'multiple-choice', tag: 'Multiple choice', title: 'AI 程度' },
+        aiGoal: { group: 'survey', type: 'long-answer', tag: 'Long answer', title: '90 天目標' },
+        currentAITools: { group: 'survey', type: 'checkboxes', tag: 'Checkboxes', title: '目前使用工具' },
+        successOutcome: { group: 'survey', type: 'long-answer', tag: 'Long answer', title: '成功後希望' },
+        currentProblem: { group: 'needs', type: 'long-answer', tag: 'Long answer', title: '目前問題' },
+        startTiming: { group: 'needs', type: 'multiple-choice', tag: 'Multiple choice', title: '開始時間' },
+        willingnessToPay: { group: 'needs', type: 'multiple-choice', tag: 'Multiple choice', title: '付費意願' },
+        whyNow: { group: 'needs', type: 'long-answer', tag: 'Long answer', title: '為什麼現在' },
+        workshopInterest: { group: 'needs', type: 'multiple-choice', tag: 'Multiple choice', title: '工作坊興趣' },
+        aiTopics: { group: 'needs', type: 'checkboxes', tag: 'Checkboxes', title: 'AI 主題興趣' },
+        additionalInfo: { group: 'needs', type: 'long-answer', tag: 'Long answer', title: '補充資料' },
+        whatsappConsent: { group: 'consent', type: 'consent', tag: 'Consent', title: '同意條款' }
+    };
+}
+
+function aiflowGetServiceApplicationDefaultFieldOrder() {
+    return aiflowGetDefaultServiceApplicationContent().fieldOrder.slice();
+}
+
+function aiflowFieldKeysFromConsultationUiOrder(ui) {
+    if (!Array.isArray(ui)) return [];
+    return ui.filter(function(x) { return x && x.type === 'field' && String(x.key || '').trim(); }).map(function(x) { return String(x.key).trim(); });
+}
+
+function aiflowFieldDisplayGroupsFromConsultationUiOrder(ui, cfg) {
+    var map = {};
+    if (!Array.isArray(ui) || !cfg) return map;
+    var meta = aiflowGetServiceApplicationBuiltinFieldMeta();
+    var currentSeg = null;
+    for (var i = 0; i < ui.length; i++) {
+        var item = ui[i];
+        if (!item) continue;
+        if (item.type === 'title') {
+            currentSeg = String(item.segmentId || '').trim() || null;
+            continue;
+        }
+        if (item.type === 'field') {
+            var key = String(item.key || '').trim();
+            if (!key) continue;
+            var built = meta[key];
+            var intrGrp = built ? (built.group || 'custom') : ((_consultCustomFieldCfg(cfg, key) || {}).group || 'custom');
+            if (intrGrp === 'consent' || (built && built.type === 'consent')) {
+                map[key] = 'consent';
+                currentSeg = null;
+            } else {
+                map[key] = currentSeg || intrGrp;
+            }
+        }
+    }
+    return map;
+}
+
+function aiflowBuildLegacyConsultationUiOrder(cfg) {
+    var ui = [];
+    if (!cfg) return ui;
+    var meta = aiflowGetServiceApplicationBuiltinFieldMeta();
+    var order = Array.isArray(cfg.fieldOrder) && cfg.fieldOrder.length ? cfg.fieldOrder.slice() : aiflowGetServiceApplicationDefaultFieldOrder();
+    var fmap = (cfg.fieldDisplayGroups && typeof cfg.fieldDisplayGroups === 'object') ? cfg.fieldDisplayGroups : {};
+    function intrinsic(key) {
+        if (meta[key]) return meta[key].group || 'custom';
+        var cf = _consultCustomFieldCfg(cfg, key);
+        return cf ? (cf.group || 'custom') : 'custom';
+    }
+    var currentSeg = null;
+    for (var i = 0; i < order.length; i++) {
+        var key = String(order[i] || '').trim();
+        if (!key) continue;
+        var seg = fmap[key] || intrinsic(key);
+        if (seg === 'consent') {
+            ui.push({ type: 'field', key: key });
+            currentSeg = null;
+            continue;
+        }
+        if (seg !== currentSeg) {
+            ui.push({ type: 'title', segmentId: seg });
+            currentSeg = seg;
+        }
+        ui.push({ type: 'field', key: key });
+    }
+    return ui;
+}
+
+function _normalizeConsultationUiOrder(ui, merged) {
+    if (!Array.isArray(ui) || !ui.length || !merged) return null;
+    var meta = aiflowGetServiceApplicationBuiltinFieldMeta();
+    var allowedOrder = Array.isArray(merged.fieldOrder) ? merged.fieldOrder.slice() : [];
+    var allowed = {};
+    allowedOrder.forEach(function(k) { allowed[k] = true; });
+    var out = [];
+    var seen = {};
+    for (var i = 0; i < ui.length; i++) {
+        var item = ui[i];
+        if (!item || !item.type) continue;
+        if (item.type === 'title') {
+            var sid = String(item.segmentId || '').trim();
+            if (!sid) continue;
+            out.push({ type: 'title', segmentId: sid });
+            continue;
+        }
+        if (item.type === 'field') {
+            var k = String(item.key || '').trim();
+            if (!allowed[k] || seen[k]) continue;
+            seen[k] = true;
+            out.push({ type: 'field', key: k });
+        }
+    }
+    for (var j = 0; j < allowedOrder.length; j++) {
+        var k2 = allowedOrder[j];
+        if (!seen[k2]) {
+            seen[k2] = true;
+            out.push({ type: 'field', key: k2 });
+        }
+    }
+    if (out.length && out[0].type === 'field') {
+        var fk = out[0].key;
+        var built = meta[fk];
+        var ig = built ? (built.group || 'custom') : ((_consultCustomFieldCfg(merged, fk) || {}).group || 'custom');
+        if (ig !== 'consent') {
+            out.unshift({ type: 'title', segmentId: ig });
+        }
+    }
+    return out.length ? out : null;
+}
+
+function _aiflowMergeServiceApplicationContent(content) {
+    var defaults = aiflowGetDefaultServiceApplicationContent();
+    var cfg = content && typeof content === 'object' ? JSON.parse(JSON.stringify(content)) : {};
+    var merged = Object.assign({}, defaults, cfg);
+    merged.cardTitles = Object.assign({}, defaults.cardTitles, cfg.cardTitles || {});
+    merged.fields = Object.assign({}, defaults.fields);
+    Object.keys(defaults.fields).forEach(function(key) {
+        merged.fields[key] = Object.assign({}, defaults.fields[key], (cfg.fields && cfg.fields[key]) || {});
+    });
+    merged.customFields = Array.isArray(cfg.customFields) ? cfg.customFields.filter(function(item) {
+        return item && item.key;
+    }).map(function(item) {
+        return Object.assign({
+            key: '',
+            type: 'short-answer',
+            group: 'custom',
+            visible: true,
+            required: false,
+            label: '自訂問題',
+            placeholder: '',
+            help: '',
+            optionsText: '',
+            multipleChoiceDisplay: 'select'
+        }, item || {});
+    }) : [];
+    var builtinMeta = aiflowGetServiceApplicationBuiltinFieldMeta();
+    var allowed = {};
+    Object.keys(builtinMeta).forEach(function(key) { allowed[key] = true; });
+    merged.customFields.forEach(function(item) { allowed[item.key] = true; });
+    var rawOrder = Array.isArray(cfg.fieldOrder) && cfg.fieldOrder.length ? cfg.fieldOrder : defaults.fieldOrder;
+    var explicitOrder = Array.isArray(cfg.fieldOrder) && cfg.fieldOrder.length > 0;
+    var seen = {};
+    merged.fieldOrder = rawOrder.filter(function(key) {
+        key = String(key || '').trim();
+        if (!key || !allowed[key] || seen[key]) return false;
+        seen[key] = true;
+        return true;
+    });
+    if (!explicitOrder) {
+        defaults.fieldOrder.forEach(function(key) {
+            if (!seen[key]) {
+                merged.fieldOrder.push(key);
+                seen[key] = true;
+            }
+        });
+    }
+    merged.customFields.forEach(function(item) {
+        if (!seen[item.key]) {
+            merged.fieldOrder.push(item.key);
+            seen[item.key] = true;
+        }
+    });
+    merged.fieldDisplayGroups = (cfg.fieldDisplayGroups && typeof cfg.fieldDisplayGroups === 'object')
+        ? JSON.parse(JSON.stringify(cfg.fieldDisplayGroups))
+        : {};
+    merged.consultationUiOrder = null;
+    if (Array.isArray(cfg.consultationUiOrder) && cfg.consultationUiOrder.length) {
+        var normalized = _normalizeConsultationUiOrder(cfg.consultationUiOrder, merged);
+        if (normalized && normalized.length) {
+            merged.consultationUiOrder = normalized;
+            merged.fieldOrder = aiflowFieldKeysFromConsultationUiOrder(normalized);
+            merged.fieldDisplayGroups = aiflowFieldDisplayGroupsFromConsultationUiOrder(normalized, merged);
+        }
+    }
+    return merged;
+}
+
+function _consultFieldCfg(cfg, key) {
+    if (cfg.fields && cfg.fields[key]) return cfg.fields[key];
+    var custom = _consultCustomFieldCfg(cfg, key);
+    return custom || {};
+}
+
+function _consultCustomFieldCfg(cfg, key) {
+    var list = (cfg && Array.isArray(cfg.customFields)) ? cfg.customFields : [];
+    for (var i = 0; i < list.length; i++) {
+        if (String(list[i].key || '') === String(key || '')) return list[i];
+    }
+    return null;
+}
+
+function _consultFieldVisible(fieldCfg) {
+    return !fieldCfg || fieldCfg.visible !== false;
+}
+
+/** Treat CMS / Firestore values like true, 1, or "true" as required (editor checkbox + legacy data). */
+function _consultIsFieldRequired(fieldCfg) {
+    if (!fieldCfg || fieldCfg.visible === false) return false;
+    var r = fieldCfg.required;
+    return r === true || r === 1 || String(r).toLowerCase() === 'true';
+}
+
+function _consultOptionsList(fieldCfg, fallback) {
+    var raw = fieldCfg && fieldCfg.optionsText;
+    if (Array.isArray(raw)) return raw.filter(function(item) { return String(item || '').trim(); });
+    if (typeof raw === 'string') {
+        return raw.split(/\r?\n/).map(function(item) { return String(item || '').trim(); }).filter(Boolean);
+    }
+    return (fallback || []).slice();
+}
+
+function _aiflowConsultRich(value) {
+    return typeof aiflowRenderRichTextHtml === 'function'
+        ? aiflowRenderRichTextHtml(value)
+        : _aiflowConsultEsc(value).replace(/\n/g, '<br>');
+}
+
+function _aiflowConsultAttr(value) {
+    return _aiflowConsultEsc(value).replace(/'/g, '&#39;');
+}
+
+function _aiflowConsultAlignAttr(obj, key) {
+    var a = String((obj && obj[key + '_textAlign']) || '').trim().toLowerCase();
+    return (a === 'center' || a === 'right' || a === 'justify' || a === 'left')
+        ? ' style="text-align:' + a + ';"'
+        : '';
+}
+
+function _aiflowConsultRichEl(tag, cls, value, obj, key, dataField) {
+    return '<' + tag +
+        (cls ? ' class="' + _aiflowConsultAttr(cls) + '"' : '') +
+        (dataField ? ' data-layout-field="' + _aiflowConsultAttr(dataField) + '"' : '') +
+        _aiflowConsultAlignAttr(obj, key) +
+        '>' + _aiflowConsultRich(value) + '</' + tag + '>';
+}
+
+function renderConsultationSection(el, content, options) {
+    if (!el) return;
+    _aiflowEnsureConsultationSectionStyles();
+    var cfg = _aiflowMergeServiceApplicationContent(content || {});
+    var id = 'afConsult_' + String((options && options.sectionId) || el.getAttribute('data-section-id') || Date.now()).replace(/[^A-Za-z0-9_-]/g, '_');
+    var title = cfg.title || '服務<span class="accent">申請</span>表單';
+    title = typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(title) : _aiflowConsultEsc(title);
+    var subtitle = cfg.subtitle || '讓我們更了解你的情況';
+    var highlight = cfg.highlight || '提交你的需要，我們會盡快與你聯絡。';
+    el.classList.add('af-consult-section');
+    el.innerHTML =
+        '<div class="af-consult-wrap">' +
+            '<div class="af-consult-header">' +
+                _aiflowConsultRichEl('div', 'af-consult-badge', cfg.badge || 'SERVICE APPLICATION', cfg, 'badge', 'badge') +
+                '<h2 data-layout-field="title"' + _aiflowConsultAlignAttr(cfg, 'title') + '>' + title + '</h2>' +
+                _aiflowConsultRichEl('p', '', subtitle, cfg, 'subtitle', 'subtitle') +
+                _aiflowConsultRichEl('p', 'highlight', highlight, cfg, 'highlight', 'highlight') +
+            '</div>' +
+            '<div class="af-consult-success" data-consult-success><div class="af-consult-success-icon">✓</div>' +
+                _aiflowConsultRichEl('h3', '', cfg.successTitle || '提交成功！', cfg, 'successTitle', 'successTitle') +
+                _aiflowConsultRichEl('p', '', cfg.successMessage || '我們已收到你的資料，會盡快與你聯絡。', cfg, 'successMessage', 'successMessage') +
+            '</div>' +
+            '<form data-consult-form>' +
+                _consultRenderOrderedFields(cfg) +
+                '<button type="submit" class="af-consult-submit" data-default-text="' + _aiflowConsultAttr(String(cfg.submitText || '提交申請 →').replace(/<[^>]*>/g, '')) + '" data-default-html="' + _aiflowConsultAttr(_aiflowConsultRich(cfg.submitText || '提交申請 →')) + '" data-submitting-text="' + _aiflowConsultAttr(cfg.submittingText || '提交中...') + '"' + _aiflowConsultAlignAttr(cfg, 'submitText') + '>' + _aiflowConsultRich(cfg.submitText || '提交申請 →') + '</button><div class="af-consult-status" data-consult-status data-error-message="' + _aiflowConsultEsc(cfg.errorMessage || '提交時遇到問題，請稍後再試。') + '"></div>' +
+            '</form>' +
+        '</div>';
+    var form = el.querySelector('[data-consult-form]');
+    if (form) {
+        form.addEventListener('change', _syncConsultOtherFields);
+        form.addEventListener('submit', function(e) { _submitConsultationSection(e, el); });
+        _syncConsultOtherFields({ currentTarget: form });
+    }
+}
+
+function _consultFieldFromConfig(cfg, name, type) {
+    var f = _consultFieldCfg(cfg, name);
+    if (!_consultFieldVisible(f)) return '';
+    return _consultField(f, name, type);
+}
+
+function _consultRenderOrderedFieldsFromUi(cfg) {
+    var meta = aiflowGetServiceApplicationBuiltinFieldMeta();
+    var html = '';
+    var openGroup = '';
+    function closeCard() {
+        if (openGroup) html += '</div>';
+        openGroup = '';
+    }
+    function openCard(group) {
+        if (group === 'consent') {
+            closeCard();
+            return;
+        }
+        if (openGroup === group) return;
+        closeCard();
+        openGroup = group || 'custom';
+        var rawTitle = (cfg.cardTitles && cfg.cardTitles[openGroup]) != null ? cfg.cardTitles[openGroup] : '';
+        var title = String(rawTitle).trim();
+        if (!title) {
+            title = '// 新區塊';
+        }
+        html += '<div class="af-consult-card" data-consult-card="' + _aiflowConsultAttr(openGroup) + '">' +
+            _aiflowConsultRichEl('h3', '', title, cfg.cardTitles || {}, openGroup, 'cardTitles.' + openGroup);
+    }
+    var ui = cfg.consultationUiOrder;
+    for (var i = 0; i < ui.length; i++) {
+        var item = ui[i];
+        if (!item) continue;
+        if (item.type === 'title') {
+            openCard(String(item.segmentId || '').trim() || 'custom');
+            continue;
+        }
+        if (item.type === 'field') {
+            var key = String(item.key || '').trim();
+            if (!key) continue;
+            var built = meta[key];
+            var custom = built ? null : _consultCustomFieldCfg(cfg, key);
+            if (!built && !custom) continue;
+            if (built && built.type === 'consent') {
+                closeCard();
+                html += _consultRenderBuiltinField(cfg, key, built);
+                continue;
+            }
+            if (!openGroup) {
+                var ig = built ? (built.group || 'custom') : (custom.group || 'custom');
+                if (ig !== 'consent') openCard(ig);
+            }
+            if (built) html += _consultRenderBuiltinField(cfg, key, built);
+            else html += _consultCustomField(custom);
+        }
+    }
+    closeCard();
+    return html;
+}
+
+function _consultRenderOrderedFields(cfg) {
+    if (Array.isArray(cfg.consultationUiOrder) && cfg.consultationUiOrder.length) {
+        return _consultRenderOrderedFieldsFromUi(cfg);
+    }
+    var meta = aiflowGetServiceApplicationBuiltinFieldMeta();
+    var order = Array.isArray(cfg.fieldOrder) && cfg.fieldOrder.length ? cfg.fieldOrder : aiflowGetServiceApplicationDefaultFieldOrder();
+    var html = '';
+    var openGroup = '';
+    function closeCard() {
+        if (openGroup) html += '</div>';
+        openGroup = '';
+    }
+    function openCard(group) {
+        if (group === 'consent') {
+            closeCard();
+            return;
+        }
+        if (openGroup === group) return;
+        closeCard();
+        openGroup = group || 'custom';
+        var rawTitle = (cfg.cardTitles && cfg.cardTitles[openGroup]) != null ? cfg.cardTitles[openGroup] : '';
+        var title = String(rawTitle).trim();
+        if (!title) {
+            title = openGroup === 'custom' ? '// 自訂問題' : '// 新區塊';
+        }
+        html += '<div class="af-consult-card" data-consult-card="' + _aiflowConsultAttr(openGroup) + '">' +
+            _aiflowConsultRichEl('h3', '', title, cfg.cardTitles || {}, openGroup, 'cardTitles.' + openGroup);
+    }
+    order.forEach(function(key) {
+        key = String(key || '').trim();
+        if (!key) return;
+        var built = meta[key];
+        var custom = built ? null : _consultCustomFieldCfg(cfg, key);
+        if (!built && !custom) return;
+        var map = cfg.fieldDisplayGroups || {};
+        var group = map[key];
+        if (!group || typeof group !== 'string' || !String(group).trim()) {
+            group = built ? built.group : (custom.group || 'custom');
+        }
+        openCard(group);
+        if (built) html += _consultRenderBuiltinField(cfg, key, built);
+        else html += _consultCustomField(custom);
+    });
+    closeCard();
+    return html;
+}
+
+function _consultSelectMarkup(name, options, required, placeholderText) {
+    var html = '<select class="af-consult-select" name="' + _aiflowConsultEsc(name) + '"' + (required ? ' required' : '') + '>';
+    var ph = String(placeholderText || '').trim() || '請選擇';
+    html += '<option value="">' + _aiflowConsultEsc(ph) + '</option>';
+    (options || []).forEach(function(opt) {
+        var o = String(opt || '').trim();
+        if (!o) return;
+        html += '<option value="' + _aiflowConsultEsc(o) + '">' + _aiflowConsultEsc(o) + '</option>';
+    });
+    html += '</select>';
+    return html;
+}
+
+function _consultRadioGridMarkup(inputName, options, required) {
+    var html = '<div class="af-consult-check-grid af-consult-radio-grid" role="radiogroup">';
+    var idx = 0;
+    (options || []).forEach(function(opt) {
+        var o = String(opt || '').trim();
+        if (!o) return;
+        var reqAttr = (required && idx === 0) ? ' required' : '';
+        idx++;
+        html += '<label class="af-consult-check af-consult-radio-choice"><input type="radio" name="' + _aiflowConsultEsc(inputName) + '" value="' + _aiflowConsultEsc(o) + '"' + reqAttr + '> ' + _aiflowConsultEsc(o) + '</label>';
+    });
+    html += '</div>';
+    return html;
+}
+
+function _consultMultipleChoiceFromConfig(cfg, name, fallbackOptions) {
+    var f = _consultFieldCfg(cfg, name);
+    if (!_consultFieldVisible(f)) return '';
+    var options = _consultOptionsList(f, fallbackOptions);
+    var required = _consultIsFieldRequired(f);
+    var mode = String(f.multipleChoiceDisplay || 'select').trim().toLowerCase();
+    var help = (f.help) ? '<p class="af-consult-help" data-layout-field="fields.' + _aiflowConsultAttr(name) + '.help"' + _aiflowConsultAlignAttr(f, 'help') + '>' + _aiflowConsultRich(f.help) + '</p>' : '';
+    var control = (mode === 'radio')
+        ? _consultRadioGridMarkup(name, options, required)
+        : _consultSelectMarkup(name, options, required, f.placeholder);
+    return '<div class="af-consult-field"><label class="af-consult-label' + (required ? ' required' : '') + '" data-layout-field="fields.' + _aiflowConsultAttr(name) + '.label"' + _aiflowConsultAlignAttr(f, 'label') + '>' + _aiflowConsultRich(f && f.label) + '</label>' +
+        control + help + '</div>';
+}
+
+function _consultEffectiveBuiltinInputType(cfg, key, meta) {
+    if (!meta || meta.type === 'consent') return 'consent';
+    var f = _consultFieldCfg(cfg, key);
+    var raw = f && f.consultInputType != null ? String(f.consultInputType).trim() : '';
+    if (!raw) return meta.type;
+    var allowed = { 'short-answer': true, 'long-answer': true, 'multiple-choice': true, checkboxes: true };
+    return allowed[raw] ? raw : meta.type;
+}
+
+function _consultRenderBuiltinField(cfg, key, meta) {
+    if (meta.type === 'consent') return _consultConsentFromConfig(cfg);
+    var t = _consultEffectiveBuiltinInputType(cfg, key, meta);
+    if (t === 'multiple-choice') {
+        var fallbackSelect = {
+            aiSkillLevel: ['從未接觸','新手','進階','專家'],
+            startTiming: ['立即開始','1週內','2-4週內','1-3個月內','3個月以上'],
+            willingnessToPay: ['非常願意','願意','考慮中','不太願意','不願意'],
+            workshopInterest: ['有興趣','可能會','暫時冇興趣']
+        };
+        return _consultMultipleChoiceFromConfig(cfg, key, fallbackSelect[key] || []);
+    }
+    if (t === 'checkboxes') {
+        var fallbackChecks = {
+            currentAITools: ['ChatGPT','Claude','Gemini','Notion AI','Zapier','Make','n8n','Kimi','其他'],
+            aiTopics: ['內容／文案生成','社交媒體內容流程','工作流自動化（n8n／Zapier／Make）','簡報／報告／文件整理','客服／銷售','資料整理／分析','其他']
+        };
+        var otherName = key === 'currentAITools' ? 'currentAIToolsOtherText' : (key === 'aiTopics' ? 'aiTopicsOtherText' : key + 'OtherText');
+        return _consultCheckboxesFromConfig(cfg, key, fallbackChecks[key] || [], otherName);
+    }
+    if (t === 'long-answer') return _consultTextareaFromConfig(cfg, key);
+    return _consultFieldFromConfig(cfg, key, meta.inputType || 'text');
+}
+
+function _consultTextareaFromConfig(cfg, name) {
+    var f = _consultFieldCfg(cfg, name);
+    if (!_consultFieldVisible(f)) return '';
+    return _consultTextarea(f, name);
+}
+
+function _consultCheckboxesFromConfig(cfg, name, fallbackOptions, otherName) {
+    var f = _consultFieldCfg(cfg, name);
+    if (!_consultFieldVisible(f)) return '';
+    var options = _consultOptionsList(f, fallbackOptions).filter(function(item) {
+        return item !== '其他' && item !== String(f.otherLabel || '').trim();
+    });
+    if (f.allowOther !== false) {
+        options.push(String(f.otherLabel || '其他').trim() || '其他');
+    }
+    return _consultCheckboxes(f, name, options, otherName, cfg.otherPlaceholder || '請輸入其他...', f.allowOther !== false ? (String(f.otherLabel || '其他').trim() || '其他') : '');
+}
+
+function _consultConsentFromConfig(cfg) {
+    var f = _consultFieldCfg(cfg, 'whatsappConsent');
+    if (!_consultFieldVisible(f)) return '';
+    return '<label class="af-consult-consent"><input type="checkbox" name="whatsappConsent"' + (_consultIsFieldRequired(f) ? ' required' : '') + '><span data-layout-field="fields.whatsappConsent.label"' + _aiflowConsultAlignAttr(f, 'label') + '>' + _aiflowConsultRich(f.label || '') + '</span></label>';
+}
+
+function _consultField(fieldCfg, name, type) {
+    var required = _consultIsFieldRequired(fieldCfg);
+    return '<div class="af-consult-field"><label class="af-consult-label' + (required ? ' required' : '') + '" data-layout-field="fields.' + _aiflowConsultAttr(name) + '.label"' + _aiflowConsultAlignAttr(fieldCfg, 'label') + '>' + _aiflowConsultRich(fieldCfg && fieldCfg.label) + '</label>' +
+        '<input class="af-consult-input" name="' + _aiflowConsultEsc(name) + '" type="' + _aiflowConsultEsc(type || 'text') + '" placeholder="' + _aiflowConsultEsc((fieldCfg && fieldCfg.placeholder) || '') + '"' + (required ? ' required' : '') + '>' +
+        ((fieldCfg && fieldCfg.help) ? '<p class="af-consult-help" data-layout-field="fields.' + _aiflowConsultAttr(name) + '.help"' + _aiflowConsultAlignAttr(fieldCfg, 'help') + '>' + _aiflowConsultRich(fieldCfg.help) + '</p>' : '') + '</div>';
+}
+
+function _consultTextarea(fieldCfg, name) {
+    var required = _consultIsFieldRequired(fieldCfg);
+    return '<div class="af-consult-field"><label class="af-consult-label' + (required ? ' required' : '') + '" data-layout-field="fields.' + _aiflowConsultAttr(name) + '.label"' + _aiflowConsultAlignAttr(fieldCfg, 'label') + '>' + _aiflowConsultRich(fieldCfg && fieldCfg.label) + '</label>' +
+        '<textarea class="af-consult-textarea" name="' + _aiflowConsultEsc(name) + '" placeholder="' + _aiflowConsultEsc((fieldCfg && fieldCfg.placeholder) || '') + '"' + (required ? ' required' : '') + '></textarea></div>';
+}
+
+function _consultCheckboxes(fieldCfg, name, options, otherName, otherPlaceholder, otherLabel) {
+    var required = _consultIsFieldRequired(fieldCfg);
+    var reqAttr = required ? ' data-consult-required-checkgroup="' + _aiflowConsultAttr(name) + '"' : '';
+    var html = '<div class="af-consult-field"' + reqAttr + '><label class="af-consult-label' + (required ? ' required' : '') + '" data-layout-field="fields.' + _aiflowConsultAttr(name) + '.label"' + _aiflowConsultAlignAttr(fieldCfg, 'label') + '>' + _aiflowConsultRich(fieldCfg && fieldCfg.label) + '</label><div class="af-consult-check-grid">';
+    (options || []).forEach(function(opt) {
+        var isOther = otherLabel && opt === otherLabel;
+        html += '<label class="af-consult-check"><input type="checkbox" name="' + _aiflowConsultEsc(name) + '" value="' + _aiflowConsultEsc(opt) + '"' + (isOther ? ' data-other-target="' + _aiflowConsultEsc(otherName) + '"' : '') + '> ' + _aiflowConsultEsc(opt) + '</label>';
+    });
+    html += '</div><div class="af-consult-other" data-other-wrap="' + _aiflowConsultEsc(otherName) + '"><input class="af-consult-input" name="' + _aiflowConsultEsc(otherName) + '" type="text" placeholder="' + _aiflowConsultEsc(otherPlaceholder || '請輸入其他...') + '"></div></div>';
+    return html;
+}
+
+function _consultCustomInputName(key) {
+    return 'custom__' + String(key || '').replace(/[^A-Za-z0-9_-]/g, '_');
+}
+
+function _consultCustomField(fieldCfg) {
+    if (!fieldCfg || fieldCfg.visible === false || !fieldCfg.key) return '';
+    var key = String(fieldCfg.key);
+    var name = _consultCustomInputName(key);
+    var labelAttr = ' data-consult-custom-key="' + _aiflowConsultAttr(key) + '" data-consult-custom-label="' + _aiflowConsultAttr(_aiflowPlainText(fieldCfg.label || key)) + '"';
+    var type = fieldCfg.type || 'short-answer';
+    var required = _consultIsFieldRequired(fieldCfg);
+    var label = '<label class="af-consult-label' + (required ? ' required' : '') + '" data-layout-field="customFields.' + _aiflowConsultAttr(key) + '.label"' + _aiflowConsultAlignAttr(fieldCfg, 'label') + '>' + _aiflowConsultRich(fieldCfg.label || '自訂問題') + '</label>';
+    var help = fieldCfg.help ? '<p class="af-consult-help">' + _aiflowConsultRich(fieldCfg.help) + '</p>' : '';
+    if (type === 'long-answer') {
+        return '<div class="af-consult-field"' + labelAttr + '>' + label +
+            '<textarea class="af-consult-textarea" name="' + _aiflowConsultAttr(name) + '" placeholder="' + _aiflowConsultEsc(fieldCfg.placeholder || '') + '"' + (required ? ' required' : '') + '></textarea>' + help + '</div>';
+    }
+    if (type === 'multiple-choice') {
+        var mode = String(fieldCfg.multipleChoiceDisplay || 'select').trim().toLowerCase();
+        var mcOpts = _consultOptionsList(fieldCfg, []);
+        var ctrl = (mode === 'radio')
+            ? _consultRadioGridMarkup(name, mcOpts, required)
+            : _consultSelectMarkup(name, mcOpts, required, fieldCfg.placeholder);
+        return '<div class="af-consult-field"' + labelAttr + '>' + label + ctrl + help + '</div>';
+    }
+    if (type === 'checkboxes') {
+        var options = _consultOptionsList(fieldCfg, []);
+        var otherLabel = String(fieldCfg.otherLabel || '其他').trim() || '其他';
+        if (fieldCfg.allowOther === true && options.indexOf(otherLabel) < 0) options.push(otherLabel);
+        var otherName = name + '__other';
+        var reqGrp = required ? ' data-consult-required-checkgroup="' + _aiflowConsultAttr(name) + '"' : '';
+        var html = '<div class="af-consult-field"' + labelAttr + reqGrp + '>' + label + '<div class="af-consult-check-grid">';
+        options.forEach(function(opt) {
+            var isOther = fieldCfg.allowOther === true && opt === otherLabel;
+            html += '<label class="af-consult-check"><input type="checkbox" name="' + _aiflowConsultAttr(name) + '" value="' + _aiflowConsultEsc(opt) + '"' + (isOther ? ' data-other-target="' + _aiflowConsultAttr(otherName) + '"' : '') + '> ' + _aiflowConsultEsc(opt) + '</label>';
+        });
+        html += '</div><div class="af-consult-other" data-other-wrap="' + _aiflowConsultAttr(otherName) + '"><input class="af-consult-input" name="' + _aiflowConsultAttr(otherName) + '" type="text" placeholder="' + _aiflowConsultEsc(fieldCfg.otherPlaceholder || '請輸入其他...') + '"></div>' + help + '</div>';
+        return html;
+    }
+    return '<div class="af-consult-field"' + labelAttr + '>' + label +
+        '<input class="af-consult-input" name="' + _aiflowConsultAttr(name) + '" type="text" placeholder="' + _aiflowConsultEsc(fieldCfg.placeholder || '') + '"' + (required ? ' required' : '') + '>' + help + '</div>';
+}
+
+function _aiflowPlainText(html) {
+    return String(html || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function _consultSyncRequiredCheckboxGroups(form) {
+    if (!form || !form.querySelectorAll) return;
+    var seenClear = {};
+    form.querySelectorAll('[data-consult-required-checkgroup]').forEach(function(wrap) {
+        var grp = wrap.getAttribute('data-consult-required-checkgroup');
+        if (!grp || seenClear[grp]) return;
+        seenClear[grp] = true;
+        var esc = grp.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        form.querySelectorAll('input[type="checkbox"][name="' + esc + '"]').forEach(function(cb) {
+            cb.setCustomValidity('');
+        });
+    });
+    form.querySelectorAll('[data-consult-required-checkgroup]').forEach(function(wrap) {
+        var grp = wrap.getAttribute('data-consult-required-checkgroup');
+        if (!grp) return;
+        var esc = grp.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        var inputs = form.querySelectorAll('input[type="checkbox"][name="' + esc + '"]');
+        if (!inputs.length) return;
+        var any = false;
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].checked) { any = true; break; }
+        }
+        var msg = '請至少選擇一項';
+        inputs[0].setCustomValidity(any ? '' : msg);
+    });
+}
+
+function _syncConsultOtherFields(e) {
+    var form = (e && (e.currentTarget || e.target && e.target.form)) || null;
+    if (!form || !form.querySelectorAll) return;
+    form.querySelectorAll('[data-other-target]').forEach(function(cb) {
+        var target = cb.getAttribute('data-other-target');
+        var wrap = form.querySelector('[data-other-wrap="' + target + '"]');
+        var input = form.querySelector('[name="' + target + '"]');
+        if (wrap) wrap.style.display = cb.checked ? 'block' : 'none';
+        if (!cb.checked && input) input.value = '';
+    });
+    _consultSyncRequiredCheckboxGroups(form);
+}
+
+function _consultFormValues(form) {
+    function val(name) {
+        var picked = form.querySelector('[name="' + name + '"]:checked');
+        if (picked) return String(picked.value || '').trim();
+        var el = form.querySelector('[name="' + name + '"]');
+        return el ? String(el.value || '').trim() : '';
+    }
+    function checked(name) {
+        return Array.prototype.slice.call(form.querySelectorAll('input[name="' + name + '"]:checked')).map(function(el) { return el.value; });
+    }
+    var customAnswers = {};
+    var customAnswerLabels = {};
+    form.querySelectorAll('[data-consult-custom-key]').forEach(function(wrap) {
+        var key = wrap.getAttribute('data-consult-custom-key') || '';
+        if (!key) return;
+        var label = wrap.getAttribute('data-consult-custom-label') || key;
+        var name = _consultCustomInputName(key);
+        var checkedVals = checked(name);
+        var answer = checkedVals.length ? checkedVals : val(name);
+        var other = val(name + '__other');
+        if (Array.isArray(answer) && other) answer = answer.concat([other]);
+        if (!Array.isArray(answer) && other) answer = other;
+        customAnswers[key] = answer;
+        customAnswerLabels[key] = label;
+    });
+    return {
+        name: val('name'),
+        phone: val('phone'),
+        email: val('email'),
+        igAccount: val('igAccount'),
+        aiSkillLevel: val('aiSkillLevel'),
+        aiGoal: val('aiGoal'),
+        currentAITools: checked('currentAITools'),
+        currentAIToolsOtherText: val('currentAIToolsOtherText'),
+        successOutcome: val('successOutcome'),
+        currentProblem: val('currentProblem'),
+        startTiming: val('startTiming'),
+        willingnessToPay: val('willingnessToPay'),
+        whyNow: val('whyNow'),
+        workshopInterest: val('workshopInterest'),
+        aiTopics: checked('aiTopics'),
+        aiTopicsOtherText: val('aiTopicsOtherText'),
+        additionalInfo: val('additionalInfo'),
+        whatsappConsent: form.querySelector('[name="whatsappConsent"]') && form.querySelector('[name="whatsappConsent"]').checked ? '是' : '否',
+        customAnswers: customAnswers,
+        customAnswerLabels: customAnswerLabels,
+        formType: 'consultation',
+        timestamp: new Date().toISOString(),
+        page: 'IG獲客諮詢表單'
+    };
+}
+
+function _submitConsultationSection(event, root) {
+    event.preventDefault();
+    var form = event.currentTarget;
+    _consultSyncRequiredCheckboxGroups(form);
+    if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+        if (typeof form.reportValidity === 'function') form.reportValidity();
+        return;
+    }
+    var submitButton = form.querySelector('.af-consult-submit');
+    var status = root.querySelector('[data-consult-status]');
+    var success = root.querySelector('[data-consult-success]');
+    var formData = _consultFormValues(form);
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = submitButton.getAttribute('data-submitting-text') || '提交中...';
+    }
+    if (status) {
+        status.textContent = '';
+        status.className = 'af-consult-status';
+    }
+    function finishOk() {
+        form.style.display = 'none';
+        if (success) success.classList.add('show');
+        try { root.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
+    }
+    function finishError(err) {
+        console.error('Consultation submission failed:', err);
+        if (status) {
+            status.textContent = status.getAttribute('data-error-message') || '提交時遇到問題，請稍後再試。';
+            status.className = 'af-consult-status error';
+        }
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.innerHTML = submitButton.getAttribute('data-default-html') || submitButton.getAttribute('data-default-text') || '提交申請 →';
+        }
+    }
+    var googleScriptURL = 'https://script.google.com/macros/s/AKfycbxE8KP5ohNSbHIFOWxl-JoWgu9_my8N8ofkTEXaeU0b7QB6K-s3qx4KE-5bOz7Qj4_miQ/exec';
+    initFirebase(function(app) {
+        var db = app.firestore();
+        var consultRef = db.collection('consultations').doc();
+        var fsData = Object.assign({}, formData, {
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: 'new'
+        });
+        var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
+            ? saveFormSubmissionMirror({
+                formType: 'consultation',
+                sourceKey: 'ig-consultation',
+                sourceLabel: 'AI 諮詢申請',
+                sourcePage: formData.page,
+                sourcePath: window.location.pathname,
+                sourceUrl: window.location.href,
+                sourceCollection: 'consultations',
+                sourceDocId: consultRef.id,
+                sheetTab: '1 on 1 Consultation',
+                contactName: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                instagram: formData.igAccount,
+                answers: {
+                    aiSkillLevel: formData.aiSkillLevel,
+                    aiGoal: formData.aiGoal,
+                    currentAITools: formData.currentAITools,
+                    currentAIToolsOtherText: formData.currentAIToolsOtherText,
+                    successOutcome: formData.successOutcome,
+                    currentProblem: formData.currentProblem,
+                    startTiming: formData.startTiming,
+                    willingnessToPay: formData.willingnessToPay,
+                    whyNow: formData.whyNow,
+                    workshopInterest: formData.workshopInterest,
+                    aiTopics: formData.aiTopics,
+                    aiTopicsOtherText: formData.aiTopicsOtherText,
+                    additionalInfo: formData.additionalInfo,
+                    whatsappConsent: formData.whatsappConsent,
+                    customAnswers: formData.customAnswers,
+                    customAnswerLabels: formData.customAnswerLabels
+                },
+                timestamp: formData.timestamp
+            }, { db: db })
+            : Promise.resolve();
+        var sheetPromise = fetch(googleScriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        }).catch(function(err) {
+            console.warn('Consultation Google Sheet write failed:', err);
+        });
+        Promise.all([consultRef.set(fsData), mirrorPromise, sheetPromise]).then(finishOk).catch(finishError);
     });
 }
 
@@ -2152,7 +3153,18 @@ function initLayoutPreviewBridge(options) {
 
     var onLayoutPreview = typeof options.onLayoutPreview === 'function' ? options.onLayoutPreview : null;
     var sectionSelector = options.sectionSelector || '[data-section-id]';
-    var clickSelectEnabled = options.clickSelectEnabled !== false;
+    /* Section outlines, crop handles, and contenteditable previews must only run inside the layout editor iframe — not on top-level tabs even with ?preview=1. */
+    var previewChromeEnabled = typeof options.previewChromeEnabled === 'boolean'
+        ? options.previewChromeEnabled
+        : !!(window.parent && window.parent !== window);
+    if (previewChromeEnabled) {
+        document.documentElement.classList.add('layout-editor-preview-chrome');
+    }
+    var clickSelectEnabled = previewChromeEnabled && (options.clickSelectEnabled !== false);
+    var activeTextEl = null;
+    var activeTextRange = null;
+    var editableTextSelector = '[data-layout-field], [data-layout-array-field]';
+    var cropDrag = null;
 
     function _allSectionEls() {
         return document.querySelectorAll(sectionSelector);
@@ -2169,6 +3181,580 @@ function initLayoutPreviewBridge(options) {
         });
     }
 
+    function _ensureCropHandles(secEl) {
+        if (!previewChromeEnabled || !secEl) return;
+        secEl.style.position = secEl.style.position || 'relative';
+        ['top', 'bottom'].forEach(function(edge) {
+            if (secEl.querySelector(':scope > .layout-section-crop-handle[data-crop-edge="' + edge + '"]')) return;
+            var handle = document.createElement('button');
+            handle.type = 'button';
+            handle.className = 'layout-section-crop-handle layout-section-crop-handle-' + edge;
+            handle.setAttribute('data-crop-edge', edge);
+            handle.setAttribute('aria-label', edge === 'top' ? '調整上方裁切' : '調整下方裁切');
+            handle.innerHTML = '<span></span>';
+            secEl.appendChild(handle);
+        });
+    }
+
+    function _removeCropHandles(secEl) {
+        if (!secEl) return;
+        secEl.querySelectorAll(':scope > .layout-section-crop-handle').forEach(function(handle) {
+            handle.remove();
+        });
+    }
+
+    function _applyCropValues(secEl, top, bottom, height) {
+        if (!secEl) return;
+        var content = {
+            _cropTop: aiflowSectionCropNumber(top),
+            _cropBottom: aiflowSectionCropNumber(bottom)
+        };
+        if (height !== undefined && height !== null) content._cropHeight = aiflowSectionCropNumber(height);
+        if (typeof aiflowApplySectionCropToElement === 'function') {
+            aiflowApplySectionCropToElement(secEl, content);
+        }
+        _ensureCropHandles(secEl);
+    }
+
+    function _postCropChange(secEl) {
+        if (!secEl || !window.parent || window.parent === window) return;
+        window.parent.postMessage({
+            type: 'previewSectionCropChange',
+            sectionId: secEl.getAttribute('data-section-id') || '',
+            cropTop: aiflowSectionCropNumber(secEl.getAttribute('data-layout-crop-top')),
+            cropBottom: aiflowSectionCropNumber(secEl.getAttribute('data-layout-crop-bottom')),
+            cropHeight: aiflowSectionCropNumber(secEl.getAttribute('data-layout-crop-height'))
+        }, '*');
+    }
+
+    function _editableTextEl(node) {
+        return node && node.closest ? node.closest(editableTextSelector) : null;
+    }
+
+    function _enablePreviewTextEditing(root) {
+        if (!previewChromeEnabled) return;
+        (root || document).querySelectorAll(editableTextSelector).forEach(function(el) {
+            el.setAttribute('contenteditable', 'true');
+            el.setAttribute('spellcheck', 'false');
+            el.classList.add('layout-preview-editable-text');
+        });
+    }
+
+    function _selectionInside(el) {
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount || !el) return false;
+        var range = sel.getRangeAt(0);
+        return el.contains(range.startContainer) && el.contains(range.endContainer);
+    }
+
+    function _rememberTextRange(el) {
+        if (!el || !_selectionInside(el)) return false;
+        try {
+            activeTextRange = window.getSelection().getRangeAt(0).cloneRange();
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function _restoreTextRange(el) {
+        if (!el || !activeTextRange) return false;
+        try {
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(activeTextRange.cloneRange());
+            return _selectionInside(el);
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function _selectTextContents(el) {
+        if (!el) return false;
+        try {
+            var sel = window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents(el);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            activeTextRange = range.cloneRange();
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function _selectionCoversTextContents(el) {
+        var sel = window.getSelection();
+        if (!el || !sel || !sel.rangeCount || !_selectionInside(el)) return false;
+        try {
+            var range = sel.getRangeAt(0);
+            if (range.collapsed) return false;
+            var whole = document.createRange();
+            whole.selectNodeContents(el);
+            return range.compareBoundaryPoints(Range.START_TO_START, whole) <= 0 &&
+                range.compareBoundaryPoints(Range.END_TO_END, whole) >= 0;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function _textPayload(el) {
+        if (!el) return null;
+        var secEl = el.closest(sectionSelector);
+        if (!secEl) return null;
+        var payload = {
+            sectionId: secEl.getAttribute('data-section-id') || '',
+            field: el.getAttribute('data-layout-field') || '',
+            arrayName: el.getAttribute('data-layout-array') || '',
+            index: el.getAttribute('data-layout-index') || '',
+            arrayField: el.getAttribute('data-layout-array-field') || '',
+            html: el.innerHTML,
+            selectionAll: _selectionCoversTextContents(el)
+        };
+        var activeNode = null;
+        var sel = window.getSelection();
+        if (sel && sel.rangeCount && _selectionInside(el)) {
+            activeNode = sel.anchorNode;
+            payload.selectionCollapsed = sel.getRangeAt(0).collapsed;
+        }
+        var activeElement = activeNode ? (activeNode.nodeType === 1 ? activeNode : activeNode.parentElement) : el;
+        try {
+            var cs = window.getComputedStyle(activeElement || el);
+            payload.color = cs.color || '';
+            payload.fontSize = cs.fontSize || '';
+        } catch (err) {}
+        return payload;
+    }
+
+    function _previewClickTargetPayload(target, secEl) {
+        if (!target || !secEl) return {};
+        var payload = {};
+        var fieldEl = _editableTextEl(target);
+        if (!fieldEl && target.closest) {
+            var fieldWrap = target.closest('.af-consult-field, .af-consult-card, [data-consult-card]');
+            if (fieldWrap) fieldEl = fieldWrap.querySelector('[data-layout-field], [data-layout-array-field]');
+        }
+        if (fieldEl) {
+            payload.field = fieldEl.getAttribute('data-layout-field') || '';
+            payload.arrayName = fieldEl.getAttribute('data-layout-array') || '';
+            payload.index = fieldEl.getAttribute('data-layout-index') || '';
+            payload.arrayField = fieldEl.getAttribute('data-layout-array-field') || '';
+        }
+        var consultCard = target.closest && target.closest('[data-consult-card]');
+        if (consultCard) payload.consultCard = consultCard.getAttribute('data-consult-card') || '';
+        return payload;
+    }
+
+    function _postPreviewText(type, el) {
+        var payload = _textPayload(el);
+        if (!payload || !window.parent || window.parent === window) return;
+        payload.type = type;
+        window.parent.postMessage(payload, '*');
+    }
+
+    function _selectTextContentsIfNeeded(el) {
+        var sel = window.getSelection();
+        var range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+        if (range && !range.collapsed && _selectionInside(el)) return;
+        _selectTextContents(el);
+    }
+
+    function _stylePropToCss(prop) {
+        return String(prop || '').replace(/[A-Z]/g, function(ch) { return '-' + ch.toLowerCase(); });
+    }
+
+    function _cleanupPreviewSpans(root) {
+        if (!root) return;
+        Array.prototype.slice.call(root.querySelectorAll('span')).reverse().forEach(function(node) {
+            if (!node || node.nodeType !== 1 || node.tagName !== 'SPAN') return;
+            var attrs = node.getAttributeNames ? node.getAttributeNames() : [];
+            if (attrs.length) return;
+            var parent = node.parentNode;
+            if (!parent) return;
+            while (node.firstChild) parent.insertBefore(node.firstChild, node);
+            parent.removeChild(node);
+        });
+    }
+
+    function _previewFragmentElementsDepthSorted(fragment) {
+        var out = [];
+        if (!fragment) return out;
+        function walk(node, depth) {
+            if (!node) return;
+            if (node.nodeType === 1) {
+                out.push({ el: node, depth: depth });
+                for (var i = 0; i < node.childNodes.length; i++) walk(node.childNodes[i], depth + 1);
+                return;
+            }
+            for (var j = 0; j < node.childNodes.length; j++) walk(node.childNodes[j], depth);
+        }
+        for (var k = 0; k < fragment.childNodes.length; k++) walk(fragment.childNodes[k], 0);
+        out.sort(function(a, b) { return b.depth - a.depth; });
+        return out.map(function(item) { return item.el; });
+    }
+
+    function _previewInlineCommandSpec(cmd) {
+        if (cmd === 'bold') return {
+            tags: { B: true, STRONG: true },
+            hasStyle: function(el) {
+                var fw = el && el.style && el.style.fontWeight;
+                return fw === 'bold' || parseInt(fw, 10) >= 600;
+            },
+            removeStyle: function(el) { if (el && el.style) el.style.removeProperty('font-weight'); },
+            applyOffStyle: function(el) { if (el && el.style) el.style.fontWeight = '400'; }
+        };
+        if (cmd === 'italic') return {
+            tags: { I: true, EM: true },
+            hasStyle: function(el) { return !!(el && el.style && el.style.fontStyle === 'italic'); },
+            removeStyle: function(el) { if (el && el.style) el.style.removeProperty('font-style'); },
+            applyOffStyle: function(el) { if (el && el.style) el.style.fontStyle = 'normal'; }
+        };
+        if (cmd === 'underline') return {
+            tags: { U: true },
+            hasStyle: function(el) {
+                var td = String((el && el.style && (el.style.textDecorationLine || el.style.textDecoration)) || '').toLowerCase();
+                return td.indexOf('underline') >= 0;
+            },
+            removeStyle: function(el) {
+                if (!el || !el.style) return;
+                var td = String(el.style.textDecoration || el.style.textDecorationLine || '').toLowerCase();
+                if (td.indexOf('underline') >= 0 && td.indexOf('line-through') >= 0) el.style.textDecoration = 'line-through';
+                else {
+                    el.style.removeProperty('text-decoration');
+                    el.style.removeProperty('text-decoration-line');
+                }
+            },
+            applyOffStyle: function(el) { if (el && el.style) el.style.textDecoration = 'none'; }
+        };
+        if (cmd === 'strikeThrough') return {
+            tags: { S: true, STRIKE: true, DEL: true },
+            hasStyle: function(el) {
+                var td = String((el && el.style && (el.style.textDecorationLine || el.style.textDecoration)) || '').toLowerCase();
+                return td.indexOf('line-through') >= 0;
+            },
+            removeStyle: function(el) {
+                if (!el || !el.style) return;
+                var td = String(el.style.textDecoration || el.style.textDecorationLine || '').toLowerCase();
+                if (td.indexOf('underline') >= 0 && td.indexOf('line-through') >= 0) el.style.textDecoration = 'underline';
+                else {
+                    el.style.removeProperty('text-decoration');
+                    el.style.removeProperty('text-decoration-line');
+                }
+            },
+            applyOffStyle: function(el) { if (el && el.style) el.style.textDecoration = 'none'; }
+        };
+        return null;
+    }
+
+    function _previewNodeHasInlineCommand(node, root, spec) {
+        var el = node && node.nodeType === 1 ? node : (node && node.parentElement);
+        while (el) {
+            if (spec.tags && spec.tags[el.tagName]) return true;
+            if (spec.hasStyle && spec.hasStyle(el)) return true;
+            if (el === root) break;
+            el = el.parentElement;
+        }
+        return false;
+    }
+
+    function _previewRangeFullyHasInlineCommand(range, root, cmd) {
+        var spec = _previewInlineCommandSpec(cmd);
+        if (!range || !root || !spec) return false;
+        var nodes = [];
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: function(node) {
+                if (!node || !String(node.nodeValue || '').trim()) return NodeFilter.FILTER_REJECT;
+                try {
+                    return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                } catch (err) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+            }
+        });
+        var node;
+        while ((node = walker.nextNode())) nodes.push(node);
+        if (!nodes.length) return false;
+        return nodes.every(function(textNode) {
+            return _previewNodeHasInlineCommand(textNode, root, spec);
+        });
+    }
+
+    function _previewRangeHasAnyInlineCommand(range, root, cmd) {
+        var spec = _previewInlineCommandSpec(cmd);
+        if (!range || !root || !spec) return false;
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: function(node) {
+                if (!node || !String(node.nodeValue || '').trim()) return NodeFilter.FILTER_REJECT;
+                try {
+                    return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                } catch (err) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+            }
+        });
+        var node;
+        while ((node = walker.nextNode())) {
+            if (_previewNodeHasInlineCommand(node, root, spec)) return true;
+        }
+        return false;
+    }
+
+    function _previewUnwrapElement(el) {
+        if (!el || !el.parentNode) return;
+        var parent = el.parentNode;
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+    }
+
+    function _previewRemoveInlineCommandFromFragment(fragment, cmd) {
+        var spec = _previewInlineCommandSpec(cmd);
+        if (!fragment || !spec) return fragment;
+        _previewFragmentElementsDepthSorted(fragment).forEach(function(el) {
+            if (spec.removeStyle) spec.removeStyle(el);
+            if (el.getAttribute && el.getAttribute('style') === '') el.removeAttribute('style');
+            if (spec.tags && spec.tags[el.tagName]) _previewUnwrapElement(el);
+        });
+        return fragment;
+    }
+
+    function _previewClearOverridingOffStyles(root, cmd) {
+        if (!root || root.nodeType !== 1) return;
+        var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+        nodes.forEach(function(el) {
+            if (!el || !el.style) return;
+            if (cmd === 'bold') {
+                var fw = String(el.style.fontWeight || '').toLowerCase();
+                if (fw === '400' || fw === 'normal') el.style.removeProperty('font-weight');
+            } else if (cmd === 'italic') {
+                var fs = String(el.style.fontStyle || '').toLowerCase();
+                if (fs === 'normal') el.style.removeProperty('font-style');
+            } else if (cmd === 'underline' || cmd === 'strikeThrough') {
+                var td = String(el.style.textDecoration || el.style.textDecorationLine || '').toLowerCase();
+                if (td === 'none' || td === '') {
+                    el.style.removeProperty('text-decoration');
+                    el.style.removeProperty('text-decoration-line');
+                }
+            }
+            if (el.getAttribute && el.getAttribute('style') === '') el.removeAttribute('style');
+        });
+    }
+
+    function _previewApplyInlineCommandWrap(el, cmd, tagName) {
+        if (!el || !tagName) return false;
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount || !_selectionInside(el)) return false;
+        var range = sel.getRangeAt(0);
+        var wrapper = document.createElement(tagName);
+        try {
+            range.surroundContents(wrapper);
+        } catch (err) {
+            var extracted = range.extractContents();
+            wrapper.appendChild(extracted);
+            range.insertNode(wrapper);
+        }
+        _previewClearOverridingOffStyles(wrapper, cmd);
+        _cleanupPreviewSpans(wrapper);
+        try {
+            var nextRange = document.createRange();
+            nextRange.selectNodeContents(wrapper);
+            sel.removeAllRanges();
+            sel.addRange(nextRange);
+            activeTextRange = nextRange.cloneRange();
+        } catch (err2) {}
+        return true;
+    }
+
+    function _previewToggleInlineCommand(el, cmd) {
+        if (!el || !cmd) return false;
+        el.focus();
+        var sel = window.getSelection();
+        if (!_restoreTextRange(el) && (!sel || !sel.rangeCount || !_selectionInside(el))) {
+            _selectTextContentsIfNeeded(el);
+            sel = window.getSelection();
+        } else {
+            sel = window.getSelection();
+        }
+        var range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+        if (range && range.collapsed && _restoreTextRange(el)) {
+            sel = window.getSelection();
+            range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+        }
+        if (!range || !_selectionInside(el)) return false;
+        if (_previewRangeHasAnyInlineCommand(range, el, cmd)) {
+            var holder = document.createDocumentFragment();
+            holder.appendChild(_previewRemoveInlineCommandFromFragment(range.extractContents(), cmd));
+            var first = holder.firstChild;
+            var last = holder.lastChild;
+            range.insertNode(holder);
+            var nextRange = document.createRange();
+            if (first && last) {
+                nextRange.setStartBefore(first);
+                nextRange.setEndAfter(last);
+            } else if (first) {
+                nextRange.selectNode(first);
+            }
+            sel.removeAllRanges();
+            sel.addRange(nextRange);
+            activeTextRange = nextRange.cloneRange();
+            return true;
+        }
+        var map = { bold: 'B', italic: 'I', underline: 'U', strikeThrough: 'S' };
+        var tag = map[cmd];
+        var ok = tag ? _previewApplyInlineCommandWrap(el, cmd, tag) : false;
+        if (!ok) {
+            try {
+                ok = document.execCommand(cmd, false, null);
+            } catch (err) {
+                ok = false;
+            }
+        }
+        _rememberTextRange(el);
+        return ok;
+    }
+
+    function _applyInlineStyleToPreviewSelection(el, prop, value, opts) {
+        if (!el || !prop || !value) return false;
+        opts = opts || {};
+        el.focus();
+        if (opts.forceWhole) _selectTextContents(el);
+        else if (!_restoreTextRange(el)) _selectTextContentsIfNeeded(el);
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return false;
+        var range = sel.getRangeAt(0);
+        if (!_selectionInside(el)) return false;
+        var span = document.createElement('span');
+        span.style[prop] = value;
+        try {
+            range.surroundContents(span);
+        } catch (err) {
+            var contents = range.extractContents();
+            span.appendChild(contents);
+            range.insertNode(span);
+        }
+        var cssProp = _stylePropToCss(prop);
+        span.querySelectorAll('*').forEach(function(node) {
+            if (node.style) node.style.removeProperty(cssProp);
+            if (prop === 'color' && node.removeAttribute) node.removeAttribute('color');
+            if (node.getAttribute && node.getAttribute('style') === '') node.removeAttribute('style');
+        });
+        _cleanupPreviewSpans(span);
+        try {
+            var nextRange = document.createRange();
+            nextRange.selectNodeContents(span);
+            sel.removeAllRanges();
+            sel.addRange(nextRange);
+            activeTextRange = nextRange.cloneRange();
+        } catch (err2) {}
+        return true;
+    }
+
+    function _safePreviewImageUrl(url) {
+        var clean = String(url || '').trim();
+        if (!clean) return '';
+        if (/^(https?:|\/|data:image\/(png|jpe?g|gif|webp|svg\+xml);base64,)/i.test(clean)) return clean;
+        return '';
+    }
+
+    function _insertImageToPreviewSelection(el, url, alt) {
+        if (!el) return false;
+        var safeUrl = _safePreviewImageUrl(url);
+        if (!safeUrl) return false;
+        el.focus();
+        if (!_restoreTextRange(el)) _selectTextContentsIfNeeded(el);
+        var sel = window.getSelection();
+        if (!sel || !sel.rangeCount || !_selectionInside(el)) return false;
+        var range = sel.getRangeAt(0);
+        var img = document.createElement('img');
+        img.setAttribute('src', safeUrl);
+        img.setAttribute('alt', String(alt || '').slice(0, 180));
+        img.setAttribute('loading', 'lazy');
+        img.setAttribute('decoding', 'async');
+        img.setAttribute('style', 'display:block;max-width:100%;height:auto;margin:16px auto;border-radius:14px;');
+        range.deleteContents();
+        range.insertNode(img);
+        range = document.createRange();
+        range.setStartAfter(img);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        activeTextRange = range.cloneRange();
+        return true;
+    }
+
+    function _findPreviewTextFromPayload(payload) {
+        if (!payload) return activeTextEl;
+        var sectionId = payload.sectionId || '';
+        var field = payload.arrayField || payload.field || '';
+        var root = sectionId ? _findSectionEl(sectionId) : document;
+        if (!root || !field) return activeTextEl;
+        var candidates = root.querySelectorAll(editableTextSelector);
+        for (var i = 0; i < candidates.length; i++) {
+            var el = candidates[i];
+            if ((payload.arrayName || '') && el.getAttribute('data-layout-array') !== String(payload.arrayName)) continue;
+            if ((payload.index || payload.index === 0) && el.getAttribute('data-layout-index') !== String(payload.index)) continue;
+            if ((payload.arrayField || '') && el.getAttribute('data-layout-array-field') !== String(payload.arrayField)) continue;
+            if (!(payload.arrayField || '') && el.getAttribute('data-layout-field') !== String(field)) continue;
+            return el;
+        }
+        return activeTextEl;
+    }
+
+    function _cssAttr(value) {
+        return String(value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    function _closestScrollTarget(el) {
+        if (!el || !el.closest) return el;
+        return el.closest('.af-consult-field, .af-consult-card, .form-group, [data-layout-field], [data-layout-array-field]') || el;
+    }
+
+    function _fieldNameFromPath(path) {
+        var clean = String(path || '').trim();
+        var match = clean.match(/^fields\.([^.]+)\./);
+        if (match) return match[1];
+        return clean.indexOf('.') < 0 ? clean : '';
+    }
+
+    function _findPreviewScrollTarget(sectionEl, payload) {
+        if (!sectionEl || !payload) return sectionEl;
+        var fieldPath = String(payload.fieldPath || payload.arrayField || payload.field || '').trim();
+        if (payload.arrayName && (payload.arrayField || payload.field)) {
+            var arrayField = String(payload.arrayField || payload.field || '');
+            var arraySelector = '[data-layout-array="' + _cssAttr(payload.arrayName) + '"][data-layout-array-field="' + _cssAttr(arrayField) + '"]';
+            if (payload.index !== '' && payload.index !== undefined && payload.index !== null) {
+                arraySelector += '[data-layout-index="' + _cssAttr(payload.index) + '"]';
+            }
+            var arrayTarget = sectionEl.querySelector(arraySelector);
+            if (arrayTarget) return _closestScrollTarget(arrayTarget);
+        }
+        if (fieldPath.indexOf('cardTitles.') === 0) {
+            var cardKey = fieldPath.split('.')[1] || '';
+            var cardTarget = sectionEl.querySelector('[data-consult-card="' + _cssAttr(cardKey) + '"]');
+            if (cardTarget) return cardTarget;
+        }
+        var fieldName = _fieldNameFromPath(fieldPath) || String(payload.field || '').trim();
+        if (fieldPath) {
+            var exactRichTarget = sectionEl.querySelector('[data-layout-field="' + _cssAttr(fieldPath) + '"]');
+            if (exactRichTarget) return _closestScrollTarget(exactRichTarget);
+        }
+        if (fieldName) {
+            var richTarget = sectionEl.querySelector('[data-layout-field="' + _cssAttr(fieldName) + '"]');
+            if (richTarget) return _closestScrollTarget(richTarget);
+            var formTarget = sectionEl.querySelector('[name="' + _cssAttr(fieldName) + '"]');
+            if (formTarget) return _closestScrollTarget(formTarget);
+        }
+        if (fieldPath === 'submitText' || fieldPath === 'submittingText') {
+            var buttonTarget = sectionEl.querySelector('[data-default-text], button[type="submit"]');
+            if (buttonTarget) return buttonTarget;
+        }
+        if (fieldPath === 'successTitle' || fieldPath === 'successMessage') {
+            var successTarget = sectionEl.querySelector('[data-consult-success]');
+            if (successTarget) return successTarget;
+        }
+        return sectionEl;
+    }
+
     function _syncPreviewClickUi() {
         document.documentElement.classList.toggle('layout-preview-click-select-enabled', !!clickSelectEnabled);
     }
@@ -2177,20 +3763,95 @@ function initLayoutPreviewBridge(options) {
         var bridgeStyle = document.createElement('style');
         bridgeStyle.id = 'layoutPreviewBridgeStyle';
         bridgeStyle.textContent =
-            'html.layout-preview-click-select-enabled [data-section-id] { cursor: pointer; transition: outline 0.15s, outline-offset 0.15s; outline: 2px solid transparent; outline-offset: -2px; }' +
-            'html.layout-preview-click-select-enabled [data-section-id]:hover { outline: 2px solid rgba(217,119,87,0.55); outline-offset: -2px; }' +
-            '[data-section-id].preview-selected { outline: 2px solid #D97757; outline-offset: -2px; }';
+            'html.layout-editor-preview-chrome.layout-preview-click-select-enabled [data-section-id] { cursor: pointer; transition: outline 0.15s, outline-offset 0.15s; outline: 2px solid transparent; outline-offset: -2px; }' +
+            'html.layout-editor-preview-chrome.layout-preview-click-select-enabled [data-section-id]:hover { outline: 2px solid rgba(217,119,87,0.55); outline-offset: -2px; }' +
+            'html.layout-editor-preview-chrome [data-section-id].preview-selected { outline: 2px solid #D97757; outline-offset: -2px; }' +
+            'html.layout-editor-preview-chrome .layout-section-crop-inner { transition: none; }' +
+            'html.layout-editor-preview-chrome .layout-section-crop-handle { position:absolute; left:50%; width:74px; height:20px; margin-left:-37px; z-index:50; border:1px solid #D97757; border-radius:999px; background:#fffaf6; box-shadow:0 6px 16px rgba(0,0,0,0.18); cursor:ns-resize; display:none; align-items:center; justify-content:center; padding:0; }' +
+            'html.layout-editor-preview-chrome .layout-section-crop-handle span { width:34px; height:3px; border-radius:999px; background:#D97757; display:block; }' +
+            'html.layout-editor-preview-chrome [data-section-id].preview-selected > .layout-section-crop-handle { display:flex; }' +
+            'html.layout-editor-preview-chrome .layout-section-crop-handle-top { top:6px; }' +
+            'html.layout-editor-preview-chrome .layout-section-crop-handle-bottom { bottom:6px; }' +
+            'html.layout-editor-preview-chrome.layout-section-crop-dragging, html.layout-editor-preview-chrome.layout-section-crop-dragging * { cursor:ns-resize !important; user-select:none !important; }';
         document.head.appendChild(bridgeStyle);
     }
 
     window.addEventListener('message', function(e) {
         if (!e || !e.data) return;
         if (e.data.type === 'layoutPreview' && onLayoutPreview && Array.isArray(e.data.sections)) {
+            var selectedBefore = e.data.selectedSectionId ? _findSectionEl(e.data.selectedSectionId) : null;
+            var selectedBeforeTop = selectedBefore && selectedBefore.getBoundingClientRect ? selectedBefore.getBoundingClientRect().top : null;
+            var scrollBefore = window.scrollY || window.pageYOffset || 0;
+            var editorScroll = e.data.editorScrollTarget;
+            var editorScrollOk = editorScroll && editorScroll.sectionId && String(editorScroll.sectionId) === String(e.data.selectedSectionId || '');
             onLayoutPreview(e.data.sections, e.data);
+            var restorePreviewScroll = function() {
+                if (editorScrollOk) return;
+                var selectedAfter = e.data.selectedSectionId ? _findSectionEl(e.data.selectedSectionId) : null;
+                if (selectedAfter && selectedAfter.getBoundingClientRect && selectedBeforeTop !== null) {
+                    var selectedAfterTop = selectedAfter.getBoundingClientRect().top;
+                    window.scrollTo(window.scrollX || window.pageXOffset || 0, (window.scrollY || window.pageYOffset || 0) + selectedAfterTop - selectedBeforeTop);
+                } else {
+                    window.scrollTo(window.scrollX || window.pageXOffset || 0, scrollBefore);
+                }
+            };
+            var applyEditorScroll = function() {
+                if (!editorScrollOk) return;
+                var sectionTarget = _findSectionEl(editorScroll.sectionId);
+                var target = _findPreviewScrollTarget(sectionTarget, editorScroll);
+                if (target && typeof target.scrollIntoView === 'function') {
+                    try { target.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (err) {}
+                }
+            };
+            restorePreviewScroll();
+            applyEditorScroll();
+            if (typeof window.requestAnimationFrame === 'function') {
+                window.requestAnimationFrame(function() {
+                    restorePreviewScroll();
+                    applyEditorScroll();
+                });
+            } else {
+                setTimeout(function() {
+                    restorePreviewScroll();
+                    applyEditorScroll();
+                }, 0);
+            }
+            _enablePreviewTextEditing();
+            if (e.data.selectedSectionId) {
+                var selected = _findSectionEl(e.data.selectedSectionId);
+                if (selected) _ensureCropHandles(selected);
+            }
+            return;
+        }
+        if (e.data.type === 'previewTextCommand') {
+            var textEl = _findPreviewTextFromPayload(e.data);
+            if (!textEl) return;
+            activeTextEl = textEl;
+            var ok = false;
+            if (e.data.command === 'style') {
+                ok = _applyInlineStyleToPreviewSelection(textEl, e.data.styleProp, e.data.styleValue, { forceWhole: e.data.selectionAll === true });
+            } else if (e.data.command === 'insertImage') {
+                ok = _insertImageToPreviewSelection(textEl, e.data.imageUrl, e.data.imageAlt);
+            } else if (e.data.command === 'exec' && e.data.execCommand) {
+                textEl.focus();
+                if (e.data.selectionAll === true) _selectTextContents(textEl);
+                else if (!_restoreTextRange(textEl)) _selectTextContentsIfNeeded(textEl);
+                if (_previewInlineCommandSpec(e.data.execCommand)) {
+                    ok = _previewToggleInlineCommand(textEl, e.data.execCommand);
+                } else {
+                    try { ok = document.execCommand(e.data.execCommand, false, e.data.execValue || null); } catch (err) { ok = false; }
+                }
+                _rememberTextRange(textEl);
+            }
+            if (ok) {
+                _postPreviewText('previewTextInput', textEl);
+                _postPreviewText('previewTextSelection', textEl);
+            }
             return;
         }
         if (e.data.type === 'scrollToSection' && e.data.sectionId) {
-            var target = _findSectionEl(e.data.sectionId);
+            var sectionTarget = _findSectionEl(e.data.sectionId);
+            var target = _findPreviewScrollTarget(sectionTarget, e.data);
             if (target && typeof target.scrollIntoView === 'function') {
                 target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
@@ -2198,9 +3859,13 @@ function initLayoutPreviewBridge(options) {
         }
         if (e.data.type === 'highlightSection') {
             _clearPreviewSelection();
+            _allSectionEls().forEach(_removeCropHandles);
             if (e.data.sectionId) {
                 var active = _findSectionEl(e.data.sectionId);
-                if (active) active.classList.add('preview-selected');
+                if (active) {
+                    active.classList.add('preview-selected');
+                    _ensureCropHandles(active);
+                }
             }
             return;
         }
@@ -2210,6 +3875,64 @@ function initLayoutPreviewBridge(options) {
         }
     });
 
+    document.addEventListener('focusin', function(e) {
+        var textEl = _editableTextEl(e.target);
+        if (!textEl) return;
+        activeTextEl = textEl;
+        _rememberTextRange(textEl);
+        _postPreviewText('previewTextFocus', textEl);
+    }, true);
+
+    document.addEventListener('input', function(e) {
+        var textEl = _editableTextEl(e.target);
+        if (!textEl) return;
+        activeTextEl = textEl;
+        _rememberTextRange(textEl);
+        _postPreviewText('previewTextInput', textEl);
+    }, true);
+
+    document.addEventListener('keydown', function(e) {
+        var textEl = _editableTextEl(e.target);
+        if (!textEl) return;
+        if ((e.metaKey || e.ctrlKey) && String(e.key || '').toLowerCase() === 'a') {
+            e.preventDefault();
+            e.stopPropagation();
+            activeTextEl = textEl;
+            if (_selectTextContents(textEl)) {
+                _postPreviewText('previewTextSelection', textEl);
+            }
+        }
+    }, true);
+
+    document.addEventListener('selectionchange', function() {
+        var sel = window.getSelection();
+        var node = sel && sel.rangeCount ? sel.anchorNode : null;
+        var textEl = _editableTextEl(node);
+        if (!textEl) return;
+        activeTextEl = textEl;
+        _rememberTextRange(textEl);
+        _postPreviewText('previewTextSelection', textEl);
+    });
+
+    document.addEventListener('click', function(e) {
+        var textEl = _editableTextEl(e.target);
+        if (!textEl) return;
+        if (!previewChromeEnabled) return;
+        activeTextEl = textEl;
+        textEl.focus();
+        _rememberTextRange(textEl);
+        _clearPreviewSelection();
+        var secEl = textEl.closest(sectionSelector);
+        if (secEl) {
+            secEl.classList.add('preview-selected');
+            _ensureCropHandles(secEl);
+        }
+        _postPreviewText('previewTextFocus', textEl);
+        if (e.target && e.target.closest && e.target.closest('a')) e.preventDefault();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        else e.stopPropagation();
+    }, true);
+
     document.addEventListener('click', function(e) {
         var secEl = e.target && e.target.closest ? e.target.closest(sectionSelector) : null;
         if (!secEl) return;
@@ -2217,21 +3940,90 @@ function initLayoutPreviewBridge(options) {
         e.preventDefault();
         e.stopPropagation();
         _clearPreviewSelection();
+        _allSectionEls().forEach(_removeCropHandles);
         secEl.classList.add('preview-selected');
+        _ensureCropHandles(secEl);
         if (window.parent && window.parent !== window) {
-            window.parent.postMessage({
+            window.parent.postMessage(Object.assign({
                 type: 'previewSectionClick',
                 sectionId: secEl.getAttribute('data-section-id')
-            }, '*');
+            }, _previewClickTargetPayload(e.target, secEl)), '*');
         }
     }, true);
 
+    document.addEventListener('pointerdown', function(e) {
+        var handle = e.target && e.target.closest ? e.target.closest('.layout-section-crop-handle') : null;
+        if (!handle) return;
+        var secEl = handle.closest(sectionSelector);
+        if (!secEl) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        cropDrag = {
+            sectionEl: secEl,
+            edge: handle.getAttribute('data-crop-edge') || 'bottom',
+            startY: e.clientY,
+            startTop: aiflowSectionCropNumber(secEl.getAttribute('data-layout-crop-top')),
+            startBottom: aiflowSectionCropNumber(secEl.getAttribute('data-layout-crop-bottom')),
+            startHeight: aiflowSectionCropNumber(secEl.getAttribute('data-layout-crop-height')) || Math.max(24, secEl.getBoundingClientRect().height)
+        };
+        document.documentElement.classList.add('layout-section-crop-dragging');
+        try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+    }, true);
+
+    document.addEventListener('pointermove', function(e) {
+        if (!cropDrag || !cropDrag.sectionEl) return;
+        e.preventDefault();
+        var dy = e.clientY - cropDrag.startY;
+        var top = cropDrag.startTop;
+        var bottom = cropDrag.startBottom;
+        var height = cropDrag.startHeight;
+        var inner = cropDrag.sectionEl.querySelector(':scope > .layout-section-crop-inner');
+        var naturalHeight = Math.max(
+            inner ? (inner.scrollHeight || 0) : 0,
+            inner ? (inner.offsetHeight || 0) : 0,
+            inner && inner.getBoundingClientRect ? Math.ceil(inner.getBoundingClientRect().height) : 0,
+            cropDrag.sectionEl.scrollHeight || 0
+        );
+        var minHeight = 24;
+        if (cropDrag.edge === 'top') {
+            var fixedBottomEdge = cropDrag.startTop + cropDrag.startHeight;
+            top = cropDrag.startTop + dy;
+            if (top < 0) top = 0;
+            if (top > fixedBottomEdge - minHeight) top = fixedBottomEdge - minHeight;
+            height = Math.max(minHeight, fixedBottomEdge - top);
+            bottom = Math.max(0, naturalHeight - top - height);
+        } else {
+            height = Math.max(minHeight, cropDrag.startHeight + dy);
+            top = cropDrag.startTop;
+            bottom = Math.max(0, naturalHeight - top - height);
+        }
+        _applyCropValues(cropDrag.sectionEl, top, bottom, height);
+        _postCropChange(cropDrag.sectionEl);
+    }, true);
+
+    function _finishCropDrag() {
+        if (!cropDrag) return;
+        _postCropChange(cropDrag.sectionEl);
+        cropDrag = null;
+        document.documentElement.classList.remove('layout-section-crop-dragging');
+    }
+
+    document.addEventListener('pointerup', _finishCropDrag, true);
+    document.addEventListener('pointercancel', _finishCropDrag, true);
+
     _syncPreviewClickUi();
+    if (previewChromeEnabled) {
+        _enablePreviewTextEditing();
+    }
 
     window.__layoutPreviewBridgeApi = {
         setClickSelectEnabled: function(enabled) {
-            clickSelectEnabled = enabled !== false;
+            clickSelectEnabled = previewChromeEnabled && (enabled !== false);
             _syncPreviewClickUi();
+        },
+        refreshEditableText: function() {
+            _enablePreviewTextEditing();
         }
     };
     window.__layoutPreviewBridgeInit = true;

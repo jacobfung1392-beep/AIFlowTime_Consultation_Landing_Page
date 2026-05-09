@@ -92,6 +92,13 @@
         }
       },
       {
+        "source": "/ig-consultation",
+        "function": {
+          "functionId": "resolvePageSlug",
+          "region": "asia-east2"
+        }
+      },
+      {
         "source": "/ai-guide-2026",
         "destination": "/ai-guide-2026.html"
       },
@@ -156,6 +163,10 @@
         "destination": "/layout-editor.html"
       },
       {
+        "source": "/canvas-page",
+        "destination": "/canvas-page.html"
+      },
+      {
         "source": "/carousel-creator",
         "destination": "/carousel-creator.html"
       },
@@ -190,6 +201,13 @@
         "source": "/api/workshop-events",
         "function": {
           "functionId": "publicWorkshopEvents",
+          "region": "asia-east2"
+        }
+      },
+      {
+        "source": "/api/cmsGoogleCalendar",
+        "function": {
+          "functionId": "cmsGoogleCalendarApi",
           "region": "asia-east2"
         }
       },
@@ -284,6 +302,23 @@
       },
       {
         "source": "/consultation",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "private, no-store, no-cache, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Pragma",
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          }
+        ]
+      },
+      {
+        "source": "/ig-consultation",
         "headers": [
           {
             "key": "Cache-Control",

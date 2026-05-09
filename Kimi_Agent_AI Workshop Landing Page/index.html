@@ -170,6 +170,19 @@
            GENERAL
         ============================================= */
         section { padding: 25px 24px; }
+
+        .sec-aj-note { padding: 48px 24px; }
+        .w0-aj-quote {
+            border-left: 4px solid var(--accent);
+            padding: 18px 22px;
+            background: rgba(217,119,87,0.08);
+            border-radius: 0 14px 14px 0;
+            margin: 0 auto;
+            font-size: 17px;
+            font-style: italic;
+            color: var(--text-dim);
+            line-height: 1.85;
+        }
         .container { max-width: 1100px; margin: 0 auto; }
 
         .section-label {
@@ -1154,7 +1167,7 @@
                     <a href="/workshop-payment?id=workshop-0" class="btn-primary" style="font-size:17px; padding:16px 40px;"></a>
                     <div class="cta-social-links" style="display:flex;justify-content:center;gap:20px;margin-top:28px;">
                         <a class="cta-wa-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:14px;text-decoration:none;transition:color .2s;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c0 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                             WhatsApp
                         </a>
                         <a class="cta-ig-link" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;color:var(--text-dim);font-size:14px;text-decoration:none;transition:color .2s;">
@@ -1163,6 +1176,13 @@
                         </a>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Layout clone source: personal note (About-style block, dark theme) -->
+        <section class="sec-aj-note reveal" data-section-id="_tpl_aj-note" data-section-type="aj-note" style="display:none;" aria-hidden="true">
+            <div class="container" style="max-width:720px;">
+                <div class="w0-aj-quote"></div>
             </div>
         </section>
 
@@ -1212,7 +1232,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/shared-utils.js?v=31"></script>
     <script src="/js/page-background-presets.js"></script>
     <script src="/js/page-background-runtime.js"></script>
 
@@ -1221,7 +1241,7 @@
     // LAYOUT ENGINE (for Layout Editor integration)
     // =============================================
     var _layoutQuery = new URLSearchParams(window.location.search);
-    var _isPreviewMode = _layoutQuery.has('preview');
+    var _isPreviewMode = _layoutQuery.get('preview') === '1';
     var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'workshop-0';
 
     function _normalizeLayoutPageStatus(status) {
@@ -1428,6 +1448,9 @@
         sections.forEach(function(sec) {
             if (!sec || sec.type === 'page-background') return;
 
+            var applyType = String(sec.type || '').trim();
+            if (applyType === 'aj_note') applyType = 'aj-note';
+
             var el = existingEls[sec.id];
             if (el && reusableStaticTypes[sec.type]) claimedStaticTypes[sec.type] = true;
 
@@ -1446,16 +1469,24 @@
             }
 
             if (!el && sec.visible !== false) {
-                var template = main.querySelector('[data-section-type="' + sec.type + '"]');
+                var template = main.querySelector('[data-section-type="' + applyType + '"]');
                 if (template) {
                     el = template.cloneNode(true);
                     el.setAttribute('data-section-id', sec.id);
+                    el.setAttribute('data-section-type', applyType);
                     if (template.id) {
                         el.id = template.id + '--' + String(sec.id || '')
                             .replace(/[^a-z0-9_-]+/gi, '-')
                             .replace(/^-+|-+$/g, '')
                             .toLowerCase();
                     }
+                    main.appendChild(el);
+                } else if (applyType === 'aj-note') {
+                    el = document.createElement('section');
+                    el.setAttribute('data-section-id', sec.id);
+                    el.setAttribute('data-section-type', 'aj-note');
+                    el.className = 'sec-aj-note reveal visible';
+                    el.innerHTML = '<div class="container" style="max-width:720px;"><div class="w0-aj-quote"></div></div>';
                     main.appendChild(el);
                 } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download' || sec.type === 'problem-grid') {
                     el = document.createElement('section');
@@ -1471,16 +1502,22 @@
                 if (el && reusableStaticTypes[sec.type]) claimedStaticTypes[sec.type] = true;
             }
 
-            if (!el) return;
+            if (!el) {
+                console.warn('[Layout] No element for section type="' + applyType + '" id="' + (sec.id || '') + '"');
+                return;
+            }
 
             if (sec.visible === false) {
                 el.style.display = 'none';
                 return;
             }
             el.style.display = '';
+            el.removeAttribute('aria-hidden');
             main.appendChild(el);
 
-            if (sec.content) applyContentToSection(el, sec.type, sec.content);
+            if (sec.content || applyType === 'aj-note') {
+                applyContentToSection(el, applyType, sec.content || {});
+            }
         });
 
         finishInitialLayoutRender();
@@ -2333,6 +2370,17 @@
                 }
                 break;
 
+            case 'aj-note':
+                var w0Note = el.querySelector('.w0-aj-quote');
+                if (w0Note) {
+                    var noteRaw = c.quoteText != null ? c.quoteText
+                        : (c.description != null ? c.description
+                            : (c.body != null ? c.body : (c.text != null ? c.text : (c.note || ''))));
+                    w0Note.innerHTML = _w0RichTextHtml(String(noteRaw || ''));
+                }
+                el.classList.add('visible');
+                break;
+
             case 'free-material-download':
                 renderFreeMaterialSection(el, 'workshop-0', el.getAttribute('data-section-id') || 'free-material-download', c, {
                     surface: 'rgba(255,248,241,0.92)',
@@ -2363,7 +2411,7 @@
                 el.innerHTML = '<div class="container" style="display:flex;justify-content:' + w0ImgAlign + ';">' +
                     '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 960) + 'px);">' +
                     w0WrapStart +
-                    '<img src="' + w0Img + '" alt="' + w0Alt + '" style="display:block;width:100%;max-width:100%;height:auto;max-height:72vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + w0ImgShadow + ';background:rgba(255,255,255,0.04);">' +
+                    '<img src="' + w0Img + '" alt="' + w0Alt + '" style="display:block;width:100%;max-width:100%;height:auto;object-fit:' + (c.objectFit === 'cover' ? 'cover' : 'contain') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + w0ImgShadow + ';background:rgba(255,255,255,0.04);">' +
                     (w0Cap ? '<p style="margin-top:14px;color:var(--text-dim);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + w0Cap + '</p>' : '') +
                     w0WrapEnd +
                     '</div></div>';

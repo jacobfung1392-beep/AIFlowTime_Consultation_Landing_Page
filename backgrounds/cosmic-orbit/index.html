@@ -23,10 +23,10 @@
 <div id="cosmic-canvas-container"></div>
 <script>
         function initCosmicBackground() {
-            // Detect mobile device early for performance optimizations
+            // Keep the same burning-sun treatment on phone and desktop.
             const isMobile = window.innerWidth < 768;
             const isRestrictedWebView = /Instagram|FBAN|FBAV|FB_IAB|Line\//i.test(navigator.userAgent || '');
-            const shouldUseSunOverlay = !isMobile && !isRestrictedWebView;
+            const shouldUseSunOverlay = true;
             
             // --- Configuration ---
             const CONFIG = {
@@ -639,6 +639,44 @@
             milkyWay.rotation.z = Math.PI / 6;
             scene.add(milkyWay);
 
+            // Distant starfield (THREE.Points; not the Linktree CSS grid).
+            const starsCount = isMobile ? 700 : 2100;
+            const starsGeometry = new THREE.BufferGeometry();
+            const starPositions = new Float32Array(starsCount * 3);
+            const starColors = new Float32Array(starsCount * 3);
+            const starTmpColor = new THREE.Color();
+            for (let i = 0; i < starsCount; i++) {
+                const radius = 130 + Math.random() * 360;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const j = i * 3;
+                starPositions[j] = radius * Math.sin(phi) * Math.cos(theta);
+                starPositions[j + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                starPositions[j + 2] = radius * Math.cos(phi);
+                const tint = Math.random();
+                if (tint < 0.12) starTmpColor.setHex(0xaaccff);
+                else if (tint < 0.22) starTmpColor.setHex(0xffe8c8);
+                else starTmpColor.setHex(0xffffff);
+                const dim = 0.5 + Math.random() * 0.5;
+                starColors[j] = starTmpColor.r * dim;
+                starColors[j + 1] = starTmpColor.g * dim;
+                starColors[j + 2] = starTmpColor.b * dim;
+            }
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+            starsGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+            const starsMaterial = new THREE.PointsMaterial({
+                size: isMobile ? 0.52 : 1.45,
+                sizeAttenuation: true,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.94,
+                depthWrite: false,
+                fog: false
+            });
+            const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
+            starsMesh.rotation.y = Math.random() * Math.PI * 2;
+            scene.add(starsMesh);
+
             const sunGeometry = new THREE.SphereGeometry(4, isMobile ? 32 : 64, isMobile ? 32 : 64);
             const sunTextures = createPlanetTexture(CONFIG.colors.sun, 'sun'); 
             const sunMaterial = new THREE.MeshStandardMaterial({
@@ -781,23 +819,6 @@
                 planets.push(planetObj);
                 scene.add(createOrbitLine(data.distance));
             });
-
-            // Reduce star count on mobile for performance (Optimized: 1000 mobile, 3000 desktop)
-            const starsGeometry = new THREE.BufferGeometry();
-            const starsCount = isMobile ? 1000 : 3000; // Optimized star count
-            const posArray = new Float32Array(starsCount * 3);
-            for(let i = 0; i < starsCount * 3; i++) {
-                posArray[i] = (Math.random() - 0.5) * 250;
-            }
-            starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const starsMaterial = new THREE.PointsMaterial({
-                size: isMobile ? 0.2 : 0.15, // Slightly larger on mobile for visibility
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.8
-            });
-            const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
-            scene.add(starsMesh);
 
             const transientObjects = []; 
             const smokeParticles = [];
@@ -1000,6 +1021,7 @@
                         p.group.userData.moonGroup.rotation.y += 0.02;
                     }
                 });
+                starsMesh.rotation.y += 0.00006;
                 if (!sunOverlay.isReady) {
                     sunGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.03);
                 }
@@ -1039,7 +1061,6 @@
                         smokeParticles.splice(i, 1);
                     }
                 }
-                starsMesh.rotation.y += 0.00005;
                 updateCameraLogic();
                 if (sunOverlay.isReady) {
                     const viewWidth = renderer.domElement.clientWidth || window.innerWidth;

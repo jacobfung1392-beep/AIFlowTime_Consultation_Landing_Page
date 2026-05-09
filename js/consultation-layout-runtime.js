@@ -85,7 +85,15 @@
                 { question: '會唔會教到我用邊啲工具？', answer: '會！Jacob 會根據你嘅需求同預算，推薦最適合你嘅 AI 工具。可能包括：ChatGPT、Claude、Notion AI、Zapier、Make 等等。Jacob 會教你點樣組合唔同工具，打造最適合你嘅自動化系統。' },
                 { question: '90 分鐘夠唔夠？', answer: '對於入門絕對夠！90 分鐘足夠 Jacob 深入了解你嘅需求、分析痛點、同埋設計一條可以立即執行嘅工作流。而且你會得到完整嘅學習資源，可以跟住步驟慢慢實踐。如果需要更深入嘅指導，Jacob 都有後續支援服務。' }
             ]
-        }
+        },
+        'consultation-form': typeof global.aiflowGetDefaultServiceApplicationContent === 'function'
+            ? global.aiflowGetDefaultServiceApplicationContent()
+            : {
+                badge: 'SERVICE APPLICATION',
+                title: '服務<span class="accent">申請</span>表單',
+                subtitle: '讓我們更了解你的情況',
+                highlight: '提交你的需要，我們會盡快與你聯絡。'
+            }
     };
 
     var RESULT_ICON_SVGS = [
@@ -126,6 +134,8 @@
 
     function normalizeConsultationSections(raw) {
         var source = Array.isArray(raw) ? raw : [];
+        var layoutDocId = String(global.__AIFLOWTIME_LAYOUT_DOC || '').trim();
+        var suppressMissingCnShell = layoutDocId === 'ig-consultation';
         var byId = {};
         source.forEach(function(s) {
             if (s && s.id) byId[s.id] = s;
@@ -133,11 +143,18 @@
         var used = {};
         var out = DEFAULT_DEFS.map(function(def, idx) {
             used[def.id] = true;
-            var from = byId[def.id] || {};
+            var fromDoc = byId[def.id];
+            var from = fromDoc || {};
+            var visible;
+            if (suppressMissingCnShell && !fromDoc && def.type !== 'page-background') {
+                visible = false;
+            } else {
+                visible = from.visible !== false;
+            }
             var merged = {
                 id: def.id,
                 type: from.type || def.type,
-                visible: from.visible !== false,
+                visible: visible,
                 order: from.order != null ? from.order : def.order != null ? def.order : idx,
                 content: mergeContent(def.type, from.content || {})
             };
@@ -277,6 +294,14 @@
             case 'cn-faq':
                 applyFaq(el, c);
                 break;
+            case 'consultation-form':
+                if (typeof renderConsultationSection === 'function') {
+                    renderConsultationSection(el, c, {
+                        pageKey: 'consultation',
+                        sectionId: el.getAttribute('data-section-id') || 'consultation-form'
+                    });
+                }
+                break;
             default:
                 break;
         }
@@ -319,6 +344,14 @@
 
         contentSections.forEach(function(sec) {
             var el = mount.querySelector(_sectionElQuery(sec.id));
+            if (!el && sec.type === 'consultation-form') {
+                el = document.createElement('section');
+                el.setAttribute('data-section-id', sec.id);
+                el.setAttribute('data-section-type', sec.type);
+                var footer = mount.querySelector('footer');
+                if (footer) mount.insertBefore(el, footer);
+                else mount.appendChild(el);
+            }
             if (!el) return;
             if (!sec.visible) {
                 el.style.display = 'none';

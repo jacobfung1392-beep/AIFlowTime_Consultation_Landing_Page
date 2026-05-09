@@ -314,8 +314,18 @@ service cloud.firestore {
 
     // Site-wide transactional email headers (Trigger Email extension reads `mail` docs; from/replyTo set client-side from this doc)
     match /siteSettings/{docId} {
-      allow read: if docId == 'emailOutbound';
-      allow write: if docId == 'emailOutbound' && isAdmin();
+      allow read: if docId == 'emailOutbound'
+        || (docId == 'googleCalendar' && isAdmin());
+      allow write: if (docId == 'emailOutbound' && isAdmin())
+        || (docId == 'googleCalendar' && isAdmin());
+    }
+
+    // OAuth + tokens for Google Calendar — Cloud Functions only (Admin SDK bypasses rules).
+    match /adminPrivate/{docId} {
+      allow read, write: if false;
+    }
+    match /calendarOauthPending/{id} {
+      allow read, write: if false;
     }
 
     // Free-material download leads: anyone can create; admin read

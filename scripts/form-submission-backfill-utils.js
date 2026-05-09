@@ -289,6 +289,8 @@ function buildConsultationImport(docId, data, opts) {
       aiTopicsOtherText: data.aiTopicsOtherText,
       additionalInfo: data.additionalInfo,
       whatsappConsent: data.whatsappConsent,
+      customAnswers: data.customAnswers || {},
+      customAnswerLabels: data.customAnswerLabels || {},
     },
   });
   return {

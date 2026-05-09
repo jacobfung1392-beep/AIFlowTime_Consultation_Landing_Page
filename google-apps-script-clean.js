@@ -13,11 +13,66 @@
 // 10. Replace 'YOUR_GOOGLE_SCRIPT_URL' in main.js with your actual URL
 //
 // The script will automatically create a new sheet called "AIFlowTime Leads" in your Google Drive
+//
+// CMS header sync: In Apps Script Project Settings → Script properties, add LAYOUT_EDITOR_SYNC_SECRET
+// (any long random string). The layout editor stores the same value in this browser after first prompt.
+
+/**
+ * Merge row 1 headers on the consultation tab without appending a data row. Requires script property LAYOUT_EDITOR_SYNC_SECRET.
+ */
+function handleAiflowSyncConsultationHeaders_(data) {
+  const props = PropertiesService.getScriptProperties();
+  const expected = props.getProperty('LAYOUT_EDITOR_SYNC_SECRET');
+  if (!expected || String(data.syncSecret || '') !== expected) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: 'Unauthorized. Set script property LAYOUT_EDITOR_SYNC_SECRET to match the layout editor.'
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  const incoming = data.headers;
+  if (!incoming || !incoming.length) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'No headers array' })).setMimeType(ContentService.MimeType.JSON);
+  }
+  const targetSpreadsheetName = 'AIFlowTime 90mins Consultation Form Submissions';
+  let ss;
+  try {
+    ss = SpreadsheetApp.getActiveSpreadsheet();
+  } catch (error) {
+    try {
+      const files = DriveApp.getFilesByName(targetSpreadsheetName);
+      ss = files.hasNext() ? SpreadsheetApp.open(files.next()) : SpreadsheetApp.create(targetSpreadsheetName);
+    } catch (searchError) {
+      ss = SpreadsheetApp.create(targetSpreadsheetName);
+    }
+  }
+  const consultTab = 'IG獲客諮詢';
+  let sheet = ss.getSheetByName(consultTab);
+  if (!sheet) sheet = ss.insertSheet(consultTab);
+  ensureSheetHeaders_(sheet, incoming.slice());
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'success',
+    message: 'Headers merged',
+    count: incoming.length,
+    spreadsheetUrl: ss.getUrl()
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
+/** Leading +, =, -, @ make Sheets treat the cell as a formula → #ERROR!. Prefix with ' to force plain text. */
+function sheetPlainTextCell_(value) {
+  var s = value == null ? '' : String(value);
+  if (!s) return '';
+  var c = s.charAt(0);
+  if (c === '+' || c === '=' || c === '-' || c === '@') return "'" + s;
+  return s;
+}
 
 function doPost(e) {
   try {
     // Parse the incoming data
     const data = JSON.parse(e.postData.contents);
+    if (data && data.action === 'aiflowSyncConsultationHeaders') {
+      return handleAiflowSyncConsultationHeaders_(data);
+    }
     
     // OPTION 1: Use a specific spreadsheet by ID (most reliable)
     // To get your spreadsheet ID: Open your Google Sheet, look at the URL
@@ -53,7 +108,7 @@ function doPost(e) {
     }
     
     // Determine which form type this is
-    const isConsultationForm = data.phone && (data.aiGoal || data.currentProblem);
+    const isConsultationForm = data.formType === 'consultation' || (data.phone && (data.aiGoal || data.currentProblem));
     const isEmailForm = data.name && data.whatsapp && !data.phone;
     
     let sheet;
@@ -64,18 +119,7 @@ function doPost(e) {
       sheetName = 'IG獲客諮詢';
       sheet = ss.getSheetByName(sheetName);
       
-      if (!sheet) {
-        sheet = ss.insertSheet(sheetName);
-        // Add headers for consultation form
-        sheet.appendRow([
-          'Timestamp', 'Name', 'Phone', 'Email', 'IG Account', 'AI Skill Level', 'AI Goal (90 days)', 
-          'Current AI Tools', 'Current AI Tools Other', 'Success Outcome', 'Current Problem', 
-          'Start Timing', 'Willingness to Pay', 'Why Now', 
-          'Workshop Interest', 'AI Topics', 'AI Topics Other', 'Additional Info', 
-          'Page', 'Submission Date'
-        ]);
-        sheet.getRange(1, 1, 1, 20).setFontWeight('bold');
-      }
+      if (!sheet) sheet = ss.insertSheet(sheetName);
       
       // Format timestamp for Hong Kong timezone
       const timestamp = new Date(data.timestamp);
@@ -85,29 +129,59 @@ function doPost(e) {
       const aiTopicsStr = Array.isArray(data.aiTopics) ? data.aiTopics.join(', ') : (data.aiTopics || '');
       const currentAIToolsStr = Array.isArray(data.currentAITools) ? data.currentAITools.join(', ') : (data.currentAITools || '');
       
-      // Append consultation form data (using HKT for timestamp)
-      sheet.appendRow([
-        hkTime,
-        data.name || '',
-        data.phone || '',
-        data.email || '',
-        data.igAccount || '',
-        data.aiSkillLevel || '',
-        data.aiGoal || '',
-        currentAIToolsStr,
-        data.currentAIToolsOtherText || '',
-        data.successOutcome || '',
-        data.currentProblem || '',
-        data.startTiming || '',
-        data.willingnessToPay || '',
-        data.whyNow || '',
-        data.workshopInterest || '',
-        aiTopicsStr,
-        data.aiTopicsOtherText || '',
-        data.additionalInfo || '',
-        data.page || 'IG獲客諮詢表單',
-        hkTime
-      ]);
+      const consultationValues = {
+        'Timestamp': hkTime,
+        'Name': data.name || '',
+        'Phone': sheetPlainTextCell_(data.phone),
+        'Email': data.email || '',
+        'IG Account': sheetPlainTextCell_(data.igAccount),
+        'AI Skill Level': data.aiSkillLevel || '',
+        'AI Goal (90 days)': data.aiGoal || '',
+        'Current AI Tools': currentAIToolsStr,
+        'Current AI Tools Other': data.currentAIToolsOtherText || '',
+        'Success Outcome': data.successOutcome || '',
+        'Current Problem': data.currentProblem || '',
+        'Start Timing': data.startTiming || '',
+        'Willingness to Pay': data.willingnessToPay || '',
+        'Why Now': data.whyNow || '',
+        'Workshop Interest': data.workshopInterest || '',
+        'AI Topics': aiTopicsStr,
+        'AI Topics Other': data.aiTopicsOtherText || '',
+        'Additional Info': data.additionalInfo || '',
+        'Page': data.page || 'IG獲客諮詢表單',
+        'Submission Date': hkTime
+      };
+      const consultationHeaders = [
+        'Timestamp', 'Name', 'Phone', 'Email', 'IG Account', 'AI Skill Level', 'AI Goal (90 days)',
+        'Current AI Tools', 'Current AI Tools Other', 'Success Outcome', 'Current Problem',
+        'Start Timing', 'Willingness to Pay', 'Why Now',
+        'Workshop Interest', 'AI Topics', 'AI Topics Other', 'Additional Info',
+        'Page', 'Submission Date'
+      ];
+      const customAnswers = data.customAnswers || {};
+      const customLabels = data.customAnswerLabels || {};
+      Object.keys(customAnswers).forEach(function(key) {
+        const label = customLabels[key] || key;
+        const header = 'Custom: ' + label + ' [' + key + ']';
+        consultationHeaders.push(header);
+        consultationValues[header] = Array.isArray(customAnswers[key]) ? customAnswers[key].join(', ') : (customAnswers[key] || '');
+      });
+
+      const customJsonCol = 'Custom answers (JSON)';
+      consultationHeaders.push(customJsonCol);
+      try {
+        consultationValues[customJsonCol] = JSON.stringify({
+          answers: customAnswers,
+          labels: customLabels
+        });
+      } catch (jsonErr) {
+        consultationValues[customJsonCol] = '';
+      }
+
+      const finalHeaders = ensureSheetHeaders_(sheet, consultationHeaders);
+      sheet.appendRow(finalHeaders.map(function(header) {
+        return consultationValues[header] || '';
+      }));
       
     } else if (isEmailForm) {
       // Email/WhatsApp Form
@@ -129,7 +203,7 @@ function doPost(e) {
       sheet.appendRow([
         hkTime,
         data.name,
-        data.whatsapp,
+        sheetPlainTextCell_(data.whatsapp),
         data.page,
         hkTime
       ]);
@@ -196,5 +270,26 @@ function testDoPost() {
   
   const result = doPost(testData);
   Logger.log(result.getContent());
+}
+
+function ensureSheetHeaders_(sheet, requiredHeaders) {
+  const lastColumn = Math.max(sheet.getLastColumn(), 1);
+  let existingHeaders = [];
+  if (sheet.getLastRow() > 0) {
+    existingHeaders = sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(function(value) {
+      return String(value || '').trim();
+    });
+  }
+  if (!existingHeaders.filter(Boolean).length) {
+    sheet.getRange(1, 1, 1, requiredHeaders.length).setValues([requiredHeaders]);
+    sheet.getRange(1, 1, 1, requiredHeaders.length).setFontWeight('bold');
+    return requiredHeaders.slice();
+  }
+  requiredHeaders.forEach(function(header) {
+    if (existingHeaders.indexOf(header) < 0) existingHeaders.push(header);
+  });
+  sheet.getRange(1, 1, 1, existingHeaders.length).setValues([existingHeaders]);
+  sheet.getRange(1, 1, 1, existingHeaders.length).setFontWeight('bold');
+  return existingHeaders;
 }
 

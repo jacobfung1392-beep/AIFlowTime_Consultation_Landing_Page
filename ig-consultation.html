@@ -4,10 +4,11 @@
     <!-- Google Analytics 4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F7WMPCPC92"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-F7WMPCPC92');</script>
+    <script>window.__AIFLOWTIME_LAYOUT_DOC = 'ig-consultation';</script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <title>AI一對一諮詢 - AIFlowTime</title>
-    <meta name="description" content="預約 AIFlowTime Jacob 1對1諮詢，90分鐘定位問題，設計初步可用AI流程清單">
+    <meta name="description" content="預約 AIFlowTime Jacob 1對1諮詢，90分鐘定位問題，設計初步可用AI流程清單。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -27,6 +28,10 @@
             --text-muted: rgba(240,237,232,0.3);
             --white: #ffffff;
             --radius: 16px;
+            --green: #10B981;
+            --green-dim: rgba(16,185,129,0.15);
+            --purple: #8B5CF6;
+            --purple-dim: rgba(139,92,246,0.15);
         }
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,6 +45,13 @@
             font-size: 16px;
             overflow-x: hidden;
         }
+        body.layout-pending [data-section-id] {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
 
         #noise-bg {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -133,172 +145,228 @@
             .mobile-menu { display: none; }
         }
 
-        /* ---- Form Layout ---- */
-        .form-container {
-            max-width: 720px; margin: 0 auto;
-            padding: 120px 20px 60px;
+        /* ---- Sections ---- */
+        .section { max-width: 56rem; margin: 0 auto; padding: 0 20px; }
+        .section-title {
+            font-size: 2rem; font-weight: 700; text-align: center;
+            margin-bottom: 12px; color: var(--text);
+        }
+        .section-sub {
+            font-size: 1.1rem; color: var(--text-dim); text-align: center;
+            margin-bottom: 48px; line-height: 1.8;
         }
 
-        .form-header {
-            text-align: center; margin-bottom: 48px;
+        /* ---- Hero ---- */
+        .hero {
+            padding: 140px 20px 80px; text-align: center;
+            max-width: 56rem; margin: 0 auto;
         }
-        .form-header-badge {
+        .hero-badge {
             display: inline-block; background: var(--accent-dim); color: var(--accent);
             font-size: 13px; font-weight: 700; padding: 6px 18px; border-radius: 20px;
-            letter-spacing: 1px; margin-bottom: 20px;
+            letter-spacing: 1px; margin-bottom: 24px;
             font-family: 'Courier Prime', monospace;
         }
-        .form-header h1 {
-            font-size: 2.4rem; font-weight: 700; color: var(--text);
-            line-height: 1.3; margin-bottom: 12px;
+        .hero-pre {
+            font-size: 1.1rem; color: var(--text-dim); margin-bottom: 12px;
         }
-        .form-header h1 .accent { color: var(--accent); }
-        .form-header p {
-            font-size: 1.1rem; color: var(--text-dim); line-height: 1.8;
+        .hero-pre .hl { color: var(--accent); font-weight: 600; }
+        .hero h1 {
+            font-size: 2.8rem; font-weight: 700; line-height: 1.25;
+            margin-bottom: 24px; color: var(--text);
         }
-        .form-header .highlight {
-            color: var(--accent); font-weight: 600;
-        }
-
-        /* ---- Card Sections ---- */
-        .form-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+        .hero h1 .accent { color: var(--accent); }
+        .hero-img {
+            display: block;
+            width: 100%;
+            max-width: 420px;
+            max-height: 400px;
+            height: auto;
+            margin: 0 auto 32px;
             border-radius: var(--radius);
-            padding: 32px 28px;
-            margin-bottom: 24px;
-            transition: border-color 0.3s;
+            object-fit: contain;
+            object-position: center center;
         }
-        .form-card:hover { border-color: var(--border-glow); }
-
-        .form-card h2 {
-            font-size: 1.15rem; font-weight: 700; color: var(--accent);
-            margin-bottom: 24px; padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-            font-family: 'Courier Prime', monospace;
-            letter-spacing: 0.5px;
+        .hero-desc {
+            font-size: 1.15rem; color: var(--text-dim); max-width: 600px;
+            margin: 0 auto 36px; line-height: 1.8;
         }
 
-        .form-group { margin-bottom: 20px; }
-        .form-group:last-child { margin-bottom: 0; }
-
-        .form-label {
-            display: block; font-weight: 500; color: var(--text);
-            margin-bottom: 8px; font-size: 0.95rem; line-height: 1.5;
-        }
-        .form-label.required::after { content: " *"; color: var(--accent); }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%; padding: 14px 16px;
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid var(--border);
-            border-radius: 12px; font-size: 1rem;
-            font-family: 'Noto Sans TC', sans-serif;
-            color: var(--text); transition: all 0.2s;
-            -webkit-appearance: none; appearance: none;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none; border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-dim);
-        }
-        .form-input::placeholder, .form-textarea::placeholder {
-            color: var(--text-muted);
-        }
-        .form-select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23D97757' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 14px center;
-            padding-right: 36px; cursor: pointer;
-        }
-        .form-select option { background: var(--bg-card); color: var(--text); }
-        .form-textarea { min-height: 100px; resize: vertical; }
-
-        .form-help-text {
-            font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;
+        @media (max-width: 480px) {
+            .hero { padding: 110px 16px 60px; }
+            .hero h1 { font-size: 2rem; }
         }
 
-        /* ---- Checkbox Grid ---- */
-        .checkbox-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 10px; margin-top: 8px;
-        }
-        @media (max-width: 480px) { .checkbox-grid { grid-template-columns: 1fr; } }
-
-        .checkbox-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px; border-radius: 10px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            cursor: pointer; transition: all 0.2s; font-size: 0.95rem; color: var(--text);
-        }
-        .checkbox-item:hover { border-color: var(--accent-dim); background: rgba(217,119,87,0.05); }
-        .checkbox-item:has(input:checked) {
-            border-color: var(--accent); background: var(--accent-dim);
-        }
-        .checkbox-item input[type="checkbox"] {
-            width: 18px; height: 18px; accent-color: var(--accent);
-            flex-shrink: 0; cursor: pointer;
+        @media (max-width: 640px) {
+            .hero,
+            .cta-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero > *:not(.hero-img) {
+                width: 100%;
+            }
+            .cta-section > *:not(.cta-img):not(.glass-cta) {
+                width: 100%;
+            }
+            .hero-img,
+            .cta-img {
+                flex-shrink: 0;
+            }
         }
 
-        .other-topic-wrap { margin-top: 10px; display: none; }
-
-        /* ---- Consent ---- */
-        .consent-row {
-            display: flex; align-items: flex-start; gap: 12px;
-            padding: 16px 20px; border-radius: 12px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            margin-bottom: 24px;
+        /* ---- CTA Section ---- */
+        .cta-section {
+            padding: 80px 20px; text-align: center;
+            max-width: 56rem; margin: 0 auto;
         }
-        .consent-row input[type="checkbox"] {
-            width: 20px; height: 20px; accent-color: var(--accent);
-            flex-shrink: 0; margin-top: 3px; cursor: pointer;
+        .cta-section h2 {
+            font-size: 2rem; font-weight: 700; margin-bottom: 24px;
         }
-        .consent-row span {
-            font-size: 0.9rem; color: var(--text-dim); line-height: 1.6;
-        }
-
-        /* ---- Submit Button ---- */
-        .form-submit {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; height: 56px; padding: 0 32px;
-            background: var(--accent); color: #fff; border: none;
-            border-radius: 14px; font-size: 1.1rem; font-weight: 700;
-            font-family: 'Noto Sans TC', sans-serif;
-            cursor: pointer; transition: all 0.3s;
-            box-shadow: 0 0 24px var(--accent-glow);
-        }
-        .form-submit:hover { transform: translateY(-2px); box-shadow: 0 0 40px var(--accent-glow); }
-        .form-submit:active { transform: translateY(0); }
-        .form-submit:disabled {
-            background: rgba(255,255,255,0.1); color: var(--text-muted);
-            cursor: not-allowed; transform: none; box-shadow: none;
-        }
-
-        /* ---- Success State ---- */
-        .form-success {
-            display: none; text-align: center; padding: 60px 32px;
-            background: var(--bg-card); border: 1px solid var(--border);
+        .cta-img {
+            display: block;
+            width: 100%;
+            max-width: 600px;
+            max-height: 250px;
+            height: auto;
+            margin: 0 auto 28px;
             border-radius: var(--radius);
+            object-fit: contain;
+            object-position: center center;
         }
-        .form-success.show { display: block; }
-        .form-success-icon {
-            width: 72px; height: 72px; margin: 0 auto 24px;
-            background: var(--accent); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; color: #fff;
-            box-shadow: 0 0 30px var(--accent-glow);
+        .cta-text {
+            font-size: 1.1rem; color: var(--text-dim); margin-bottom: 12px;
+            line-height: 1.8; font-weight: 500;
         }
-        .form-success h2 {
-            font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 12px;
+        .cta-sub {
+            font-size: 1.05rem; color: var(--text-muted); margin-bottom: 32px;
         }
-        .form-success p {
-            font-size: 1rem; color: var(--text-dim); margin-bottom: 28px; line-height: 1.7;
-        }
-        .form-success .back-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            height: 48px; padding: 0 28px; background: var(--accent); color: #fff;
-            border-radius: 12px; font-weight: 700; font-size: 15px;
+
+        /* ---- Glass CTA Button ---- */
+        .glass-cta {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            height: 60px; padding: 0 36px;
+            background: rgba(255,255,255,0.06);
+            border: 1.5px solid rgba(255,255,255,0.12);
+            border-radius: 999px; font-size: 1.2rem; font-weight: 700;
             text-decoration: none; transition: all 0.3s;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            position: relative; overflow: hidden;
         }
-        .form-success .back-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px var(--accent-glow); }
+        .glass-cta-text {
+            background: linear-gradient(90deg, #FFD700 0%, #FFA500 25%, #FFD700 50%, #FFA500 75%, #FFD700 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shinyGold 3s ease-in-out infinite;
+        }
+        @keyframes shinyGold {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .glass-cta:hover {
+            border-color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(217,119,87,0.2);
+        }
+
+        /* ---- Timeline ---- */
+        .timeline-section {
+            padding: 80px 20px; max-width: 48rem; margin: 0 auto;
+        }
+        .timeline-item {
+            position: relative; padding-left: 44px; margin-bottom: 40px;
+        }
+        .timeline-item::before {
+            content: ''; position: absolute; left: 0; top: 8px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--accent); border: 3px solid var(--bg);
+            box-shadow: 0 0 0 2px var(--accent), 0 0 12px var(--accent-glow);
+        }
+        .timeline-item::after {
+            content: ''; position: absolute; left: 7px; top: 28px;
+            width: 2px; height: calc(100% - 12px);
+            background: var(--border);
+        }
+        .timeline-item:last-child::after { display: none; }
+
+        .timeline-item h3 {
+            font-size: 1.15rem; font-weight: 700; margin-bottom: 10px;
+            color: var(--text);
+        }
+        .timeline-item p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.8; }
+
+        .tl-highlight {
+            padding: 14px 18px; border-radius: 12px; margin-top: 14px;
+            font-size: 0.9rem; font-weight: 600;
+        }
+        .tl-highlight.orange { background: var(--accent-dim); color: var(--accent); }
+        .tl-highlight.purple { background: var(--purple-dim); color: var(--purple); }
+
+        /* ---- Deliverables Grid ---- */
+        .del-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 14px; margin-top: 16px;
+        }
+        @media (max-width: 640px) { .del-grid { grid-template-columns: 1fr; } }
+
+        .del-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px; transition: all 0.3s;
+        }
+        .del-card:hover { border-color: var(--border-glow); transform: translateY(-2px); }
+        .del-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+        .del-card p { font-size: 0.85rem; color: var(--text-dim); }
+
+        /* ---- Result Card ---- */
+        .result-card {
+            background: var(--bg-card); border: 1px solid rgba(16,185,129,0.2);
+            border-radius: var(--radius); padding: 32px 28px; margin-top: 16px;
+        }
+        .result-card h4 {
+            font-size: 1.1rem; font-weight: 700; color: var(--green);
+            margin-bottom: 12px;
+        }
+        .result-card p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.8; margin-bottom: 12px; }
+        .result-card .bold-line { color: var(--green); font-weight: 600; }
+
+        .result-icons {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 16px; margin-top: 20px;
+        }
+        @media (max-width: 480px) { .result-icons { grid-template-columns: 1fr; } }
+        .result-icon-item { text-align: center; }
+        .result-icon-circle {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: var(--green); display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 8px; box-shadow: 0 0 16px rgba(16,185,129,0.3);
+        }
+        .result-icon-circle svg { width: 22px; height: 22px; color: #fff; }
+        .result-icon-item p { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+        /* ---- FAQ ---- */
+        .faq-section {
+            padding: 80px 20px; max-width: 48rem; margin: 0 auto;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+        }
+        .faq-question {
+            cursor: pointer; padding: 20px 0; display: flex;
+            justify-content: space-between; align-items: center;
+            font-weight: 600; font-size: 1rem; color: var(--text);
+        }
+        .faq-question:hover { color: var(--accent); }
+        .faq-answer {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: var(--text-dim); font-size: 0.95rem; line-height: 1.8;
+        }
+        .faq-answer.open { max-height: 300px; padding-bottom: 20px; }
+        .faq-icon { transition: transform 0.3s; color: var(--text-muted); flex-shrink: 0; }
+        .faq-icon.open { transform: rotate(180deg); color: var(--accent); }
 
         /* ---- Footer ---- */
         footer {
@@ -309,15 +377,15 @@
         footer a { color: var(--text-dim); text-decoration: none; transition: color 0.3s; }
         footer a:hover { color: var(--accent); }
 
-        /* ---- Responsive ---- */
-        @media (max-width: 480px) {
-            .form-header h1 { font-size: 1.8rem; }
-            .form-card { padding: 24px 20px; }
-            .form-container { padding: 100px 16px 40px; }
+        /* ---- Fade In ---- */
+        .fade-in {
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body>
+<body class="layout-pending">
     <!-- Noise Background -->
     <div id="noise-bg">
         <div class="radial-glow"></div>
@@ -329,7 +397,7 @@
     <!-- Header -->
     <header>
         <div class="header-inner">
-            <a href="linktree.html" class="logo">AI<span>FLOW</span>TIME</a>
+            <a href="/linktree" class="logo">AI<span>FLOW</span>TIME</a>
             <nav class="nav-desktop">
                 <a href="/ai-beginner-workshop#workshops">工作坊</a>
                 <a href="/about-jacob">About Jacob</a>
@@ -350,179 +418,38 @@
         </nav>
     </header>
 
-    <!-- Form Section -->
-    <div class="form-container">
+    <!-- Hero (content from Firestore / layout editor) -->
+    <div class="hero fade-in" data-section-id="cn-hero" data-section-type="cn-hero">
+        <div class="hero-badge"></div>
+        <p class="hero-pre"></p>
+        <h1></h1>
+        <img src="" alt="" class="hero-img" width="600" height="400" loading="eager">
+        <p class="hero-desc"></p>
+    </div>
 
-        <!-- Header -->
-        <div class="form-header">
-            <div class="form-header-badge">1-ON-1 CONSULTATION</div>
-            <h1>AI<span class="accent">一對一</span>諮詢</h1>
-            <p>讓 Jacob 更了解你的情況</p>
-            <p class="highlight" style="margin-top:8px;">90 分鐘定位問題，設計初步可用 AI 流程清單</p>
-        </div>
+    <!-- CTA Section -->
+    <div class="cta-section fade-in" data-section-id="cn-cta" data-section-type="cn-cta">
+        <h2></h2>
+        <img src="" alt="" class="cta-img" width="800" height="250" loading="eager">
+        <p class="cta-text"></p>
+        <p class="cta-sub"></p>
+        <a href="#" class="glass-cta">
+            <span class="glass-cta-text"></span>
+        </a>
+    </div>
 
-        <!-- Success Message -->
-        <div id="formSuccess" class="form-success">
-            <div class="form-success-icon">✓</div>
-            <h2>提交成功！</h2>
-            <p>我們已收到你的資料，會盡快與你聯絡安排諮詢時間。</p>
-            <a href="linktree.html" class="back-btn">返回首頁 →</a>
-        </div>
+    <!-- Consultation Process -->
+    <div class="timeline-section" data-section-id="cn-process" data-section-type="cn-process">
+        <h2 class="section-title fade-in"></h2>
+        <p class="section-sub fade-in"></p>
+        <div class="cn-process-mount"></div>
+    </div>
 
-        <!-- Form -->
-        <form id="consultationForm" onsubmit="handleConsultationSubmit(event)">
-
-            <!-- Section 1: Basic Info -->
-            <div class="form-card">
-                <h2>// 基本資料</h2>
-
-                <div class="form-group">
-                    <label for="name" class="form-label required">姓名</label>
-                    <input type="text" id="name" name="name" class="form-input" placeholder="請輸入你的姓名" required minlength="2">
-                </div>
-
-                <div class="form-group">
-                    <label for="phone" class="form-label required">電話號碼</label>
-                    <input type="tel" id="phone" name="phone" class="form-input" placeholder="+852 xxxx xxxx" required pattern="[\+]?[0-9\s\-]+">
-                </div>
-
-                <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="igAccount" class="form-label">你的 IG 帳號？</label>
-                    <input type="text" id="igAccount" name="igAccount" class="form-input" placeholder="@your_instagram">
-                    <p class="form-help-text">請輸入你的 Instagram 帳號（包含 @）</p>
-                </div>
-            </div>
-
-            <!-- Section 2: AI Survey -->
-            <div class="form-card">
-                <h2>// AI 應用調查</h2>
-
-                <div class="form-group">
-                    <label for="aiSkillLevel" class="form-label required">你會怎樣形容自己在AI應用方面的能力？</label>
-                    <select id="aiSkillLevel" name="aiSkillLevel" class="form-select" required>
-                        <option value="">請選擇</option>
-                        <option value="從未接觸">從未接觸</option>
-                        <option value="新手">新手</option>
-                        <option value="進階">進階</option>
-                        <option value="專家">專家</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="aiGoal" class="form-label required">你希望在接下來 90 天，透過 AI 最想達成哪一個具體成果？</label>
-                    <textarea id="aiGoal" name="aiGoal" class="form-textarea" placeholder="例如：每週省下 5 小時重複工作、每月多產出 8 條內容等" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">目前你在工作或創業中，已經有在用哪些 AI 工具？（可多選）</label>
-                    <div class="checkbox-grid" role="group" aria-label="AI tools">
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="ChatGPT"> ChatGPT</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Claude"> Claude</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Gemini"> Gemini</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Notion AI"> Notion AI</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Zapier"> Zapier</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Make"> Make</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="n8n"> n8n</label>
-                        <label class="checkbox-item"><input type="checkbox" name="currentAITools" value="Kimi"> Kimi</label>
-                        <label class="checkbox-item"><input type="checkbox" id="currentAIToolsOtherCheck" name="currentAITools" value="其他"> 其他</label>
-                    </div>
-                    <div class="other-topic-wrap" id="currentAIToolsOtherWrap">
-                        <input type="text" id="currentAIToolsOtherText" name="currentAIToolsOtherText" class="form-input" placeholder="請輸入其他 AI 工具...">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="successOutcome" class="form-label">用一句話形容：如果這次 1 on 1 諮詢很成功，結束後你希望自己「多了哪一種能力」或「少了哪一種困擾」？</label>
-                    <textarea id="successOutcome" name="successOutcome" class="form-textarea" placeholder="請用一句話描述..."></textarea>
-                </div>
-            </div>
-
-            <!-- Section 3: Needs & Willingness -->
-            <div class="form-card">
-                <h2>// 需求與意願</h2>
-
-                <div class="form-group">
-                    <label for="currentProblem" class="form-label required">你目前最想解決的問題是什麼？</label>
-                    <textarea id="currentProblem" name="currentProblem" class="form-textarea" placeholder="請詳細描述你目前遇到的問題..." required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="startTiming" class="form-label required">如果我們可以解決你的問題，你希望多快開始進行？</label>
-                    <select id="startTiming" name="startTiming" class="form-select" required>
-                        <option value="">請選擇</option>
-                        <option value="立即開始">立即開始</option>
-                        <option value="1週內">1週內</option>
-                        <option value="2-4週內">2-4週內</option>
-                        <option value="1-3個月內">1-3個月內</option>
-                        <option value="3個月以上">3個月以上</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="willingnessToPay" class="form-label required">這個問題，你願意花錢解決嗎？</label>
-                    <select id="willingnessToPay" name="willingnessToPay" class="form-select" required>
-                        <option value="">請選擇</option>
-                        <option value="非常願意">非常願意</option>
-                        <option value="願意">願意</option>
-                        <option value="考慮中">考慮中</option>
-                        <option value="不太願意">不太願意</option>
-                        <option value="不願意">不願意</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="whyNow" class="form-label">你現在為什麼會想找我們解決問題？是什麼讓你覺得現在就是時機？</label>
-                    <textarea id="whyNow" name="whyNow" class="form-textarea" placeholder="請分享你的想法..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="workshopInterest" class="form-label">你會唔會有興趣參加未來嘅 AI 付費工作坊？</label>
-                    <select id="workshopInterest" name="workshopInterest" class="form-select">
-                        <option value="">請選擇</option>
-                        <option value="有興趣">有興趣</option>
-                        <option value="可能會">可能會</option>
-                        <option value="暫時冇興趣">暫時冇興趣</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">你對邊啲 AI 主題比較有興趣？（可多選）</label>
-                    <div class="checkbox-grid" role="group" aria-label="AI topics">
-                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="內容／文案生成"> 內容／文案生成</label>
-                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="社交媒體內容流程"> 社交媒體內容流程</label>
-                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="工作流自動化（n8n／Zapier／Make）"> 工作流自動化</label>
-                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="簡報／報告／文件整理"> 簡報／報告／文件整理</label>
-                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="客服／銷售"> 客服／銷售</label>
-                        <label class="checkbox-item"><input type="checkbox" name="aiTopics" value="資料整理／分析"> 資料整理／分析</label>
-                        <label class="checkbox-item"><input type="checkbox" id="aiTopicOtherCheck" name="aiTopics" value="其他"> 其他</label>
-                    </div>
-                    <div class="other-topic-wrap" id="aiTopicsOtherWrap">
-                        <input type="text" id="aiTopicsOtherText" name="aiTopicsOtherText" class="form-input" placeholder="請輸入其他主題...">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="additionalInfo" class="form-label">有沒有什麼想讓我們提前知道的？</label>
-                    <textarea id="additionalInfo" name="additionalInfo" class="form-textarea" placeholder="任何額外的資訊、問題或需求..."></textarea>
-                </div>
-            </div>
-
-            <!-- Consent -->
-            <label class="consent-row">
-                <input type="checkbox" id="whatsappConsent" name="whatsappConsent" required>
-                <span>我同意在提交此表單後，透過 WhatsApp 接收由 AIFlowTime 提供的自動化 AI 回覆與相關服務資訊（包括諮詢安排與後續聯絡）。</span>
-            </label>
-
-            <!-- Submit -->
-            <button type="submit" class="form-submit" id="submitButton">
-                提交申請 →
-            </button>
-        </form>
+    <!-- FAQ -->
+    <div class="faq-section" data-section-id="cn-faq" data-section-type="cn-faq">
+        <h2 class="section-title fade-in"></h2>
+        <p class="section-sub fade-in"></p>
+        <div class="cn-faq-mount"></div>
     </div>
 
     <!-- Footer -->
@@ -537,148 +464,42 @@
 
     </div><!-- end .page-content -->
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=2"></script>
+    <script src="/js/shared-utils.js?v=31"></script>
+    <script src="/js/page-background-runtime.js"></script>
+    <script src="/js/consultation-layout-runtime.js?v=30"></script>
     <script>
         // toggleMobileMenu and closeMobileMenu loaded from /js/shared-utils.js
 
-        // Form submission
-        function handleConsultationSubmit(event) {
-            event.preventDefault();
-
-            var submitButton = document.getElementById('submitButton');
-            var form = document.getElementById('consultationForm');
-            var successMessage = document.getElementById('formSuccess');
-
-            submitButton.disabled = true;
-            submitButton.textContent = '提交中...';
-
-            var formData = {
-                name: document.getElementById('name').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                igAccount: document.getElementById('igAccount').value.trim(),
-                aiSkillLevel: document.getElementById('aiSkillLevel').value,
-                aiGoal: document.getElementById('aiGoal').value.trim(),
-                currentAITools: Array.from(document.querySelectorAll('input[name="currentAITools"]:checked')).map(function(el) { return el.value; }),
-                currentAIToolsOtherText: (document.getElementById('currentAIToolsOtherText').value || '').trim(),
-                successOutcome: document.getElementById('successOutcome').value.trim(),
-                currentProblem: document.getElementById('currentProblem').value.trim(),
-                startTiming: document.getElementById('startTiming').value,
-                willingnessToPay: document.getElementById('willingnessToPay').value,
-                whyNow: document.getElementById('whyNow').value.trim(),
-                workshopInterest: (document.getElementById('workshopInterest').value || ''),
-                aiTopics: Array.from(document.querySelectorAll('input[name="aiTopics"]:checked')).map(function(el) { return el.value; }),
-                aiTopicsOtherText: (document.getElementById('aiTopicsOtherText').value || '').trim(),
-                additionalInfo: document.getElementById('additionalInfo').value.trim(),
-                whatsappConsent: document.getElementById('whatsappConsent').checked ? '是' : '否',
-                timestamp: new Date().toISOString(),
-                page: 'IG獲客諮詢表單'
-            };
-
-            initFirebase(function(app) {
-                var db = app.firestore();
-                var consultRef = db.collection('consultations').doc();
-                var fsData = Object.assign({}, formData, {
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    status: 'new'
-                });
-                var mirrorPromise = typeof saveFormSubmissionMirror === 'function'
-                    ? saveFormSubmissionMirror({
-                        formType: 'consultation',
-                        sourceKey: 'ig-consultation',
-                        sourceLabel: 'AI 諮詢申請',
-                        sourcePage: formData.page,
-                        sourcePath: window.location.pathname,
-                        sourceUrl: window.location.href,
-                        sourceCollection: 'consultations',
-                        sourceDocId: consultRef.id,
-                        sheetTab: '1 on 1 Consultation',
-                        contactName: formData.name,
-                        phone: formData.phone,
-                        email: formData.email,
-                        instagram: formData.igAccount,
-                        answers: {
-                            aiSkillLevel: formData.aiSkillLevel,
-                            aiGoal: formData.aiGoal,
-                            currentAITools: formData.currentAITools,
-                            currentAIToolsOtherText: formData.currentAIToolsOtherText,
-                            successOutcome: formData.successOutcome,
-                            currentProblem: formData.currentProblem,
-                            startTiming: formData.startTiming,
-                            willingnessToPay: formData.willingnessToPay,
-                            whyNow: formData.whyNow,
-                            workshopInterest: formData.workshopInterest,
-                            aiTopics: formData.aiTopics,
-                            aiTopicsOtherText: formData.aiTopicsOtherText,
-                            additionalInfo: formData.additionalInfo,
-                            whatsappConsent: formData.whatsappConsent
-                        },
-                        timestamp: formData.timestamp
-                    }, { db: db }).catch(function(err) {
-                        console.error('Form submission mirror failed:', err);
-                    })
-                    : Promise.resolve();
-                Promise.all([
-                    consultRef.set(fsData),
-                    mirrorPromise
-                ]).then(function() {
-                    console.log('Consultation saved to Firestore');
-                }).catch(function(err) {
-                    console.error('Firestore write failed:', err);
-                });
-            });
-
-            var googleScriptURL = 'https://script.google.com/macros/s/AKfycbxE8KP5ohNSbHIFOWxl-JoWgu9_my8N8ofkTEXaeU0b7QB6K-s3qx4KE-5bOz7Qj4_miQ/exec';
-
-            fetch(googleScriptURL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            }).then(function() {
-                console.log('Consultation form data sent to Google Sheet');
-            }).catch(function(error) {
-                console.error('Error sending to Google Sheet:', error);
-            });
-
-            var submissions = JSON.parse(localStorage.getItem('aiflowtime_consultations') || '[]');
-            submissions.push(formData);
-            localStorage.setItem('aiflowtime_consultations', JSON.stringify(submissions));
-
-            form.style.display = 'none';
-            successMessage.classList.add('show');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        // FAQ toggle
+        function toggleFAQ(el) {
+            var answer = el.nextElementSibling;
+            var icon = el.querySelector('.faq-icon');
+            if (answer.classList.contains('open')) {
+                answer.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                document.querySelectorAll('.faq-answer.open').forEach(function(a) { a.classList.remove('open'); });
+                document.querySelectorAll('.faq-icon.open').forEach(function(i) { i.classList.remove('open'); });
+                answer.classList.add('open');
+                icon.classList.add('open');
+            }
         }
 
-        // "Other" checkbox toggles
+        // Fade-in observer
         document.addEventListener('DOMContentLoaded', function() {
-            // AI Topics "Other"
-            var otherCheck = document.getElementById('aiTopicOtherCheck');
-            var otherWrap = document.getElementById('aiTopicsOtherWrap');
-            var otherText = document.getElementById('aiTopicsOtherText');
-            if (otherCheck && otherWrap && otherText) {
-                function syncOther() {
-                    otherWrap.style.display = otherCheck.checked ? 'block' : 'none';
-                    if (!otherCheck.checked) otherText.value = '';
-                }
-                otherCheck.addEventListener('change', syncOther);
-                syncOther();
-            }
-
-            // AI Tools "Other"
-            var toolsOtherCheck = document.getElementById('currentAIToolsOtherCheck');
-            var toolsOtherWrap = document.getElementById('currentAIToolsOtherWrap');
-            var toolsOtherText = document.getElementById('currentAIToolsOtherText');
-            if (toolsOtherCheck && toolsOtherWrap && toolsOtherText) {
-                function syncToolsOther() {
-                    toolsOtherWrap.style.display = toolsOtherCheck.checked ? 'block' : 'none';
-                    if (!toolsOtherCheck.checked) toolsOtherText.value = '';
-                }
-                toolsOtherCheck.addEventListener('change', syncToolsOther);
-                syncToolsOther();
+            var els = document.querySelectorAll('.fade-in');
+            if ('IntersectionObserver' in window) {
+                var obs = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(e) {
+                        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+                    });
+                }, { threshold: 0.1 });
+                els.forEach(function(el) { obs.observe(el); });
+            } else {
+                els.forEach(function(el) { el.classList.add('visible'); });
             }
         });
 
@@ -690,10 +511,7 @@
             if (!ctx) return;
             var frame = 0, animId, REFRESH = 2, ALPHA = 18, SIZE = 1024;
 
-            function resize() {
-                canvas.width = SIZE;
-                canvas.height = SIZE;
-            }
+            function resize() { canvas.width = SIZE; canvas.height = SIZE; }
 
             function drawNoise() {
                 frame++;
@@ -702,7 +520,7 @@
                 var data = imageData.data;
                 for (var i = 0; i < data.length; i += 4) {
                     var v = Math.random() * 255;
-                    data[i] = v; data[i + 1] = v; data[i + 2] = v; data[i + 3] = ALPHA;
+                    data[i] = v; data[i+1] = v; data[i+2] = v; data[i+3] = ALPHA;
                 }
                 ctx.putImageData(imageData, 0, 0);
                 animId = requestAnimationFrame(drawNoise);
@@ -711,6 +529,78 @@
             resize();
             drawNoise();
             window.addEventListener('resize', resize);
+        })();
+
+        (function() {
+            var query = new URLSearchParams(window.location.search);
+            var isPreview = query.get('preview') === '1';
+            var layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || query.get('layoutDoc') || 'ig-consultation';
+            var layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
+                ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
+                : { finish: function() { if (document.body) document.body.classList.remove('layout-pending'); } };
+
+            function applyConsultationLayout(sections) {
+                if (typeof applyConsultationPageLayout === 'function') {
+                    applyConsultationPageLayout(sections || [], { wrapperId: 'consultation-page-bg' });
+                } else if (typeof syncPageBackgroundFromSections === 'function') {
+                    syncPageBackgroundFromSections(sections || [], { wrapperId: 'consultation-page-bg' });
+                    if (typeof consultationUpdateNoiseLayer === 'function') consultationUpdateNoiseLayer();
+                }
+            }
+
+            function finishInitialLayoutRender() {
+                layoutPendingController.finish();
+            }
+
+            if (isPreview && typeof initLayoutPreviewBridge === 'function') {
+                initLayoutPreviewBridge({
+                    onLayoutPreview: function(sections) {
+                        applyConsultationLayout(sections || []);
+                        finishInitialLayoutRender();
+                    }
+                });
+            }
+
+            if (typeof initFirebase !== 'function' || typeof firebase === 'undefined' || !firebase.firestore) {
+                applyConsultationLayout([]);
+                finishInitialLayoutRender();
+                return;
+            }
+            initFirebase(function() {
+                firebase.firestore().collection('pageLayouts').doc(layoutDocId).get().then(function(doc) {
+                    var data = doc.exists ? (doc.data() || {}) : null;
+                    var sections = data && Array.isArray(data.sections) ? data.sections : [];
+                    function finishFromLayoutPayload(payload) {
+                        if (typeof applyFirestorePageMeta === 'function') {
+                            applyFirestorePageMeta(data, { fallbackTitle: document.title });
+                        }
+                        applyConsultationLayout(payload || []);
+                        finishInitialLayoutRender();
+                    }
+                    if (layoutDocId === 'ig-consultation' && !sections.length) {
+                        firebase.firestore().collection('pageLayouts').doc('consultation').get().then(function(cdoc) {
+                            var cdata = cdoc.exists ? (cdoc.data() || {}) : {};
+                            var csecs = Array.isArray(cdata.sections) ? cdata.sections : [];
+                            var boot = csecs.map(function(s) {
+                                if (!s) return s;
+                                var c = JSON.parse(JSON.stringify(s));
+                                if (c.type === 'cn-hero' || c.type === 'cn-cta' || c.type === 'cn-process' || c.type === 'cn-faq') {
+                                    c.visible = false;
+                                }
+                                return c;
+                            });
+                            finishFromLayoutPayload(boot);
+                        }).catch(function() {
+                            finishFromLayoutPayload([]);
+                        });
+                        return;
+                    }
+                    finishFromLayoutPayload(sections);
+                }).catch(function() {
+                    applyConsultationLayout([]);
+                    finishInitialLayoutRender();
+                });
+            });
         })();
     </script>
 </body>

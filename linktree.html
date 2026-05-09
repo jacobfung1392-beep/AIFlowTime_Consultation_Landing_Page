@@ -86,6 +86,10 @@
             z-index: 0;
             pointer-events: none;
         }
+
+        body.layout-page-bg-active .background-grid-container {
+            display: none !important;
+        }
         
         .day-grid {
             position: absolute;
@@ -2115,14 +2119,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="/js/firebase-init.js"></script>
-    <script src="/js/shared-utils.js?v=10"></script>
+    <script src="/js/shared-utils.js?v=31"></script>
     <script src="/js/page-background-runtime.js"></script>
 
     <!-- Layout Engine (Preview + Public) -->
     <script>
     (function() {
         var _layoutQuery = new URLSearchParams(window.location.search);
-        var _isPreview = _layoutQuery.has('preview');
+        var _isPreview = _layoutQuery.get('preview') === '1';
         var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'linktree';
         if (!_isPreview && document.body) document.body.classList.add('layout-pending');
 
@@ -2179,10 +2183,16 @@
 
         function _ltLooksLikeLegacyCosmicCode(content) {
             var c = content || {};
-            if (String(c.sourceType || '') !== 'code') return false;
-            var code = String(c.code || '');
-            return code.indexOf('id="cosmos"') !== -1 &&
-                code.indexOf('function drawSun(time)') !== -1 &&
+            var sourceType = String(c.sourceType || '').toLowerCase();
+            if (sourceType !== 'code' && sourceType !== 'iframe') return false;
+            var code = [
+                String(c.code || ''),
+                String(c.codeHtml || ''),
+                String(c.codeCss || ''),
+                String(c.codeJs || '')
+            ].join('\n');
+            return code.indexOf('id="cosmos"') !== -1 ||
+                code.indexOf('function drawSun(time)') !== -1 ||
                 code.indexOf('function drawPlanet(planet, time)') !== -1;
         }
 
@@ -2488,6 +2498,34 @@
             if (!raw.trim()) return '';
             if (typeof sanitizeHeroTitleHtml === 'function') return sanitizeHeroTitleHtml(raw);
             return _escHtml(raw).replace(/\n/g, '<br>');
+        }
+        function _applyTextAlign(el, content, fieldName) {
+            if (typeof aiflowApplyTextAlignToElement === 'function') {
+                aiflowApplyTextAlignToElement(el, content, fieldName);
+            }
+        }
+        function _markLayoutEditableText(el, fieldName, opts) {
+            if (!el || !fieldName) return el;
+            opts = opts || {};
+            el.setAttribute('data-layout-field', fieldName);
+            if (opts.arrayName) {
+                el.setAttribute('data-layout-array', opts.arrayName);
+                el.setAttribute('data-layout-index', String(opts.index || 0));
+                el.setAttribute('data-layout-array-field', fieldName);
+            } else {
+                el.removeAttribute('data-layout-array');
+                el.removeAttribute('data-layout-index');
+                el.removeAttribute('data-layout-array-field');
+            }
+            return el;
+        }
+        function _setRichText(el, value, content, fieldName, opts) {
+            if (!el) return '';
+            var html = _richTextHtml(value);
+            el.innerHTML = html;
+            _applyTextAlign(el, content, fieldName);
+            _markLayoutEditableText(el, fieldName, opts);
+            return html;
         }
 
         function _getGooeyWords(value) {
@@ -2892,7 +2930,7 @@
                         el.removeAttribute('style');
                         var container = document.querySelector('.links-container');
                         if (container) container.appendChild(el);
-                    } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download') {
+                    } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download' || sec.type === 'consultation-form') {
                         el = document.createElement('section');
                         el.setAttribute('data-section-id', sec.id);
                         el.setAttribute('data-section-type', sec.type);
@@ -2907,6 +2945,9 @@
                 el.style.opacity = (sec.type === 'lead-magnet') ? '' : '1';
                 el.style.order = order++;
                 applyContent(el, sec, { skipIfBakedHero: skipBakedHeroOnHydrate });
+                if (typeof aiflowApplySectionCropToElement === 'function') {
+                    aiflowApplySectionCropToElement(el, sec.content || {});
+                }
             });
 
             if (matched === 0) {
@@ -2981,6 +3022,16 @@
                         (subtitleHtml ? '<p class="hero-tagline">' + subtitleHtml + '</p>' : '') +
                         (buttons.length ? '<div class="cta-group">' + buttons.join('') + '</div>' : '') +
                         scrollHintHtml;
+                    var heroBadgeEl = el.querySelector('.hero-badge');
+                    if (heroBadgeEl) _setRichText(heroBadgeEl, heroCfg.badge || '', heroCfg, 'badge');
+                    var heroTitleEl = el.querySelector('.hero-title');
+                    if (heroTitleEl) _setRichText(heroTitleEl, heroCfg.title || '', heroCfg, 'title');
+                    var heroSubtitleEl = el.querySelector('.hero-tagline');
+                    if (heroSubtitleEl) _setRichText(heroSubtitleEl, heroCfg.subtitle || '', heroCfg, 'subtitle');
+                    var heroPrimaryBtn = el.querySelector('.cta-group .btn-primary');
+                    if (heroPrimaryBtn) _setRichText(heroPrimaryBtn, heroCfg.ctaText || '', heroCfg, 'ctaText');
+                    var heroSecondaryBtn = el.querySelector('.cta-group .btn-outline');
+                    if (heroSecondaryBtn) _setRichText(heroSecondaryBtn, heroCfg.secondaryCtaText || '', heroCfg, 'secondaryCtaText');
                     break;
 
                 case 'gooey-flow':
@@ -3006,7 +3057,7 @@
                                 el.appendChild(a);
                             });
                         } else {
-                        c.links.forEach(function(lnk) {
+                        c.links.forEach(function(lnk, idx) {
                             var hasLeadMagnet = _linkUsesLeadMagnet(lnk);
                             var rowInner = '<div class="link-text">';
                             rowInner += '<div class="link-title">';
@@ -3047,6 +3098,21 @@
                                 linkRow.href = lnk.url || '#';
                                 if (lnk.url && lnk.url.indexOf('http') === 0) { linkRow.target = '_blank'; linkRow.rel = 'noopener noreferrer'; }
                                 linkRow.innerHTML = rowInner;
+                                var rowLabel = linkRow.querySelector('.link-title-text');
+                                if (rowLabel) {
+                                    _markLayoutEditableText(rowLabel, 'label', { arrayName: 'links', index: idx });
+                                    _applyTextAlign(rowLabel, lnk, 'label');
+                                }
+                                var rowDesc = linkRow.querySelector('.link-description');
+                                if (rowDesc) {
+                                    _markLayoutEditableText(rowDesc, 'description', { arrayName: 'links', index: idx });
+                                    _applyTextAlign(rowDesc, lnk, 'description');
+                                }
+                                var rowBadge = linkRow.querySelector('.link-badge');
+                                if (rowBadge) {
+                                    _markLayoutEditableText(rowBadge, 'badgeText', { arrayName: 'links', index: idx });
+                                    _applyTextAlign(rowBadge, lnk, 'badgeText');
+                                }
                                 card.appendChild(linkRow);
                                 if (hasLeadMagnet) {
                                     function _openLeadMagnet(e) {
@@ -3073,6 +3139,21 @@
                             }
                             inner += '<div class="link-content">' + rowInner + '</div>';
                             a.innerHTML = inner;
+                            var linkLabel = a.querySelector('.link-title-text');
+                            if (linkLabel) {
+                                _markLayoutEditableText(linkLabel, 'label', { arrayName: 'links', index: idx });
+                                _applyTextAlign(linkLabel, lnk, 'label');
+                            }
+                            var linkDesc = a.querySelector('.link-description');
+                            if (linkDesc) {
+                                _markLayoutEditableText(linkDesc, 'description', { arrayName: 'links', index: idx });
+                                _applyTextAlign(linkDesc, lnk, 'description');
+                            }
+                            var linkBadge = a.querySelector('.link-badge');
+                            if (linkBadge) {
+                                _markLayoutEditableText(linkBadge, 'badgeText', { arrayName: 'links', index: idx });
+                                _applyTextAlign(linkBadge, lnk, 'badgeText');
+                            }
                             if (hasLeadMagnet) {
                                 a.addEventListener('click', function(e) {
                                     _openResolvedLinkLeadMagnet(lnk, e);
@@ -3088,10 +3169,10 @@
 
                 case 'section-divider':
                     var titleEl = el.querySelector('.linktree-section-title');
-                    if (titleEl) titleEl.innerHTML = _richTextHtml(c.title || '');
+                    if (titleEl) _setRichText(titleEl, c.title || '', c, 'title');
                     var subEl = el.querySelector('.linktree-section-subtitle');
                     if (subEl) {
-                        if (c.subtitle) { subEl.innerHTML = _richTextHtml(c.subtitle || ''); subEl.style.display = ''; }
+                        if (c.subtitle) { _setRichText(subEl, c.subtitle || '', c, 'subtitle'); subEl.style.display = ''; }
                         else { subEl.style.display = 'none'; }
                     }
                     break;
@@ -3099,7 +3180,7 @@
                 case 'tools-grid':
                     if (c.tools) {
                         el.innerHTML = '';
-                        c.tools.forEach(function(tool) {
+                        c.tools.forEach(function(tool, idx) {
                             var cardMediaRaw = String(tool.cardMediaUrl || '').trim();
                             var hasCardMedia = !!cardMediaRaw;
                             var inner = '';
@@ -3147,6 +3228,21 @@
                                 linkCol.target = '_blank';
                                 linkCol.rel = 'noopener noreferrer';
                                 linkCol.innerHTML = textCol;
+                                var toolNameEl = linkCol.querySelector('.link-title-text');
+                                if (toolNameEl) {
+                                    _markLayoutEditableText(toolNameEl, 'name', { arrayName: 'tools', index: idx });
+                                    _applyTextAlign(toolNameEl, tool, 'name');
+                                }
+                                var toolDescEl = linkCol.querySelector('.link-description');
+                                if (toolDescEl) {
+                                    _markLayoutEditableText(toolDescEl, 'description', { arrayName: 'tools', index: idx });
+                                    _applyTextAlign(toolDescEl, tool, 'description');
+                                }
+                                var toolBadgeEl = linkCol.querySelector('.link-badge');
+                                if (toolBadgeEl) {
+                                    _markLayoutEditableText(toolBadgeEl, 'badgeText', { arrayName: 'tools', index: idx });
+                                    _applyTextAlign(toolBadgeEl, tool, 'badgeText');
+                                }
                                 var mediaCol = document.createElement('div');
                                 mediaCol.className = 'link-tools-grid-media lt-video-wrap';
                                 mediaCol.innerHTML = _ltRenderManagedVideo(_cmFixed, 'lt-managed-video', '', '影片預覽', true);
@@ -3184,6 +3280,21 @@
                             } else {
                                 a.innerHTML = '<div class="link-content"><div class="link-text">' + inner + '</div></div>';
                             }
+                            var toolNameInline = a.querySelector('.link-title-text');
+                            if (toolNameInline) {
+                                _markLayoutEditableText(toolNameInline, 'name', { arrayName: 'tools', index: idx });
+                                _applyTextAlign(toolNameInline, tool, 'name');
+                            }
+                            var toolDescInline = a.querySelector('.link-description');
+                            if (toolDescInline) {
+                                _markLayoutEditableText(toolDescInline, 'description', { arrayName: 'tools', index: idx });
+                                _applyTextAlign(toolDescInline, tool, 'description');
+                            }
+                            var toolBadgeInline = a.querySelector('.link-badge');
+                            if (toolBadgeInline) {
+                                _markLayoutEditableText(toolBadgeInline, 'badgeText', { arrayName: 'tools', index: idx });
+                                _applyTextAlign(toolBadgeInline, tool, 'badgeText');
+                            }
                             el.appendChild(a);
                         });
                     }
@@ -3199,6 +3310,13 @@
                         accentText: '#ffffff',
                         border: 'rgba(255,255,255,0.10)',
                         backdrop: 'rgba(7,10,15,0.74)'
+                    });
+                    break;
+
+                case 'consultation-form':
+                    renderConsultationSection(el, c, {
+                        pageKey: 'linktree',
+                        sectionId: el.getAttribute('data-section-id') || 'consultation-form'
                     });
                     break;
 
@@ -3220,10 +3338,12 @@
                     el.style.justifyContent = ltImgAlign;
                     el.innerHTML = '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 760) + 'px);">' +
                         ltStart +
-                        '<img src="' + ltImg + '" alt="' + ltAlt + '" style="display:block;width:100%;height:auto;max-height:70vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + ltImgShadow + ';">' +
+                        '<img src="' + ltImg + '" alt="' + ltAlt + '" style="display:block;width:100%;height:auto;object-fit:' + (c.objectFit === 'cover' ? 'cover' : 'contain') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + ltImgShadow + ';">' +
                         (ltCap ? '<p style="margin-top:12px;color:rgba(255,255,255,0.62);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + ltCap + '</p>' : '') +
                         ltEnd +
                         '</div>';
+                    var ltCaptionEl = el.querySelector('p');
+                    if (ltCaptionEl && c.caption) _setRichText(ltCaptionEl, c.caption || '', c, 'caption');
                     break;
 
                 case 'text-only':
@@ -3247,6 +3367,26 @@
                         (ltBody ? '<div style="margin-top:14px;color:rgba(255,255,255,0.72);font-size:16px;line-height:1.8;">' + ltBody + '</div>' : '') +
                         (ltBtn ? '<div style="margin-top:22px;"><a href="' + ltBtnLink + '" class="link-item" style="display:inline-flex;padding:0.95rem 1.35rem;">' + _escHtml(ltBtn) + '</a></div>' : '') +
                         '</div>';
+                    var ltTextBox = el.firstElementChild;
+                    if (ltTextBox) {
+                        var textOnlyChildren = Array.prototype.filter.call(ltTextBox.children || [], function(node) {
+                            return node && node.nodeType === 1;
+                        });
+                        var textChildIdx = 0;
+                        if (ltLabel && textOnlyChildren[textChildIdx]) {
+                            _setRichText(textOnlyChildren[textChildIdx], c.sectionLabel || '', c, 'sectionLabel');
+                            textChildIdx += 1;
+                        }
+                        if (ltTitle && textOnlyChildren[textChildIdx]) {
+                            _setRichText(textOnlyChildren[textChildIdx], c.title || '', c, 'title');
+                            textChildIdx += 1;
+                        }
+                        if (ltBody && textOnlyChildren[textChildIdx]) {
+                            _setRichText(textOnlyChildren[textChildIdx], c.body || '', c, 'body');
+                        }
+                    }
+                    var textOnlyBtn = el.querySelector('a.link-item');
+                    if (textOnlyBtn && ltBtn) _setRichText(textOnlyBtn, c.ctaText || '', c, 'ctaText');
                     break;
             }
         }

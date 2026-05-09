@@ -1568,7 +1568,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="/js/firebase-init.js"></script>
-<script src="/js/shared-utils.js?v=10"></script>
+<script src="/js/shared-utils.js?v=31"></script>
 <script src="/js/page-background-runtime.js"></script>
 
 <script>
@@ -1668,7 +1668,7 @@ function toggleFaq(el) {
 // LAYOUT ENGINE (for Layout Editor integration)
 // =============================================
 var _layoutQuery = new URLSearchParams(window.location.search);
-var _isPreviewMode = _layoutQuery.has('preview');
+var _isPreviewMode = _layoutQuery.get('preview') === '1';
 var _layoutDocId = window.__AIFLOWTIME_LAYOUT_DOC || _layoutQuery.get('layoutDoc') || 'workshop-c';
 var _layoutPendingController = typeof aiflowCreateLayoutPendingController === 'function'
     ? aiflowCreateLayoutPendingController({ bodyClass: 'layout-pending', timeoutMs: 6000 })
@@ -1903,13 +1903,13 @@ function applySections(rawSections) {
                 el = template.cloneNode(true);
                 el.setAttribute('data-section-id', sec.id);
                 main.appendChild(el);
-            } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download') {
+            } else if (sec.type === 'image-only' || sec.type === 'text-only' || sec.type === 'free-material-download' || sec.type === 'consultation-form') {
                 el = document.createElement('section');
                 el.setAttribute('data-section-id', sec.id);
                 el.setAttribute('data-section-type', sec.type);
                 el.className = sec.type === 'image-only'
                     ? 'sec-image-only reveal'
-                    : (sec.type === 'text-only' ? 'sec-text-only reveal' : 'sec-free-material reveal');
+                    : (sec.type === 'text-only' ? 'sec-text-only reveal' : (sec.type === 'consultation-form' ? 'sec-consultation-form reveal' : 'sec-free-material reveal'));
                 main.appendChild(el);
             }
         }
@@ -1924,6 +1924,9 @@ function applySections(rawSections) {
         main.appendChild(el);
 
         if (sec.content) applyContentToSection(el, sec.type, sec.content);
+        if (typeof aiflowApplySectionCropToElement === 'function') {
+            aiflowApplySectionCropToElement(el, sec.content || {});
+        }
     });
 
     initScrollReveal('.reveal', { threshold: 0.12 });
@@ -1946,6 +1949,37 @@ function _escHtml(value) {
 function _wcRichHtml(value) {
     if (!value) return '';
     return typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(value) : _escHtml(value);
+}
+
+function _wcApplyTextAlign(el, content, fieldName) {
+    if (typeof aiflowApplyTextAlignToElement === 'function') {
+        aiflowApplyTextAlignToElement(el, content, fieldName);
+    }
+}
+
+function _wcMarkLayoutEditableText(el, fieldName, opts) {
+    if (!el || !fieldName) return el;
+    opts = opts || {};
+    el.setAttribute('data-layout-field', fieldName);
+    if (opts.arrayName) {
+        el.setAttribute('data-layout-array', opts.arrayName);
+        el.setAttribute('data-layout-index', String(opts.index || 0));
+        el.setAttribute('data-layout-array-field', fieldName);
+    } else {
+        el.removeAttribute('data-layout-array');
+        el.removeAttribute('data-layout-index');
+        el.removeAttribute('data-layout-array-field');
+    }
+    return el;
+}
+
+function _wcSetRichText(el, value, content, fieldName, opts) {
+    if (!el) return '';
+    var html = _wcRichHtml(value || '');
+    el.innerHTML = html;
+    _wcApplyTextAlign(el, content, fieldName);
+    _wcMarkLayoutEditableText(el, fieldName, opts);
+    return html;
 }
 
 function _wcMediaUrl(url) {
@@ -2125,24 +2159,24 @@ function applyContentToSection(el, type, c) {
             el.removeAttribute('data-layout-hero-baked');
             window._wcLatestHeroConfig = c || {};
             var h1 = el.querySelector('.hero-title');
-            if (h1) h1.innerHTML = _wcRichHtml(c.title || '');
+            if (h1) _wcSetRichText(h1, c.title || '', c, 'title');
             var sub = el.querySelector('.hero-tagline');
-            if (sub) sub.innerHTML = _wcRichHtml(c.subtitle || '');
+            if (sub) _wcSetRichText(sub, c.subtitle || '', c, 'subtitle');
             var badge = el.querySelector('.hero-badge');
-            if (badge) badge.innerHTML = _wcRichHtml(c.badge || '✦ WORKSHOP C · 視覺升級');
+            if (badge) _wcSetRichText(badge, c.badge || '✦ WORKSHOP C · 視覺升級', c, 'badge');
             var eyebrow = el.querySelector('.hero-subtitle-en');
             if (eyebrow) {
-                eyebrow.innerHTML = _wcRichHtml(c.eyebrowText || 'NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY');
+                _wcSetRichText(eyebrow, c.eyebrowText || 'NEXT-LEVEL VISUAL — COMMERCIAL AI IMAGERY', c, 'eyebrowText');
                 eyebrow.style.display = '';
             }
             var cta = el.querySelector('.btn-primary');
             var heroShimmerEnabled = c.ctaShimmer === true || String(c.ctaShimmer || '').toLowerCase() === 'true';
-            if (cta) cta.innerHTML = _wcRichHtml(c.ctaText || '');
+            if (cta) _wcSetRichText(cta, c.ctaText || '', c, 'ctaText');
             if (cta) cta.href = _wcResolvePaymentLink(c.ctaLink, _wcCurrentWorkshopId());
             if (cta && typeof aiflowSetButtonShimmer === 'function') aiflowSetButtonShimmer(cta, heroShimmerEnabled);
             var ctaSecondary = el.querySelector('.btn-outline');
             if (ctaSecondary) {
-                ctaSecondary.innerHTML = _wcRichHtml(c.secondaryCtaText || '了解內容');
+                _wcSetRichText(ctaSecondary, c.secondaryCtaText || '了解內容', c, 'secondaryCtaText');
                 ctaSecondary.href = c.secondaryCtaLink || '#what-you-learn';
                 ctaSecondary.style.display = 'inline-flex';
             }
@@ -2151,7 +2185,7 @@ function applyContentToSection(el, type, c) {
         case 'video':
             var videoContent = _wcNormalizeVideoContent(c);
             var videoLabel = el.querySelector('.section-label');
-            if (videoLabel) videoLabel.innerHTML = _wcRichHtml(videoContent.sectionLabel);
+            if (videoLabel) _wcSetRichText(videoLabel, videoContent.sectionLabel, c, 'sectionLabel');
             var videoWrap = el.querySelector('.video-wrap');
             if (videoWrap) {
                 videoWrap.innerHTML = videoContent.videoUrl
@@ -2166,36 +2200,45 @@ function applyContentToSection(el, type, c) {
                 videoWrap.insertAdjacentElement('afterend', videoCaption);
             }
             if (videoCaption) {
-                videoCaption.innerHTML = _wcRichHtml(videoContent.caption || '');
+                _wcSetRichText(videoCaption, videoContent.caption || '', c, 'caption');
                 videoCaption.style.display = videoContent.caption ? '' : 'none';
             }
             break;
 
         case 'image-chain':
             var chainContent = _wcNormalizeImageChainContent(c);
+            var chainCardsHtml = chainContent.cards.map(function(card, idx) {
+                var rowClass = idx % 2 === 1 ? 'right' : 'left';
+                var nextConnector = idx < chainContent.cards.length - 1
+                    ? '<div class="chain-v-connector"><svg viewBox="0 0 700 80" preserveAspectRatio="none" aria-hidden="true">' +
+                        '<path d="' + (idx % 2 === 0 ? 'M 180 0 C 180 40, 520 40, 520 80' : 'M 520 0 C 520 40, 180 40, 180 80') + '" stroke="rgba(217,119,87,0.45)" stroke-width="1.5" fill="none" stroke-dasharray="5 5"/>' +
+                    '</svg></div>'
+                    : '';
+                return '<div class="chain-row ' + rowClass + '">' +
+                    '<div class="chain-card">' +
+                        '<img src="' + _escHtml(card.imageUrl) + '" alt="' + _escHtml(card.alt || card.label || 'AI 商業圖像示例') + '" loading="lazy">' +
+                        (card.label ? '<div class="chain-card-label">' + _escHtml(card.label) + '</div>' : '') +
+                    '</div>' +
+                '</div>' + nextConnector;
+            }).join('');
             el.innerHTML = '<div class="container">' +
                 '<div class="chain-intro reveal">' +
                     '<div class="section-label">' + _wcRichHtml(chainContent.sectionLabel) + '</div>' +
                     '<h2 class="section-title">' + _wcRichHtml(chainContent.sectionTitle) + '</h2>' +
                     (chainContent.introText ? '<p style="color:var(--text-dim);font-size:16px;max-width:480px;margin:0 auto;">' + _wcRichHtml(chainContent.introText) + '</p>' : '') +
                 '</div>' +
-                chainContent.cards.map(function(card, idx) {
-                    var rowClass = idx % 2 === 1 ? 'right' : 'left';
-                    return '<div class="chain-row ' + rowClass + '">' +
-                        '<div class="chain-card">' +
-                            '<img src="' + _escHtml(card.imageUrl) + '" alt="' + _escHtml(card.alt || card.label || 'AI 商業圖像示例') + '" loading="lazy">' +
-                            (card.label ? '<div class="chain-card-label">' + _escHtml(card.label) + '</div>' : '') +
-                        '</div>' +
-                    '</div>';
-                }).join('') +
-            '</div>';
+            '</div>' +
+            '<div class="chain-vertical reveal">' + chainCardsHtml + '</div>';
+            _wcSetRichText(el.querySelector('.chain-intro .section-label'), chainContent.sectionLabel, c, 'sectionLabel');
+            _wcSetRichText(el.querySelector('.chain-intro .section-title'), chainContent.sectionTitle, c, 'sectionTitle');
+            _wcSetRichText(el.querySelector('.chain-intro p'), chainContent.introText, c, 'introText');
             break;
 
         case 'problem-grid':
             var labelPg = el.querySelector('.section-label');
-            if (labelPg) labelPg.innerHTML = _wcRichHtml(c.sectionLabel || '');
+            if (labelPg) _wcSetRichText(labelPg, c.sectionLabel || '', c, 'sectionLabel');
             var h2pg = el.querySelector('.section-title');
-            if (h2pg) h2pg.innerHTML = _wcRichHtml(c.sectionTitle || '');
+            if (h2pg) _wcSetRichText(h2pg, c.sectionTitle || '', c, 'sectionTitle');
             var problemGrid = el.querySelector('.problem-grid');
             if (problemGrid) {
                 var pgContent = _wcNormalizeProblemGridContent(c);
@@ -2208,12 +2251,17 @@ function applyContentToSection(el, type, c) {
                         '<p>' + safeText + '</p>' +
                     '</div>';
                 }).join('');
+                pgContent.items.forEach(function(item, idx) {
+                    var p = problemGrid.querySelectorAll('.problem-item p')[idx];
+                    _wcApplyTextAlign(p, item, 'text');
+                    _wcMarkLayoutEditableText(p, 'text', { arrayName: 'items', index: idx });
+                });
             }
             break;
 
         case 'pain-points':
             var h2 = el.querySelector('.section-title');
-            if (h2) h2.innerHTML = _wcRichHtml(c.sectionTitle || '');
+            if (h2) _wcSetRichText(h2, c.sectionTitle || '', c, 'sectionTitle');
             if (c.items) {
                 var items = el.querySelectorAll('.problem-item p');
                 c.items.forEach(function(item, i) {
@@ -2225,22 +2273,24 @@ function applyContentToSection(el, type, c) {
         case 'mindset-shift':
             var mindsetContent = _wcNormalizeMindsetContent(c);
             var labelMs = el.querySelector('.section-label');
-            if (labelMs) labelMs.innerHTML = _wcRichHtml(mindsetContent.sectionLabel);
+            if (labelMs) _wcSetRichText(labelMs, mindsetContent.sectionLabel, c, 'sectionLabel');
             var large = el.querySelector('.shift-large');
             if (large) {
                 large.innerHTML = _wcRichHtml(mindsetContent.beforeText) +
                     (mindsetContent.afterText ? '<br><span class="accent"> ' + _wcRichHtml(mindsetContent.afterText) + '</span>' : '');
+                _wcApplyTextAlign(large, c, 'beforeText');
+                _wcMarkLayoutEditableText(large, 'beforeText');
             }
             var body = el.querySelector('.shift-body');
-            if (body) body.innerHTML = _wcRichHtml(mindsetContent.description || '');
+            if (body) _wcSetRichText(body, mindsetContent.description || '', c, 'description');
             break;
 
         case 'learning-outcomes':
             var learningContent = _wcNormalizeLearningContent(c);
             var labelLo = el.querySelector('.section-label');
-            if (labelLo) labelLo.innerHTML = _wcRichHtml(learningContent.sectionLabel);
+            if (labelLo) _wcSetRichText(labelLo, learningContent.sectionLabel, c, 'sectionLabel');
             var h2lo = el.querySelector('.section-title');
-            if (h2lo) h2lo.innerHTML = _wcRichHtml(learningContent.sectionTitle);
+            if (h2lo) _wcSetRichText(h2lo, learningContent.sectionTitle, c, 'sectionTitle');
             var masterList = el.querySelector('.master-list');
             if (masterList) {
                 masterList.innerHTML = learningContent.items.map(function(item, idx) {
@@ -2263,6 +2313,18 @@ function applyContentToSection(el, type, c) {
                         '</div>' +
                     '</div>';
                 }).join('');
+                learningContent.items.forEach(function(item, idx) {
+                    var itemEl = masterList.querySelectorAll('.master-item')[idx];
+                    var titleEl = itemEl && itemEl.querySelector('.master-text');
+                    var descEl = itemEl && itemEl.querySelector('.master-sub');
+                    var moreEl = itemEl && itemEl.querySelector('.master-details');
+                    _wcApplyTextAlign(titleEl, item, 'title');
+                    _wcApplyTextAlign(descEl, item, 'description');
+                    _wcApplyTextAlign(moreEl, item, 'moreText');
+                    _wcMarkLayoutEditableText(titleEl, 'title', { arrayName: 'items', index: idx });
+                    _wcMarkLayoutEditableText(descEl, 'description', { arrayName: 'items', index: idx });
+                    _wcMarkLayoutEditableText(moreEl, 'moreText', { arrayName: 'items', index: idx });
+                });
             }
             var toolsRow = el.querySelector('.tools-row');
             if (toolsRow) {
@@ -2282,15 +2344,17 @@ function applyContentToSection(el, type, c) {
             if (demoBox) {
                 demoBox.innerHTML = '<div class="demo-big">' + _wcRichHtml(learningContent.demoText || '') + '</div>' +
                     (learningContent.demoSubtext ? '<p class="demo-sub">' + _wcRichHtml(learningContent.demoSubtext) + '</p>' : '');
+                _wcSetRichText(demoBox.querySelector('.demo-big'), learningContent.demoText || '', c, 'demoText');
+                _wcSetRichText(demoBox.querySelector('.demo-sub'), learningContent.demoSubtext || '', c, 'demoSubtext');
             }
             break;
 
         case 'audience-fit':
             var audienceContent = _wcNormalizeAudienceContent(c);
             var labelAf = el.querySelector('.section-label');
-            if (labelAf) labelAf.innerHTML = _wcRichHtml(audienceContent.sectionLabel);
+            if (labelAf) _wcSetRichText(labelAf, audienceContent.sectionLabel, c, 'sectionLabel');
             var h2af = el.querySelector('.section-title');
-            if (h2af) h2af.innerHTML = _wcRichHtml(audienceContent.sectionTitle || '');
+            if (h2af) _wcSetRichText(h2af, audienceContent.sectionTitle || '', c, 'sectionTitle');
             var forGrid = el.querySelector('.for-grid');
             if (forGrid) {
                 var forTitleHtml = _wcRichHtml(audienceContent.forTitle || '');
@@ -2309,28 +2373,40 @@ function applyContentToSection(el, type, c) {
                         return '<li>' + _wcRichHtml(item.text || '') + '</li>';
                     }).join('') + '</ul>' +
                 '</div>';
+                _wcSetRichText(forGrid.querySelector('.for-yes .for-card-label'), audienceContent.forTitle || '', c, 'forTitle');
+                _wcSetRichText(forGrid.querySelector('.for-no .for-card-label'), audienceContent.notForTitle || '', c, 'notForTitle');
+                audienceContent.forItems.forEach(function(item, idx) {
+                    var li = forGrid.querySelectorAll('.for-yes .for-list li')[idx];
+                    _wcApplyTextAlign(li, item, 'text');
+                    _wcMarkLayoutEditableText(li, 'text', { arrayName: 'forItems', index: idx });
+                });
+                audienceContent.notForItems.forEach(function(item, idx) {
+                    var li = forGrid.querySelectorAll('.for-no .for-list li')[idx];
+                    _wcApplyTextAlign(li, item, 'text');
+                    _wcMarkLayoutEditableText(li, 'text', { arrayName: 'notForItems', index: idx });
+                });
             }
             break;
 
         case 'about':
             var labelAbout = el.querySelector('.section-label');
-            if (labelAbout) labelAbout.innerHTML = _wcRichHtml(c.sectionLabel || '— 關於講師 —');
+            if (labelAbout) _wcSetRichText(labelAbout, c.sectionLabel || '— 關於講師 —', c, 'sectionLabel');
             var avatar = el.querySelector('.instructor-avatar img');
             if (avatar && c.photoUrl) avatar.src = _wcMediaUrl(c.photoUrl);
             var name = el.querySelector('.instructor-name');
-            if (name) name.innerHTML = _wcRichHtml(c.name || '');
+            if (name) _wcSetRichText(name, c.name || '', c, 'name');
             var role = el.querySelector('.instructor-role');
-            if (role) role.innerHTML = _wcRichHtml(c.role || '');
+            if (role) _wcSetRichText(role, c.role || '', c, 'role');
             var bio = el.querySelector('.instructor-bio');
-            if (bio) bio.innerHTML = _wcRichHtml(c.bio || '');
+            if (bio) _wcSetRichText(bio, c.bio || '', c, 'bio');
             break;
 
         case 'faq':
             var faqContent = _wcNormalizeFaqContent(c);
             var labelFaq = el.querySelector('.section-label');
-            if (labelFaq) labelFaq.innerHTML = _wcRichHtml(faqContent.sectionLabel);
+            if (labelFaq) _wcSetRichText(labelFaq, faqContent.sectionLabel, c, 'sectionLabel');
             var h2faq = el.querySelector('.section-title');
-            if (h2faq) h2faq.innerHTML = _wcRichHtml(faqContent.sectionTitle || '');
+            if (h2faq) _wcSetRichText(h2faq, faqContent.sectionTitle || '', c, 'sectionTitle');
             var faqList = el.querySelector('.faq-list');
             if (faqList) {
                 faqList.innerHTML = faqContent.items.map(function(item) {
@@ -2342,18 +2418,27 @@ function applyContentToSection(el, type, c) {
                         '<div class="faq-a">' + _wcRichHtml(item.answer || '') + '</div>' +
                     '</div>';
                 }).join('');
+                faqContent.items.forEach(function(item, idx) {
+                    var faqItem = faqList.querySelectorAll('.faq-item')[idx];
+                    var q = faqItem && faqItem.querySelector('.faq-q');
+                    var a = faqItem && faqItem.querySelector('.faq-a');
+                    _wcApplyTextAlign(q, item, 'question');
+                    _wcApplyTextAlign(a, item, 'answer');
+                    _wcMarkLayoutEditableText(q, 'question', { arrayName: 'items', index: idx });
+                    _wcMarkLayoutEditableText(a, 'answer', { arrayName: 'items', index: idx });
+                });
             }
             break;
 
         case 'logistics-card':
             window._wcLatestLogisticsConfig = c || {};
             var lLabel = el.querySelector('.section-label');
-            if (lLabel) lLabel.innerHTML = _wcRichHtml(c.sectionLabel || '');
+            if (lLabel) _wcSetRichText(lLabel, c.sectionLabel || '', c, 'sectionLabel');
             var lTitle = el.querySelector('.section-title');
-            if (lTitle) lTitle.innerHTML = _wcRichHtml(c.sectionTitle || '');
+            if (lTitle) _wcSetRichText(lTitle, c.sectionTitle || '', c, 'sectionTitle');
             _wcApplyLogisticsTheme(el, c);
             var lCta = el.querySelector('.wsc-logistics-cta .btn-primary');
-            if (lCta) lCta.innerHTML = _wcRichHtml(c.ctaText || '');
+            if (lCta) _wcSetRichText(lCta, c.ctaText || '', c, 'ctaText');
             if (lCta) lCta.href = _wcResolvePaymentLink(c.ctaLink, c.workshopId);
             var desiredWorkshopId = String(c.workshopId || '').trim() || 'workshop-c';
             if (window._wcFirebaseReady && typeof _wcSubscribeWorkshopData === 'function') {
@@ -2368,13 +2453,13 @@ function applyContentToSection(el, type, c) {
         case 'final-cta':
             window._wcLatestFinalCtaConfig = c || {};
             var labelFinal = el.querySelector('.section-label');
-            if (labelFinal) labelFinal.innerHTML = _wcRichHtml(c.sectionLabel || '— 最後 —');
+            if (labelFinal) _wcSetRichText(labelFinal, c.sectionLabel || '— 最後 —', c, 'sectionLabel');
             var title = el.querySelector('.final-cta-title');
-            if (title) title.innerHTML = _wcRichHtml(c.title || '');
+            if (title) _wcSetRichText(title, c.title || '', c, 'title');
             var subFc = el.querySelector('.final-cta-sub');
-            if (subFc) subFc.innerHTML = _wcRichHtml(c.subtitle || '');
+            if (subFc) _wcSetRichText(subFc, c.subtitle || '', c, 'subtitle');
             var ctaFc = el.querySelector('.btn-primary');
-            if (ctaFc) ctaFc.innerHTML = _wcRichHtml(c.ctaText || '');
+            if (ctaFc) _wcSetRichText(ctaFc, c.ctaText || '', c, 'ctaText');
             if (ctaFc) ctaFc.href = _wcResolveFinalCtaLink(c.ctaLink);
             break;
 
@@ -2388,6 +2473,13 @@ function applyContentToSection(el, type, c) {
                 accentText: '#ffffff',
                 border: 'rgba(255,255,255,0.10)',
                 backdrop: 'rgba(10,10,10,0.72)'
+            });
+            break;
+
+        case 'consultation-form':
+            renderConsultationSection(el, c, {
+                pageKey: 'workshop-c',
+                sectionId: el.getAttribute('data-section-id') || 'consultation-form'
             });
             break;
 
@@ -2408,7 +2500,7 @@ function applyContentToSection(el, type, c) {
             el.innerHTML = '<div class="container" style="display:flex;justify-content:' + wcImgAlign + ';">' +
                 '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 960) + 'px);">' +
                 wcStart +
-                '<img src="' + wcImgUrl + '" alt="' + wcAlt + '" style="display:block;width:100%;height:auto;max-height:72vh;object-fit:' + (c.objectFit === 'contain' ? 'contain' : 'cover') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + wcImgShadow + ';background:var(--bg-card);">' +
+                '<img src="' + wcImgUrl + '" alt="' + wcAlt + '" style="display:block;width:100%;height:auto;object-fit:' + (c.objectFit === 'cover' ? 'cover' : 'contain') + ';border-radius:' + (parseInt(c.radius, 10) || 22) + 'px;box-shadow:' + wcImgShadow + ';background:var(--bg-card);">' +
                 (wcCap ? '<p style="margin-top:12px;color:var(--text-dim);font-size:14px;line-height:1.6;text-align:' + (c.align || 'center') + ';">' + wcCap + '</p>' : '') +
                 wcEnd +
                 '</div></div>';
@@ -2421,19 +2513,31 @@ function applyContentToSection(el, type, c) {
                 : c.surface === 'card'
                     ? 'background:var(--bg-card);border:1px solid var(--border);box-shadow:0 18px 40px rgba(0,0,0,0.16);'
                     : 'background:transparent;border:none;box-shadow:none;';
-            var wcLabel = c.sectionLabel ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.sectionLabel) : _escHtml(c.sectionLabel)) : '';
-            var wcTitle = c.title ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.title) : _escHtml(c.title)) : '';
-            var wcBody = c.body ? (typeof sanitizeHeroTitleHtml === 'function' ? sanitizeHeroTitleHtml(c.body) : _escHtml(c.body)) : '';
             var wcBtn = (c.ctaText || '').trim();
             var wcBtnLink = _escHtml(c.ctaLink || '#');
             el.style.padding = (parseInt(c.paddingTop, 10) || 44) + 'px 24px ' + (parseInt(c.paddingBottom, 10) || 44) + 'px';
             el.innerHTML = '<div class="container" style="display:flex;justify-content:center;">' +
                 '<div style="width:min(100%,' + (parseInt(c.maxWidth, 10) || 760) + 'px);padding:' + (c.surface === 'none' ? '0' : '32px') + ';border-radius:24px;text-align:' + wcTextAlign + ';' + wcSurfaceStyle + '">' +
-                (wcLabel ? '<div style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px;">' + wcLabel + '</div>' : '') +
-                (wcTitle ? '<div style="font-size:clamp(28px,4vw,52px);line-height:1.12;font-weight:800;color:var(--text);">' + wcTitle + '</div>' : '') +
-                (wcBody ? '<div style="margin-top:16px;color:var(--text-dim);font-size:16px;line-height:1.8;">' + wcBody + '</div>' : '') +
+                '<div class="to-label" style="font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px;"></div>' +
+                '<div class="to-title" style="font-size:clamp(28px,4vw,52px);line-height:1.12;font-weight:800;color:var(--text);"></div>' +
+                '<div class="to-body" style="margin-top:16px;color:var(--text-dim);font-size:16px;line-height:1.8;"></div>' +
                 (wcBtn ? '<div style="margin-top:24px;"><a href="' + wcBtnLink + '" class="btn-primary">' + _escHtml(wcBtn) + '</a></div>' : '') +
                 '</div></div>';
+            var wcLabelEl = el.querySelector('.to-label');
+            var wcTitleEl = el.querySelector('.to-title');
+            var wcBodyEl = el.querySelector('.to-body');
+            if (wcLabelEl) {
+                if (c.sectionLabel) { _wcSetRichText(wcLabelEl, c.sectionLabel, c, 'sectionLabel'); wcLabelEl.style.display = ''; }
+                else { wcLabelEl.innerHTML = ''; wcLabelEl.style.display = 'none'; _wcApplyTextAlign(wcLabelEl, c, 'sectionLabel'); }
+            }
+            if (wcTitleEl) {
+                if (c.title) { _wcSetRichText(wcTitleEl, c.title, c, 'title'); wcTitleEl.style.display = ''; }
+                else { wcTitleEl.innerHTML = ''; wcTitleEl.style.display = 'none'; _wcApplyTextAlign(wcTitleEl, c, 'title'); }
+            }
+            if (wcBodyEl) {
+                if (c.body) { _wcSetRichText(wcBodyEl, c.body, c, 'body'); wcBodyEl.style.display = ''; }
+                else { wcBodyEl.innerHTML = ''; wcBodyEl.style.display = 'none'; _wcApplyTextAlign(wcBodyEl, c, 'body'); }
+            }
             break;
     }
 }

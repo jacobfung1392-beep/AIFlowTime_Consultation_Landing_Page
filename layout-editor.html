@@ -1657,9 +1657,11 @@
             max-height: 140px;
             object-fit: cover;
         }
-        /* Hero 頭像 / 媒體：透明 PNG 不外加方框或底色 */
+        /* Hero 頭像 / 媒體：透明 PNG 不外加方框或底色；置中（避免編輯卡左側窄塊） */
         .img-upload-zone.hero-avatar {
             aspect-ratio: 1; width: 100%; max-width: 200px; min-height: 0;
+            margin-left: auto;
+            margin-right: auto;
         }
         .img-upload-zone.hero-avatar.has-image {
             aspect-ratio: auto;
